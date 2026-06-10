@@ -1,0 +1,234 @@
+/*  CONTENEDOR  */
+.notification-bell {
+  position: relative;
+}
+
+.bell-button {
+  padding: 0.5rem;
+  border-radius: 9999px;
+  background: transparent !important;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.p-button-text{
+  font-family: "kodchasan";
+}
+
+.bell-button .p-button-icon {
+  font-size: 1.8rem;
+  color: #fff;
+}
+
+.bell-button:hover {
+  background-color: #0a7463 !important;
+}
+
+.bell-button:hover .p-button-icon,
+.bell-button.has-notices:hover .p-button-icon {
+  animation: bell-ring 0.7s ease both;
+}
+
+.bell-button,
+.bell-button:focus,
+.bell-button:focus-visible,
+.bell-button:active,
+.bell-button.p-focus,
+.bell-button.p-button:focus,
+.bell-button.p-button:active {
+  outline: none !important;
+  box-shadow: none !important; 
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bell-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 1rem;
+  height: 1rem;
+  line-height: 1rem;
+  font-size: 0.75rem;
+}
+
+/*  ANIMACIONES CONTENEDOR */
+
+@keyframes bell-ring {
+  0% {
+    transform: scale(1.06) rotate(0);
+  }
+  20% {
+    transform: scale(1.06) rotate(-12deg);
+  }
+  40% {
+    transform: scale(1.06) rotate(10deg);
+  }
+  60% {
+    transform: scale(1.06) rotate(-8deg);
+  }
+  80% {
+    transform: scale(1.06) rotate(6deg);
+  }
+  100% {
+    transform: scale(1.06) rotate(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bell-button.has-notices .p-button-icon {
+    animation: none !important;
+  }
+  .bell-button .p-button-icon {
+    transition: none;
+  }
+}
+
+/* PANEL BASE */
+
+.bell-panel.p-overlaypanel:before,
+.bell-panel.p-overlaypanel:after {
+  display: none !important;
+}
+
+.bell-panel.p-overlaypanel {
+  margin-top: -0.2rem;
+  width: 22rem;
+  background: #d7d7d7a9;
+  backdrop-filter: blur(2px);
+  border-radius: 14px;
+  color: #fff;
+}
+
+/* CONTENIDO PANEL */
+.bell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.2rem;
+}
+
+.bell-title {
+  font-weight: 800;
+  color: #5f5f5fa2;
+  font-family: "kodchasan";
+}
+
+.bell-empty {
+  color: #6b3b3b;
+  font-family: "kodchasan";
+}
+
+/* FILA DE NOTIFICACIÓN */
+
+.bell-row {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 10px;
+  margin-block: 0.5rem;
+  border-radius: 10px;
+  background: #8d8d8da2;
+  border-left: 4px solid transparent;
+}
+
+.bell-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(90deg, var(--sev) 0% 85%, var(--sevLight) 100%);
+  opacity: 0.96;
+  transform: translateX(-100%);
+  transition: transform 0.45s ease;
+  pointer-events: none;
+}
+
+.bell-row:hover::before {
+  transform: translateX(0);
+}
+
+.bell-row > * {
+  position: relative;
+  z-index: 1;
+}
+
+.bell-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: gap 0.15s ease;
+}
+
+.bell-text,
+.sev-icon {
+  line-height: 1.2;
+  will-change: transform;
+  transition: transform 0.15s ease, color 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.bell-text{
+  font-family: "kodchasan";
+}
+
+.bell-row:hover .sev-icon {
+  color: #fff !important;
+}
+
+.bell-row:hover .bell-text,
+.bell-row:hover .sev-icon {
+  transform: scale(1.03);
+}
+
+.bell-remove {
+  margin-left: auto;
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+.bell-remove .p-button {
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+.bell-row:hover .bell-remove .p-button-icon,
+.bell-row:hover .bell-remove .pi {
+  color: #fff !important;
+}
+
+.sev-dot {
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+/* COLORES NOTIFICACIONES */
+
+.bell-row.urgent {
+  --sev: #ef4444;
+  --sevLight: #f8a3a3;
+  border-left-color: var(--sev);
+}
+
+.bell-row.warning {
+  --sev: #f59e0b;
+  --sevLight: #f6d36b;
+  border-left-color: var(--sev);
+}
+
+.bell-row.info {
+  --sev: #3b82f6;
+  --sevLight: #8db8ff;
+  border-left-color: var(--sev);
+}
+
+.sev-icon.urgent {
+  color: #f47474;
+}
+
+.sev-icon.warning {
+  color: #f6b83b;
+}
+
+.sev-icon.info {
+  color: #649dfa;
+}

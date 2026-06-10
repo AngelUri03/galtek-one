@@ -1,0 +1,164 @@
+stages:
+  - build
+  - deploy
+
+default:
+  cache:
+    key: maven-cache
+    paths:
+      - .m2/repository/
+
+# Compila el backend (todas las ramas)
+build-backend:
+  stage: build
+  image: maven:3.9-eclipse-temurin-21
+  script:
+    - mvn -V -B -DskipTests clean package
+  artifacts:
+    paths:
+      - target/*.jar
+    expire_in: 1 week
+  rules:
+    - if: '$CI_COMMIT_BRANCH'  # corre en cualquier rama
+
+# Despliegue a Elastic Beanstalk (solo main)
+deploy-eb:
+  stage: deploy
+  image: debian:bookworm-slim  # shell real; instalamos AWS CLI v2
+  needs:
+    - job: build-backend
+      artifacts: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+  before_script: |
+    set -euo pipefail
+    : "${AWS_REGION?Missing AWS_REGION}"
+    : "${AWS_ACCESS_KEY_ID?Missing AWS_ACCESS_KEY_ID}"
+    : "${AWS_SECRET_ACCESS_KEY?Missing AWS_SECRET_ACCESS_KEY}"
+    : "${EB_APP_NAME?Missing EB_APP_NAME}"
+    : "${EB_ENV_NAME?Missing EB_ENV_NAME}"
+    : "${S3_BUCKET?Missing S3_BUCKET}"
+    : "${DB_URL?Missing DB_URL}"
+    : "${DB_NAME?Missing DB_NAME}"
+    : "${DB_USERNAME?Missing DB_USERNAME}"
+    : "${DB_PASSWORD?Missing DB_PASSWORD}"
+    : "${RSA_PUBLIC_PEM_B64?Missing RSA_PUBLIC_PEM_B64}"
+    : "${RSA_PRIVATE_PEM_B64?Missing RSA_PRIVATE_PEM_B64}"
+    : "${APP_JWT_SECRET?Missing APP_JWT_SECRET}"
+
+    apt-get update
+    apt-get install -y curl unzip ca-certificates zip jq
+    curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
+    unzip -q awscliv2.zip
+    ./aws/install
+    aws --version
+    echo "AWS Region => ${AWS_REGION}"
+    aws sts get-caller-identity --region "${AWS_REGION}"
+  script: |
+    set -euo pipefail
+
+    # 1) Localiza el JAR
+    ARTIFACT="$(ls target/*.jar | head -n1 || true)"
+    if [ -z "${ARTIFACT}" ]; then
+      echo "No se encontró JAR en target/"; exit 1
+    fi
+    echo "Artifact: ${ARTIFACT}"
+
+    # 2) Reconstruye llaves desde variables CI (robusto: PEM crudo, Base64 de PEM, o Base64 DER)
+    mkdir -p keys
+
+    write_pem() {
+      local content="$1"   # variable con la llave (puede ser PEM, b64 de PEM o b64 DER)
+      local type="$2"      # "PUBLIC KEY" | "PRIVATE KEY"
+      local out="$3"       # ruta archivo destino
+
+      # Caso A: ya es PEM (trae BEGIN/END)
+      if grep -q "BEGIN " <<<"$content"; then
+        printf '%s\n' "$content" | sed 's/\r$//' > "$out"
+        return
+      fi
+
+      # Caso B: es Base64 de PEM (al decodificar aparece BEGIN)
+      # (no capturamos binario en variables; usamos archivo temporal)
+      local tmp
+      tmp="$(mktemp)"
+      # limpiamos CR/LF antes de decodificar
+      printf '%s' "$content" | tr -d '\n\r' | base64 -d > "$tmp" 2>/dev/null || true
+      if grep -q "BEGIN " "$tmp"; then
+        sed -i 's/\r$//' "$tmp" || true
+        mv "$tmp" "$out"
+        return
+      fi
+      rm -f "$tmp"
+
+      # Caso C: es Base64 DER → envolvemos en PEM (64 columnas)
+      {
+        echo "-----BEGIN ${type}-----"
+        printf '%s' "$content" | tr -d '\n\r' | fold -w64
+        echo "-----END ${type}-----"
+      } > "$out"
+    }
+
+    # PUBLIC
+    write_pem "${RSA_PUBLIC_PEM_B64}"  "PUBLIC KEY"  "keys/public_key.pem"
+    # PRIVATE
+    write_pem "${RSA_PRIVATE_PEM_B64}" "PRIVATE KEY" "keys/private_key.pem"
+
+    chmod 600 keys/private_key.pem
+
+    # Debug mínimo: encabezados (no muestra contenido completo)
+    echo "HEAD public:"  && head -n 2 keys/public_key.pem  || true
+    echo "HEAD private:" && head -n 2 keys/private_key.pem || true
+
+
+
+    # 3) Prepara bundle con Procfile (EB Java SE)
+    BUNDLE_DIR="bundle"
+    rm -rf "${BUNDLE_DIR}" && mkdir -p "${BUNDLE_DIR}"
+    cp "${ARTIFACT}" "${BUNDLE_DIR}/application.jar"
+    cp -r keys "${BUNDLE_DIR}/keys"
+    cat > "${BUNDLE_DIR}/Procfile" <<'EOF'
+    web: java -jar application.jar
+    EOF
+
+    BUNDLE_FILE="bundle-${CI_PIPELINE_ID}.zip"
+    (cd "${BUNDLE_DIR}" && zip -qr "../${BUNDLE_FILE}" .)
+    echo "Bundle: ${BUNDLE_FILE}"
+
+    # 4) Sube a S3 y crea versión
+    VERSION_LABEL="gitlab-${CI_PIPELINE_ID}-${CI_JOB_ID}-${CI_COMMIT_SHORT_SHA}"
+    S3_KEY="${EB_APP_NAME}/${VERSION_LABEL}/${BUNDLE_FILE}"
+
+    aws s3 cp "${BUNDLE_FILE}" "s3://${S3_BUCKET}/${S3_KEY}" --region "${AWS_REGION}"
+
+    aws elasticbeanstalk create-application-version \
+      --application-name "${EB_APP_NAME}" \
+      --version-label "${VERSION_LABEL}" \
+      --source-bundle S3Bucket="${S3_BUCKET}",S3Key="${S3_KEY}" \
+      --region "${AWS_REGION}"
+
+    # 5) Inyección de variables de entorno (DB) en el Environment de EB
+    FULL_URL="${DB_URL}:3306/${DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+    
+    cat > env.json <<JSON
+    [
+      {"Namespace":"aws:elasticbeanstalk:application:environment","OptionName":"SPRING_DATASOURCE_URL","Value":"${FULL_URL}"},
+      {"Namespace":"aws:elasticbeanstalk:application:environment","OptionName":"SPRING_DATASOURCE_USERNAME","Value":"${DB_USERNAME}"},
+      {"Namespace":"aws:elasticbeanstalk:application:environment","OptionName":"SPRING_DATASOURCE_PASSWORD","Value":"${DB_PASSWORD}"},
+      {"Namespace":"aws:elasticbeanstalk:application:environment","OptionName":"APP_RSA_PUBLIC_PATH","Value":"keys/public_key.pem"},
+      {"Namespace":"aws:elasticbeanstalk:application:environment","OptionName":"APP_RSA_PRIVATE_PATH","Value":"keys/private_key.pem"},
+      {"Namespace":"aws:elasticbeanstalk:application:environment","OptionName":"APP_JWT_SECRET","Value":"${APP_JWT_SECRET}"},
+      {"Namespace":"aws:elasticbeanstalk:application:environment","OptionName":"APP_JWT_ACCESS_EXP_MS","Value":"43200000"},
+      {"Namespace":"aws:elasticbeanstalk:application:environment","OptionName":"APP_SESSION_IDLE_MAX_SECONDS","Value":"3600"},
+      {"Namespace":"aws:elasticbeanstalk:application:environment","OptionName":"APP_SESSION_ABSOLUTE_MAX_MS","Value":"43200000"},
+      {"Namespace":"aws:elasticbeanstalk:application:environment","OptionName":"SERVER_SERVLET_CONTEXT_PATH","Value":"/GaltekOne"},
+      {"Namespace":"aws:elasticbeanstalk:application:environment","OptionName":"SERVER_PORT","Value":"5000"}
+    ]
+    JSON
+
+    aws elasticbeanstalk update-environment \
+      --environment-name "${EB_ENV_NAME}" \
+      --version-label "${VERSION_LABEL}" \
+      --option-settings file://env.json \
+      --region "${AWS_REGION}"

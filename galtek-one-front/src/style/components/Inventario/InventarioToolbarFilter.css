@@ -1,0 +1,1245 @@
+/* MODAL */
+.inv-filter-dialog {
+  width: 150vh;
+  max-width: 96vw;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface-card);
+  border: none;
+  font-family: "Kodchasan", sans-serif;
+}
+
+/* Fondo blur */
+.p-dialog-mask.p-component-overlay {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+
+/* GRID */
+.inv-fm-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px 18px;
+  padding: 4px 4px 10px;
+}
+
+/* ITEM */
+.inv-fm-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.inv-fm-item label {
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--text-color-secondary);
+  margin-left: 2px;
+}
+
+/* CONTROL */
+.inv-fm-control {
+  width: 100% !important;
+  background: linear-gradient(180deg, #ffffff, #f7f7f7);
+}
+
+.inv-fm-control.p-inputtext,
+.inv-fm-control.p-dropdown,
+.inv-fm-control.p-multiselect,
+.inv-fm-control .p-inputnumber-input,
+.inv-fm-control.p-calendar,
+.inv-fm-control .p-inputtext {
+  height: 40px !important;
+  border-radius: 10px !important;
+  font-size: 0.9rem !important;
+  font-family: "Kodchasan", sans-serif !important;
+}
+
+.inv-fm-grid .p-dropdown:hover,
+.inv-fm-grid .p-multiselect:hover,
+.inv-fm-grid .p-inputtext:hover,
+.inv-fm-grid .p-inputnumber:hover,
+.inv-fm-grid .p-calendar:hover {
+  border-color: #bdbdbd;
+  background: linear-gradient(180deg, #ffffff, #f7f7f7) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+    0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.inv-fm-grid .p-focus,
+.inv-fm-grid .p-dropdown.p-focus,
+.inv-fm-grid .p-multiselect.p-focus,
+.inv-fm-grid .p-calendar.p-focus {
+  box-shadow: none;
+  border-color: #0a7463;
+  background: #ffffff;
+  color: #0a5045;
+}
+
+.inv-fm-ms-categorias .p-multiselect-trigger-icon,
+.inv-fm-ms-proveedores .p-multiselect-trigger-icon,
+.inv-fm-ms-estadoStock .p-multiselect-trigger-icon,
+.inv-fm-dd-estadoProducto .p-dropdown-trigger-icon,
+.inv-fm-dd-caducados .p-dropdown-trigger-icon {
+  color: #0a7463;
+}
+
+/* ===================== */
+/*      CATEGORÍAS       */
+/* ===================== */
+
+.inv-fm-item--categorias {
+  width: 20rem;
+}
+
+.inv-fm-ms-categorias.p-multiselect {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  border-radius: 10px !important;
+  box-sizing: border-box;
+  transition: color 0.22s ease, opacity 0.22s ease !important;
+}
+
+.inv-fm-ms-categorias .p-multiselect-label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-block: 2px;
+  padding-inline: 0.6rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.inv-fm-ms-categorias .p-multiselect-label::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.7) 60%,
+    #ffffff 100%
+  );
+}
+
+.inv-fm-ms-categorias .p-multiselect-label::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 100%;
+  pointer-events: auto;
+  cursor: default !important;
+  background: transparent;
+  z-index: 5;
+}
+
+.inv-fm-ms-categorias .p-multiselect-token {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  margin: 0 !important;
+  padding: 0 6px;
+  font-size: 0.82rem;
+  line-height: 1;
+  border-radius: 8px;
+  background: #e6f2ef;
+  color: #0a7463;
+}
+
+.inv-fm-ms-categorias .p-multiselect-token-icon {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Panel Categoría */
+.inv-fm-ms-categorias-panel.p-multiselect-panel {
+  border-radius: 12px !important;
+  border: none !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  font-family: "Kodchasan", sans-serif;
+  background: #ffffff;
+}
+
+.inv-fm-ms-categorias-panel .inv-ms-cat-header {
+  background-color: #0a7463 !important;
+  color: #ffffff !important;
+  padding: 0.35rem 0.75rem !important;
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  border-bottom: none !important;
+  font-size: 0.8rem;
+}
+
+.inv-fm-ms-categorias-panel .p-checkbox {
+  width: 18px;
+  height: 18px;
+}
+
+.inv-fm-ms-categorias-panel.p-multiselect-panel
+  .p-multiselect-items
+  .p-multiselect-item
+  .p-checkbox-box {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 4px !important;
+  border: 2px solid #0a7463 !important;
+  background-color: #ffffff !important;
+  box-shadow: none !important;
+  transition: all 0.16s ease-in-out !important;
+}
+
+.inv-fm-ms-categorias-panel.p-multiselect-panel
+  .p-multiselect-items
+  .p-multiselect-item.p-highlight
+  .p-checkbox-box {
+  background-color: #0a7463 !important;
+  border-color: #0a7463 !important;
+  box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.2) !important;
+}
+
+.inv-fm-ms-categorias-panel.p-multiselect-panel
+  .p-multiselect-header
+  .p-checkbox-box {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 4px !important;
+  border: 2px solid #ffffff !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  transition: all 0.18s ease !important;
+}
+
+.inv-fm-ms-categorias-panel .inv-ms-cat-header .p-checkbox {
+  margin-right: 0.25rem;
+}
+
+.inv-fm-ms-categorias-panel .inv-ms-cat-header-clear {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  transition: background 0.16s ease, transform 0.12s ease, opacity 0.16s ease;
+}
+
+.inv-fm-ms-categorias-panel .inv-ms-cat-header-clear:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.inv-fm-ms-categorias-panel .inv-ms-cat-header-clear:active {
+  transform: scale(1.05);
+  opacity: 0.85;
+}
+
+.inv-fm-ms-categorias-panel .p-multiselect-item {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.75rem !important;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.inv-fm-ms-categorias-panel .p-multiselect-item.p-highlight {
+  background: rgba(10, 116, 99, 0.12) !important;
+  color: #0a7463 !important;
+}
+
+.inv-fm-ms-categorias-panel .p-multiselect-items-wrapper > ul {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.inv-fm-ms-categorias-panel .p-multiselect-items-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.inv-fm-ms-categorias-panel
+  .p-multiselect-items-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.16);
+  border-radius: 999px;
+}
+
+/* ===================== */
+/*       PROVEEDORES     */
+/* ===================== */
+
+.inv-fm-item--proveedores {
+  width: 30rem;
+}
+
+.inv-fm-ms-proveedores.p-multiselect {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  border-radius: 10px !important;
+  box-sizing: border-box;
+  transition: color 0.22s ease, opacity 0.22s ease !important;
+}
+
+.inv-fm-ms-proveedores .p-multiselect-label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-block: 2px;
+  padding-inline: 0.6rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.inv-fm-ms-proveedores .p-multiselect-label::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.7) 60%,
+    #ffffff 100%
+  );
+}
+
+.inv-fm-ms-proveedores .p-multiselect-label::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 100%;
+  pointer-events: auto;
+  cursor: default !important;
+  background: transparent;
+  z-index: 5;
+}
+
+.inv-fm-ms-proveedores .p-multiselect-token {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  margin: 0 !important;
+  padding: 0 6px;
+  font-size: 0.82rem;
+  line-height: 1;
+  border-radius: 8px;
+  background: #e6f2ef;
+  color: #0a7463;
+}
+
+.inv-fm-ms-proveedores .p-multiselect-token-icon {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Panel Proveedores */
+.inv-fm-ms-proveedores-panel.p-multiselect-panel {
+  border-radius: 12px !important;
+  border: none !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  font-family: "Kodchasan", sans-serif;
+  background: #ffffff;
+}
+
+.inv-fm-ms-proveedores-panel .inv-ms-prov-header {
+  background-color: #0a7463 !important;
+  color: #ffffff !important;
+  padding: 0.35rem 0.75rem !important;
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  border-bottom: none !important;
+  font-size: 0.8rem;
+}
+
+.inv-fm-ms-proveedores-panel .p-checkbox {
+  width: 18px;
+  height: 18px;
+}
+
+.inv-fm-ms-proveedores-panel.p-multiselect-panel
+  .p-multiselect-items
+  .p-multiselect-item
+  .p-checkbox-box {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 4px !important;
+  border: 2px solid #0a7463 !important;
+  background-color: #ffffff !important;
+  box-shadow: none !important;
+  transition: all 0.16s ease-in-out !important;
+}
+
+.inv-fm-ms-proveedores-panel.p-multiselect-panel
+  .p-multiselect-items
+  .p-multiselect-item.p-highlight
+  .p-checkbox-box {
+  background-color: #0a7463 !important;
+  border-color: #0a7463 !important;
+  box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.2) !important;
+}
+
+.inv-fm-ms-proveedores-panel.p-multiselect-panel
+  .p-multiselect-header
+  .p-checkbox-box {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 4px !important;
+  border: 2px solid #ffffff !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  transition: all 0.18s ease !important;
+}
+
+.inv-fm-ms-proveedores-panel .inv-ms-prov-header .p-checkbox {
+  margin-right: 0.25rem;
+}
+
+.inv-fm-ms-proveedores-panel .inv-ms-prov-header-clear {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  transition: background 0.16s ease, transform 0.12s ease, opacity 0.16s ease;
+}
+
+.inv-fm-ms-proveedores-panel .inv-ms-prov-header-clear:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.inv-fm-ms-proveedores-panel .inv-ms-prov-header-clear:active {
+  transform: scale(1.05);
+  opacity: 0.85;
+}
+
+.inv-fm-ms-proveedores-panel .p-multiselect-item {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.75rem !important;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.inv-fm-ms-proveedores-panel .p-multiselect-item.p-highlight {
+  background: rgba(10, 116, 99, 0.12) !important;
+  color: #0a7463 !important;
+}
+
+.inv-fm-ms-proveedores-panel .p-multiselect-items-wrapper > ul {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.inv-fm-ms-proveedores-panel .p-multiselect-items-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.inv-fm-ms-proveedores-panel
+  .p-multiselect-items-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.16);
+  border-radius: 999px;
+}
+
+/* =============================== */
+/*      ESTADO DEL PRODUCTO        */
+/* =============================== */
+
+.inv-fm-item--estado-producto {
+  width: 20rem;
+}
+
+.inv-fm-dd-estadoProducto.p-dropdown {
+  font-family: "Kodchasan", sans-serif;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.inv-fm-dd-estadoProducto .p-dropdown-label.p-inputtext {
+  display: flex;
+  align-items: center;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.inv-fm-dd-estadoProducto-panel.p-dropdown-panel {
+  border-radius: 12px !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  font-family: "Kodchasan", sans-serif;
+  background: #ffffff;
+}
+
+.inv-fm-dd-estadoProducto-panel .p-dropdown-items {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.inv-fm-dd-estadoProducto-panel .p-dropdown-item {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.85rem !important;
+  cursor: pointer;
+}
+
+.inv-fm-dd-estadoProducto-panel .p-dropdown-item.p-highlight {
+  background: rgba(10, 116, 99, 0.1) !important;
+  color: #0a7463 !important;
+}
+
+/* ========================= */
+/*      ESTADO DE STOCK      */
+/* ========================= */
+
+.inv-fm-item--estado-stock {
+  width: 20rem;
+}
+
+.inv-fm-ms-estadoStock.p-multiselect {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  border-radius: 10px !important;
+  box-sizing: border-box;
+  transition: color 0.22s ease, opacity 0.22s ease !important;
+}
+
+.inv-fm-ms-estadoStock .p-multiselect-label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-block: 2px;
+  padding-inline: 0.6rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.inv-fm-ms-estadoStock .p-multiselect-label::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.7) 60%,
+    #ffffff 100%
+  );
+}
+
+.inv-fm-ms-estadoStock .p-multiselect-label::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 100%;
+  pointer-events: auto;
+  cursor: default !important;
+  background: transparent;
+  z-index: 5;
+}
+
+.inv-fm-ms-estadoStock .p-multiselect-token {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  margin: 0 !important;
+  padding: 0 6px;
+  font-size: 0.82rem;
+  line-height: 1;
+  border-radius: 8px;
+  background: #e6f2ef;
+  color: #0a7463;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.inv-fm-ms-estadoStock .p-multiselect-token-icon {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/*  Panel estado de stock */
+.inv-fm-ms-estadoStock-panel.p-multiselect-panel {
+  border-radius: 12px !important;
+  border: none !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  font-family: "Kodchasan", sans-serif;
+  background: #ffffff;
+}
+
+.inv-fm-ms-estadoStock-panel .inv-ms-stock-header {
+  background-color: #0a7463 !important;
+  color: #ffffff !important;
+  padding: 0.35rem 0.75rem !important;
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  border-bottom: none !important;
+  font-size: 0.8rem;
+}
+
+.inv-fm-ms-estadoStock-panel .inv-ms-stock-header .p-checkbox {
+  margin-right: 0.25rem;
+}
+
+.inv-fm-ms-estadoStock-panel .inv-ms-stock-header-clear {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  transition: background 0.16s ease, transform 0.12s ease, opacity 0.16s ease;
+}
+
+.inv-fm-ms-estadoStock-panel .inv-ms-stock-header-clear:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.inv-fm-ms-estadoStock-panel .inv-ms-stock-header-clear:active {
+  transform: scale(1.05);
+  opacity: 0.85;
+}
+
+.inv-fm-ms-estadoStock-panel .p-checkbox {
+  width: 18px;
+  height: 18px;
+}
+
+.inv-fm-ms-estadoStock-panel.p-multiselect-panel
+  .p-multiselect-items
+  .p-multiselect-item
+  .p-checkbox-box {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 4px !important;
+  border: 2px solid #0a7463 !important;
+  background-color: #ffffff !important;
+  box-shadow: none !important;
+  transition: all 0.16s ease-in-out !important;
+}
+
+.inv-fm-ms-estadoStock-panel.p-multiselect-panel
+  .p-multiselect-items
+  .p-multiselect-item.p-highlight
+  .p-checkbox-box {
+  background-color: #0a7463 !important;
+  border-color: #0a7463 !important;
+  box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.2) !important;
+}
+
+.inv-fm-ms-estadoStock-panel.p-multiselect-panel
+  .p-multiselect-header
+  .p-checkbox-box {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 4px !important;
+  border: 2px solid #ffffff !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  transition: all 0.18s ease !important;
+}
+
+.inv-fm-ms-estadoStock-panel .p-multiselect-item {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.75rem !important;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.inv-fm-ms-estadoStock-panel .p-multiselect-item.p-highlight {
+  background: rgba(10, 116, 99, 0.12) !important;
+  color: #0a7463 !important;
+}
+
+.inv-fm-ms-estadoStock-panel .p-multiselect-items-wrapper > ul {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.inv-fm-ms-estadoStock-panel .p-multiselect-items-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.inv-fm-ms-estadoStock-panel
+  .p-multiselect-items-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.16);
+  border-radius: 999px;
+}
+
+/* =============================== */
+/*      STOCK MÍN - MÁX            */
+/* =============================== */
+
+.inv-fm-item--stock-range {
+  width: 30rem;
+}
+
+.inv-fm-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inv-fm-in-stockMin.p-inputnumber,
+.inv-fm-in-stockMax.p-inputnumber {
+  height: 40px;
+  border-radius: 10px !important;
+  border: 1px solid var(--surface-300);
+  font-family: "Kodchasan", sans-serif;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden !important;
+}
+
+.inv-fm-in-stockMin.p-inputnumber.p-inputwrapper-focus,
+.inv-fm-in-stockMax.p-inputnumber.p-inputwrapper-focus {
+  border-color: #0a7463;
+  background: #ffffff;
+  color: #0a5045;
+}
+
+.inv-fm-in-stockMin .p-inputnumber-input,
+.inv-fm-in-stockMax .p-inputnumber-input {
+  width: 2rem !important;
+  flex: 1 1 auto;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  font-size: 0.9rem;
+}
+
+.inv-fm-in-stockMin .p-inputnumber-input:hover,
+.inv-fm-in-stockMax .p-inputnumber-input:hover {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.inv-fm-in-stockMin .p-inputnumber-input::placeholder,
+.inv-fm-in-stockMax .p-inputnumber-input::placeholder {
+  opacity: 0.85;
+}
+
+.inv-fm-in-stockMin .p-inputnumber-button-group,
+.inv-fm-in-stockMax .p-inputnumber-button-group {
+  flex: 0 0 2.3rem;
+  height: 100%;
+  background: #0a7463 !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.inv-fm-in-stockMin .p-inputnumber-button,
+.inv-fm-in-stockMax .p-inputnumber-button {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+}
+
+.inv-fm-in-stockMin .p-inputnumber-button:not(.p-disabled):hover,
+.inv-fm-in-stockMax .p-inputnumber-button:not(.p-disabled):hover {
+  background: rgba(0, 0, 0, 0.123) !important;
+}
+
+/* =============================== */
+/*        RANGO DE FECHAS          */
+/* =============================== */
+
+.inv-fm-item--fecha {
+  width: 20rem;
+}
+
+.inv-fm-cal-actualizado .p-inputtext {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.inv-fm-cal-actualizado.p-calendar-w-btn {
+  display: flex;
+  align-items: stretch;
+  border-radius: 10px !important;
+  border: 1px solid var(--surface-300);
+  overflow: hidden;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.inv-fm-cal-actualizado .p-datepicker-trigger {
+  border: none !important;
+  background: #0a7463 !important;
+  color: #ffffff !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none !important;
+}
+
+.inv-fm-cal-actualizado .p-datepicker-trigger:not(.p-disabled):hover {
+  background: #085c4f !important;
+}
+
+/* Panel calendario */
+.inv-fm-cal-actualizado-panel.p-datepicker {
+  width: 20rem !important;
+  min-width: 20rem !important;
+  max-width: 20rem !important;
+  border-radius: 12px !important;
+  border: none !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  font-family: "Kodchasan", sans-serif;
+  background: #ffffff;
+  padding: 0 !important;
+  overflow: hidden !important;
+  margin-top: -1px !important;
+}
+
+.inv-fm-cal-actualizado-panel .p-datepicker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 2.4rem;
+  height: 2.4rem;
+  box-sizing: border-box;
+  background-color: #0a7463 !important;
+  color: #ffffff !important;
+}
+
+.inv-fm-cal-actualizado-panel .p-datepicker-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.inv-fm-cal-actualizado-panel .p-datepicker-prev:hover,
+.inv-fm-cal-actualizado-panel .p-datepicker-next:hover {
+  background: rgba(255, 255, 255, 0.16) !important;
+}
+
+.inv-fm-cal-actualizado-panel .p-datepicker-calendar {
+  table-layout: fixed !important;
+}
+
+.inv-fm-cal-actualizado-panel .p-datepicker-calendar td {
+  padding: 0.15rem !important;
+}
+
+.inv-fm-cal-actualizado-panel .p-datepicker-calendar td > span {
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+}
+
+.inv-fm-cal-actualizado-panel .p-datepicker-calendar thead th {
+  font-size: 0.82rem !important;
+  padding: 0.25rem !important;
+}
+
+.inv-fm-cal-actualizado-panel .p-datepicker-calendar td > span.p-highlight,
+.inv-fm-cal-actualizado-panel .p-datepicker-calendar td.p-highlight > span,
+.inv-fm-cal-actualizado-panel .p-datepicker-calendar td.p-range-start > span,
+.inv-fm-cal-actualizado-panel .p-datepicker-calendar td.p-range-end > span {
+  background: rgba(1, 134, 112, 0.137) !important;
+  color: #08806e !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+
+.inv-fm-cal-actualizado-panel .p-datepicker-calendar td > span:focus,
+.inv-fm-cal-actualizado-panel .p-datepicker-calendar td > span.p-focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.inv-fm-cal-actualizado-panel
+  .p-datepicker-calendar
+  td
+  > span:focus:not(.p-highlight):not(.p-range-start):not(.p-range-end),
+.inv-fm-cal-actualizado-panel
+  .p-datepicker-calendar
+  td
+  > span.p-focus:not(.p-highlight):not(.p-range-start):not(.p-range-end) {
+  background: rgb(243, 243, 243) !important;
+  color: #333333 !important;
+}
+
+.inv-fm-cal-actualizado-panel
+  .p-datepicker-calendar
+  td
+  > span.p-focus.p-highlight,
+.inv-fm-cal-actualizado-panel
+  .p-datepicker-calendar
+  td
+  > span.p-focus.p-range-start,
+.inv-fm-cal-actualizado-panel
+  .p-datepicker-calendar
+  td
+  > span.p-focus.p-range-end {
+  background: rgba(1, 134, 112, 0.22) !important;
+  color: #066657 !important;
+}
+
+.inv-fm-cal-actualizado-panel .p-yearpicker {
+  padding: 0rem !important;
+  margin: 0 !important;
+}
+
+.inv-fm-cal-actualizado-panel .p-yearpicker .p-yearpicker-year {
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.inv-fm-cal-actualizado-panel .p-yearpicker .p-yearpicker-year:focus,
+.inv-fm-cal-actualizado-panel .p-yearpicker .p-yearpicker-year.p-focus {
+  outline: none !important;
+  box-shadow: none !important;
+  background: rgb(243, 243, 243) !important;
+}
+
+.inv-fm-cal-actualizado-panel .p-yearpicker .p-yearpicker-year.p-highlight {
+  background: rgba(1, 134, 112, 0.137) !important;
+  color: #08806e !important;
+  box-shadow: none !important;
+}
+
+.inv-fm-cal-actualizado-panel .p-monthpicker {
+  padding: 0rem !important;
+  margin: 0 !important;
+}
+
+.inv-fm-cal-actualizado-panel .p-monthpicker .p-monthpicker-month {
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.inv-fm-cal-actualizado-panel
+  .p-monthpicker
+  .p-monthpicker-month:not(.p-highlight):hover {
+  background: rgb(243, 243, 243) !important;
+  color: #333333 !important;
+  box-shadow: none !important;
+}
+
+.inv-fm-cal-actualizado-panel .p-monthpicker .p-monthpicker-month:focus,
+.inv-fm-cal-actualizado-panel .p-monthpicker .p-monthpicker-month.p-focus {
+  outline: none !important;
+  box-shadow: none !important;
+  background: rgb(243, 243, 243) !important;
+}
+
+.inv-fm-cal-actualizado-panel .p-monthpicker .p-monthpicker-month.p-highlight {
+  background: rgba(1, 134, 112, 0.137) !important;
+  color: #08806e !important;
+  box-shadow: none !important;
+}
+
+/* =============================== */
+/*         LOTES CADUCADOS        */
+/* =============================== */
+
+.inv-fm-item--caducados {
+  width: 20rem;
+}
+
+.inv-fm-dd-caducados.p-dropdown {
+  font-family: "Kodchasan", sans-serif;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.inv-fm-dd-caducados .p-dropdown-label.p-inputtext {
+  display: flex;
+  align-items: center;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.inv-fm-dd-caducados-panel.p-dropdown-panel {
+  border-radius: 12px !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  font-family: "Kodchasan", sans-serif;
+  background: #ffffff;
+}
+
+.inv-fm-dd-caducados-panel .p-dropdown-items {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.inv-fm-dd-caducados-panel .p-dropdown-item {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.85rem !important;
+  cursor: pointer;
+}
+
+.inv-fm-dd-caducados-panel .p-dropdown-item.p-highlight {
+  background: rgba(10, 116, 99, 0.1) !important;
+  color: #0a7463 !important;
+}
+
+/* =============================== */
+/*     CADUCA EN ≤ (DÍAS)          */
+/* =============================== */
+
+.inv-fm-item--caduca-dias {
+  width: 30rem;
+}
+
+.inv-fm-in-caducaDias.p-inputnumber {
+  height: 40px;
+  border-radius: 10px !important;
+  border: 1px solid var(--surface-300);
+  font-family: "Kodchasan", sans-serif;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden !important;
+}
+
+.inv-fm-in-caducaDias.p-inputnumber.p-inputwrapper-focus {
+  border-color: #0a7463;
+  background: #ffffff;
+  color: #0a5045;
+}
+
+.inv-fm-in-caducaDias .p-inputnumber-input {
+  width: 2rem !important;
+  flex: 1 1 auto;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  font-size: 0.9rem;
+}
+
+.inv-fm-in-caducaDias .p-inputnumber-input::placeholder {
+  opacity: 0.85;
+}
+
+.inv-fm-in-caducaDias .p-inputnumber-button-group {
+  height: 100%;
+  background: #0a7463 !important;
+  overflow: hidden !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.inv-fm-in-caducaDias .p-inputnumber-button {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+}
+
+.inv-fm-in-caducaDias .p-inputnumber-button:not(.p-disabled):hover {
+  background: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* =============================== */
+/*   NÚMERO DE LOTE Y UBICACIÓN    */
+/* =============================== */
+
+.inv-fm-item--lote .inv-fm-it-numLote.p-inputtext,
+.inv-fm-item--ubicacion .inv-fm-it-ubicacion.p-inputtext {
+  height: 40px !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--surface-300) !important;
+  font-family: "Kodchasan", sans-serif !important;
+  font-size: 0.9rem !important;
+  padding: 0 0.75rem !important;
+  background: linear-gradient(180deg, #ffffff, #f7f7f7);
+  transition: border-color 0.18s ease, background-color 0.18s ease,
+    color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.inv-fm-item--lote .inv-fm-it-numLote.p-inputtext:hover,
+.inv-fm-item--ubicacion .inv-fm-it-ubicacion.p-inputtext:hover {
+  border-color: #bdbdbd !important;
+  background: linear-gradient(180deg, #ffffff, #f7f7f7) !important;
+}
+
+.inv-fm-item--lote .inv-fm-it-numLote.p-inputtext:focus,
+.inv-fm-item--ubicacion .inv-fm-it-ubicacion.p-inputtext:focus,
+.inv-fm-item--lote .inv-fm-it-numLote.p-inputtext.p-focus,
+.inv-fm-item--ubicacion .inv-fm-it-ubicacion.p-inputtext.p-focus {
+  border-color: #0a7463 !important;
+  background: #ffffff !important;
+  color: #0a5045 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Placeholder consistente */
+.inv-fm-item--lote .inv-fm-it-numLote::placeholder,
+.inv-fm-item--ubicacion .inv-fm-it-ubicacion::placeholder {
+  color: var(--text-color-secondary) !important;
+  opacity: 0.85 !important;
+}
+
+/* FOOTER */
+.inv-fm-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 8px;
+}
+
+.inv-fm-footer .grow {
+  flex: 1;
+}
+
+/* Botones base del footer */
+.inv-fm-footer .inv-fm-btn.p-button {
+  font-family: "Kodchasan", sans-serif !important;
+  height: 36px;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  border-width: 1px !important;
+  font-size: 0.9rem !important;
+  padding-inline: 0.9rem !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: transform 0.14s ease, background-color 0.14s ease,
+    border-color 0.14s ease, color 0.14s ease, opacity 0.14s ease;
+}
+
+/* Sin glow azul en focus */
+.inv-fm-footer .inv-fm-btn.p-button:focus,
+.inv-fm-footer .inv-fm-btn.p-button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* LIMPIAR – texto rojo */
+.inv-fm-btn--clear.p-button {
+  background: transparent !important;
+  color: #ba1414 !important;
+  border-color: transparent !important;
+}
+
+.inv-fm-btn--clear.p-button:hover {
+  color: #961111 !important;
+  background: rgba(186, 20, 20, 0.06) !important;
+  transform: scale(1.03);
+}
+
+.inv-fm-btn--clear.p-button:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+/* CANCELAR – gris neutro */
+.inv-fm-btn--cancel.p-button {
+  background: transparent !important;
+  color: #555555 !important;
+  border-color: var(--surface-300) !important;
+}
+
+.inv-fm-btn--cancel.p-button:hover {
+  background: #f5f5f5 !important;
+  border-color: #c7c7c7 !important;
+  transform: scale(1.03);
+}
+
+.inv-fm-btn--cancel.p-button:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+/* APLICAR – CTA verde */
+.inv-fm-btn--apply.p-button {
+  background: #0a7463 !important;
+  color: #ffffff !important;
+  border-color: #0a7463 !important;
+}
+
+.inv-fm-btn--apply.p-button:hover {
+  background: #096153 !important;
+  border-color: #096153 !important;
+  transform: scale(1.03);
+}
+
+.inv-fm-btn--apply.p-button:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+/* Íconos */
+.inv-fm-footer .inv-fm-btn .pi {
+  font-size: 0.9rem;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1400px) {
+  .inv-fm-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 700px) {
+  .inv-fm-grid {
+    grid-template-columns: 1fr;
+  }
+}

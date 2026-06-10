@@ -1,0 +1,201 @@
+/* ==========================================================================
+   REPORTE DE VENTAS - ESTILO LIQUID GLASS (APPLE STYLE)
+   ========================================================================== */
+
+:root {
+  --rvx-brand: #0a7463; 
+  --rvx-green-soft: rgba(10, 116, 99, 0.15);
+  --rvx-text: #0f172a;
+  
+  /* Variables Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-hover: rgba(255, 255, 255, 0.7);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+  --glass-blur: blur(16px);
+  --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.05);
+  --rvx-radius: 24px;
+}
+
+/* --- FONDO CON BLOBS LUMINOSOS --- */
+.rvx-page { 
+    padding: 20px; 
+    min-height: 100vh; 
+    font-family: "Kodchasan", sans-serif; 
+    color: var(--rvx-text);
+    /* Fondo gradiente base */
+    background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 100%);
+    position: relative;
+    z-index: 0;
+    overflow-x: hidden; /* Evita scroll horizontal por los blobs */
+}
+
+/* Efecto luces desenfocadas atrás del cristal */
+.rvx-page::before,
+.rvx-page::after {
+    content: ''; position: absolute; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.6; pointer-events: none;
+}
+.rvx-page::before { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #bae6fd; }
+.rvx-page::after { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #bbf7d0; }
+
+/* --- HEADER SUPERIOR --- */
+.rvx-header-bar {
+  width: 100%; padding: 1rem 2rem; border-radius: 0 0 35px 35px; margin-bottom: 20px;
+  background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border); border-top: none;
+  box-shadow: var(--glass-shadow); display: flex; align-items: center; justify-content: space-between;
+}
+.rvx-header-title { font-size: 1.15rem; font-weight: 700; letter-spacing: 0.5px; color: rgba(10, 116, 99, 0.95); display: flex; align-items: center; gap: 0.8rem; margin: 0; text-transform: uppercase; }
+.rvx-header-title i { font-size: 1.3rem; }
+
+/* --- LAYOUT --- */
+.rvx-layout-grid { display: grid; grid-template-columns: 260px 1fr; gap: 20px; align-items: start; }
+
+/* --- SIDEBAR --- */
+.rvx-sidebar {
+  border-radius: 14px; padding: 18px; position: sticky; top: 20px;
+  display: flex; flex-direction: column; gap: 14px; font-family: "Kodchasan", sans-serif; min-height: auto;
+  /* Glass Effect */
+  background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border); box-shadow: var(--glass-shadow);
+}
+.rvx-sidebar-label { font-size: 0.83rem; font-weight: 600; color: #475569; display: flex; align-items: center; gap: 6px; margin-bottom: 2px; text-transform: uppercase; }
+.rvx-sidebar label { font-size: 0.83rem; font-weight: 600; color: #475569; margin-left: 2px; }
+
+/* Inputs dentro del cristal (más opacos para destacar) */
+.rvx-sidebar .p-inputtext, .rvx-sidebar .p-dropdown, .rvx-sidebar .p-multiselect, .rvx-sidebar .p-calendar, .rvx-sidebar .rvx-ctl {
+  height: 40px !important; border-radius: 10px !important; font-size: 0.9rem !important; font-family: "Kodchasan", sans-serif !important;
+  background: rgba(255, 255, 255, 0.75) !important; color: #334155 !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  transition: all 0.2s ease; box-shadow: inset 0 2px 4px rgba(255,255,255,0.5) !important; width: 100% !important; display: flex; align-items: center;
+}
+.rvx-sidebar .p-calendar .p-inputtext, .rvx-sidebar .p-dropdown .p-inputtext { background: transparent !important; border: none !important; height: 100% !important; box-shadow: none !important; }
+.rvx-sidebar .p-inputtext:enabled:hover, .rvx-sidebar .p-dropdown:hover, .rvx-sidebar .p-multiselect:hover { background: rgba(255, 255, 255, 0.9) !important; border-color: #fff !important; }
+.rvx-sidebar .p-inputtext:enabled:focus, .rvx-sidebar .p-dropdown.p-focus, .rvx-sidebar .p-multiselect.p-focus, .rvx-sidebar .p-calendar.p-inputwrapper-focus { border-color: var(--rvx-brand) !important; background: #ffffff !important; color: #0a5045 !important; box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.2) !important; }
+.rvx-sidebar .p-dropdown-trigger-icon, .rvx-sidebar .p-multiselect-trigger-icon { color: var(--rvx-brand) !important; font-size: 0.9rem; }
+.rvx-sidebar .p-inputtext::placeholder { color: #64748b !important; opacity: 0.8; }
+
+/* Paneles Desplegables en Cristal */
+.p-dropdown-panel, .p-multiselect-panel, .p-datepicker { 
+    border-radius: 12px !important; 
+    background: rgba(255, 255, 255, 0.85) !important; backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border) !important; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important; font-family: "Kodchasan", sans-serif !important; overflow: hidden; 
+}
+.p-dropdown-item, .p-multiselect-item { font-size: 0.85rem !important; padding: 0.5rem 1rem !important; color: #334155 !important; }
+.p-dropdown-item.p-highlight, .p-multiselect-item.p-highlight, .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover, .p-multiselect-item:not(.p-highlight):not(.p-disabled):hover { background: var(--rvx-green-soft) !important; color: var(--rvx-brand) !important; }
+.p-multiselect-panel .p-checkbox-box { border-radius: 4px !important; border: 2px solid var(--rvx-brand) !important; width: 18px; height: 18px; }
+.p-multiselect-panel .p-checkbox-box.p-highlight { background: var(--rvx-brand) !important; border-color: var(--rvx-brand) !important; }
+.p-multiselect-token { background: rgba(255, 255, 255, 0.8) !important; color: var(--rvx-brand) !important; border: 1px solid rgba(255,255,255,0.9); border-radius: 8px !important; font-family: "Kodchasan", sans-serif; font-size: 0.82rem; padding: 2px 8px !important; }
+.p-multiselect-header { background: rgba(10, 116, 99, 0.9) !important; backdrop-filter: blur(10px); color: #fff !important; padding: 0.5rem !important; }
+.p-multiselect-header .p-checkbox-box { border-color: #fff !important; background: transparent !important; }
+.p-multiselect-header .p-multiselect-close { color: #fff !important; }
+
+/* --- CONTENT & KPIS --- */
+.rvx-content { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.rvx-kpis { display: flex; gap: 1px; border-radius: var(--rvx-radius); overflow: hidden; box-shadow: var(--glass-shadow); border: var(--glass-border); background: transparent; }
+.rvx-kpi { flex: 1; text-align: center; padding: 16px; border-right: 1px solid rgba(255, 255, 255, 0.3); background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); }
+.rvx-kpi:last-child { border-right: none; }
+.rvx-kpiLabel { font-size: 0.7rem; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 4px; }
+.rvx-kpiValue { font-size: 1.5rem; font-weight: 900; color: #0f172a; }
+
+/* --- CARD PRINCIPAL UNIFICADO --- */
+.rvx-main-card { 
+    border-radius: var(--rvx-radius); padding: 24px; min-height: auto; display: flex; flex-direction: column; position: relative; 
+    background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border); box-shadow: var(--glass-shadow);
+}
+.rvx-card-action-btn { position: absolute; top: 18px; right: 24px; z-index: 10; }
+
+/* --- TABS EN CRISTAL --- */
+.rvx-tabs-wrapper { position: relative; margin-top: 0; }
+.rvx-tabview .p-tabview-nav { background: transparent !important; border: none !important; padding: 0 60px 12px 0 !important; gap: 6px; border-bottom: 1px solid rgba(255,255,255,0.4) !important; margin-bottom: 24px !important; }
+.rvx-tabview .p-tabview-nav li .p-tabview-nav-link { background: rgba(255,255,255,0.4) !important; border: var(--glass-border) !important; border-radius: 99px !important; padding: 8px 18px !important; font-weight: 700 !important; font-size: 0.85rem !important; color: #475569 !important; transition: all 0.2s ease;}
+.rvx-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link { background: var(--rvx-brand) !important; color: #fff !important; border-color: var(--rvx-brand) !important; box-shadow: 0 4px 15px rgba(10, 116, 99, 0.3) !important; }
+.rvx-tabview .p-tabview-panels { background: transparent !important; padding: 0 !important; border: none !important; }
+
+/* --- SUB TABS --- */
+.rvx-sub-tabview > .p-tabview-nav { background: rgba(255,255,255,0.3) !important; border-radius: 99px !important; padding: 3px !important; display: inline-flex !important; gap: 3px !important; border: var(--glass-border) !important; margin-bottom: 20px !important; align-self: center; padding-right: 3px !important; }
+.rvx-sub-tabview > .p-tabview-nav li .p-tabview-nav-link { background: transparent !important; border: none !important; border-radius: 99px !important; padding: 6px 14px !important; font-size: 0.8rem !important; font-weight: 700 !important; color: #475569 !important; }
+.rvx-sub-tabview > .p-tabview-nav li.p-highlight .p-tabview-nav-link { background: rgba(255,255,255,0.8) !important; color: var(--rvx-brand) !important; box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important; border: 1px solid #fff !important; }
+
+/* --- GRÁFICAS --- */
+.rvx-chart-container { display: flex; flex-direction: column; width: 100%; align-items: center; }
+.rvx-chart-full { width: 100% !important; margin: 0 auto; position: relative; height: 380px !important; min-height: 380px !important; overflow: hidden; }
+.rvx-chart-full canvas { width: 100% !important; height: 100% !important; display: block; }
+.rvx-minimal-title { font-size: 1rem; font-weight: 800; color: #0f172a; margin-bottom: 10px; text-align: center; width: 100%; }
+
+/* SPLIT VIEW */
+.rvx-split-view { display: flex; width: 100%; gap: 30px; align-items: center; margin-top: 10px; }
+.rvx-split-left { flex: 1; min-width: 0; }
+.rvx-split-right { flex: 1; min-width: 0; display: flex; justify-content: center; }
+
+/* 🔥 TARJETAS Y RANKINGS (EFECTO CRISTAL) */
+.rvx-top-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 10px; }
+.rvx-top-card, .rvx-ranking-box { 
+    background: rgba(255, 255, 255, 0.45); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border); border-radius: 18px; padding: 24px; position: relative; overflow: hidden; 
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.05); transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s; cursor: pointer; 
+}
+.rvx-top-card { display: flex; flex-direction: column; gap: 12px; }
+.rvx-ranking-box { padding: 20px; }
+
+.rvx-top-card:hover, .rvx-ranking-box:hover { transform: translateY(-4px); background: rgba(255, 255, 255, 0.65); box-shadow: 0 12px 40px rgba(31, 38, 135, 0.1); border-color: #fff; }
+
+.rvx-top-rank { position: absolute; top: -15px; right: -5px; font-size: 5rem; font-weight: 900; color: rgba(10, 116, 99, 0.05); z-index: 0; pointer-events: none; }
+.rvx-top-info { z-index: 1; display: flex; flex-direction: column; gap: 4px; }
+.rvx-top-name { font-size: 1.05rem; font-weight: 800; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rvx-top-revenue { font-size: 1.4rem; font-weight: 900; color: var(--rvx-brand); }
+.rvx-top-bar-container { z-index: 1; margin-top: auto; display: flex; flex-direction: column; gap: 6px; }
+.rvx-top-meta { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; }
+.rvx-top-bar-bg { background: rgba(255, 255, 255, 0.5); height: 8px; border-radius: 99px; width: 100%; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
+.rvx-top-bar-fill { background: var(--rvx-brand); height: 100%; border-radius: 99px; transition: width 1s ease-in-out; }
+.rvx-top-card--rank-1 .rvx-top-bar-fill { background: #eab308; } 
+.rvx-top-card--rank-1 .rvx-top-revenue { color: #d97706; }
+.rvx-top-card--rank-2 .rvx-top-bar-fill { background: #94a3b8; } 
+.rvx-top-card--rank-2 .rvx-top-revenue { color: #475569; }
+
+/* RANKING LISTAS EN CRISTAL */
+.rvx-ranking-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
+.rvx-ranking-title { font-size: 1rem; font-weight: 800; color: #0f172a; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; text-transform: uppercase;}
+.rvx-ranking-item { margin-bottom: 16px; }
+.rvx-ranking-item:last-child { margin-bottom: 0; }
+.rvx-ranking-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.rvx-ranking-name { font-weight: 700; color: #334155; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;}
+.rvx-ranking-badge { background: rgba(255,255,255,0.7); color: #475569; padding: 2px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; border: 1px solid #fff;}
+.rvx-ranking-val { font-weight: 800; color: var(--rvx-brand); font-size: 0.95rem; }
+
+/* --- TABLA TRANSPARENTE EN CRISTAL --- */
+.rvx-tableHead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.rvx-tableTitle { font-weight: 800; font-size: 1rem; }
+.rvx-rowsSel.p-dropdown { border-radius: 99px !important; height: 32px !important; align-items: center; background: rgba(255,255,255,0.5) !important; border: var(--glass-border) !important; font-size: 0.85rem !important; }
+.rvx-table { border-radius: 12px; border: none; overflow: hidden; background: transparent; }
+.rvx-table .p-datatable-thead > tr > th { background: rgba(255,255,255,0.4) !important; font-weight: 800 !important; color: #475569 !important; border: none !important; border-bottom: 1px solid rgba(255,255,255,0.6) !important; padding: 12px 16px !important; font-size: 0.85rem; }
+.rvx-table .p-datatable-tbody > tr > td { background: transparent !important; padding: 10px 16px !important; border-bottom: 1px solid rgba(255,255,255,0.4) !important; font-size: 0.85rem; }
+.rvx-table .p-datatable-tbody > tr:hover > td { background: rgba(255,255,255,0.3) !important; }
+.rvx-chip { background: rgba(255, 255, 255, 0.7); padding: 3px 8px; border-radius: 6px; font-family: monospace; font-weight: 700; color: #475569; border: var(--glass-border); font-size: 0.85rem; }
+.rvx-tag { border-radius: 99px; font-weight: 800; font-size: 0.7rem; padding: 3px 8px; }
+
+/* --- BOTONES --- */
+.rvx-btn.p-button { font-family: "Kodchasan", sans-serif !important; height: 36px !important; border-radius: 999px !important; box-shadow: none !important; font-size: 0.9rem !important; display: flex; justify-content: center; align-items: center; transition: transform 0.14s ease, background-color 0.14s ease; width: 100%; } 
+.rvx-btn--primary.p-button { background: var(--rvx-brand) !important; border: none !important; color: #fff; box-shadow: 0 4px 15px rgba(10, 116, 99, 0.3) !important; } 
+.rvx-btn--ghost.p-button { background: rgba(255,255,255,0.5) !important; color: #475569 !important; border: var(--glass-border) !important; }
+.rvx-btn--ghost.p-button:hover { background: rgba(255,255,255,0.8) !important; transform: scale(1.03); color: var(--rvx-brand) !important; }
+.rvx-btn--ghost.p-button:active { transform: scale(0.96); }
+.rvx-iconBtn.p-button { width: 28px !important; height: 28px !important; background: rgba(255,255,255,0.5) !important; color: var(--rvx-brand) !important; border: var(--glass-border) !important; border-radius: 6px !important; padding: 0 !important;}
+.rvx-btn-icon-only.p-button { width: 38px !important; height: 38px !important; border-radius: 50% !important; padding: 0 !important; display: flex; align-items: center; justify-content: center; }
+
+/* --- MODALES EFECTO CRISTAL --- */
+.rvx-dialog { width: 550px; border-radius: 20px; overflow: hidden; font-family: "Kodchasan", sans-serif; border: var(--glass-border); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.6) !important; }
+.rvx-dialog .p-dialog-header { background: rgba(255, 255, 255, 0.8) !important; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.5); }
+.rvx-dialog .p-dialog-content { background: rgba(255, 255, 255, 0.8) !important; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 0 1.2rem 1.2rem 1.2rem; }
+.p-dialog-mask.p-component-overlay { background: rgba(15, 23, 42, 0.2) !important; backdrop-filter: blur(4px) !important; -webkit-backdrop-filter: blur(4px) !important; }
+
+/* Fondo interno modal (reemplaza bg-gray-50) */
+.rvx-modal-inner-glass { background: rgba(255,255,255,0.5); border: var(--glass-border); border-radius: 12px; padding: 1rem; }
+
+@media (max-width: 1000px) { 
+    .rvx-layout-grid { grid-template-columns: 1fr; } 
+    .rvx-sidebar { position: static; min-height: auto; } 
+    .rvx-card-action-btn { position: relative; top: auto; right: auto; margin-bottom: 10px; width: 100%; display: flex; justify-content: flex-end; } 
+    .rvx-chart-full { height: 280px !important; min-height: 280px !important; } 
+    .rvx-split-view { flex-direction: column; } 
+}

@@ -1,0 +1,494 @@
+
+/* Fuente general para todo el módulo Clientes */
+.clientes-container,
+.clientes-header,
+.clientes-table,
+.modal-header,
+.pedido-dialog,
+.pedido-panel,
+.cliente-sel-wrapper,
+.cliente-sel-card,
+.crear-wrapper,
+.crear-card,
+.edit-wrapper,
+.edit-card,
+.p-button,
+.p-inputtext,
+.p-dialog,
+.p-datatable,
+.p-column-header-content {
+  font-family: 'Kodchasan', sans-serif !important;
+}
+
+h1, h2, h3 {
+  font-weight: 700;
+}
+
+p, span, td, th, label, button, input, select {
+  font-weight: 400;
+}
+
+.clientes-container {
+  padding: 2rem !important;               /* espacio interno */
+}
+
+.clientes-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap:1rem;
+  margin-bottom: 1.5rem !important;
+  flex-wrap: nowrap;
+}
+
+.clientes-header h2 {
+  font-size: 1.75rem !important;
+  font-weight: bold !important;
+  margin: 0 !important;
+}
+
+.search-box {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  flex: 1;
+}
+
+/*ESTILO TABLA CLIENTES*/
+.clientes-table {
+  font-family: "Kodchasan", sans-serif !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.clientes-table .p-datatable-thead > tr > th {
+  background: #0a7463 !important;
+  color: #ffff !important;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.55rem 0.7rem;
+}
+
+/* Unifica el color de todas las filas del cuerpo */
+.clientes-table .p-datatable-tbody > tr {
+    background: #ffffff !important; /* Cambia esto al color que desees */
+}
+
+/* Asegura que las filas alternas no tengan un color distinto */
+.clientes-table .p-datatable-tbody > tr:nth-child(even) {
+    background: #ffffff !important;
+}
+
+.clientes-table .p-datatable-tbody > tr > td,
+.clientes-table .p-datatable-frozen-view .p-datatable-tbody > tr > td {
+  padding: 0.55rem 0.7rem;
+  font-size: 0.9rem;
+  border: none !important;
+}
+
+.clientes-table .p-datatable-tbody > tr,
+.clientes-table .p-datatable-frozen-view .p-datatable-tbody > tr {
+  position: relative;
+}
+
+.clientes-table .p-datatable-tbody > tr:not(.p-datatable-row-expansion)::after,
+.clientes-table.p-datatable-frozen-view .p-datatable-tbody> tr:not(.p-datatable-row-expansion)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+}
+
+.clientes-table .p-datatable-tbody > tr.p-datatable-row-expansion::after,
+.clientes-table .p-datatable-frozen-view .p-datatable-tbody > tr.p-datatable-row-expansion::after {
+  border-bottom: none;
+  content: none;
+}
+
+.clientes-table .p-datatable-thead > tr > th:first-child { border-top-left-radius: 12px !important; }
+.clientes-table .p-datatable-thead > tr > th:last-child { border-top-right-radius: 12px !important; }
+.clientes-table .p-datatable-wrapper {
+  border-top-left-radius: 12px !important;
+  border-top-right-radius: 12px !important;
+  overflow: hidden;
+}
+
+.clientes-table .p-datatable-thead .p-sortable-column .p-sortable-column-icon,
+.clientes-table .p-datatable-thead .p-sortable-column .pi {
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.clientes-table .p-datatable-thead .p-sortable-column.p-highlight {
+  background: #0a7463 !important;
+  color: #ffffff !important;
+}
+
+.clientes-table .p-datatable-thead.p-sortable-column .p-highlight .p-sortable-column-icon {
+  color: #ffffff !important;
+}
+
+/* ======================================= */
+/*           PAGINACIÓN PREMIUM            */
+/* ======================================= */
+
+.clientes-table .p-paginator {
+  background: transparent !important;
+  border: none !important;
+  padding: 0.8rem 0.5rem !important;
+  font-family: "Kodchasan", sans-serif !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.clientes-table .p-paginator-current {
+  font-size: 0.9rem;
+  color: #0a5045 !important;
+  opacity: 0.85;
+  cursor: default !important;
+  pointer-events: none;
+}
+
+.clientes-table .p-paginator .p-paginator-element {
+  border: none !important;
+  background: transparent !important;
+  color: #0a5045 !important;
+  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  margin: 0 3px;
+  transition: all 0.18s ease !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.clientes-table .p-paginator .p-paginator-pages {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.clientes-table .p-paginator .p-paginator-pages .p-paginator-page {
+  margin: 0 3px;
+}
+
+.clientes-table .p-paginator .p-paginator-element:not(.p-disabled):hover {
+  background: rgba(10, 116, 99, 0.1) !important;
+  transform: translateY(-2px);
+}
+
+.clientes-table .p-paginator .p-highlight {
+  background: rgba(10, 116, 99, 0.18) !important;
+  color: #0a5045 !important;
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px rgba(10, 116, 99, 0.22);
+}
+
+.clientes-table .p-paginator .p-highlight:hover {
+  background: rgba(10, 116, 99, 0.22) !important;
+  transform: translateY(-3px) scale(1.03);
+}
+
+.clientes-table .p-paginator .pi {
+  font-size: 0.85rem !important;
+  opacity: 0.9;
+}
+
+.clientes-table .p-dropdown .p-dropdown-label {
+  font-family: "Kodchasan", sans-serif !important;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.75rem;
+}
+
+.clientes-table .p-dropdown {
+  border-radius: 10px !important;
+  border: 1px solid rgba(10, 116, 99, 0.28) !important;
+  font-family: "Kodchasan", sans-serif !important;
+  color: #0a5045 !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease;
+  align-items: center;
+}
+
+.clientes-table .p-dropdown:hover {
+  border-color: #0a5045 !important;
+}
+
+.clientes-table .p-dropdown:not(.p-disabled).p-focus {
+  border-color: #085a4e !important;
+  box-shadow: none;
+}
+
+.p-dropdown-panel {
+  border-radius: 12px !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  overflow: hidden !important;
+}
+
+.p-dropdown-panel .p-dropdown-items-wrapper {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.p-dropdown-panel .p-dropdown-items {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.p-dropdown-panel .p-dropdown-item {
+  font-family: "Kodchasan", sans-serif !important;
+  font-size: 0.85rem !important;
+  padding: 0.35rem 0.8rem !important;
+  margin: 0 !important;
+}
+
+.clientes-table .p-dropdown-item {
+  font-family: "Kodchasan", sans-serif !important;
+  padding: 0.45rem 0.8rem !important;
+}
+
+.p-dropdown-panel .p-dropdown-item.p-highlight,
+.p-dropdown-panel .p-dropdown-item.p-highlight.p-focus {
+  background: rgba(10, 116, 99, 0.12) !important;
+  color: #0a5045 !important;
+}
+
+/* PrimeReact pone este span como inline-block; cámbialo a bloque y 100% */
+.clientes-header .p-input-icon-left{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fcfcfc, #f6f6f6);
+  border: 1px solid #cfcfcf;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  transition: border-color 0.22s ease, box-shadow 0.22s ease,
+    background 0.22s ease;
+  -webkit-font-smoothing: antialiased;
+  width: 100%;
+}
+
+.clientes-header .p-input-icon-left > i {
+  font-size: 0.95rem;
+  color: #6b7280;
+  transition: color 0.22s ease, opacity 0.22s ease;
+  opacity: 0.9;
+}
+
+/* Y el input realmente al 100% */
+.clientes-header .p-input-icon-left .p-inputtext{
+  font-family: "Kodchasan", sans-serif !important;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  padding-left: 0.8rem;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: #111827;
+  font-size: 0.95rem;
+  caret-color: #0a7463;
+  transition: color 0.22s ease;
+}
+
+.clientes-header .p-input-icon-left .p-inputtext::placeholder {
+  color: #9ca3af;
+  transition: color 0.22s ease, opacity 0.22s ease;
+}
+
+.clientes-header .p-input-icon-left:hover{
+  border-color: #bdbdbd;
+  background: linear-gradient(180deg, #ffffff, #f7f7f7);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+    0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.clientes-header .p-input-icon-left:hover > i {
+  color: #0a7463;
+  opacity: 0.95;
+}
+
+.clientes-header .p-input-icon-left:focus-within {
+  border-color: #0a7463;
+  background: #ffffff;
+}
+
+.clientes-header .p-input-icon-left:focus-within > i {
+  color: #0a7463;
+}
+
+.clientes-header .p-input-icon-left:focus-within .p-inputtext {
+    color: #0a5045;
+}
+
+.clientes-header .p-input-icon-left:focus-within .p-inputtext::placeholder {
+  color: #91b9b1;
+}
+
+/* padding para no chocar con la lupa, altura y borde */
+.clientes-header .p-input-icon-left .p-inputtext {
+  width: 100%;
+  height: 2.75rem;              /* altura */
+  padding-left: 2.5rem;        /* espacio para la lupa + margen */
+  font-size: 0.95rem;
+  border-radius: 0.5rem;        
+}
+
+.acciones-header{
+  display:flex;
+  align-items:center;
+  gap:.5rem;              /* espacio entre botones */
+  flex-shrink:0;          /* no se reduce */
+}
+
+.btn-seleccionar {
+  background-color: #00A38B !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+.btn-seleccionar:hover {
+  background-color: #008a75 !important;
+}
+
+/* Botón verde */
+.btn-verde {
+  background: linear-gradient(135deg, #0a7463, #0f9f82) !important;
+  color: #fff !important;
+  border-radius: 999px !important;
+  border: none !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  height: 1.5rem !important; 
+  padding: 0 1rem !important;
+  box-shadow: none;
+  transition: transform 0.14s ease-out, box-shadow 0.14s ease-out,
+  filter 0.12s ease-out, background 0.12s ease-out;
+}
+
+.btn-verde:hover {
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px rgba(15, 118, 110, 0.45);
+}
+
+.btn-verde:active {
+  transform: translateY(0) scale(0.96);
+  box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+}
+
+/* Alinear los 3 icon-buttons dentro de la celda de acciones */
+.acciones-cell{
+  display: flex;
+  align-items: center;
+  justify-content: center; /* o 'flex-start' si prefieres pegado a la izq */
+  gap: 0.5rem;
+}
+
+/* Centrar SOLO el encabezado de la columna Acciones */
+.p-datatable .p-datatable-thead > tr > th.acciones-header-cell {
+  text-align: center !important; /* por si no hay flex adentro */
+}
+
+/* Lo importante: centrar el contenedor flex interno del header */
+.p-datatable .p-datatable-thead > tr > th.acciones-header-cell .p-column-header-content {
+  justify-content: center !important; /* en lugar de space-between */
+  width: 100%;
+}
+
+/*Pedidos */
+/* ===== Overlay un poco más oscuro (estilo screenshot) ===== */
+.pedido-dialog ~ .p-component-overlay {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* ===== Contenedor del Dialog (borde redondeado suave) ===== */
+.pedido-dialog .p-dialog {
+  border-radius: 0.875rem;
+  overflow: hidden;
+  box-shadow: 0 0.75rem 2.5rem rgba(0,0,0,.25);
+}
+
+/* ===== Header: título centrado + ícono cerrar a la derecha ===== */
+.pedido-dialog .p-dialog-header {
+  position: relative;
+  justify-content: center;             /* centra el texto */
+  padding: 0.9rem 3rem;                /* compactito como el mockup */
+  border-bottom: none;
+}
+.pedido-dialog .p-dialog-title {
+  font-weight: 800;
+  font-size: 1.15rem;
+}
+.pedido-dialog .p-dialog-header-icons {
+  position: absolute;
+  right: 0.75rem;                      /* X pegada a la orilla */
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* ===== Cuerpo con fondo gris claro dentro (panel) ===== */
+.pedido-dialog .p-dialog-content {
+  background: #f2f2f2;                 /* gris claro del mockup */
+  padding: 1.25rem;
+}
+
+/* Panel blanco redondeado dentro del gris */
+.pedido-panel {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  padding: 1rem 1rem 0.75rem;
+}
+
+/* ===== Filas y columnas ===== */
+.pedido-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 1rem;
+  row-gap: .25rem;
+  padding: 0.25rem 0.25rem 0.5rem;
+}
+
+.pedido-row--top {
+  border-bottom: 1px solid #e4e4e4;    /* separador como la línea gris */
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.pedido-cell {
+  display: flex;
+  gap: .35rem;
+  align-items: center;
+  font-size: .95rem;
+}
+
+.pedido-cell--right {
+  justify-content: flex-end;           /* valores alineados a la derecha */
+  text-align: right;
+}
+
+/* Etiquetas y valores (tipografía del mockup) */
+.pedido-cell .label {
+  color: #333;
+  font-weight: 600;
+}
+.pedido-cell .value {
+  color: #222;
+  font-weight: 500;
+}
+
+.modal-header {
+  text-align: center;
+}
+
+
+

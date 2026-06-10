@@ -1,0 +1,175 @@
+.soporte-wrapper {
+  padding: 2rem;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.soporte-titulo {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* ====== CONTENEDOR DE LAS TARJETAS ====== */
+.soporte-opciones {
+  display: flex;
+  justify-content: space-between; /* separación uniforme */
+  align-items: stretch;
+  flex-wrap: nowrap; /* los mantiene en una sola línea */
+  gap: 1.5rem; /* espacio entre tarjetas */
+  margin: 1rem 0;
+}
+
+/* ====== TARJETA INDIVIDUAL ====== */
+.soporte-card {
+  flex: 1; /* todas las tarjetas del mismo ancho */
+  background-color: #f7f7f7;
+  border-radius: 0.75rem;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  font-size: 1.15rem; /* tamaño de letra más grande */
+  font-family: 'Kodchasan', sans-serif;
+  position: relative;
+  overflow: visible;
+}
+
+/* ====== ÍCONO DENTRO DE CADA TARJETA ====== */
+.soporte-card i {
+  font-size: 2rem;
+  color: #00a38b;
+  margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 10;
+  transition: color 0.3s ease; /* Transición de color */
+}
+
+.soporte-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.soporte-card:hover i {
+  color: #007f6e; /* Cambia el color del ícono al hacer hover si es necesario */
+  /* Evita cualquier transformación en el ícono, como movimiento o cambios de tamaño */
+}
+
+/* === Sección documentación + búsqueda === */
+.soporte-docs {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.soporte-card-large {
+  width: 50%;
+  height: 6rem;
+}
+
+.soporte-search {
+  flex: 1;
+  background: #f5f5f5;
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.soporte-search h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.soporte-search .p-input-icon-left {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.soporte-search .p-inputtext {
+  width: 90%;
+  height: 2.75rem;
+  border-radius: 1.5rem;
+  padding: 0 2rem;
+}
+
+/* === Tabla === */
+.soporte-tickets {
+  margin-top: 0.5rem;
+}
+
+.soporte-tickets h3 {
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* === Botón verde reutilizable === */
+.btn-verde {
+  background-color: #00a38b !important;
+  border: none !important;
+  color: #fff !important;
+  border-radius: 0.75rem !important;
+}
+.btn-verde:hover {
+  background-color: #008a75 !important;
+}
+
+/* ======= MODAL DETALLE ======= */
+.soporte-dialog .p-dialog-content {
+  font-family: "Kodchasan", sans-serif;
+  padding: 1.5rem;
+}
+
+.ticket-detalle h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #00a38b;
+}
+
+.ticket-detalle p {
+  margin: 0.25rem 0;
+  line-height: 1.4;
+}
+
+.ticket-detalle .descripcion {
+  background: #f5f5f5;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+
+.mensajes-box {
+  background: #f8f8f8;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.mensaje {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.mensaje-usuario {
+  background: #eaf6f4;
+  align-self: flex-start;
+}
+
+.mensaje-soporte {
+  background: #dff3ff;
+  align-self: flex-end;
+}

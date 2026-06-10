@@ -1,0 +1,36 @@
+export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "";
+
+export const endpoints = {
+  authPublicKey: `${API_BASE_URL}/auth/keys/public`,
+  authLogin: `${API_BASE_URL}/auth/login`,
+  authLogout: `${API_BASE_URL}/auth/logout`,
+
+  ventasProductos: `${API_BASE_URL}/productos`,
+  ventasCategorias: `${API_BASE_URL}/productos/categoria`,
+  categorias: `${API_BASE_URL}/categorias`,
+  ventas: `${API_BASE_URL}/ventas`,
+  compras: `${API_BASE_URL}/compras`,
+  compraDetalle: `${API_BASE_URL}/compraDetalle`,
+  reporteGanancias: `${API_BASE_URL}/reportes-financieros/ganancias`,
+  ticket: `${API_BASE_URL}/ticket/imprimir`,
+  clientes: `${API_BASE_URL}/clientes`,
+  metodoPago: `${API_BASE_URL}/metodoPago`,
+
+  usuarios: `${API_BASE_URL}/usuarios`,
+  usuariosPorRol: `${API_BASE_URL}/usuarios/rol`,
+  usuariosPermisos: `${API_BASE_URL}/usuarioPermisos`,
+  roles: `${API_BASE_URL}/roles`,
+  rolesPermisos: `${API_BASE_URL}/roles/permisos`,
+  permisos: `${API_BASE_URL}/permisos`,
+
+  inventario: `${API_BASE_URL}/inventario`,
+  proveedores: `${API_BASE_URL}/proveedores`,
+  proveedorProducto: `${API_BASE_URL}/proveedorProducto`,
+  estadoStock: `${API_BASE_URL}/estadoStock`,
+  productoEstadoStock: `${API_BASE_URL}/productoEstadoStock`,
+  configurarUmbrales: `${API_BASE_URL}/productoEstadoStock/configurar`,
+  almacen: `${API_BASE_URL}/almacen`,
+  lotes: `${API_BASE_URL}/lotes`,
+  unidades: `${API_BASE_URL}/unidades`,
+  entradasSalidas: `${API_BASE_URL}/entradasSalidas`,
+};

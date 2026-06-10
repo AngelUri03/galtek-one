@@ -1,0 +1,125 @@
+
+/* Fuente general para todo el módulo Clientes */
+.clientes-container,
+.clientes-header,
+.clientes-table,
+.modal-header,
+.pedido-dialog,
+.pedido-panel,
+.cliente-sel-wrapper,
+.cliente-sel-card,
+.crear-wrapper,
+.crear-card,
+.edit-wrapper,
+.edit-card,
+.p-button,
+.p-inputtext,
+.p-dialog,
+.p-datatable,
+.p-column-header-content {
+  font-family: 'Kodchasan', sans-serif !important;
+}
+
+h1, h2, h3 {
+  font-weight: 700;
+}
+
+p, span, td, th, label, button, input, select {
+  font-weight: 400;
+}
+
+.edit-wrapper { 
+  padding: 2rem; 
+}
+
+/* título arriba centrado */
+.edit-subtitle {
+  text-align: center;
+  font-size: 1rem;         /* ~16px */
+  font-weight: 700;
+  margin: 0.25rem 0 1rem;  /* 4px 0 16px */
+}
+
+.edit-subtitle span { 
+  font-weight: 800; 
+}
+
+/* tarjeta gris centrada como el mockup */
+.edit-card {
+  margin: 0 auto;
+  max-width: 32.5rem;      /* 520px */
+  background: #f2f2f2;
+  border-radius: 0.875rem; /* 14px */
+  padding: 1.25rem;
+  display: grid;
+  row-gap: 0.75rem;
+  justify-items: center;
+}
+
+/* avatar redondo con icono */
+.edit-avatar {
+  width: 7.5rem;   /* 120px */
+  height: 7.5rem;  /* 120px */
+  border-radius: 999px;
+  background: #ffffff;
+  display: grid; place-items: center;
+  margin-bottom: 0.5rem;  /* 8px */
+}
+
+.edit-avatar .pi { 
+  font-size: 3rem; 
+  color: #4b4b4b; 
+}
+
+/* inputs tipo pastilla */
+.edit-field { 
+  width: 80%; 
+}
+
+.edit-input.p-inputtext {
+  width: 100%;
+  height: 2.625rem;          /* 42px */
+  border-radius: 999px;
+  padding: 0 1rem;
+  background: #e6e6e6;
+  border: 1px solid transparent;
+  text-align: center;
+  font-weight: 600;
+}
+
+.edit-input.p-inputtext:focus {
+  outline: none;
+  border-color: #00A38B;
+  background: #fff;
+}
+
+/* botones */
+.edit-actions {
+  width: 80%;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.btn-verde.p-button, .p-button.btn-verde {
+  background-color: #00A38B !important;
+  border: none !important;
+  color: #fff !important;
+  border-radius: 0.75rem !important;  /* 12px */
+}
+
+.btn-verde.p-button:hover, .p-button.btn-verde:hover {
+  background-color: #008a75 !important;
+}
+
+.btn-gris.p-button, .p-button.btn-gris {
+  background-color: #e0e0e0 !important;
+  border: none !important;
+  color: #333 !important;
+  border-radius: 0.75rem !important; /* 12px */
+}
+
+.btn-gris.p-button:hover, .p-button.btn-gris:hover {
+  background-color: #cfcfcf !important;
+}

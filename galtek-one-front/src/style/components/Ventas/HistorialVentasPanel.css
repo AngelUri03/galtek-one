@@ -1,0 +1,227 @@
+/* ========================= */
+/*   HISTORIAL VENTAS PANEL  */
+/* ========================= */
+
+.historial-sidebar {
+    width: 390px !important;
+    font-family: "Kodchasan", sans-serif;
+}
+
+/* ── Header ── */
+.historial-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.historial-titulo {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.historial-titulo .pi {
+    color: #0a7463;
+    font-size: 1rem;
+}
+
+.historial-fecha {
+    font-size: 0.78rem;
+    color: #6b7280;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+/* ── Resumen del día ── */
+.historial-resumen {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background: linear-gradient(135deg, rgba(10, 116, 99, 0.08), rgba(15, 159, 130, 0.12));
+    border: 1px solid rgba(10, 116, 99, 0.18);
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.historial-resumen-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.historial-resumen-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.historial-resumen-value {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.historial-resumen-total {
+    color: #0a7463;
+}
+
+.historial-resumen-sep {
+    width: 1px;
+    height: 2.5rem;
+    background: rgba(10, 116, 99, 0.2);
+}
+
+/* ── Estado vacío ── */
+.historial-vacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 3rem 1rem;
+    color: #9ca3af;
+    text-align: center;
+}
+
+.historial-vacio-icon {
+    font-size: 2.5rem;
+    opacity: 0.5;
+}
+
+.historial-vacio p {
+    margin: 0;
+    font-size: 0.88rem;
+}
+
+/* ── Lista de ventas ── */
+.historial-lista {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.historial-item {
+    display: flex;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 14px;
+    padding: 0.85rem 1rem;
+    backdrop-filter: blur(6px);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.historial-item:hover {
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.07);
+    transform: translateY(-1px);
+}
+
+.historial-item-num {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #9ca3af;
+    min-width: 1.8rem;
+    padding-top: 0.1rem;
+}
+
+.historial-item-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.historial-item-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.historial-item-hora {
+    font-size: 0.8rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.historial-item-metodo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 0.18rem 0.6rem;
+    border-radius: 999px;
+}
+
+.historial-item-metodo--efectivo {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+}
+
+.historial-item-metodo--tarjeta {
+    background: rgba(99, 102, 241, 0.1);
+    color: #4f46e5;
+}
+
+.historial-item-metodo--transferencia {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+}
+
+/* ── Chips de productos ── */
+.historial-item-productos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+
+.historial-item-producto-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: rgba(241, 245, 249, 0.9);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 999px;
+    padding: 0.1rem 0.55rem;
+    font-size: 0.72rem;
+    color: #374151;
+    max-width: 13rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.historial-item-producto-qty {
+    font-weight: 700;
+    color: #0a7463;
+    flex-shrink: 0;
+}
+
+/* ── Fila inferior: subtotal ── */
+.historial-item-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.historial-item-items-count {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.historial-item-total {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0a5045;
+}

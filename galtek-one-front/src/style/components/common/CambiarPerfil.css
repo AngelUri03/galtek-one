@@ -1,0 +1,548 @@
+/* ========================= */
+/*          MODAL            */
+/* ========================= */
+.cpr-dialog {
+  width: 120vh;
+  max-width: 96vw;
+  height: min(78vh, 620px);
+
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface-card);
+  border: none;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.p-dialog-mask.p-component-overlay {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+
+.cpr-dialog.p-dialog {
+  overflow: hidden;
+}
+
+.cpr-dialog .p-dialog-header {
+  flex: 0 0 auto;
+  border: none;
+  background: transparent;
+  padding: 0.85rem 1rem 0rem;
+}
+
+.cpr-dialog .p-dialog-content {
+  height: calc(100% - 58px);
+  min-height: 0;
+  overflow: hidden;
+  padding: 0.75rem;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========================= */
+/*          LAYOUT           */
+/* ========================= */
+.cpr-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 14px;
+  padding: 6px 6px 2px;
+  align-items: stretch;
+
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+
+  overflow: hidden;
+}
+
+/* ========================= */
+/*           ROLES           */
+/* ========================= */
+.cpr-roles {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff, #f7f7f7);
+  border: 1px solid var(--surface-300);
+  padding: 12px;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.cpr-roles-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.cpr-roles-head > span:first-child {
+  font-weight: 900;
+  font-size: 0.92rem;
+  color: var(--text-color);
+}
+
+.cpr-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  background: #e6f2ef;
+  color: #0a7463;
+  font-weight: 900;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.cpr-roles-list {
+  flex: 1 1 auto;
+  min-height: 0;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding: 10px 10px 12px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  scrollbar-gutter: stable;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.5) transparent;
+}
+
+.cpr-roles-list::-webkit-scrollbar {
+  width: 0.35rem;
+}
+
+.cpr-roles-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cpr-roles-list::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.5);
+  border-radius: 999px;
+}
+
+.cpr-roles-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.8);
+}
+
+.cpr-roles-list::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Botón rol */
+.cpr-role {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--surface-300);
+  background: #ffffff;
+  padding: 11px 12px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  cursor: pointer;
+  font-family: "Kodchasan", sans-serif;
+
+  transform-origin: center;
+  will-change: transform;
+
+  transition: transform 0.16s ease, box-shadow 0.16s ease,
+    border-color 0.16s ease, background 0.16s ease;
+}
+
+.cpr-role:hover {
+  border-color: rgba(148, 163, 184, 0.9);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(148, 163, 184, 0.18);
+  transform: scale(1.02);
+}
+
+.cpr-role:active {
+  transform: scale(0.97);
+  opacity: 0.96;
+}
+
+.cpr-role.is-active {
+  border-color: rgba(10, 116, 99, 0.9) !important;
+  box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.12),
+    0 10px 22px rgba(15, 23, 42, 0.1) !important;
+}
+
+.cpr-role-name {
+  font-weight: 900;
+  font-size: 0.9rem;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cpr-role-count {
+  margin-left: auto;
+  font-weight: 900;
+  font-size: 0.82rem;
+  color: #0a7463;
+  background: #e6f2ef;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+}
+
+/* ========================= */
+/*        USUARIOS           */
+/* ========================= */
+.cpr-main {
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff, #f7f7f7);
+  border: 1px solid var(--surface-300);
+  padding: 12px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+
+  overflow: hidden;
+}
+
+.cpr-main-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+
+.cpr-title-role {
+  font-weight: 950;
+  font-size: 1rem;
+  color: #222;
+}
+
+.cpr-sub {
+  display: block;
+  margin-top: 2px;
+  font-weight: 650;
+  font-size: 0.82rem;
+  color: var(--text-color-secondary);
+}
+
+.cpr-users {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  align-content: start;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px 10px 12px 6px;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.5) transparent;
+}
+
+.cpr-users::-webkit-scrollbar {
+  width: 0.35rem;
+}
+
+.cpr-users::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cpr-users::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.5);
+  border-radius: 999px;
+}
+
+.cpr-users::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.8);
+}
+
+.cpr-users::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* tarjeta usuario */
+.cpr-user {
+  width: 100%;
+  text-align: left;
+  border-radius: 12px;
+  border: 1px solid var(--surface-300);
+  background: #ffffff;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 10px;
+  cursor: pointer;
+  font-family: "Kodchasan", sans-serif;
+  box-sizing: border-box;
+  transform-origin: center;
+  will-change: transform;
+  transition: transform 0.14s ease, box-shadow 0.14s ease,
+    border-color 0.14s ease;
+}
+
+.cpr-user:hover {
+  border-color: rgba(148, 163, 184, 0.9);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(148, 163, 184, 0.18);
+  transform: scale(1.01);
+}
+
+.cpr-user:active {
+  transform: scale(0.97);
+  opacity: 0.96;
+}
+
+.cpr-user.is-active {
+  border-color: rgba(10, 116, 99, 0.9) !important;
+  box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.12),
+    0 10px 22px rgba(15, 23, 42, 0.1) !important;
+}
+
+.cpr-user-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 2px solid #e7e7e7;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.cpr-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cpr-user-avatar i {
+  font-size: 1.1rem;
+  color: #0a7463;
+}
+
+.cpr-user-meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cpr-user-name {
+  font-weight: 900;
+  font-size: 0.92rem;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cpr-user-sub {
+  font-weight: 650;
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ========================= */
+/*       AUTENTICACIÓN       */
+/* ========================= */
+.cpr-auth {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--surface-300);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 10px 12px;
+  box-sizing: border-box;
+}
+
+.cpr-auth-field {
+  position: relative;
+}
+
+.cpr-auth-field.has-error .cpr-pass-input {
+  padding-right: 11.2rem !important;
+}
+
+.cpr-auth-field.has-error .p-password-input,
+.cpr-auth-field.has-error .p-inputtext {
+  padding-right: 11.2rem !important;
+}
+
+.cpr-auth label {
+  font-size: 0.83rem;
+  font-weight: 800;
+  color: var(--text-color-secondary);
+  margin-left: 2px;
+}
+
+.cpr-pass-input {
+  height: 40px !important;
+  border-radius: 10px !important;
+  font-size: 0.9rem !important;
+  font-family: "Kodchasan", sans-serif !important;
+  border: 1px solid var(--surface-300) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  width: 15rem;
+}
+
+.cpr-pass-input:hover {
+  border-color: #bdbdbd !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+    0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.cpr-pass-input:focus,
+.cpr-pass-input.p-focus {
+  border-color: #0a7463 !important;
+  color: #0a5045 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* ========================= */
+/*           ERROR           */
+/* ========================= */
+.cpr-error {
+  margin: 0; 
+  font-size: 0.88rem;
+  font-weight: 750;
+  color: #ba1414;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  background: rgba(186, 20, 20, 0.06);
+  border: 1px solid rgba(186, 20, 20, 0.18);
+}
+
+.cpr-error-float {
+  position: absolute;
+  right: 7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 18rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #ba1414;
+
+  padding: 0.58rem 0.55rem;
+  border-radius: 10px;
+  background: rgba(186, 20, 20, 0.08);
+  border: 1px solid rgba(186, 20, 20, 0.22);
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.cpr-error-slot {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+/* ========================= */
+/*         FOOTER            */
+/* ========================= */
+.cpr-footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  padding-top: 8px;
+  justify-content: flex-end;
+}
+
+.cpr-footer .cpr-btn.p-button {
+  font-family: "Kodchasan", sans-serif !important;
+  height: 36px;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  border-width: 1px !important;
+  font-size: 0.9rem !important;
+  padding-inline: 0.95rem !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: transform 0.14s ease, background-color 0.14s ease,
+    border-color 0.14s ease, color 0.14s ease, opacity 0.14s ease;
+}
+
+.cpr-footer .cpr-btn.p-button:focus,
+.cpr-footer .cpr-btn.p-button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.cpr-btn--cancel.p-button {
+  background: transparent !important;
+  color: #555555 !important;
+  border-color: var(--surface-300) !important;
+}
+
+.cpr-btn--cancel.p-button:hover {
+  background: #f5f5f5 !important;
+  border-color: #c7c7c7 !important;
+  transform: scale(1.03);
+}
+
+.cpr-btn--cancel.p-button:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+.cpr-btn--apply.p-button {
+  background: #0a7463 !important;
+  color: #ffffff !important;
+  border-color: #0a7463 !important;
+}
+
+.cpr-btn--apply.p-button:hover {
+  background: #096153 !important;
+  border-color: #096153 !important;
+  transform: scale(1.03);
+}
+
+.cpr-btn--apply.p-button:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+@media (max-width: 1400px) {
+  .cpr-users {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

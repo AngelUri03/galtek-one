@@ -1,0 +1,70 @@
+/* Contenedor principal de Exportar Datos */
+.export-container {
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-left: 500px; /* Ajuste horizontal para mover a la derecha */
+  margin-bottom: 200px;
+  justify-content: center; /* Centrado vertical si se usa flex en parent */
+  align-self: flex-start;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+/* Contenedor de la sección dentro del layout para centrar verticalmente */
+.aj-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Alineación ligeramente a la derecha */
+  justify-content: center;
+  margin-left: 250px; /* Espacio para el sidebar */
+  min-height: calc(100vh - 60px); /* Altura completa restando navbar */
+  padding: 2rem;
+}
+
+/* Título */
+.titulo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #106b5c;
+  text-align: center;
+}
+
+/* Campos */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Calendarios y dropdown */
+.fechas {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.calendar-input,
+.dropdown-full {
+  width: 100%;
+  max-width: 300px;
+}
+
+/* Botón exportar abajo a la derecha */
+.export-button-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.export-button {
+  background-color: #176b5b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1.5rem;
+  font-weight: 600;
+}

@@ -1,0 +1,568 @@
+/* =========================
+   Modal Apple-Vision Glass
+   ========================= */
+.msas-dialog {
+  width: 120vh;
+  max-width: 96vw;
+  border-radius: 16px;
+  overflow: hidden;
+  border: none;
+  font-family: "Kodchasan", sans-serif;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* overlay blur */
+.p-dialog-mask.p-component-overlay {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+
+.msas-dialog .p-dialog-header {
+  padding: 0.95rem 1rem !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* Header */
+.msas-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.msas-header-left {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.msas-title {
+  font-weight: 1000;
+  font-size: 1.02rem;
+  color: var(--text-color);
+}
+
+.msas-subtitle {
+  font-size: 0.86rem;
+  color: var(--text-color-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60vw;
+}
+
+.msas-header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Wrap */
+.msas-wrap {
+  padding: 8px 4px 10px;
+}
+
+.msas-loading {
+  padding: 1rem;
+  color: var(--text-color-secondary);
+}
+
+/* Chips */
+.msas-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 900;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.msas-chip--soft {
+  color: #0a7463;
+  background: rgba(10, 116, 99, 0.12);
+  border-color: rgba(10, 116, 99, 0.18);
+}
+
+.msas-chip--dirty {
+  color: #8a6a00;
+  background: rgba(255, 193, 7, 0.18);
+  border-color: rgba(255, 193, 7, 0.22);
+}
+
+.msas-chip--agotado {
+  background: rgba(186, 20, 20, 0.1);
+  color: #ba1414;
+  border-color: rgba(186, 20, 20, 0.18);
+}
+
+.msas-chip--critico {
+  background: rgba(239, 108, 0, 0.12);
+  color: #c35c00;
+  border-color: rgba(239, 108, 0, 0.18);
+}
+
+.msas-chip--bajo {
+  background: rgba(255, 193, 7, 0.18);
+  color: #8a6a00;
+  border-color: rgba(255, 193, 7, 0.22);
+}
+
+.msas-chip--optimo {
+  background: rgba(10, 116, 99, 0.12);
+  color: #0a7463;
+  border-color: rgba(10, 116, 99, 0.18);
+}
+
+/* Tabs (TOTAL/LOTE) */
+.msas-tabs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.msas-tab {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.62);
+  font-family: "Kodchasan", sans-serif;
+  font-weight: 900;
+  font-size: 0.9rem;
+  color: #333;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.14s ease, background 0.14s ease,
+    border-color 0.14s ease, opacity 0.14s ease;
+}
+
+.msas-tab:hover {
+  transform: scale(1.03);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.msas-tab.is-active {
+  border-color: rgba(10, 116, 99, 0.24);
+  background: rgba(10, 116, 99, 0.1);
+  color: #0a5045;
+}
+
+.msas-tab:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.msas-tabsHint {
+  margin-left: auto;
+  color: var(--text-color-secondary);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+/* Cards */
+.msas-card {
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.msas-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    900px 300px at 10% 0%,
+    rgba(10, 116, 99, 0.12),
+    rgba(255, 255, 255, 0) 55%
+  );
+  opacity: 0.8;
+}
+
+.msas-cardTitle {
+  padding: 0.85rem 0.95rem 0.55rem;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-weight: 1000;
+  color: var(--text-color);
+  position: relative;
+  z-index: 1;
+}
+
+.msas-cardHint {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--text-color-secondary);
+  opacity: 0.85;
+}
+
+.msas-cardBody {
+  padding: 0 0.95rem 0.95rem;
+  position: relative;
+  z-index: 1;
+}
+
+.msas-loteMeta {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Grid main */
+.msas-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+/* Controls */
+.msas-label {
+  display: block;
+  font-size: 0.83rem;
+  font-weight: 800;
+  color: var(--text-color-secondary);
+  margin: 0 0 6px 2px;
+}
+
+.msas-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 14px;
+}
+
+.msas-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.msas-help {
+  font-size: 0.82rem;
+  color: var(--text-color-secondary);
+  line-height: 1.25;
+}
+
+/* Segmented (Entrada/Salida) */
+.msas-seg {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.55);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.msas-seg-btn {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  font-family: "Kodchasan", sans-serif;
+  font-weight: 1000;
+  font-size: 0.9rem;
+  color: #444;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.14s ease, background 0.14s ease, opacity 0.14s ease;
+}
+
+.msas-seg-btn:hover {
+  transform: scale(1.03);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.msas-seg-btn.is-active {
+  background: rgba(10, 116, 99, 0.12);
+  color: #0a5045;
+}
+
+/* Delta badge */
+.msas-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-weight: 1000;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.msas-delta.in {
+  color: #0a7463;
+  background: rgba(10, 116, 99, 0.12);
+  border-color: rgba(10, 116, 99, 0.18);
+}
+
+.msas-delta.out {
+  color: #ba1414;
+  background: rgba(186, 20, 20, 0.1);
+  border-color: rgba(186, 20, 20, 0.18);
+}
+
+/* Warning */
+.msas-warning {
+  margin-top: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 193, 7, 0.25);
+  background: rgba(255, 193, 7, 0.12);
+  color: #6b5200;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+}
+
+/* Prime controls (igual lenguaje filtros) */
+.msas-control {
+  width: 100% !important;
+  background: linear-gradient(180deg, #ffffff, #f7f7f7);
+}
+
+.msas-dd.p-dropdown,
+.msas-num.p-inputnumber {
+  border-radius: 12px !important;
+  overflow: hidden;
+  font-family: "Kodchasan", sans-serif !important;
+}
+
+.msas-dd .p-dropdown-label.p-inputtext {
+  display: flex;
+  align-items: center;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  height: 40px !important;
+  font-size: 0.9rem !important;
+}
+
+.msas-dd .p-dropdown-trigger {
+  background: #0a7463 !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+.msas-dd .p-dropdown-trigger:not(.p-disabled):hover {
+  background: #085c4f !important;
+}
+
+.msas-dd-panel.p-dropdown-panel {
+  border-radius: 12px !important;
+  border: none !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  font-family: "Kodchasan", sans-serif;
+  background: #ffffff;
+}
+
+.msas-dd-panel .p-dropdown-item.p-highlight {
+  background: rgba(10, 116, 99, 0.1) !important;
+  color: #0a7463 !important;
+}
+
+.msas-num .p-inputnumber-input {
+  height: 40px !important;
+  border-radius: 12px !important;
+  font-size: 0.9rem !important;
+  font-family: "Kodchasan", sans-serif !important;
+}
+
+.msas-num .p-inputnumber-button-group {
+  background: #0a7463 !important;
+}
+
+.msas-num .p-inputnumber-button {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+}
+
+.msas-num .p-inputnumber-button:not(.p-disabled):hover {
+  background: rgba(0, 0, 0, 0.12) !important;
+}
+
+.msas-card .p-dropdown:hover,
+.msas-card .p-inputnumber:hover {
+  border-color: #bdbdbd !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+    0 8px 22px rgba(0, 0, 0, 0.06);
+}
+
+.msas-card .p-dropdown.p-focus,
+.msas-card .p-inputnumber.p-inputwrapper-focus {
+  box-shadow: none !important;
+  border-color: #0a7463 !important;
+  background: #ffffff !important;
+  color: #0a5045 !important;
+}
+
+/* Preview */
+.msas-preview {
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.msas-previewBlock {
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.6);
+  padding: 12px;
+}
+
+.msas-muted {
+  font-size: 0.82rem;
+  color: var(--text-color-secondary);
+  font-weight: 800;
+}
+
+.msas-big {
+  font-size: 1.35rem;
+  font-weight: 1000;
+  color: var(--text-color);
+  margin-top: 4px;
+}
+
+.msas-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.35);
+}
+
+.msas-previewLine {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+/* Message */
+.msas-message.p-message {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: none !important;
+  font-family: "Kodchasan", sans-serif;
+}
+
+/* Footer pill */
+.msas-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 8px;
+}
+
+.msas-footer .grow {
+  flex: 1;
+}
+
+.msas-footer .msas-btn.p-button {
+  font-family: "Kodchasan", sans-serif !important;
+  height: 36px;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  border-width: 1px !important;
+  font-size: 0.9rem !important;
+  padding-inline: 0.95rem !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: transform 0.14s ease, background-color 0.14s ease,
+    border-color 0.14s ease, color 0.14s ease, opacity 0.14s ease;
+}
+
+.msas-footer .msas-btn.p-button:focus,
+.msas-footer .msas-btn.p-button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.msas-btn--cancel.p-button {
+  background: transparent !important;
+  color: #555555 !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+.msas-btn--cancel.p-button:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+  transform: scale(1.03);
+}
+
+.msas-btn--cancel.p-button:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+.msas-btn--ghost.p-button {
+  background: rgba(255, 255, 255, 0.55) !important;
+  color: #0a7463 !important;
+  border-color: rgba(10, 116, 99, 0.22) !important;
+}
+
+.msas-btn--ghost.p-button:hover {
+  background: rgba(10, 116, 99, 0.06) !important;
+  border-color: rgba(10, 116, 99, 0.32) !important;
+  transform: scale(1.03);
+}
+
+.msas-btn--ghost.p-button:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+.msas-btn--apply.p-button {
+  background: #0a7463 !important;
+  color: #ffffff !important;
+  border-color: #0a7463 !important;
+}
+
+.msas-btn--apply.p-button:hover {
+  background: #096153 !important;
+  border-color: #096153 !important;
+  transform: scale(1.03);
+}
+
+.msas-btn--apply.p-button:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+  .msas-grid {
+    grid-template-columns: 1fr;
+  }
+}

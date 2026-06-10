@@ -1,0 +1,243 @@
+/* CARD */
+
+.lf-card {
+  width: 35rem;
+  height: 30rem;
+  border: none;
+  text-align: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.75);
+  border-radius: 20px;
+  color: rgb(112, 112, 112);
+  padding: 1rem;
+  margin-top: -5rem;
+}
+
+.lf-title {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 3.5rem;
+  font-weight: bold;
+  margin-top: -1rem;
+  margin-bottom: 2rem;
+}
+
+/* FORM */
+
+.lf-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* CONTENEDORES DE INPUTS */
+
+.lf-input-wrapper,
+.lf-pass-wrapper {
+  position: relative;
+  width: 28rem;
+  height: auto;
+}
+
+/* INPUT BASE */
+
+.lf-input-base {
+  width: 100%;
+  padding: 0 3.4rem 0 1.2rem;
+  border: 2px solid rgba(112, 112, 112, 0.8);
+  border-radius: 50px;
+  background-color: transparent !important;
+  color: rgb(112, 112, 112);
+  font-size: 1.2rem;
+  font-family: "Kodchasan", sans-serif;
+  box-shadow: none !important;
+  transition: all 0.3s ease;
+}
+
+.lf-input-username,
+.lf-input-pass-plain {
+  min-height: 3.4rem !important;
+}
+
+.lf-input-base::placeholder {
+  color: rgb(112, 112, 112);
+  transition: color 0.3s ease;
+}
+
+.lf-input-base:focus {
+  border-color: #2684ff;
+  color: #2684ff;
+  outline: none;
+  box-shadow: none !important;
+}
+
+.lf-input-base:focus::placeholder {
+  color: #2684ff;
+}
+
+.lf-input-icon {
+  position: absolute;
+  right: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.3rem;
+  color: rgb(112, 112, 112);
+  pointer-events: none;
+  transition: color 0.3s ease;
+}
+
+.lf-input-wrapper:has(.lf-input-base:focus) .lf-input-icon {
+  color: #2684ff;
+}
+
+/* BOTÓN DEL OJO (PASSWORD) */
+
+.lf-eye-btn {
+  position: absolute;
+  right: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.4rem;
+  height: 2.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.lf-eye-btn .pi {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: rgb(112, 112, 112);
+  transition: color 0.3s ease;
+}
+
+.lf-pass-wrapper:has(.lf-input-pass-plain:focus) .lf-eye-btn .pi {
+  color: #2684ff;
+}
+
+.lf-input-wrapper.invalid .lf-input-base,
+.lf-pass-wrapper.invalid .lf-input-base {
+  border-color: #ff4d4f !important;
+  animation: lf-bump 0.2s ease;
+}
+
+.lf-input-wrapper.invalid .lf-input-icon,
+.lf-pass-wrapper.invalid .lf-eye-btn .pi {
+  color: #ff4d4f !important;
+}
+
+.lf-input-base.invalid,
+.lf-input-base.invalid::placeholder {
+  color: #ff4d4f !important;
+}
+
+@keyframes lf-bump {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.lf-card input:-webkit-autofill,
+.lf-card input:-webkit-autofill:hover,
+.lf-card input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px rgba(255, 255, 255, 0.85) inset !important;
+  -webkit-text-fill-color: rgb(112, 112, 112) !important;
+  border-radius: 50px;
+}
+
+/* CHECKBOX + OPCIONES */
+
+.lf-options-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 28rem;
+}
+
+.lf-remember {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lf-remember .p-checkbox {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.lf-checkbox-label {
+  margin: 0;
+  line-height: 1;
+  font-family: "Kodchasan", sans-serif;
+  color: rgb(112, 112, 112);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+/* LINKS */
+
+.lf-link {
+  font-family: "Kodchasan", sans-serif !important;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: rgb(112, 112, 112) !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  padding: 0;
+  box-shadow: none;
+}
+
+.lf-link:hover {
+  color: rgb(79, 79, 79) !important;
+  text-decoration: underline;
+  transform: scale(1.05);
+}
+
+/* BOTÓN PRINCIPAL */
+
+.lf-button {
+  box-shadow: none;
+  border-radius: 50px;
+  border: none;
+  width: 28rem;
+  height: 3.5rem;
+  background-color: rgb(112, 112, 112) !important;
+  color: white !important;
+  font-size: 1rem;
+  font-weight: bold;
+  font-family: "Kodchasan", sans-serif !important;
+}
+
+.lf-button:hover {
+  background-color: #2684ff !important;
+  font-size: 1.2rem;
+}
+
+/* REGISTRARSE */
+
+.lf-row-register {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.lf-text {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.95rem;
+  color: rgb(112, 112, 112);
+}

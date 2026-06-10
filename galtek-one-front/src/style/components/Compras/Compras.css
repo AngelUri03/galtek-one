@@ -1,0 +1,85 @@
+
+/* Fuente general para todo el módulo Compras */
+.compras-wrapper,
+.compras-prod-wrapper,
+.compras-prov-wrapper,
+.compras-ticket-wrapper,
+.compras-content,
+.compras-table-section,
+.compras-sugerencia,
+.sugerencia-panel,
+.sugerencia-tabla,
+.p-button,
+.p-inputtext,
+.p-dialog,
+.p-datatable,
+.p-column-header-content {
+  font-family: 'Kodchasan', sans-serif !important;
+}
+
+h1, h2, h3 {
+  font-weight: 700;
+}
+
+p, span, td, th, label, button, input, select {
+  font-weight: 400;
+}
+
+.compras-wrapper {
+  padding: 1rem;
+  text-align: center;
+}
+
+.compras-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-top: 3rem !important;  /* fuerza el espacio superior */
+  margin-bottom: 4rem;
+  text-align: center;
+}
+
+.compras-cards {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.compras-card {
+  background-color: #009b85;
+  color: #fff;
+  text-decoration: none;
+  width: 20rem;
+  height: 10rem;
+  border-radius: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s ease, background-color 0.25s ease;
+  cursor: pointer;
+}
+
+.compras-card i {
+  font-size: 2.2rem;
+  margin-bottom: 0.75rem;
+}
+
+.compras-card h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  color : white;
+}
+
+.compras-card span {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+/* hover animación */
+.compras-card:hover {
+  background-color: #008a75;
+  transform: scale(1.05);
+}

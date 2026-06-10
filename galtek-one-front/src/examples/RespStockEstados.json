@@ -1,0 +1,11 @@
+{
+  "statusCode": 200,
+  "status": "OK",
+  "message": "Estados de stock obtenidos con éxito",
+  "data": [
+    { "claveEstado": "AGOTADO", "nombreEstado": "Agotado" },
+    { "claveEstado": "CRITICO", "nombreEstado": "Crítico" },
+    { "claveEstado": "BAJO", "nombreEstado": "Bajo" },
+    { "claveEstado": "OPTIMO", "nombreEstado": "Óptimo" }
+  ]
+}

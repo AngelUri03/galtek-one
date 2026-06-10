@@ -1,0 +1,68 @@
+/* INVENTARIO HEADER */
+
+.inv-header {
+  display: flex;
+  width: auto;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0 4px;
+  gap: 12px;
+}
+
+.inv-title {
+  font-family: "kodchasan";
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #222;
+}
+
+/* MESSAGE */
+
+.inv-counters {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inv-msg {
+  border-radius: 15px;
+  padding: 5px 10px;
+  font-size: 0.4rem !important;
+  font-weight: 500;
+  min-height: 26px;
+  align-items: center;
+  border-width: 1.4px !important;
+}
+
+.inv-msg,
+.inv-msg .p-inline-message,
+.inv-msg .p-inline-message-text{
+  font-family: "Kodchasan", sans-serif !important;
+}
+
+.inv-msg .p-inline-message-text {
+  font-size: 0.95rem !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+}
+
+.inv-msg .p-inline-message-icon {
+  font-size: 1rem !important;
+  margin-right: 4px;
+}
+
+.inv-counters span:hover .inv-msg {
+  filter: brightness(1.03);
+  transform: scale(1.03);
+  transition: all 0.18s ease-in-out;
+}
+
+/* TOOLTIP */
+
+.p-tooltip {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.7rem !important;
+  text-align: center;
+  padding: 4px 8px !important;
+  border-radius: 10px !important;
+}

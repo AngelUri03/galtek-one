@@ -1,0 +1,109 @@
+# Galtek One monorepo
+
+# Operating system files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Editors and IDEs
+.idea/
+.vscode/
+*.code-workspace
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.swp
+*.swo
+
+# Environment, secrets and local config
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!.env.sample
+!**/.env.example
+!**/.env.sample
+*.pem
+*.key
+*.p12
+*.pfx
+keys/
+**/keys/
+
+# Logs
+logs/
+**/logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local databases and runtime data
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite-shm
+*.sqlite-wal
+*.mv.db
+*.trace.db
+data/
+runtime/
+storage/
+
+# Keep database scripts versioned
+!galtek-one-schema.sql
+!galtek-one-seed.sql
+
+# Java / Spring / Maven
+**/target/
+**/.mvn/timing.properties
+**/.mvn/wrapper/maven-wrapper.jar.sha256
+*.class
+*.jar
+*.war
+*.ear
+!**/.mvn/wrapper/maven-wrapper.jar
+
+# React / Node
+**/node_modules/
+**/build/
+**/coverage/
+**/.pnp
+**/.pnp.js
+**/.cache/
+.eslintcache
+
+# Tauri / Rust
+galtek-one-front/src-tauri/target/
+galtek-one-front/src-tauri/resources/backend/*.jar
+galtek-one-front/src-tauri/resources/jre/
+
+# Desktop build artifacts
+GaltekOne.exe
+*.exe
+*.msi
+*.msix
+*.appx
+*.dmg
+*.deb
+*.rpm
+*.AppImage
+*.zip
+*.7z
+*.tar
+*.tar.gz
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Accidental local files
+**/git status

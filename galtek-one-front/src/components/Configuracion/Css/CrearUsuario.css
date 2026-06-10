@@ -1,0 +1,235 @@
+/* ============================= */
+/* CREAR USUARIO — ESTILO PROPIO */
+/* ============================= */
+
+:root {
+  --cu-verde: #086c5c;
+  --cu-verde-hover: #0a7f6b;
+  --cu-borde: #cfd8dc;
+  --cu-texto: #444;
+
+  --cu-altura: 42px;
+  --cu-ancho: 80%;
+  --cu-radio: 10px;
+}
+
+/* ============================= */
+/* CONTENEDOR                    */
+/* ============================= */
+
+.crear-usuario-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  width: 100%;
+}
+
+/* ============================= */
+/* AVATAR                        */
+/* ============================= */
+
+.crear-avatar {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: #e6f7f4;
+  border: 2px solid var(--cu-verde);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.crear-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.crear-avatar .pi {
+  font-size: 3.2rem;
+  color: var(--cu-verde);
+}
+
+/* Avatar clickeable */
+.avatar-upload {
+  position: relative;
+  cursor: pointer;
+}
+
+/* Hover oscuro */
+.avatar-hover {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
+.avatar-hover i {
+  font-size: 1.8rem;
+  color: #fff;
+}
+
+.avatar-upload:hover .avatar-hover {
+  opacity: 1;
+}
+
+
+/* ============================= */
+/* INPUT TEXTO                   */
+/* ============================= */
+
+.crear-usuario-box .p-inputtext {
+  width: var(--cu-ancho) !important;
+  height: var(--cu-altura) !important;
+
+  border-radius: var(--cu-radio);
+  border: 1.8px solid var(--cu-borde);
+
+  padding: 0 0.75rem;
+  font-size: 0.9rem;
+  color: var(--cu-texto);
+
+  transition: border-color .15s ease;
+}
+
+.crear-usuario-box .p-inputtext:focus {
+  border-color: var(--cu-verde);
+  box-shadow: 0 0 0 2px rgba(8,108,92,.12);
+}
+
+/* ============================= */
+/* PASSWORD (UNA SOLA BARRA)     */
+/* ============================= */
+
+.crear-usuario-box .p-password {
+  width: var(--cu-ancho) !important;
+  height: var(--cu-altura) !important;
+
+  border-radius: var(--cu-radio);
+  border: 1.8px solid var(--cu-borde);
+  display: flex;
+  align-items: center;
+}
+
+.crear-usuario-box .p-password input {
+  border: none !important;
+  background: transparent;
+  width: 100%;
+  padding-left: .75rem;
+}
+
+.crear-usuario-box .p-password:focus-within {
+  border-color: var(--cu-verde);
+  box-shadow: 0 0 0 2px rgba(8,108,92,.12);
+}
+
+/* ============================= */
+/* DROPDOWN — LIMPIO             */
+/* ============================= */
+/* ============================= */
+/* DROPDOWN CREAR USUARIO (FIX)  */
+/* ============================= */
+
+.dropdown-crear.p-dropdown {
+  width: 80%;
+  height: 2.5rem;
+
+  border: 1.8px solid #cfd8dc;
+  border-radius: 10px;
+  background: #fff;
+
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+
+  padding: 0;
+}
+
+/* ============================= */
+/* DROPDOWN CREAR USUARIO FINAL  */
+/* ============================= */
+
+.dropdown-crear.p-dropdown {
+  width: 62%;
+  height: var(--cu-altura);
+
+  border: 1.8px solid var(--cu-borde);
+  border-radius: var(--cu-radio);
+  background: #fff;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* TEXTO */
+.dropdown-crear .p-dropdown-label {
+  height: 100%;
+  padding: 0 2.5rem 0 0.75rem;
+
+  display: flex;
+  align-items: center;
+
+  font-size: 0.9rem;
+  color: var(--cu-texto);
+
+  background: transparent;
+}
+
+/* FLECHA */
+.dropdown-crear .p-dropdown-trigger {
+  width: 2.5rem;
+  height: 100%;
+
+  border: none;
+  background: transparent;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* FOCUS */
+.dropdown-crear.p-focus {
+  border-color: var(--cu-verde);
+  box-shadow: 0 0 0 2px rgba(8,108,92,.12);
+}
+
+/* 🔴 CLAVE: eliminar borde interno */
+.dropdown-crear .p-dropdown-label,
+.dropdown-crear .p-dropdown-label:focus,
+.dropdown-crear .p-dropdown-label.p-inputtext {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+
+/* ============================= */
+/* BOTÓN                         */
+/* ============================= */
+
+.boton-crear {
+  width: var(--cu-ancho);
+  height: 46px;
+  border-radius: 999px;
+
+  background: var(--cu-verde) !important;
+  border: none !important;
+
+  font-weight: 700;
+  color: #fff;
+}
+
+.boton-crear:hover {
+  background: var(--cu-verde-hover) !important;
+}

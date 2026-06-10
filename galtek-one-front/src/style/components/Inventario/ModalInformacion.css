@@ -1,0 +1,454 @@
+/* MODAL */
+.inv-info-dialog {
+  width: 150vh;
+  max-width: 96vw;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface-card);
+  border: none;
+  font-family: "Kodchasan", sans-serif;
+}
+
+/* Reusa el blur del overlay (mismo que tu modal de filtros) */
+.p-dialog-mask.p-component-overlay {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+
+/* Header custom */
+.inv-info-dialog .p-dialog-header {
+  padding: 0.85rem 1rem !important;
+  border-bottom: 1px solid var(--surface-200);
+}
+
+.inv-im-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.inv-im-header-left {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.inv-im-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-color);
+}
+
+.inv-im-subtitle {
+  font-size: 0.86rem;
+  color: var(--text-color-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 62vw;
+}
+
+.inv-im-subtitle--muted {
+  opacity: 0.75;
+}
+
+.inv-im-header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Body wrap */
+.inv-im-wrap {
+  padding: 8px 4px 10px;
+}
+
+.inv-im-top {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* Left: media + quick */
+.inv-im-media {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.inv-im-thumbWrap {
+  width: 220px;
+  height: 220px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--surface-200);
+  background: linear-gradient(180deg, #ffffff, #f7f7f7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inv-im-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.inv-im-thumbPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.35);
+  font-size: 2rem;
+}
+
+.inv-im-quick {
+  border-radius: 14px;
+  border: 1px solid var(--surface-200);
+  background: linear-gradient(180deg, #ffffff, #f7f7f7);
+  padding: 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inv-im-quickRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.inv-im-k {
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--text-color-secondary);
+}
+
+.inv-im-v {
+  font-size: 0.9rem;
+  color: var(--text-color);
+  text-align: right;
+}
+
+.inv-im-stockBig {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.inv-im-quickBadges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+/* Right: summary card */
+.inv-im-summary {
+  display: flex;
+  min-width: 0;
+}
+
+.inv-im-card {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--surface-200);
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.06);
+  padding: 12px 12px;
+}
+
+.inv-im-cardTitle {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--text-color);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.inv-im-cardHint {
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--text-color-secondary);
+}
+
+.inv-im-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 14px;
+}
+
+.inv-im-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.inv-im-field label {
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--text-color-secondary);
+  margin-left: 2px;
+}
+
+.inv-im-value {
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--surface-300);
+  background: linear-gradient(180deg, #ffffff, #f7f7f7);
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  font-size: 0.9rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.inv-im-divider {
+  height: 1px;
+  background: var(--surface-200);
+  margin: 12px 0 10px;
+}
+
+.inv-im-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--text-color-secondary);
+  font-size: 0.84rem;
+  line-height: 1.25;
+}
+
+.inv-im-note .pi {
+  color: #0a7463;
+  margin-top: 2px;
+}
+
+/* Chips */
+.inv-im-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  user-select: none;
+}
+
+.inv-im-chip--soft {
+  background: #e6f2ef;
+  color: #0a7463;
+  border-color: rgba(10, 116, 99, 0.18);
+}
+
+.inv-im-chip--agotado {
+  background: rgba(186, 20, 20, 0.1);
+  color: #ba1414;
+  border-color: rgba(186, 20, 20, 0.18);
+}
+
+.inv-im-chip--critico {
+  background: rgba(239, 108, 0, 0.12);
+  color: #c35c00;
+  border-color: rgba(239, 108, 0, 0.18);
+}
+
+.inv-im-chip--bajo {
+  background: rgba(255, 193, 7, 0.18);
+  color: #8a6a00;
+  border-color: rgba(255, 193, 7, 0.22);
+}
+
+.inv-im-chip--optimo {
+  background: rgba(10, 116, 99, 0.12);
+  color: #0a7463;
+  border-color: rgba(10, 116, 99, 0.18);
+}
+
+.inv-im-chip--activo {
+  background: rgba(10, 116, 99, 0.12);
+  color: #0a7463;
+  border-color: rgba(10, 116, 99, 0.18);
+}
+
+.inv-im-chip--inactivo {
+  background: rgba(120, 120, 120, 0.12);
+  color: #5d5d5d;
+  border-color: rgba(120, 120, 120, 0.18);
+}
+
+/* Bottom: lotes */
+.inv-im-bottom {
+  margin-top: 14px;
+}
+
+.inv-im-lotesTable.p-datatable {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--surface-200);
+}
+
+.inv-im-lotesTable .p-datatable-thead > tr > th {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.85rem;
+}
+
+.inv-im-lotesTable .p-datatable-tbody > tr > td {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.87rem;
+}
+
+.inv-im-qty {
+  font-weight: 800;
+}
+
+/* Caducidad */
+.inv-im-date {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.inv-im-date--ok {
+  background: rgba(10, 116, 99, 0.12);
+  color: #0a7463;
+  border-color: rgba(10, 116, 99, 0.18);
+}
+
+.inv-im-date--soon {
+  background: rgba(239, 108, 0, 0.12);
+  color: #c35c00;
+  border-color: rgba(239, 108, 0, 0.18);
+}
+
+.inv-im-date--bad {
+  background: rgba(186, 20, 20, 0.1);
+  color: #ba1414;
+  border-color: rgba(186, 20, 20, 0.18);
+}
+
+.inv-im-muted {
+  color: var(--text-color-secondary);
+  opacity: 0.85;
+}
+
+/* Footer (estilo base del filtro) */
+.inv-im-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 8px;
+}
+
+.inv-im-footer .grow {
+  flex: 1;
+}
+
+/* Botones pill */
+.inv-im-footer .inv-im-btn.p-button {
+  font-family: "Kodchasan", sans-serif !important;
+  height: 36px;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  border-width: 1px !important;
+  font-size: 0.9rem !important;
+  padding-inline: 0.9rem !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: transform 0.14s ease, background-color 0.14s ease,
+    border-color 0.14s ease, color 0.14s ease, opacity 0.14s ease;
+}
+
+.inv-im-footer .inv-im-btn.p-button:focus,
+.inv-im-footer .inv-im-btn.p-button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Cerrar */
+.inv-im-btn--cancel.p-button {
+  background: transparent !important;
+  color: #555555 !important;
+  border-color: var(--surface-300) !important;
+}
+
+.inv-im-btn--cancel.p-button:hover {
+  background: #f5f5f5 !important;
+  border-color: #c7c7c7 !important;
+  transform: scale(1.03);
+}
+
+.inv-im-btn--cancel.p-button:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+/* Ghost (Editar / Alertas) */
+.inv-im-btn--ghost.p-button {
+  background: transparent !important;
+  color: #0a7463 !important;
+  border-color: rgba(10, 116, 99, 0.24) !important;
+}
+
+.inv-im-btn--ghost.p-button:hover {
+  background: rgba(10, 116, 99, 0.06) !important;
+  border-color: rgba(10, 116, 99, 0.34) !important;
+  transform: scale(1.03);
+}
+
+.inv-im-btn--ghost.p-button:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+/* CTA Ajustar */
+.inv-im-btn--apply.p-button {
+  background: #0a7463 !important;
+  color: #ffffff !important;
+  border-color: #0a7463 !important;
+}
+
+.inv-im-btn--apply.p-button:hover {
+  background: #096153 !important;
+  border-color: #096153 !important;
+  transform: scale(1.03);
+}
+
+.inv-im-btn--apply.p-button:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+/* Ajustes para pantallas medianas */
+@media (max-width: 1400px) {
+  .inv-im-top {
+    grid-template-columns: 1fr;
+  }
+
+  .inv-im-media {
+    grid-template-columns: 220px 1fr;
+  }
+}

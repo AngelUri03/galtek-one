@@ -1,0 +1,434 @@
+/* ============================== */
+/*   CONTENEDOR PRINCIPAL         */
+/* ============================== */
+
+.carrito-section {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+  font-family: "Kodchasan", sans-serif;
+}
+
+/* ============================== */
+/*           HEADER               */
+/* ============================== */
+
+.carrito-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0.75rem 0.75rem 0 0.75rem;
+}
+
+.carrito-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.carrito-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #020617;
+  letter-spacing: 0.02em;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-subtitle {
+  font-size: 0.78rem;
+  color: #6b7280;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-btn-vaciar.p-button {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  color: #b91c1c;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-btn-vaciar .pi {
+  font-size: 0.85rem;
+  margin-right: 0.2rem;
+}
+
+/* ============================== */
+/*        MAIN SIN CARD           */
+/* ============================== */
+
+.carrito-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden !important;
+}
+
+/* ============================== */
+/*         SCROLL / LISTA         */
+/* ============================== */
+
+.carrito-scroll {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.carrito-scroll .p-scrollpanel-content {
+  padding: 1rem;
+  padding-right: 2rem;
+  padding-bottom: 1.5rem;
+  box-sizing: border-box;
+}
+
+.carrito-scroll .p-scrollpanel-bar {
+  background: rgba(148, 163, 184, 0.7);
+  border-radius: 999px;
+}
+
+/* ============================== */
+/*          ESTADO VACÍO          */
+/* ============================== */
+
+.carrito-vacio {
+  height: 100%;
+  min-height: 8rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  text-align: center;
+  color: #6b7280;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-vacio-icon {
+  font-size: 1.6rem;
+  color: #0a7463;
+}
+
+.carrito-vacio-text {
+  margin: 0;
+  font-size: 0.85rem;
+  max-width: 12rem;
+  font-family: "Kodchasan", sans-serif;
+}
+
+/* ============================== */
+/*           ITEMS                */
+/* ============================== */
+
+.carrito-contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  width: 100%;
+}
+
+.carrito-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-sizing: border-box;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.04),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.65);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+/* LEFT SIDE */
+
+.carrito-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.carrito-btn-eliminar.p-button {
+  width: 1.75rem;
+  height: 1.75rem;
+  min-width: 1.75rem;
+  color: #9ca3af;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-btn-eliminar .pi {
+  font-size: 0.9rem;
+}
+
+.carrito-thumb {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 0.85rem;
+  background: radial-gradient(circle at 30% 0%,
+      #ffffff 0%,
+      #e0f2fe 40%,
+      #dcfce7 100%);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.22),
+    0 0 0 1px rgba(226, 232, 240, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.carrito-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.carrito-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0a7463;
+  font-size: 1.1rem;
+}
+
+.carrito-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-nombre {
+  font-size: 0.86rem;
+  color: #0f172a;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 9.2rem;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-precio-unit {
+  font-size: 0.8rem;
+  color: #0a5045;
+  font-weight: 600;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-precio-unit-unidad {
+  font-size: 0.72rem;
+  color: #6b7280;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-peso-info {
+  font-size: 0.72rem;
+  color: #6b7280;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-item-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-cantidad-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.18rem 0.35rem;
+  background: rgba(15, 23, 42, 0.02);
+}
+
+.carrito-btn-cantidad.p-button {
+  width: 1.9rem;
+  height: 1.9rem;
+  min-width: 1.9rem;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.8);
+  box-shadow: 0 5px 12px rgba(15, 23, 42, 0.16);
+  color: #0a7463;
+  padding: 0;
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out,
+    background 0.12s ease-out, border-color 0.12s ease-out;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-btn-cantidad .pi {
+  font-size: 0.82rem;
+}
+
+.carrito-btn-cantidad.p-button:hover {
+  background: #ecfdf5;
+  border-color: #0a7463;
+  transform: translateY(-1px);
+  box-shadow: 0 9px 18px rgba(15, 23, 42, 0.22);
+}
+
+.carrito-btn-cantidad.p-button:active {
+  transform: translateY(0) scale(0.93);
+  box-shadow: 0 5px 10px rgba(15, 23, 42, 0.2);
+}
+
+.carrito-cantidad {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #0f172a;
+  padding: 0.15rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-total-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.05rem;
+}
+
+.carrito-total-item-label {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-total-item-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+  font-family: "Kodchasan", sans-serif;
+}
+
+/* ============================== */
+/*           FOOTER               */
+/* ============================== */
+
+.carrito-footer {
+  flex: 0 0 auto;
+  padding: 0.9rem 0.9rem 0.9rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.32);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.carrito-total-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.carrito-total-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-total-subtitle {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-total-amount {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0a5045;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.carrito-btn-pago.p-button {
+  margin: 0.2rem;
+  border-radius: 999px;
+  height: 2.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: "Kodchasan", sans-serif;
+  background: linear-gradient(135deg, #0a7463, #0f9f82);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  color: #ffffff;
+}
+
+.carrito-btn-pago .pi {
+  font-size: 1rem;
+}
+
+.carrito-btn-pago.p-button:enabled:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 20px rgba(121, 121, 121, 0.5);
+}
+
+.carrito-btn-pago.p-button:enabled:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 10px 20px rgba(16, 185, 129, 0.45);
+}
+
+.carrito-btn-pago.p-button:disabled {
+  background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+  color: #9ca3af;
+  box-shadow: none;
+}
+
+/* ============================== */
+/*         RESPONSIVE             */
+/* ============================== */
+
+@media (max-width: 1200px) {
+  .carrito-nombre {
+    max-width: 7.5rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .carrito-nombre {
+    max-width: 6.5rem;
+  }
+}

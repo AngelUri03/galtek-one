@@ -1,0 +1,117 @@
+body {
+  margin: 0;
+  background-color: white;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Contenedor más compacto: sube el contenido al reducir padding superior */
+.contenedor-principal {
+  display: flex;
+  padding: 0.75rem 2rem 2rem; /* antes: 2rem; ahora: 0.75rem arriba */
+  gap: 1.5rem;                /* antes: 2rem */
+}
+
+/* Menos padding interno para que “suba” visualmente */
+.formulario {
+  width: 50%;
+  background: white;
+  padding: 1.5rem;            /* antes: 2rem */
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* También compactamos el panel derecho */
+.promociones-activas {
+  flex: 1;
+  background: #f4f4f4;
+  padding: 1rem;              /* antes: 1.5rem */
+  border-radius: 8px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+
+h2 {
+  color: #f3f3f3;
+  margin-bottom: 1rem;
+  font-size: 'kodchasan', sans-serif;
+}
+
+h3 {
+  color: #333;
+  margin-top: 2rem;
+  font-size: 'kodchasan', sans-serif;
+}
+/* Reducimos el espacio bajo los títulos */
+h2, h3 {
+  color: #086c5c;
+  margin-bottom: 0.75rem;     /* antes: 1rem */
+}
+
+/* Campos un poco más juntos */
+.campo {
+  margin-bottom: 1.1rem;      /* antes: 1.5rem */
+}
+
+
+.campo label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.input-full {
+  width: 100%;
+}
+
+.input-number {
+  width: 100%;
+}
+
+.doble {
+  display: flex;
+  gap: 1rem;
+}
+
+.solo-botones {
+  flex: 1;
+}
+
+/* Botón verde */
+.boton-verde {
+  background-color: #086c5c !important;
+  border: none !important;
+  color: white !important;
+}
+
+.boton-verde:hover {
+  background-color: #065145 !important;
+}
+
+.boton-derecha {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Item de la lista */
+.promo-item {
+  background-color: white;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+/* Cambiar color de botones + y - en InputNumber */
+.custom-spinner .p-inputnumber-button {
+  background-color: #086c5c !important;
+  border: none !important;
+  color: white !important;
+}
+
+.custom-spinner .p-inputnumber-button:hover {
+  background-color: #065145 !important;
+}

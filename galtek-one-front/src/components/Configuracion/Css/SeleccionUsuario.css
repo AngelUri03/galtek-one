@@ -1,0 +1,471 @@
+/* ============================= */
+/* VARIABLES GLOBALES            */
+/* ============================= */
+:root {
+  --verde-principal: #086c5c;
+  --verde-hover: #0a7f6b;
+
+  --gris-borde: #c7c7c7;
+  --gris-texto: #444;
+
+  --alto-campo: 42px;
+  --ancho-campo: 61%;
+  --radio-campo: 12px;
+}
+
+/* ============================= */
+/* MODAL (BORDES CURVOS)         */
+/* ============================= */
+.p-dialog {
+  border-radius: 22px !important;
+  overflow: hidden;
+}
+
+/* ============================= */
+/* HEADER DEL MODAL              */
+/* ============================= */
+.spm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .25rem .75rem;
+}
+
+.spm-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--verde-principal);
+}
+
+.spm-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.spm-close .pi {
+  font-size: 1.2rem;
+  color: #444;
+}
+
+.spm-close:hover {
+  background: rgba(0,0,0,0.08);
+}
+
+/* ============================= */
+/* CONTENIDO                     */
+/* ============================= */
+.spm-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-box-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.3rem;
+  width: 100%;
+}
+
+/* ============================= */
+/* AVATAR                        */
+/* ============================= */
+.login-avatar-modal {
+  width: 150px;
+  height: 150px;
+  margin-bottom: .4rem;
+}
+
+/* ============================= */
+/* INPUT TEXTO NORMAL            */
+/* ============================= */
+.login-box-modal .p-inputtext {
+  width: var(--ancho-campo) !important;
+  height: var(--alto-campo) !important;
+
+  border: 2px solid var(--gris-borde) !important;
+  border-radius: var(--radio-campo);
+
+  padding: 0 0.75rem;
+  font-size: 0.9rem;
+  color: var(--gris-texto);
+
+  box-sizing: border-box;
+  transition: transform .15s ease, border-color .15s ease;
+}
+
+.login-box-modal .p-inputtext:hover {
+  transform: scale(1.03);
+}
+
+.login-box-modal .p-inputtext:focus {
+  border-color: var(--verde-principal) !important;
+  color: var(--verde-principal);
+  box-shadow: 0 0 0 2px rgba(8,108,92,.15);
+}
+
+/* ============================= */
+/* PASSWORD — UNA SOLA BARRA     */
+/* ============================= */
+.login-box-modal .p-password {
+  position: relative;
+
+  width: var(--ancho-campo) !important;
+  height: var(--alto-campo) !important;
+
+  border: 2px solid var(--gris-borde) !important;
+  border-radius: var(--radio-campo);
+
+  background: #fff;
+  display: flex;
+  align-items: center;
+
+  box-sizing: border-box;
+  transition: transform .15s ease, border-color .15s ease;
+}
+
+.login-box-modal .p-password:hover {
+  transform: scale(1.03);
+}
+
+.login-box-modal .p-password input {
+  width: 100% !important;
+  height: 100% !important;
+
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+
+  padding-left: 0.75rem;
+  padding-right: 4rem;
+
+  font-size: 0.9rem;
+  color: var(--gris-texto);
+
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.login-box-modal .p-password-toggle-icon {
+  position: absolute;
+  right: 0.45rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  cursor: pointer;
+}
+
+.login-box-modal .p-password:focus-within {
+  border-color: var(--verde-principal) !important;
+  box-shadow: 0 0 0 2px rgba(8,108,92,.15);
+}
+
+.login-box-modal .p-password:focus-within input,
+.login-box-modal .p-password:focus-within .p-password-toggle-icon {
+  color: var(--verde-principal);
+}
+
+/* ============================= */
+/* DROPDOWN — IGUAL AL PASSWORD  */
+/* ============================= */
+
+.dropdown-simple.p-dropdown {
+  position: relative;
+
+  width: var(--ancho-campo) !important;
+  height: var(--alto-campo) !important;
+
+  border: 2px solid var(--gris-borde) !important;
+  border-radius: var(--radio-campo);
+
+  background: #fff;
+  display: flex;
+  align-items: center;
+
+  box-sizing: border-box;
+  padding: 0 !important;
+  overflow: hidden;
+
+  transition: transform .15s ease, border-color .15s ease;
+}
+
+/* Hover (igual que password) */
+.dropdown-simple:hover {
+  transform: scale(1.03);
+}
+
+/* TEXTO — COMO INPUT */
+.dropdown-simple .p-dropdown-label {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+
+  width: 100%;
+  height: 100%;
+
+  padding-left: 0.75rem;
+  padding-right: 3.8rem; /* 🔥 espacio EXACTO como el ojo */
+
+  font-size: 0.9rem;
+  color: var(--gris-texto);
+
+  display: flex;
+  align-items: center;
+
+  box-shadow: none !important;
+  border-radius: 0 !important;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* FLECHA — IGUAL AL OJO */
+.dropdown-simple .p-dropdown-trigger {
+  position: absolute;
+  right: 0.45rem;   /* 🔥 MISMA distancia que el ojo */
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: auto;
+  height: auto;
+
+  padding: 0;
+   padding-left: .25rem;
+  margin: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Focus — IGUAL AL PASSWORD */
+.dropdown-simple.p-focus {
+  border-color: var(--verde-principal) !important;
+  box-shadow: 0 0 0 2px rgba(8,108,92,.15);
+}
+
+/* TEXTO — COMO INPUT */
+.dropdown-simple .p-dropdown-label {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+
+  width: 100%;
+  height: 100%;
+
+  padding-left: 0.75rem;
+  /* AUMENTADO: De 3.8rem a 4.5rem para dar más aire a la flecha */
+  padding-right: 4.5rem !important; 
+  
+  font-size: 0.9rem;
+  color: var(--gris-texto);
+
+  display: flex;
+  align-items: center;
+
+  box-shadow: none !important;
+  border-radius: 0 !important;
+
+  /* Propiedades vitales para cortar el texto */
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* FLECHA — AJUSTADA */
+.dropdown-simple .p-dropdown-trigger {
+  position: absolute;
+  right: 0.45rem;   
+  top: 50%;
+  transform: translateY(-50%);
+
+  /* Definimos un ancho fijo para la zona de la flecha para controlar mejor el espacio */
+  width: 2.5rem; 
+  height: 100%; /* Ocupa toda la altura para centrar mejor */
+
+  padding: 0;
+  margin: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Centra el icono dentro de su zona */
+
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  
+  color: #666; /* Color explícito para la flecha */
+}
+/* ============================= */
+/* BOTÓN VERDE                   */
+/* ============================= */
+.boton-verde {
+  width: var(--ancho-campo);
+  height: 46px;
+
+  background-color: var(--verde-principal) !important;
+  border: none !important;
+  border-radius: 999px;
+
+  color: #fff !important;
+  font-weight: 700;
+
+  transition: background-color .2s ease, transform .15s ease;
+}
+
+.boton-verde:hover {
+  background-color: var(--verde-hover) !important;
+  transform: translateY(-1px);
+}
+/* ===== AVATAR GRANDE SELECCIÓN PERFIL ===== */
+.login-avatar-modal {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background-color: #e6f7f4;
+  border: 2px solid  #1f7a6d;;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-icon {
+  font-size: 3.2rem;
+  color: #1f7a6d;
+}
+
+/* ===== DROPDOWN USUARIOS ===== */
+.dropdown-user-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.dropdown-avatar-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.dropdown-avatar-icon {
+  font-size: 1.6rem;
+  color: #1f7a6d;
+}
+
+.dropdown-user-name {
+  font-size: 1rem;
+  color: #000;
+}
+.usuario-card {
+  width: 180px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.usuario-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+.usuario-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: #e8f5e9; /* verde suave */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.usuario-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.usuario-icono {
+  font-size: 3rem;          /* icono grande */
+  color: #2e7d32;           /* verde */
+}
+
+.usuario-info {
+  text-align: center;
+}
+
+.usuario-nombre {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+/* ============================= */
+/* Dropdown igual a InputText */
+/* ============================= */
+
+.dropdown-igual.p-dropdown {
+  width: 80%;
+  height: 2.5rem;
+
+  border-radius: 6px;
+  border: 1px solid #ced4da; /* mismo borde que InputText */
+  box-shadow: none;
+}
+
+/* Quita bordes internos */
+.dropdown-igual .p-dropdown-label {
+  border: none;
+  padding: 0.5rem 0.75rem;
+  line-height: 1.5rem;
+}
+
+/* Flecha */
+.dropdown-igual .p-dropdown-trigger {
+  border: none;
+}
+
+/* Focus (cuando haces click) */
+.dropdown-igual.p-dropdown:not(.p-disabled).p-focus {
+  border-color: #2e7d32; /* verde */
+  box-shadow: 0 0 0 1px #2e7d32;
+}
+/* ============================= */
+/* PANEL DESPLEGABLE COMPACTO    */
+/* ============================= */
+
+/* Reducimos el padding de cada opción (fila) */
+.dropdown-compact-panel .p-dropdown-item {
+    padding: 0.5rem 0.75rem !important; /* Menos relleno vertical */
+    font-size: 0.9rem !important;       /* Texto un poco más pequeño */
+}
+
+/* Opcional: Si quieres que la lista total sea menos alta (menos scroll) */
+.dropdown-compact-panel .p-dropdown-items-wrapper {
+    max-height: 150px !important; /* Ajusta esto a tu gusto */
+}

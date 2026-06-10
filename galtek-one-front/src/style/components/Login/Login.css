@@ -1,0 +1,140 @@
+.login-container {
+  position: fixed;
+  inset: 0; 
+  display: grid; 
+  place-items: center; 
+  z-index: 10;
+  margin: 0;
+  padding: 0;
+}
+
+.video-background {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: -2;
+  pointer-events: none;
+  display: flex;
+}
+
+.login-center {
+  position: relative;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  place-items: center;
+  min-height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.recover-mode {
+  height: auto;
+  padding: 4vh 4vh;
+}
+
+.recovery-text {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 2.2vh;
+  color: rgb(112, 112, 112);
+  margin-bottom: 4vh;
+}
+
+.recover-title {
+  font-size: 3.5vh;
+}
+
+.recover-button {
+  margin-top: 5vh;
+}
+
+.recover-mode .ant-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.recover-mode .input-username,
+.recover-mode .login-button {
+  width: 100%;
+}
+
+.recover-mode .ant-form-item {
+  width: 100%;
+  margin-bottom: 2vh;
+}
+
+.recover-mode .recover-button {
+  width: 100%;
+  padding: 2vh;
+}
+
+.input-username-fullname {
+  border: 3px solid rgba(112, 112, 112, 0.801);
+  border-radius: 50px;
+  width: 90%;
+  padding: 1.6vh;
+  padding-left: 2.5vh;
+  font-size: 2.3vh;
+  background-color: transparent !important;
+  color: rgb(112, 112, 112);
+}
+
+.input-username-phone {
+  border: 3px solid rgba(112, 112, 112, 0.801);
+  border-radius: 50px;
+  width: 90%;
+  padding: 1.6vh;
+  padding-left: 2.5vh;
+  font-size: 2.3vh;
+  background-color: transparent !important;
+  color: rgb(112, 112, 112);
+}
+
+.body-terms {
+  background-color: #7ec5b3;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 5vw;
+}
+
+.terms-title {
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.terms-text {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.body-terms {
+  background-color: #007b68;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 5vw;
+}
+
+.terms-title-hoja {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+}
+
+.terms-title-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

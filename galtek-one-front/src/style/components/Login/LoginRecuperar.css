@@ -1,0 +1,208 @@
+/* CARD */
+
+.lrec-card {
+  position: relative;
+  width: 35rem;
+  height: 30rem;
+  border: none;
+  text-align: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.75);
+  border-radius: 20px;
+  color: rgb(112, 112, 112);
+  padding: 1.4rem 1.4rem 1.2rem;
+  margin-top: -5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* BOTÓN VOLVER */
+
+.lrec-back-btn {
+  position: absolute;
+  top: 1rem;
+  left: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.9rem;
+  color: rgb(112, 112, 112);
+  padding: 0;
+}
+
+.lrec-back-btn .pi {
+  font-size: 1rem;
+}
+
+.lrec-back-btn:hover {
+  color: #2684ff;
+}
+
+/* TÍTULO */
+
+.lrec-title {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin-top: 1.4rem;
+  margin-bottom: 0.9rem;
+}
+
+/* TEXTO */
+
+.lrec-text {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.95rem;
+  color: rgb(112, 112, 112);
+  max-width: 27rem;
+  line-height: 1.35;
+  margin-bottom: 1.2rem;
+}
+
+/* FORM */
+
+.lrec-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* INPUT BASE */
+
+.lrec-input-wrapper {
+  display: inline-flex;
+  align-items: center;
+  width: 28rem;
+  height: 3.5rem;
+  position: relative;
+  border: 2px solid rgba(112, 112, 112, 0.8);
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  background: transparent;
+}
+
+.lrec-input-base {
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  padding-right: 3.4rem;
+  font-size: 1.2rem;
+  border: none;
+  box-shadow: none;
+  background-color: transparent !important;
+  color: rgb(112, 112, 112);
+  font-family: "Kodchasan", sans-serif;
+  transition: color 0.3s ease;
+}
+
+.lrec-input-text {
+  padding-right: 3.4rem;
+}
+
+.lrec-input-icon {
+  position: absolute;
+  right: 1.2rem;
+  font-size: 1.3rem;
+  color: rgb(112, 112, 112);
+  pointer-events: none;
+  transition: color 0.3s ease;
+}
+
+.lrec-input-base::placeholder {
+  color: rgb(112, 112, 112);
+  transition: color 0.3s ease;
+}
+
+/* Autofill Chrome */
+
+.lrec-input-base:-webkit-autofill,
+.lrec-input-base:-webkit-autofill:hover,
+.lrec-input-base:-webkit-autofill:focus {
+  -webkit-text-fill-color: rgb(112, 112, 112);
+  box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0) inset;
+  transition: background-color 9999s ease-out, color 9999s ease-out;
+}
+
+/* Focus */
+
+.lrec-input-wrapper:has(.lrec-input-base:focus) {
+  border-color: #2684ff;
+}
+
+.lrec-input-base:focus {
+  outline: none;
+  color: #2684ff;
+}
+
+.lrec-input-wrapper:has(.lrec-input-base:focus) .lrec-input-icon {
+  color: #2684ff;
+}
+
+.lrec-input-base:focus::placeholder {
+  color: #2684ff;
+}
+
+/* ERROR */
+
+.lrec-input-wrapper.invalid {
+  border-color: #ff4d4f !important;
+  animation: lrec-bump 0.2s ease;
+}
+
+.lrec-input-wrapper.invalid .lrec-input-icon {
+  color: #ff4d4f !important;
+}
+
+.lrec-input-base.invalid {
+  color: #ff4d4f !important;
+}
+
+.lrec-input-base.invalid::placeholder {
+  color: #ff4d4f !important;
+}
+
+@keyframes lrec-bump {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* BOTÓN */
+
+.lrec-button {
+  box-shadow: none;
+  border-radius: 50px;
+  border: none;
+  width: 28rem;
+  height: 3.5rem;
+  background-color: rgb(112, 112, 112) !important;
+  color: white !important;
+  font-size: 1rem;
+  font-weight: bold;
+  font-family: "Kodchasan", sans-serif !important;
+}
+
+.lrec-button:hover {
+  background-color: #2684ff !important;
+  font-size: 1.05rem;
+}
+
+/* Toast tipografía */
+
+.p-toast .p-toast-message-text {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.9rem;
+}

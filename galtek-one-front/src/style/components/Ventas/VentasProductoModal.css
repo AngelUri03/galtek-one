@@ -1,0 +1,209 @@
+.ventas-producto-modal {
+  width: 440px !important;
+  max-width: 95vw !important;
+  height: auto !important;
+  max-height: 90vh !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2) !important;
+}
+
+.ventas-producto-modal .p-dialog-content {
+  height: auto;
+  overflow-y: hidden !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 0 0 20px 20px !important;
+  padding: 1.5rem !important;
+}
+
+.ventas-producto-modal .p-dialog-header {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 20px 20px 0 0 !important;
+  padding: 1.25rem 1.5rem 0.5rem !important;
+}
+
+.ventas-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ventas-modal-img-wrapper {
+  width: 100%;
+  height: 150px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ventas-modal-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.ventas-modal-placeholder {
+  font-size: 2.5rem;
+  color: var(--text-color-secondary);
+}
+
+.ventas-modal-descripcion {
+  font-size: 0.95rem;
+  color: var(--text-color-secondary);
+  text-align: center;
+}
+
+.ventas-modal-precio {
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.ventas-modal-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.ventas-modal-qty {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+}
+
+.ventas-modal-pesaje {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.ventas-modal-pesaje label {
+  font-size: 0.85rem;
+  color: var(--text-color-secondary);
+}
+
+
+
+/* CONTENIDO */
+/* CONTENIDO */
+.ventas-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 500px;
+  /* Limitar ancho del contenido centrado */
+}
+
+/* IMAGEN */
+.ventas-modal-img-wrapper {
+  width: 100%;
+  height: 160px;
+  /* Reduced height to fit better */
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f4f6f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ventas-modal-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.ventas-modal-placeholder {
+  font-size: 2.2rem;
+  color: #9aa0a6;
+}
+
+/* INFO */
+.ventas-modal-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ventas-modal-precio {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0a7463;
+}
+
+.ventas-modal-precio span {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* DESCRIPCIÓN LARGA */
+.ventas-modal-descripcion {
+  max-height: 100px;
+  /* Limit height */
+  overflow: hidden;
+  /* Hide overflow instead of scroll */
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  /* Show approx 4 lines */
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  padding-right: 0;
+}
+
+.ventas-modal-descripcion p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #374151;
+  margin: 0;
+}
+
+/* PESAJE */
+.ventas-modal-pesaje {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.ventas-modal-pesaje label {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* ACCIONES */
+.ventas-modal-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+/* BOTÓN VERDE PERSONALIZADO */
+.ventas-modal-btn-agregar {
+  background-color: #0a7463 !important;
+  border-color: #0a7463 !important;
+  width: 100%;
+  font-weight: 600;
+  color: #ffffff !important;
+}
+
+.ventas-modal-btn-agregar:hover {
+  background-color: #086357 !important;
+  border-color: #086357 !important;
+}
+
+/* CANTIDAD */
+.ventas-modal-qty {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+}

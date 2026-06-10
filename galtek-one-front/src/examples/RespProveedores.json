@@ -1,0 +1,35 @@
+{
+  "statusCode": 200,
+  "status": "OK",
+  "user": "toño",
+  "timestamp": "2025-12-02T03:58:41.188663423",
+  "durationMs": 10,
+  "message": "Proveedores obtenidos con éxito",
+  "data": [
+    {
+      "idProveedor": 1,
+      "nombreProveedor": "Proveedor MX",
+      "estatus": true
+    },
+    {
+      "idProveedor": 2,
+      "nombreProveedor": "Distribuidora Central",
+      "estatus": true
+    },
+    {
+      "idProveedor": 3,
+      "nombreProveedor": "Lácteos del Valle",
+      "estatus": true
+    },
+    {
+      "idProveedor": 4,
+      "nombreProveedor": "HigienePlus",
+      "estatus": true
+    },
+    {
+      "idProveedor": 5,
+      "nombreProveedor": "Cárnicos Premium",
+      "estatus": true
+    }
+  ]
+}

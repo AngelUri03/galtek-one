@@ -1,0 +1,564 @@
+/* ==========================================================================
+   REPORTE DE BALANCE - ESTILO FINAL UNIFICADO
+   ========================================================================== */
+
+:root {
+  --rvx-bg: #f8fafc;
+  --rvx-border: 1px solid rgba(226, 232, 240, 0.8);
+  --rvx-radius: 24px;
+  --rvx-brand: #0a7463;
+  /* Verde Base */
+  --rvx-income: #0a7463;
+  /* Verde Ingresos */
+  --rvx-expense: #ef4444;
+  /* Rojo Egresos */
+  --rvx-net: #0a7463;
+  /* 🔥 Cambiado de #6366f1 (Morado) a Verde Marca */
+  --rvx-green-soft: rgba(10, 116, 99, 0.15);
+  --rvx-text: #0f172a;
+}
+
+.rvx-page {
+  padding: 20px;
+  background: var(--rvx-bg);
+  min-height: 100vh;
+  font-family: "Kodchasan", sans-serif;
+  color: var(--rvx-text);
+}
+
+/* --- HEADER SUPERIOR --- */
+.rvx-header-bar {
+  width: 100%;
+  background: #ffffff;
+  padding: 1rem 2rem;
+  border-radius: 0 0 35px 35px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rvx-header-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: rgba(10, 116, 99, 0.95);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.rvx-header-title i {
+  font-size: 1.3rem;
+}
+
+/* --- LAYOUT --- */
+.rvx-layout-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* --- SIDEBAR (ESTILO INVENTARIO) --- */
+.rvx-sidebar {
+  background: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 18px;
+  position: sticky;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  font-family: "Kodchasan", sans-serif;
+  min-height: auto;
+}
+
+.rvx-sidebar-label {
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+}
+
+.rvx-sidebar label {
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-left: 2px;
+}
+
+.rvx-sidebar .p-inputtext,
+.rvx-sidebar .p-dropdown,
+.rvx-sidebar .p-multiselect,
+.rvx-sidebar .p-calendar,
+.rvx-sidebar .rvx-ctl {
+  height: 40px !important;
+  border-radius: 10px !important;
+  font-size: 0.9rem !important;
+  font-family: "Kodchasan", sans-serif !important;
+  border: 1px solid #e2e8f0 !important;
+  background: linear-gradient(180deg, #ffffff, #f7f7f7) !important;
+  color: #334155 !important;
+  transition: all 0.2s ease;
+  box-shadow: none !important;
+  width: 100% !important;
+  display: flex;
+  align-items: center;
+}
+
+.rvx-sidebar .p-calendar .p-inputtext,
+.rvx-sidebar .p-dropdown .p-inputtext {
+  background: transparent !important;
+  border: none !important;
+  height: 100% !important;
+}
+
+.rvx-sidebar .p-inputtext:enabled:hover,
+.rvx-sidebar .p-dropdown:hover,
+.rvx-sidebar .p-multiselect:hover {
+  border-color: #bdbdbd !important;
+  background: linear-gradient(180deg, #ffffff, #f7f7f7) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+.rvx-sidebar .p-inputtext:enabled:focus,
+.rvx-sidebar .p-dropdown.p-focus,
+.rvx-sidebar .p-multiselect.p-focus,
+.rvx-sidebar .p-calendar.p-inputwrapper-focus {
+  border-color: #0a7463 !important;
+  background: #ffffff !important;
+  color: #0a5045 !important;
+  box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.1) !important;
+}
+
+.rvx-sidebar .p-dropdown-trigger-icon,
+.rvx-sidebar .p-multiselect-trigger-icon {
+  color: #0a7463 !important;
+  font-size: 0.9rem;
+}
+
+.rvx-sidebar .p-inputtext::placeholder {
+  color: var(--text-color-secondary) !important;
+  opacity: 0.7;
+}
+
+/* Paneles flotantes */
+.p-dropdown-panel,
+.p-multiselect-panel,
+.p-datepicker {
+  border-radius: 12px !important;
+  border: none !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16) !important;
+  font-family: "Kodchasan", sans-serif !important;
+  background: #ffffff !important;
+  overflow: hidden;
+}
+
+.p-dropdown-item,
+.p-multiselect-item {
+  font-size: 0.85rem !important;
+  padding: 0.5rem 1rem !important;
+  color: #334155 !important;
+}
+
+.p-dropdown-item.p-highlight,
+.p-multiselect-item.p-highlight,
+.p-dropdown-item:not(.p-highlight):not(.p-disabled):hover,
+.p-multiselect-item:not(.p-highlight):not(.p-disabled):hover {
+  background: rgba(10, 116, 99, 0.12) !important;
+  color: #0a7463 !important;
+}
+
+.p-multiselect-panel .p-checkbox-box {
+  border-radius: 4px !important;
+  border: 2px solid #0a7463 !important;
+  width: 18px;
+  height: 18px;
+}
+
+.p-multiselect-panel .p-checkbox-box.p-highlight {
+  background: #0a7463 !important;
+  border-color: #0a7463 !important;
+}
+
+.p-multiselect-token {
+  background: #e6f2ef !important;
+  color: #0a7463 !important;
+  border-radius: 8px !important;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.82rem;
+  padding: 2px 8px !important;
+}
+
+.p-multiselect-header {
+  background: #0a7463 !important;
+  color: #fff !important;
+  padding: 0.5rem !important;
+}
+
+.p-multiselect-header .p-checkbox-box {
+  border-color: #fff !important;
+  background: transparent !important;
+}
+
+.p-multiselect-header .p-multiselect-close {
+  color: #fff !important;
+}
+
+/* --- CONTENT & KPIS --- */
+.rvx-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.rvx-kpis {
+  display: flex;
+  gap: 1px;
+  background: #fff;
+  border: var(--rvx-border);
+  border-radius: var(--rvx-radius);
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.rvx-kpi {
+  flex: 1;
+  text-align: center;
+  padding: 16px;
+  border-right: 1px solid #f1f5f9;
+}
+
+.rvx-kpi:last-child {
+  border-right: none;
+}
+
+.rvx-kpiLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.rvx-kpiValue {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.rvx-text-income {
+  color: var(--rvx-income) !important;
+}
+
+.rvx-text-expense {
+  color: var(--rvx-expense) !important;
+}
+
+.rvx-text-net {
+  color: var(--rvx-net) !important;
+}
+
+/* --- CARD PRINCIPAL UNIFICADO --- */
+.rvx-main-card {
+  background: #fff;
+  border-radius: var(--rvx-radius);
+  border: var(--rvx-border);
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.rvx-card-action-btn {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  z-index: 10;
+}
+
+/* --- TABS --- */
+.rvx-tabs-wrapper {
+  position: relative;
+  margin-top: 0;
+}
+
+.rvx-tabview .p-tabview-nav {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 60px 12px 0 !important;
+  gap: 6px;
+  border-bottom: 1px solid #f1f5f9 !important;
+  margin-bottom: 24px !important;
+}
+
+.rvx-tabview .p-tabview-nav li .p-tabview-nav-link {
+  background: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  border-radius: 99px !important;
+  padding: 8px 18px !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  color: #64748b !important;
+  transition: all 0.2s ease;
+}
+
+/* 🔥 TAB ACTIVO (AHORA ES VERDE) */
+.rvx-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background: var(--rvx-brand) !important;
+  color: #fff !important;
+  border-color: var(--rvx-brand) !important;
+  box-shadow: 0 4px 10px rgba(10, 116, 99, 0.2) !important;
+}
+
+.rvx-tabview .p-tabview-panels {
+  background: transparent !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+
+/* --- SUB TABS --- */
+.rvx-sub-tabview>.p-tabview-nav {
+  background: #f8fafc !important;
+  border-radius: 99px !important;
+  padding: 3px !important;
+  display: inline-flex !important;
+  gap: 3px !important;
+  border: 1px solid #e2e8f0 !important;
+  margin-bottom: 20px !important;
+  align-self: center;
+  padding-right: 3px !important;
+}
+
+.rvx-sub-tabview>.p-tabview-nav li .p-tabview-nav-link {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 99px !important;
+  padding: 6px 14px !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  color: #64748b !important;
+}
+
+/* 🔥 SUB TAB ACTIVO (AHORA ES VERDE) */
+.rvx-sub-tabview>.p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background: #fff !important;
+  color: var(--rvx-brand) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+
+/* --- BOTONES --- */
+.rvx-btn.p-button {
+  font-family: "Kodchasan", sans-serif !important;
+  height: 36px !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  font-size: 0.9rem !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.14s ease, background-color 0.14s ease;
+  width: 100%;
+}
+
+/* 🔥 BOTON PRIMARIO (DESCARGAR EXCEL) AHORA ES VERDE */
+.rvx-btn--primary.p-button {
+  background: var(--rvx-brand) !important;
+  border: none !important;
+  color: #fff;
+}
+
+/* --- GRÁFICAS --- */
+.rvx-chart-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+
+.rvx-chart-full {
+  width: 100% !important;
+  margin: 0 auto;
+  position: relative;
+  height: 380px !important;
+  min-height: 380px !important;
+  overflow: hidden;
+}
+
+.rvx-chart-full canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.rvx-minimal-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 10px;
+  text-align: center;
+  width: 100%;
+}
+
+/* --- TABLA Y UTILS --- */
+.rvx-tableHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.rvx-tableTitle {
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.rvx-rowsSel.p-dropdown {
+  border-radius: 99px !important;
+  height: 32px !important;
+  align-items: center;
+  border: 1px solid #e2e8f0 !important;
+  font-size: 0.85rem !important;
+}
+
+.rvx-table {
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+  overflow: hidden;
+}
+
+.rvx-table .p-datatable-thead>tr>th {
+  background: #f8fafc !important;
+  font-weight: 800 !important;
+  color: #64748b !important;
+  border: none !important;
+  padding: 12px 16px !important;
+  font-size: 0.85rem;
+}
+
+.rvx-table .p-datatable-tbody>tr>td {
+  padding: 10px 16px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  font-size: 0.85rem;
+}
+
+.rvx-chip {
+  background: #f1f5f9;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-weight: 700;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  font-size: 0.85rem;
+}
+
+.rvx-tag {
+  border-radius: 99px;
+  font-weight: 800;
+  font-size: 0.7rem;
+  padding: 3px 8px;
+}
+
+/* Botones Sidebar (Estilo Modal) */
+.rvx-btn.p-button {
+  font-family: "Kodchasan", sans-serif !important;
+  height: 36px !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  font-size: 0.9rem !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.14s ease, background-color 0.14s ease;
+  width: 100%;
+}
+
+.rvx-btn--primary.p-button {
+  background: var(--rvx-net) !important;
+  border: none !important;
+  color: #fff;
+}
+
+.rvx-btn--ghost.p-button {
+  background: transparent !important;
+  color: #555555 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.rvx-btn--ghost.p-button:hover {
+  background: #f5f5f5 !important;
+  border-color: #c7c7c7 !important;
+  transform: scale(1.03);
+  color: var(--rvx-brand) !important;
+}
+
+.rvx-btn--ghost.p-button:active {
+  transform: scale(0.96);
+}
+
+.rvx-iconBtn.p-button {
+  width: 28px !important;
+  height: 28px !important;
+  background: transparent !important;
+  color: var(--rvx-brand) !important;
+  border: 1px solid var(--rvx-brand) !important;
+  border-radius: 6px !important;
+  padding: 0 !important;
+}
+
+.rvx-btn-icon-only.p-button {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rvx-btn-icon-only.p-button .p-button-icon {
+  font-size: 1.1rem;
+}
+
+@media (max-width: 1000px) {
+  .rvx-layout-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rvx-sidebar {
+    position: static;
+    min-height: auto;
+  }
+
+  .rvx-card-action-btn {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin-bottom: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .rvx-chart-full {
+    height: 280px !important;
+    min-height: 280px !important;
+  }
+}

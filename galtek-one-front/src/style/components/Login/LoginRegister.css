@@ -1,0 +1,276 @@
+/* CARD */
+
+.lr-card {
+  position: relative;
+  width: 35rem;
+  height: 35rem;
+  border: none;
+  text-align: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.75);
+  border-radius: 20px;
+  color: rgb(112, 112, 112);
+  padding: 1.4rem 1.4rem 1.2rem;
+  margin-top: -5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* BOTÓN VOLVER */
+
+.lr-back-btn {
+  position: absolute;
+  top: 1rem;
+  left: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.9rem;
+  color: rgb(112, 112, 112);
+  padding: 0;
+}
+
+.lr-back-btn .pi {
+  font-size: 1rem;
+}
+
+.lr-back-btn:hover {
+  color: #2684ff;
+}
+
+/* TÍTULO */
+
+.lr-title {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 2.3rem;
+  font-weight: bold;
+  margin-top: 1.2rem;
+  margin-bottom: 1.4rem;
+}
+
+/* FORM */
+
+.lr-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+}
+
+.lr-input-wrapper {
+  display: inline-flex;
+  align-items: center;
+  width: 28rem;
+  height: 3.5rem;
+  position: relative;
+  border: 2px solid rgba(112, 112, 112, 0.8);
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  background: transparent;
+}
+
+.lr-input-base {
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  padding-right: 3.4rem;
+  font-size: 1.2rem;
+  border: none;
+  box-shadow: none;
+  background-color: transparent !important;
+  color: rgb(112, 112, 112);
+  font-family: "Kodchasan", sans-serif;
+  transition: color 0.3s ease;
+}
+
+.lr-input-text {
+  padding-right: 3.4rem;
+}
+
+.lr-input-icon {
+  position: absolute;
+  right: 1.2rem;
+  font-size: 1.3rem;
+  color: rgb(112, 112, 112);
+  pointer-events: none;
+  transition: color 0.3s ease;
+}
+
+.lr-input-base::placeholder {
+  color: rgb(112, 112, 112);
+  transition: color 0.3s ease;
+}
+
+.lr-input-base:-webkit-autofill,
+.lr-input-base:-webkit-autofill:hover,
+.lr-input-base:-webkit-autofill:focus {
+  -webkit-text-fill-color: rgb(112, 112, 112);
+  box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0) inset;
+  transition: background-color 9999s ease-out, color 9999s ease-out;
+}
+
+.lr-pass-wrapper {
+  position: relative;
+  width: 28rem;
+  height: 3.5rem;
+  border: 2px solid rgba(112, 112, 112, 0.8);
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  background: transparent;
+  display: flex;
+  align-items: center;
+}
+
+.lr-input-pass {
+  width: 100%;
+  height: 100%;
+  padding-left: 1rem;
+  padding-right: 3.4rem !important;
+  border: none;
+  box-shadow: none;
+  background-color: transparent !important;
+  color: rgb(112, 112, 112);
+  font-size: 1.2rem;
+  font-family: "Kodchasan", sans-serif;
+  transition: color 0.3s ease;
+}
+
+.lr-input-wrapper:has(.lr-input-base:focus),
+.lr-pass-wrapper:has(.lr-input-base:focus) {
+  border-color: #2684ff;
+}
+
+.lr-input-base:focus {
+  outline: none;
+  color: #2684ff;
+}
+
+.lr-input-wrapper:has(.lr-input-base:focus) .lr-input-icon {
+  color: #2684ff;
+}
+
+.lr-pass-wrapper:has(.lr-input-base:focus) .lr-eye-btn .pi {
+  color: #2684ff;
+}
+
+.lr-input-base:focus::placeholder {
+  color: #2684ff;
+}
+
+.lr-eye-btn {
+  position: absolute;
+  right: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.4rem;
+  height: 2.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.lr-eye-btn .pi {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: rgb(112, 112, 112);
+  transition: color 0.3s ease;
+}
+
+/* ESTADOS DE ERROR */
+
+.lr-input-wrapper.invalid,
+.lr-pass-wrapper.invalid {
+  border-color: #ff4d4f !important;
+  animation: lr-bump 0.2s ease;
+}
+
+.lr-input-wrapper.invalid .lr-input-icon,
+.lr-pass-wrapper.invalid .lr-eye-btn .pi {
+  color: #ff4d4f !important;
+}
+
+.lr-input-base.invalid {
+  color: #ff4d4f !important;
+}
+
+.lr-input-base.invalid::placeholder {
+  color: #ff4d4f !important;
+}
+
+@keyframes lr-bump {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* BOTÓN REGISTRARSE */
+
+.lr-button {
+  box-shadow: none;
+  border-radius: 50px;
+  border: none;
+  width: 28rem;
+  height: 3.5rem;
+  background-color: rgb(112, 112, 112) !important;
+  color: white !important;
+  font-size: 1rem;
+  font-weight: bold;
+  font-family: "Kodchasan", sans-serif !important;
+  margin-top: 0.4rem;
+}
+
+.lr-button:hover {
+  background-color: #2684ff !important;
+  font-size: 1.05rem;
+}
+
+/* TÉRMINOS */
+
+.lr-terms {
+  margin-top: 0.8rem;
+  margin-bottom: 1rem;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.9rem;
+  color: rgb(112, 112, 112);
+  text-align: center;
+  max-width: 26rem;
+  line-height: 1.3;
+}
+
+.lr-link-button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.9rem;
+  color: #2684ff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.lr-link-button:hover {
+  color: #1a5fbf;
+}
+
+/* TOAST */
+
+.p-toast .p-toast-message-text {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.9rem;
+}

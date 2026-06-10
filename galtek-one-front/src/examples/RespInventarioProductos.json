@@ -1,0 +1,2627 @@
+{
+  "statusCode": 200,
+  "status": "OK",
+  "user": "toño",
+  "timestamp": "2025-12-05T18:30:00.000000000",
+  "durationMs": 18,
+  "message": "Inventario obtenido con éxito",
+  "data": [
+    {
+      "idProducto": 1,
+      "sku": "SKU-00001",
+      "codigoBarras": "7501000000001",
+      "nombreProducto": "Agua Purificada 1L",
+      "categoriaNombre": "Bebidas",
+      "proveedorNombre": "Proveedor MX",
+      "precioCompra": 6.5,
+      "precioVenta": 10.0,
+      "critico": 5,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-03T10:25:31",
+      "urlImagen": "https://picsum.photos/seed/inv1/80/80",
+      "lotes": [
+        {
+          "idLote": 101,
+          "numeroLote": "L001-1",
+          "cantidad": 20,
+          "fechaExpiracion": "2026-01-15",
+          "ubicacion": "A-01"
+        },
+        {
+          "idLote": 102,
+          "numeroLote": "L001-2",
+          "cantidad": 22,
+          "fechaExpiracion": "2025-12-18",
+          "ubicacion": "A-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 2,
+      "sku": "SKU-00002",
+      "codigoBarras": "7501000000002",
+      "nombreProducto": "Leche Entera 1L",
+      "categoriaNombre": "Lácteos",
+      "proveedorNombre": "Lácteos del Valle",
+      "precioCompra": 15.2,
+      "precioVenta": 22.5,
+      "critico": 8,
+      "bajo": 18,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-04T08:11:02",
+      "urlImagen": "https://picsum.photos/seed/inv2/80/80",
+      "lotes": [
+        {
+          "idLote": 201,
+          "numeroLote": "L002-1",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-06",
+          "ubicacion": "LAC-01"
+        },
+        {
+          "idLote": 202,
+          "numeroLote": "L002-2",
+          "cantidad": 7,
+          "fechaExpiracion": "2025-12-20",
+          "ubicacion": "LAC-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 3,
+      "sku": "SKU-00003",
+      "codigoBarras": "7501000000003",
+      "nombreProducto": "Yogurt Natural 900g",
+      "categoriaNombre": "Lácteos",
+      "proveedorNombre": "AgroFresco",
+      "precioCompra": 18.0,
+      "precioVenta": 27.0,
+      "critico": 5,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-02T17:40:10",
+      "urlImagen": "https://picsum.photos/seed/inv3/80/80",
+      "lotes": [
+        {
+          "idLote": 301,
+          "numeroLote": "YOG-01",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-03",
+          "ubicacion": "LAC-02"
+        },
+        {
+          "idLote": 302,
+          "numeroLote": "YOG-02",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-10",
+          "ubicacion": "LAC-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 4,
+      "sku": "SKU-00004",
+      "codigoBarras": "7501000000004",
+      "nombreProducto": "Papas Fritas 150g",
+      "categoriaNombre": "Botanas",
+      "proveedorNombre": "SnacksGolosinas SA",
+      "precioCompra": 9.5,
+      "precioVenta": 15.0,
+      "critico": 4,
+      "bajo": 12,
+      "estatus": true,
+      "fechaActualizacion": "2025-11-30T12:05:44",
+      "urlImagen": "https://picsum.photos/seed/inv4/80/80",
+      "lotes": []
+    },
+    {
+      "idProducto": 5,
+      "sku": "SKU-00005",
+      "codigoBarras": "7501000000005",
+      "nombreProducto": "Arroz Blanco 1kg",
+      "categoriaNombre": "Abarrotes",
+      "proveedorNombre": "DespensaExpress",
+      "precioCompra": 16.0,
+      "precioVenta": 23.5,
+      "critico": 10,
+      "bajo": 25,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-01T09:21:18",
+      "urlImagen": "https://picsum.photos/seed/inv5/80/80",
+      "lotes": [
+        {
+          "idLote": 501,
+          "numeroLote": "ARZ-01",
+          "cantidad": 25,
+          "fechaExpiracion": "2026-05-30",
+          "ubicacion": "AB-01"
+        },
+        {
+          "idLote": 502,
+          "numeroLote": "ARZ-02",
+          "cantidad": 30,
+          "fechaExpiracion": "2026-08-10",
+          "ubicacion": "AB-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 6,
+      "sku": "SKU-00006",
+      "codigoBarras": "7501000000006",
+      "nombreProducto": "Frijol Negro 900g",
+      "categoriaNombre": "Cereales y Granos",
+      "proveedorNombre": "Grupo Alimentos Selectos",
+      "precioCompra": 19.8,
+      "precioVenta": 28.9,
+      "critico": 6,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T07:55:10",
+      "urlImagen": "https://picsum.photos/seed/inv6/80/80",
+      "lotes": [
+        {
+          "idLote": 601,
+          "numeroLote": "FRJ-01",
+          "cantidad": 4,
+          "fechaExpiracion": "2026-02-10",
+          "ubicacion": "AB-03"
+        },
+        {
+          "idLote": 602,
+          "numeroLote": "FRJ-02",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-16",
+          "ubicacion": "AB-03"
+        }
+      ]
+    },
+    {
+      "idProducto": 7,
+      "sku": "SKU-00007",
+      "codigoBarras": "7501000000007",
+      "nombreProducto": "Detergente Líquido 4L",
+      "categoriaNombre": "Limpieza del Hogar",
+      "proveedorNombre": "Plásticos Nova",
+      "precioCompra": 65.0,
+      "precioVenta": 89.0,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-04T21:35:01",
+      "urlImagen": "https://picsum.photos/seed/inv7/80/80",
+      "lotes": [
+        {
+          "idLote": 701,
+          "numeroLote": "LMP-01",
+          "cantidad": 10,
+          "fechaExpiracion": "2027-01-20",
+          "ubicacion": "LIM-01"
+        },
+        {
+          "idLote": 702,
+          "numeroLote": "LMP-02",
+          "cantidad": 8,
+          "fechaExpiracion": "2027-03-11",
+          "ubicacion": "LIM-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 8,
+      "sku": "SKU-00008",
+      "codigoBarras": "7501000000008",
+      "nombreProducto": "Shampoo Familiar 750ml",
+      "categoriaNombre": "Higiene Personal",
+      "proveedorNombre": "HigienePlus",
+      "precioCompra": 32.0,
+      "precioVenta": 48.0,
+      "critico": 5,
+      "bajo": 12,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-02T13:14:10",
+      "urlImagen": "https://picsum.photos/seed/inv8/80/80",
+      "lotes": [
+        {
+          "idLote": 801,
+          "numeroLote": "HIG-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2026-09-10",
+          "ubicacion": "HIG-01"
+        },
+        {
+          "idLote": 802,
+          "numeroLote": "HIG-02",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-25",
+          "ubicacion": "HIG-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 9,
+      "sku": "SKU-00009",
+      "codigoBarras": "7501000000009",
+      "nombreProducto": "Toallas de Papel 6 pzas",
+      "categoriaNombre": "Limpieza del Hogar",
+      "proveedorNombre": "Súper Distribuciones AR",
+      "precioCompra": 38.5,
+      "precioVenta": 55.9,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T11:08:18",
+      "urlImagen": "https://picsum.photos/seed/inv9/80/80",
+      "lotes": [
+        {
+          "idLote": 901,
+          "numeroLote": "PAP-01",
+          "cantidad": 3,
+          "fechaExpiracion": "2027-05-01",
+          "ubicacion": "LIM-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 10,
+      "sku": "SKU-00010",
+      "codigoBarras": "7501000000010",
+      "nombreProducto": "Manzana Roja Kg",
+      "categoriaNombre": "Frutas y Verduras",
+      "proveedorNombre": "Frutas Selectas",
+      "precioCompra": 24.0,
+      "precioVenta": 36.0,
+      "critico": 6,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T09:40:55",
+      "urlImagen": "https://picsum.photos/seed/inv10/80/80",
+      "lotes": [
+        {
+          "idLote": 1001,
+          "numeroLote": "FRU-01",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-07",
+          "ubicacion": "FV-01"
+        },
+        {
+          "idLote": 1002,
+          "numeroLote": "FRU-02",
+          "cantidad": 9,
+          "fechaExpiracion": "2025-12-13",
+          "ubicacion": "FV-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 11,
+      "sku": "SKU-00011",
+      "codigoBarras": "7501000000011",
+      "nombreProducto": "Pechuga de Pollo Kg",
+      "categoriaNombre": "Carnicería",
+      "proveedorNombre": "Cárnicos Premium",
+      "precioCompra": 76.0,
+      "precioVenta": 109.9,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T06:12:42",
+      "urlImagen": "https://picsum.photos/seed/inv11/80/80",
+      "lotes": [
+        {
+          "idLote": 1101,
+          "numeroLote": "CAR-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2025-12-05",
+          "ubicacion": "CAR-01"
+        },
+        {
+          "idLote": 1102,
+          "numeroLote": "CAR-02",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-09",
+          "ubicacion": "CAR-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 12,
+      "sku": "SKU-00012",
+      "codigoBarras": "7501000000012",
+      "nombreProducto": "Atún en Agua 140g",
+      "categoriaNombre": "Abarrotes",
+      "proveedorNombre": "Proveedor Express",
+      "precioCompra": 13.5,
+      "precioVenta": 19.9,
+      "critico": 8,
+      "bajo": 20,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-01T20:33:00",
+      "urlImagen": "https://picsum.photos/seed/inv12/80/80",
+      "lotes": [
+        {
+          "idLote": 1201,
+          "numeroLote": "ATN-01",
+          "cantidad": 18,
+          "fechaExpiracion": "2027-08-12",
+          "ubicacion": "AB-05"
+        },
+        {
+          "idLote": 1202,
+          "numeroLote": "ATN-02",
+          "cantidad": 18,
+          "fechaExpiracion": "2027-09-30",
+          "ubicacion": "AB-05"
+        }
+      ]
+    },
+    {
+      "idProducto": 13,
+      "sku": "SKU-00013",
+      "codigoBarras": "7501000000013",
+      "nombreProducto": "Croquetas Perro 20kg",
+      "categoriaNombre": "Mascotas",
+      "proveedorNombre": "AgroFresco",
+      "precioCompra": 380.0,
+      "precioVenta": 520.0,
+      "critico": 3,
+      "bajo": 8,
+      "estatus": true,
+      "fechaActualizacion": "2025-11-29T18:09:49",
+      "urlImagen": "https://picsum.photos/seed/inv13/80/80",
+      "lotes": [
+        {
+          "idLote": 1301,
+          "numeroLote": "PET-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2026-11-01",
+          "ubicacion": "MAS-01"
+        },
+        {
+          "idLote": 1302,
+          "numeroLote": "PET-02",
+          "cantidad": 2,
+          "fechaExpiracion": "2027-01-20",
+          "ubicacion": "MAS-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 14,
+      "sku": "SKU-00014",
+      "codigoBarras": "7501000000014",
+      "nombreProducto": "Café Molido 500g",
+      "categoriaNombre": "Bebidas",
+      "proveedorNombre": "Café Sierra Madre",
+      "precioCompra": 75.0,
+      "precioVenta": 112.0,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-03T15:45:26",
+      "urlImagen": "https://picsum.photos/seed/inv14/80/80",
+      "lotes": [
+        {
+          "idLote": 1401,
+          "numeroLote": "CAF-01",
+          "cantidad": 8,
+          "fechaExpiracion": "2026-06-01",
+          "ubicacion": "BEB-02"
+        },
+        {
+          "idLote": 1402,
+          "numeroLote": "CAF-02",
+          "cantidad": 8,
+          "fechaExpiracion": "2026-09-15",
+          "ubicacion": "BEB-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 15,
+      "sku": "SKU-00015",
+      "codigoBarras": "7501000000015",
+      "nombreProducto": "Pan de Caja Integral",
+      "categoriaNombre": "Panadería",
+      "proveedorNombre": "Panificadora San Miguel",
+      "precioCompra": 26.0,
+      "precioVenta": 38.0,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T05:22:10",
+      "urlImagen": "https://picsum.photos/seed/inv15/80/80",
+      "lotes": [
+        {
+          "idLote": 1501,
+          "numeroLote": "PAN-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2025-12-06",
+          "ubicacion": "PAN-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 16,
+      "sku": "SKU-00016",
+      "codigoBarras": "7501000000016",
+      "nombreProducto": "Queso Manchego 400g",
+      "categoriaNombre": "Cremería y Embutidos",
+      "proveedorNombre": "Lácteos del Valle",
+      "precioCompra": 52.0,
+      "precioVenta": 79.0,
+      "critico": 5,
+      "bajo": 12,
+      "estatus": false,
+      "fechaActualizacion": "2025-11-25T14:12:20",
+      "urlImagen": "https://picsum.photos/seed/inv16/80/80",
+      "lotes": [
+        {
+          "idLote": 1601,
+          "numeroLote": "QMC-01",
+          "cantidad": 6,
+          "fechaExpiracion": "2025-12-04",
+          "ubicacion": "CRE-01"
+        },
+        {
+          "idLote": 1602,
+          "numeroLote": "QMC-02",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-15",
+          "ubicacion": "CRE-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 17,
+      "sku": "SKU-00017",
+      "codigoBarras": "7501000000017",
+      "nombreProducto": "Cereal de Maíz 500g",
+      "categoriaNombre": "Cereales y Granos",
+      "proveedorNombre": "Proveedor MX",
+      "precioCompra": 29.0,
+      "precioVenta": 44.0,
+      "critico": 6,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-02T19:05:11",
+      "urlImagen": "https://picsum.photos/seed/inv17/80/80",
+      "lotes": [
+        {
+          "idLote": 1701,
+          "numeroLote": "CER-01",
+          "cantidad": 12,
+          "fechaExpiracion": "2026-03-22",
+          "ubicacion": "AB-06"
+        },
+        {
+          "idLote": 1702,
+          "numeroLote": "CER-02",
+          "cantidad": 15,
+          "fechaExpiracion": "2026-05-30",
+          "ubicacion": "AB-06"
+        }
+      ]
+    },
+    {
+      "idProducto": 18,
+      "sku": "SKU-00018",
+      "codigoBarras": "7501000000018",
+      "nombreProducto": "Galletas Surtidas 500g",
+      "categoriaNombre": "Dulcería",
+      "proveedorNombre": "Dulces y Snacks del Centro",
+      "precioCompra": 21.5,
+      "precioVenta": 32.0,
+      "critico": 5,
+      "bajo": 15,
+      "estatus": false,
+      "fechaActualizacion": "2025-11-20T11:59:40",
+      "urlImagen": "https://picsum.photos/seed/inv18/80/80",
+      "lotes": []
+    },
+    {
+      "idProducto": 19,
+      "sku": "SKU-00002",
+      "codigoBarras": "7501000000002",
+      "nombreProducto": "Leche Entera 1L",
+      "categoriaNombre": "Lácteos",
+      "proveedorNombre": "Lácteos del Valle",
+      "precioCompra": 15.2,
+      "precioVenta": 22.5,
+      "critico": 8,
+      "bajo": 18,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-04T08:11:02",
+      "urlImagen": "https://picsum.photos/seed/inv2/80/80",
+      "lotes": [
+        {
+          "idLote": 201,
+          "numeroLote": "L002-1",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-06",
+          "ubicacion": "LAC-01"
+        },
+        {
+          "idLote": 202,
+          "numeroLote": "L002-2",
+          "cantidad": 7,
+          "fechaExpiracion": "2025-12-20",
+          "ubicacion": "LAC-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 20,
+      "sku": "SKU-00003",
+      "codigoBarras": "7501000000003",
+      "nombreProducto": "Yogurt Natural 900g",
+      "categoriaNombre": "Lácteos",
+      "proveedorNombre": "AgroFresco",
+      "precioCompra": 18.0,
+      "precioVenta": 27.0,
+      "critico": 5,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-02T17:40:10",
+      "urlImagen": "https://picsum.photos/seed/inv3/80/80",
+      "lotes": [
+        {
+          "idLote": 301,
+          "numeroLote": "YOG-01",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-03",
+          "ubicacion": "LAC-02"
+        },
+        {
+          "idLote": 302,
+          "numeroLote": "YOG-02",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-10",
+          "ubicacion": "LAC-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 21,
+      "sku": "SKU-00004",
+      "codigoBarras": "7501000000004",
+      "nombreProducto": "Papas Fritas 150g",
+      "categoriaNombre": "Botanas",
+      "proveedorNombre": "SnacksGolosinas SA",
+      "precioCompra": 9.5,
+      "precioVenta": 15.0,
+      "critico": 4,
+      "bajo": 12,
+      "estatus": true,
+      "fechaActualizacion": "2025-11-30T12:05:44",
+      "urlImagen": "https://picsum.photos/seed/inv4/80/80",
+      "lotes": []
+    },
+    {
+      "idProducto": 22,
+      "sku": "SKU-00005",
+      "codigoBarras": "7501000000005",
+      "nombreProducto": "Arroz Blanco 1kg",
+      "categoriaNombre": "Abarrotes",
+      "proveedorNombre": "DespensaExpress",
+      "precioCompra": 16.0,
+      "precioVenta": 23.5,
+      "critico": 10,
+      "bajo": 25,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-01T09:21:18",
+      "urlImagen": "https://picsum.photos/seed/inv5/80/80",
+      "lotes": [
+        {
+          "idLote": 501,
+          "numeroLote": "ARZ-01",
+          "cantidad": 25,
+          "fechaExpiracion": "2026-05-30",
+          "ubicacion": "AB-01"
+        },
+        {
+          "idLote": 502,
+          "numeroLote": "ARZ-02",
+          "cantidad": 30,
+          "fechaExpiracion": "2026-08-10",
+          "ubicacion": "AB-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 23,
+      "sku": "SKU-00006",
+      "codigoBarras": "7501000000006",
+      "nombreProducto": "Frijol Negro 900g",
+      "categoriaNombre": "Cereales y Granos",
+      "proveedorNombre": "Grupo Alimentos Selectos",
+      "precioCompra": 19.8,
+      "precioVenta": 28.9,
+      "critico": 6,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T07:55:10",
+      "urlImagen": "https://picsum.photos/seed/inv6/80/80",
+      "lotes": [
+        {
+          "idLote": 601,
+          "numeroLote": "FRJ-01",
+          "cantidad": 4,
+          "fechaExpiracion": "2026-02-10",
+          "ubicacion": "AB-03"
+        },
+        {
+          "idLote": 602,
+          "numeroLote": "FRJ-02",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-16",
+          "ubicacion": "AB-03"
+        }
+      ]
+    },
+    {
+      "idProducto": 24,
+      "sku": "SKU-00007",
+      "codigoBarras": "7501000000007",
+      "nombreProducto": "Detergente Líquido 4L",
+      "categoriaNombre": "Limpieza del Hogar",
+      "proveedorNombre": "Plásticos Nova",
+      "precioCompra": 65.0,
+      "precioVenta": 89.0,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-04T21:35:01",
+      "urlImagen": "https://picsum.photos/seed/inv7/80/80",
+      "lotes": [
+        {
+          "idLote": 701,
+          "numeroLote": "LMP-01",
+          "cantidad": 10,
+          "fechaExpiracion": "2027-01-20",
+          "ubicacion": "LIM-01"
+        },
+        {
+          "idLote": 702,
+          "numeroLote": "LMP-02",
+          "cantidad": 8,
+          "fechaExpiracion": "2027-03-11",
+          "ubicacion": "LIM-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 25,
+      "sku": "SKU-00008",
+      "codigoBarras": "7501000000008",
+      "nombreProducto": "Shampoo Familiar 750ml",
+      "categoriaNombre": "Higiene Personal",
+      "proveedorNombre": "HigienePlus",
+      "precioCompra": 32.0,
+      "precioVenta": 48.0,
+      "critico": 5,
+      "bajo": 12,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-02T13:14:10",
+      "urlImagen": "https://picsum.photos/seed/inv8/80/80",
+      "lotes": [
+        {
+          "idLote": 801,
+          "numeroLote": "HIG-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2026-09-10",
+          "ubicacion": "HIG-01"
+        },
+        {
+          "idLote": 802,
+          "numeroLote": "HIG-02",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-25",
+          "ubicacion": "HIG-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 26,
+      "sku": "SKU-00009",
+      "codigoBarras": "7501000000009",
+      "nombreProducto": "Toallas de Papel 6 pzas",
+      "categoriaNombre": "Limpieza del Hogar",
+      "proveedorNombre": "Súper Distribuciones AR",
+      "precioCompra": 38.5,
+      "precioVenta": 55.9,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T11:08:18",
+      "urlImagen": "https://picsum.photos/seed/inv9/80/80",
+      "lotes": [
+        {
+          "idLote": 901,
+          "numeroLote": "PAP-01",
+          "cantidad": 3,
+          "fechaExpiracion": "2027-05-01",
+          "ubicacion": "LIM-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 27,
+      "sku": "SKU-00010",
+      "codigoBarras": "7501000000010",
+      "nombreProducto": "Manzana Roja Kg",
+      "categoriaNombre": "Frutas y Verduras",
+      "proveedorNombre": "Frutas Selectas",
+      "precioCompra": 24.0,
+      "precioVenta": 36.0,
+      "critico": 6,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T09:40:55",
+      "urlImagen": "https://picsum.photos/seed/inv10/80/80",
+      "lotes": [
+        {
+          "idLote": 1001,
+          "numeroLote": "FRU-01",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-07",
+          "ubicacion": "FV-01"
+        },
+        {
+          "idLote": 1002,
+          "numeroLote": "FRU-02",
+          "cantidad": 9,
+          "fechaExpiracion": "2025-12-13",
+          "ubicacion": "FV-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 28,
+      "sku": "SKU-00011",
+      "codigoBarras": "7501000000011",
+      "nombreProducto": "Pechuga de Pollo Kg",
+      "categoriaNombre": "Carnicería",
+      "proveedorNombre": "Cárnicos Premium",
+      "precioCompra": 76.0,
+      "precioVenta": 109.9,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T06:12:42",
+      "urlImagen": "https://picsum.photos/seed/inv11/80/80",
+      "lotes": [
+        {
+          "idLote": 1101,
+          "numeroLote": "CAR-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2025-12-05",
+          "ubicacion": "CAR-01"
+        },
+        {
+          "idLote": 1102,
+          "numeroLote": "CAR-02",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-09",
+          "ubicacion": "CAR-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 29,
+      "sku": "SKU-00012",
+      "codigoBarras": "7501000000012",
+      "nombreProducto": "Atún en Agua 140g",
+      "categoriaNombre": "Abarrotes",
+      "proveedorNombre": "Proveedor Express",
+      "precioCompra": 13.5,
+      "precioVenta": 19.9,
+      "critico": 8,
+      "bajo": 20,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-01T20:33:00",
+      "urlImagen": "https://picsum.photos/seed/inv12/80/80",
+      "lotes": [
+        {
+          "idLote": 1201,
+          "numeroLote": "ATN-01",
+          "cantidad": 18,
+          "fechaExpiracion": "2027-08-12",
+          "ubicacion": "AB-05"
+        },
+        {
+          "idLote": 1202,
+          "numeroLote": "ATN-02",
+          "cantidad": 18,
+          "fechaExpiracion": "2027-09-30",
+          "ubicacion": "AB-05"
+        }
+      ]
+    },
+    {
+      "idProducto": 30,
+      "sku": "SKU-00013",
+      "codigoBarras": "7501000000013",
+      "nombreProducto": "Croquetas Perro 20kg",
+      "categoriaNombre": "Mascotas",
+      "proveedorNombre": "AgroFresco",
+      "precioCompra": 380.0,
+      "precioVenta": 520.0,
+      "critico": 3,
+      "bajo": 8,
+      "estatus": true,
+      "fechaActualizacion": "2025-11-29T18:09:49",
+      "urlImagen": "https://picsum.photos/seed/inv13/80/80",
+      "lotes": [
+        {
+          "idLote": 1301,
+          "numeroLote": "PET-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2026-11-01",
+          "ubicacion": "MAS-01"
+        },
+        {
+          "idLote": 1302,
+          "numeroLote": "PET-02",
+          "cantidad": 2,
+          "fechaExpiracion": "2027-01-20",
+          "ubicacion": "MAS-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 31,
+      "sku": "SKU-00014",
+      "codigoBarras": "7501000000014",
+      "nombreProducto": "Café Molido 500g",
+      "categoriaNombre": "Bebidas",
+      "proveedorNombre": "Café Sierra Madre",
+      "precioCompra": 75.0,
+      "precioVenta": 112.0,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-03T15:45:26",
+      "urlImagen": "https://picsum.photos/seed/inv14/80/80",
+      "lotes": [
+        {
+          "idLote": 1401,
+          "numeroLote": "CAF-01",
+          "cantidad": 8,
+          "fechaExpiracion": "2026-06-01",
+          "ubicacion": "BEB-02"
+        },
+        {
+          "idLote": 1402,
+          "numeroLote": "CAF-02",
+          "cantidad": 8,
+          "fechaExpiracion": "2026-09-15",
+          "ubicacion": "BEB-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 32,
+      "sku": "SKU-00015",
+      "codigoBarras": "7501000000015",
+      "nombreProducto": "Pan de Caja Integral",
+      "categoriaNombre": "Panadería",
+      "proveedorNombre": "Panificadora San Miguel",
+      "precioCompra": 26.0,
+      "precioVenta": 38.0,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T05:22:10",
+      "urlImagen": "https://picsum.photos/seed/inv15/80/80",
+      "lotes": [
+        {
+          "idLote": 1501,
+          "numeroLote": "PAN-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2025-12-06",
+          "ubicacion": "PAN-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 33,
+      "sku": "SKU-00016",
+      "codigoBarras": "7501000000016",
+      "nombreProducto": "Queso Manchego 400g",
+      "categoriaNombre": "Cremería y Embutidos",
+      "proveedorNombre": "Lácteos del Valle",
+      "precioCompra": 52.0,
+      "precioVenta": 79.0,
+      "critico": 5,
+      "bajo": 12,
+      "estatus": false,
+      "fechaActualizacion": "2025-11-25T14:12:20",
+      "urlImagen": "https://picsum.photos/seed/inv16/80/80",
+      "lotes": [
+        {
+          "idLote": 1601,
+          "numeroLote": "QMC-01",
+          "cantidad": 6,
+          "fechaExpiracion": "2025-12-04",
+          "ubicacion": "CRE-01"
+        },
+        {
+          "idLote": 1602,
+          "numeroLote": "QMC-02",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-15",
+          "ubicacion": "CRE-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 34,
+      "sku": "SKU-00017",
+      "codigoBarras": "7501000000017",
+      "nombreProducto": "Cereal de Maíz 500g",
+      "categoriaNombre": "Cereales y Granos",
+      "proveedorNombre": "Proveedor MX",
+      "precioCompra": 29.0,
+      "precioVenta": 44.0,
+      "critico": 6,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-02T19:05:11",
+      "urlImagen": "https://picsum.photos/seed/inv17/80/80",
+      "lotes": [
+        {
+          "idLote": 1701,
+          "numeroLote": "CER-01",
+          "cantidad": 12,
+          "fechaExpiracion": "2026-03-22",
+          "ubicacion": "AB-06"
+        },
+        {
+          "idLote": 1702,
+          "numeroLote": "CER-02",
+          "cantidad": 15,
+          "fechaExpiracion": "2026-05-30",
+          "ubicacion": "AB-06"
+        }
+      ]
+    },
+    {
+      "idProducto": 35,
+      "sku": "SKU-00018",
+      "codigoBarras": "7501000000018",
+      "nombreProducto": "Galletas Surtidas 500g",
+      "categoriaNombre": "Dulcería",
+      "proveedorNombre": "Dulces y Snacks del Centro",
+      "precioCompra": 21.5,
+      "precioVenta": 32.0,
+      "critico": 5,
+      "bajo": 15,
+      "estatus": false,
+      "fechaActualizacion": "2025-11-20T11:59:40",
+      "urlImagen": "https://picsum.photos/seed/inv18/80/80",
+      "lotes": []
+    },
+    {
+      "idProducto": 36,
+      "sku": "SKU-00002",
+      "codigoBarras": "7501000000002",
+      "nombreProducto": "Leche Entera 1L",
+      "categoriaNombre": "Lácteos",
+      "proveedorNombre": "Lácteos del Valle",
+      "precioCompra": 15.2,
+      "precioVenta": 22.5,
+      "critico": 8,
+      "bajo": 18,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-04T08:11:02",
+      "urlImagen": "https://picsum.photos/seed/inv2/80/80",
+      "lotes": [
+        {
+          "idLote": 201,
+          "numeroLote": "L002-1",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-06",
+          "ubicacion": "LAC-01"
+        },
+        {
+          "idLote": 202,
+          "numeroLote": "L002-2",
+          "cantidad": 7,
+          "fechaExpiracion": "2025-12-20",
+          "ubicacion": "LAC-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 37,
+      "sku": "SKU-00003",
+      "codigoBarras": "7501000000003",
+      "nombreProducto": "Yogurt Natural 900g",
+      "categoriaNombre": "Lácteos",
+      "proveedorNombre": "AgroFresco",
+      "precioCompra": 18.0,
+      "precioVenta": 27.0,
+      "critico": 5,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-02T17:40:10",
+      "urlImagen": "https://picsum.photos/seed/inv3/80/80",
+      "lotes": [
+        {
+          "idLote": 301,
+          "numeroLote": "YOG-01",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-03",
+          "ubicacion": "LAC-02"
+        },
+        {
+          "idLote": 302,
+          "numeroLote": "YOG-02",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-10",
+          "ubicacion": "LAC-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 38,
+      "sku": "SKU-00004",
+      "codigoBarras": "7501000000004",
+      "nombreProducto": "Papas Fritas 150g",
+      "categoriaNombre": "Botanas",
+      "proveedorNombre": "SnacksGolosinas SA",
+      "precioCompra": 9.5,
+      "precioVenta": 15.0,
+      "critico": 4,
+      "bajo": 12,
+      "estatus": true,
+      "fechaActualizacion": "2025-11-30T12:05:44",
+      "urlImagen": "https://picsum.photos/seed/inv4/80/80",
+      "lotes": []
+    },
+    {
+      "idProducto": 39,
+      "sku": "SKU-00005",
+      "codigoBarras": "7501000000005",
+      "nombreProducto": "Arroz Blanco 1kg",
+      "categoriaNombre": "Abarrotes",
+      "proveedorNombre": "DespensaExpress",
+      "precioCompra": 16.0,
+      "precioVenta": 23.5,
+      "critico": 10,
+      "bajo": 25,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-01T09:21:18",
+      "urlImagen": "https://picsum.photos/seed/inv5/80/80",
+      "lotes": [
+        {
+          "idLote": 501,
+          "numeroLote": "ARZ-01",
+          "cantidad": 25,
+          "fechaExpiracion": "2026-05-30",
+          "ubicacion": "AB-01"
+        },
+        {
+          "idLote": 502,
+          "numeroLote": "ARZ-02",
+          "cantidad": 30,
+          "fechaExpiracion": "2026-08-10",
+          "ubicacion": "AB-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 40,
+      "sku": "SKU-00006",
+      "codigoBarras": "7501000000006",
+      "nombreProducto": "Frijol Negro 900g",
+      "categoriaNombre": "Cereales y Granos",
+      "proveedorNombre": "Grupo Alimentos Selectos",
+      "precioCompra": 19.8,
+      "precioVenta": 28.9,
+      "critico": 6,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T07:55:10",
+      "urlImagen": "https://picsum.photos/seed/inv6/80/80",
+      "lotes": [
+        {
+          "idLote": 601,
+          "numeroLote": "FRJ-01",
+          "cantidad": 4,
+          "fechaExpiracion": "2026-02-10",
+          "ubicacion": "AB-03"
+        },
+        {
+          "idLote": 602,
+          "numeroLote": "FRJ-02",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-16",
+          "ubicacion": "AB-03"
+        }
+      ]
+    },
+    {
+      "idProducto": 41,
+      "sku": "SKU-00007",
+      "codigoBarras": "7501000000007",
+      "nombreProducto": "Detergente Líquido 4L",
+      "categoriaNombre": "Limpieza del Hogar",
+      "proveedorNombre": "Plásticos Nova",
+      "precioCompra": 65.0,
+      "precioVenta": 89.0,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-04T21:35:01",
+      "urlImagen": "https://picsum.photos/seed/inv7/80/80",
+      "lotes": [
+        {
+          "idLote": 701,
+          "numeroLote": "LMP-01",
+          "cantidad": 10,
+          "fechaExpiracion": "2027-01-20",
+          "ubicacion": "LIM-01"
+        },
+        {
+          "idLote": 702,
+          "numeroLote": "LMP-02",
+          "cantidad": 8,
+          "fechaExpiracion": "2027-03-11",
+          "ubicacion": "LIM-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 42,
+      "sku": "SKU-00008",
+      "codigoBarras": "7501000000008",
+      "nombreProducto": "Shampoo Familiar 750ml",
+      "categoriaNombre": "Higiene Personal",
+      "proveedorNombre": "HigienePlus",
+      "precioCompra": 32.0,
+      "precioVenta": 48.0,
+      "critico": 5,
+      "bajo": 12,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-02T13:14:10",
+      "urlImagen": "https://picsum.photos/seed/inv8/80/80",
+      "lotes": [
+        {
+          "idLote": 801,
+          "numeroLote": "HIG-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2026-09-10",
+          "ubicacion": "HIG-01"
+        },
+        {
+          "idLote": 802,
+          "numeroLote": "HIG-02",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-25",
+          "ubicacion": "HIG-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 43,
+      "sku": "SKU-00009",
+      "codigoBarras": "7501000000009",
+      "nombreProducto": "Toallas de Papel 6 pzas",
+      "categoriaNombre": "Limpieza del Hogar",
+      "proveedorNombre": "Súper Distribuciones AR",
+      "precioCompra": 38.5,
+      "precioVenta": 55.9,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T11:08:18",
+      "urlImagen": "https://picsum.photos/seed/inv9/80/80",
+      "lotes": [
+        {
+          "idLote": 901,
+          "numeroLote": "PAP-01",
+          "cantidad": 3,
+          "fechaExpiracion": "2027-05-01",
+          "ubicacion": "LIM-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 44,
+      "sku": "SKU-00010",
+      "codigoBarras": "7501000000010",
+      "nombreProducto": "Manzana Roja Kg",
+      "categoriaNombre": "Frutas y Verduras",
+      "proveedorNombre": "Frutas Selectas",
+      "precioCompra": 24.0,
+      "precioVenta": 36.0,
+      "critico": 6,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T09:40:55",
+      "urlImagen": "https://picsum.photos/seed/inv10/80/80",
+      "lotes": [
+        {
+          "idLote": 1001,
+          "numeroLote": "FRU-01",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-07",
+          "ubicacion": "FV-01"
+        },
+        {
+          "idLote": 1002,
+          "numeroLote": "FRU-02",
+          "cantidad": 9,
+          "fechaExpiracion": "2025-12-13",
+          "ubicacion": "FV-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 45,
+      "sku": "SKU-00011",
+      "codigoBarras": "7501000000011",
+      "nombreProducto": "Pechuga de Pollo Kg",
+      "categoriaNombre": "Carnicería",
+      "proveedorNombre": "Cárnicos Premium",
+      "precioCompra": 76.0,
+      "precioVenta": 109.9,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T06:12:42",
+      "urlImagen": "https://picsum.photos/seed/inv11/80/80",
+      "lotes": [
+        {
+          "idLote": 1101,
+          "numeroLote": "CAR-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2025-12-05",
+          "ubicacion": "CAR-01"
+        },
+        {
+          "idLote": 1102,
+          "numeroLote": "CAR-02",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-09",
+          "ubicacion": "CAR-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 46,
+      "sku": "SKU-00012",
+      "codigoBarras": "7501000000012",
+      "nombreProducto": "Atún en Agua 140g",
+      "categoriaNombre": "Abarrotes",
+      "proveedorNombre": "Proveedor Express",
+      "precioCompra": 13.5,
+      "precioVenta": 19.9,
+      "critico": 8,
+      "bajo": 20,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-01T20:33:00",
+      "urlImagen": "https://picsum.photos/seed/inv12/80/80",
+      "lotes": [
+        {
+          "idLote": 1201,
+          "numeroLote": "ATN-01",
+          "cantidad": 18,
+          "fechaExpiracion": "2027-08-12",
+          "ubicacion": "AB-05"
+        },
+        {
+          "idLote": 1202,
+          "numeroLote": "ATN-02",
+          "cantidad": 18,
+          "fechaExpiracion": "2027-09-30",
+          "ubicacion": "AB-05"
+        }
+      ]
+    },
+    {
+      "idProducto": 47,
+      "sku": "SKU-00013",
+      "codigoBarras": "7501000000013",
+      "nombreProducto": "Croquetas Perro 20kg",
+      "categoriaNombre": "Mascotas",
+      "proveedorNombre": "AgroFresco",
+      "precioCompra": 380.0,
+      "precioVenta": 520.0,
+      "critico": 3,
+      "bajo": 8,
+      "estatus": true,
+      "fechaActualizacion": "2025-11-29T18:09:49",
+      "urlImagen": "https://picsum.photos/seed/inv13/80/80",
+      "lotes": [
+        {
+          "idLote": 1301,
+          "numeroLote": "PET-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2026-11-01",
+          "ubicacion": "MAS-01"
+        },
+        {
+          "idLote": 1302,
+          "numeroLote": "PET-02",
+          "cantidad": 2,
+          "fechaExpiracion": "2027-01-20",
+          "ubicacion": "MAS-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 48,
+      "sku": "SKU-00014",
+      "codigoBarras": "7501000000014",
+      "nombreProducto": "Café Molido 500g",
+      "categoriaNombre": "Bebidas",
+      "proveedorNombre": "Café Sierra Madre",
+      "precioCompra": 75.0,
+      "precioVenta": 112.0,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-03T15:45:26",
+      "urlImagen": "https://picsum.photos/seed/inv14/80/80",
+      "lotes": [
+        {
+          "idLote": 1401,
+          "numeroLote": "CAF-01",
+          "cantidad": 8,
+          "fechaExpiracion": "2026-06-01",
+          "ubicacion": "BEB-02"
+        },
+        {
+          "idLote": 1402,
+          "numeroLote": "CAF-02",
+          "cantidad": 8,
+          "fechaExpiracion": "2026-09-15",
+          "ubicacion": "BEB-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 49,
+      "sku": "SKU-00015",
+      "codigoBarras": "7501000000015",
+      "nombreProducto": "Pan de Caja Integral",
+      "categoriaNombre": "Panadería",
+      "proveedorNombre": "Panificadora San Miguel",
+      "precioCompra": 26.0,
+      "precioVenta": 38.0,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T05:22:10",
+      "urlImagen": "https://picsum.photos/seed/inv15/80/80",
+      "lotes": [
+        {
+          "idLote": 1501,
+          "numeroLote": "PAN-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2025-12-06",
+          "ubicacion": "PAN-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 50,
+      "sku": "SKU-00016",
+      "codigoBarras": "7501000000016",
+      "nombreProducto": "Queso Manchego 400g",
+      "categoriaNombre": "Cremería y Embutidos",
+      "proveedorNombre": "Lácteos del Valle",
+      "precioCompra": 52.0,
+      "precioVenta": 79.0,
+      "critico": 5,
+      "bajo": 12,
+      "estatus": false,
+      "fechaActualizacion": "2025-11-25T14:12:20",
+      "urlImagen": "https://picsum.photos/seed/inv16/80/80",
+      "lotes": [
+        {
+          "idLote": 1601,
+          "numeroLote": "QMC-01",
+          "cantidad": 6,
+          "fechaExpiracion": "2025-12-04",
+          "ubicacion": "CRE-01"
+        },
+        {
+          "idLote": 1602,
+          "numeroLote": "QMC-02",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-15",
+          "ubicacion": "CRE-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 51,
+      "sku": "SKU-00017",
+      "codigoBarras": "7501000000017",
+      "nombreProducto": "Cereal de Maíz 500g",
+      "categoriaNombre": "Cereales y Granos",
+      "proveedorNombre": "Proveedor MX",
+      "precioCompra": 29.0,
+      "precioVenta": 44.0,
+      "critico": 6,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-02T19:05:11",
+      "urlImagen": "https://picsum.photos/seed/inv17/80/80",
+      "lotes": [
+        {
+          "idLote": 1701,
+          "numeroLote": "CER-01",
+          "cantidad": 12,
+          "fechaExpiracion": "2026-03-22",
+          "ubicacion": "AB-06"
+        },
+        {
+          "idLote": 1702,
+          "numeroLote": "CER-02",
+          "cantidad": 15,
+          "fechaExpiracion": "2026-05-30",
+          "ubicacion": "AB-06"
+        }
+      ]
+    },
+    {
+      "idProducto": 52,
+      "sku": "SKU-00018",
+      "codigoBarras": "7501000000018",
+      "nombreProducto": "Galletas Surtidas 500g",
+      "categoriaNombre": "Dulcería",
+      "proveedorNombre": "Dulces y Snacks del Centro",
+      "precioCompra": 21.5,
+      "precioVenta": 32.0,
+      "critico": 5,
+      "bajo": 15,
+      "estatus": false,
+      "fechaActualizacion": "2025-11-20T11:59:40",
+      "urlImagen": "https://picsum.photos/seed/inv18/80/80",
+      "lotes": []
+    },
+    {
+      "idProducto": 53,
+      "sku": "SKU-00002",
+      "codigoBarras": "7501000000002",
+      "nombreProducto": "Leche Entera 1L",
+      "categoriaNombre": "Lácteos",
+      "proveedorNombre": "Lácteos del Valle",
+      "precioCompra": 15.2,
+      "precioVenta": 22.5,
+      "critico": 8,
+      "bajo": 18,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-04T08:11:02",
+      "urlImagen": "https://picsum.photos/seed/inv2/80/80",
+      "lotes": [
+        {
+          "idLote": 201,
+          "numeroLote": "L002-1",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-06",
+          "ubicacion": "LAC-01"
+        },
+        {
+          "idLote": 202,
+          "numeroLote": "L002-2",
+          "cantidad": 7,
+          "fechaExpiracion": "2025-12-20",
+          "ubicacion": "LAC-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 54,
+      "sku": "SKU-00003",
+      "codigoBarras": "7501000000003",
+      "nombreProducto": "Yogurt Natural 900g",
+      "categoriaNombre": "Lácteos",
+      "proveedorNombre": "AgroFresco",
+      "precioCompra": 18.0,
+      "precioVenta": 27.0,
+      "critico": 5,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-02T17:40:10",
+      "urlImagen": "https://picsum.photos/seed/inv3/80/80",
+      "lotes": [
+        {
+          "idLote": 301,
+          "numeroLote": "YOG-01",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-03",
+          "ubicacion": "LAC-02"
+        },
+        {
+          "idLote": 302,
+          "numeroLote": "YOG-02",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-10",
+          "ubicacion": "LAC-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 55,
+      "sku": "SKU-00004",
+      "codigoBarras": "7501000000004",
+      "nombreProducto": "Papas Fritas 150g",
+      "categoriaNombre": "Botanas",
+      "proveedorNombre": "SnacksGolosinas SA",
+      "precioCompra": 9.5,
+      "precioVenta": 15.0,
+      "critico": 4,
+      "bajo": 12,
+      "estatus": true,
+      "fechaActualizacion": "2025-11-30T12:05:44",
+      "urlImagen": "https://picsum.photos/seed/inv4/80/80",
+      "lotes": []
+    },
+    {
+      "idProducto": 56,
+      "sku": "SKU-00005",
+      "codigoBarras": "7501000000005",
+      "nombreProducto": "Arroz Blanco 1kg",
+      "categoriaNombre": "Abarrotes",
+      "proveedorNombre": "DespensaExpress",
+      "precioCompra": 16.0,
+      "precioVenta": 23.5,
+      "critico": 10,
+      "bajo": 25,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-01T09:21:18",
+      "urlImagen": "https://picsum.photos/seed/inv5/80/80",
+      "lotes": [
+        {
+          "idLote": 501,
+          "numeroLote": "ARZ-01",
+          "cantidad": 25,
+          "fechaExpiracion": "2026-05-30",
+          "ubicacion": "AB-01"
+        },
+        {
+          "idLote": 502,
+          "numeroLote": "ARZ-02",
+          "cantidad": 30,
+          "fechaExpiracion": "2026-08-10",
+          "ubicacion": "AB-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 57,
+      "sku": "SKU-00006",
+      "codigoBarras": "7501000000006",
+      "nombreProducto": "Frijol Negro 900g",
+      "categoriaNombre": "Cereales y Granos",
+      "proveedorNombre": "Grupo Alimentos Selectos",
+      "precioCompra": 19.8,
+      "precioVenta": 28.9,
+      "critico": 6,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T07:55:10",
+      "urlImagen": "https://picsum.photos/seed/inv6/80/80",
+      "lotes": [
+        {
+          "idLote": 601,
+          "numeroLote": "FRJ-01",
+          "cantidad": 4,
+          "fechaExpiracion": "2026-02-10",
+          "ubicacion": "AB-03"
+        },
+        {
+          "idLote": 602,
+          "numeroLote": "FRJ-02",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-16",
+          "ubicacion": "AB-03"
+        }
+      ]
+    },
+    {
+      "idProducto": 58,
+      "sku": "SKU-00007",
+      "codigoBarras": "7501000000007",
+      "nombreProducto": "Detergente Líquido 4L",
+      "categoriaNombre": "Limpieza del Hogar",
+      "proveedorNombre": "Plásticos Nova",
+      "precioCompra": 65.0,
+      "precioVenta": 89.0,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-04T21:35:01",
+      "urlImagen": "https://picsum.photos/seed/inv7/80/80",
+      "lotes": [
+        {
+          "idLote": 701,
+          "numeroLote": "LMP-01",
+          "cantidad": 10,
+          "fechaExpiracion": "2027-01-20",
+          "ubicacion": "LIM-01"
+        },
+        {
+          "idLote": 702,
+          "numeroLote": "LMP-02",
+          "cantidad": 8,
+          "fechaExpiracion": "2027-03-11",
+          "ubicacion": "LIM-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 59,
+      "sku": "SKU-00008",
+      "codigoBarras": "7501000000008",
+      "nombreProducto": "Shampoo Familiar 750ml",
+      "categoriaNombre": "Higiene Personal",
+      "proveedorNombre": "HigienePlus",
+      "precioCompra": 32.0,
+      "precioVenta": 48.0,
+      "critico": 5,
+      "bajo": 12,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-02T13:14:10",
+      "urlImagen": "https://picsum.photos/seed/inv8/80/80",
+      "lotes": [
+        {
+          "idLote": 801,
+          "numeroLote": "HIG-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2026-09-10",
+          "ubicacion": "HIG-01"
+        },
+        {
+          "idLote": 802,
+          "numeroLote": "HIG-02",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-25",
+          "ubicacion": "HIG-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 60,
+      "sku": "SKU-00009",
+      "codigoBarras": "7501000000009",
+      "nombreProducto": "Toallas de Papel 6 pzas",
+      "categoriaNombre": "Limpieza del Hogar",
+      "proveedorNombre": "Súper Distribuciones AR",
+      "precioCompra": 38.5,
+      "precioVenta": 55.9,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T11:08:18",
+      "urlImagen": "https://picsum.photos/seed/inv9/80/80",
+      "lotes": [
+        {
+          "idLote": 901,
+          "numeroLote": "PAP-01",
+          "cantidad": 3,
+          "fechaExpiracion": "2027-05-01",
+          "ubicacion": "LIM-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 61,
+      "sku": "SKU-00010",
+      "codigoBarras": "7501000000010",
+      "nombreProducto": "Manzana Roja Kg",
+      "categoriaNombre": "Frutas y Verduras",
+      "proveedorNombre": "Frutas Selectas",
+      "precioCompra": 24.0,
+      "precioVenta": 36.0,
+      "critico": 6,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T09:40:55",
+      "urlImagen": "https://picsum.photos/seed/inv10/80/80",
+      "lotes": [
+        {
+          "idLote": 1001,
+          "numeroLote": "FRU-01",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-07",
+          "ubicacion": "FV-01"
+        },
+        {
+          "idLote": 1002,
+          "numeroLote": "FRU-02",
+          "cantidad": 9,
+          "fechaExpiracion": "2025-12-13",
+          "ubicacion": "FV-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 62,
+      "sku": "SKU-00011",
+      "codigoBarras": "7501000000011",
+      "nombreProducto": "Pechuga de Pollo Kg",
+      "categoriaNombre": "Carnicería",
+      "proveedorNombre": "Cárnicos Premium",
+      "precioCompra": 76.0,
+      "precioVenta": 109.9,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T06:12:42",
+      "urlImagen": "https://picsum.photos/seed/inv11/80/80",
+      "lotes": [
+        {
+          "idLote": 1101,
+          "numeroLote": "CAR-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2025-12-05",
+          "ubicacion": "CAR-01"
+        },
+        {
+          "idLote": 1102,
+          "numeroLote": "CAR-02",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-09",
+          "ubicacion": "CAR-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 63,
+      "sku": "SKU-00012",
+      "codigoBarras": "7501000000012",
+      "nombreProducto": "Atún en Agua 140g",
+      "categoriaNombre": "Abarrotes",
+      "proveedorNombre": "Proveedor Express",
+      "precioCompra": 13.5,
+      "precioVenta": 19.9,
+      "critico": 8,
+      "bajo": 20,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-01T20:33:00",
+      "urlImagen": "https://picsum.photos/seed/inv12/80/80",
+      "lotes": [
+        {
+          "idLote": 1201,
+          "numeroLote": "ATN-01",
+          "cantidad": 18,
+          "fechaExpiracion": "2027-08-12",
+          "ubicacion": "AB-05"
+        },
+        {
+          "idLote": 1202,
+          "numeroLote": "ATN-02",
+          "cantidad": 18,
+          "fechaExpiracion": "2027-09-30",
+          "ubicacion": "AB-05"
+        }
+      ]
+    },
+    {
+      "idProducto": 64,
+      "sku": "SKU-00013",
+      "codigoBarras": "7501000000013",
+      "nombreProducto": "Croquetas Perro 20kg",
+      "categoriaNombre": "Mascotas",
+      "proveedorNombre": "AgroFresco",
+      "precioCompra": 380.0,
+      "precioVenta": 520.0,
+      "critico": 3,
+      "bajo": 8,
+      "estatus": true,
+      "fechaActualizacion": "2025-11-29T18:09:49",
+      "urlImagen": "https://picsum.photos/seed/inv13/80/80",
+      "lotes": [
+        {
+          "idLote": 1301,
+          "numeroLote": "PET-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2026-11-01",
+          "ubicacion": "MAS-01"
+        },
+        {
+          "idLote": 1302,
+          "numeroLote": "PET-02",
+          "cantidad": 2,
+          "fechaExpiracion": "2027-01-20",
+          "ubicacion": "MAS-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 65,
+      "sku": "SKU-00014",
+      "codigoBarras": "7501000000014",
+      "nombreProducto": "Café Molido 500g",
+      "categoriaNombre": "Bebidas",
+      "proveedorNombre": "Café Sierra Madre",
+      "precioCompra": 75.0,
+      "precioVenta": 112.0,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-03T15:45:26",
+      "urlImagen": "https://picsum.photos/seed/inv14/80/80",
+      "lotes": [
+        {
+          "idLote": 1401,
+          "numeroLote": "CAF-01",
+          "cantidad": 8,
+          "fechaExpiracion": "2026-06-01",
+          "ubicacion": "BEB-02"
+        },
+        {
+          "idLote": 1402,
+          "numeroLote": "CAF-02",
+          "cantidad": 8,
+          "fechaExpiracion": "2026-09-15",
+          "ubicacion": "BEB-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 66,
+      "sku": "SKU-00015",
+      "codigoBarras": "7501000000015",
+      "nombreProducto": "Pan de Caja Integral",
+      "categoriaNombre": "Panadería",
+      "proveedorNombre": "Panificadora San Miguel",
+      "precioCompra": 26.0,
+      "precioVenta": 38.0,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T05:22:10",
+      "urlImagen": "https://picsum.photos/seed/inv15/80/80",
+      "lotes": [
+        {
+          "idLote": 1501,
+          "numeroLote": "PAN-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2025-12-06",
+          "ubicacion": "PAN-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 67,
+      "sku": "SKU-00016",
+      "codigoBarras": "7501000000016",
+      "nombreProducto": "Queso Manchego 400g",
+      "categoriaNombre": "Cremería y Embutidos",
+      "proveedorNombre": "Lácteos del Valle",
+      "precioCompra": 52.0,
+      "precioVenta": 79.0,
+      "critico": 5,
+      "bajo": 12,
+      "estatus": false,
+      "fechaActualizacion": "2025-11-25T14:12:20",
+      "urlImagen": "https://picsum.photos/seed/inv16/80/80",
+      "lotes": [
+        {
+          "idLote": 1601,
+          "numeroLote": "QMC-01",
+          "cantidad": 6,
+          "fechaExpiracion": "2025-12-04",
+          "ubicacion": "CRE-01"
+        },
+        {
+          "idLote": 1602,
+          "numeroLote": "QMC-02",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-15",
+          "ubicacion": "CRE-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 68,
+      "sku": "SKU-00017",
+      "codigoBarras": "7501000000017",
+      "nombreProducto": "Cereal de Maíz 500g",
+      "categoriaNombre": "Cereales y Granos",
+      "proveedorNombre": "Proveedor MX",
+      "precioCompra": 29.0,
+      "precioVenta": 44.0,
+      "critico": 6,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-02T19:05:11",
+      "urlImagen": "https://picsum.photos/seed/inv17/80/80",
+      "lotes": [
+        {
+          "idLote": 1701,
+          "numeroLote": "CER-01",
+          "cantidad": 12,
+          "fechaExpiracion": "2026-03-22",
+          "ubicacion": "AB-06"
+        },
+        {
+          "idLote": 1702,
+          "numeroLote": "CER-02",
+          "cantidad": 15,
+          "fechaExpiracion": "2026-05-30",
+          "ubicacion": "AB-06"
+        }
+      ]
+    },
+    {
+      "idProducto": 69,
+      "sku": "SKU-00018",
+      "codigoBarras": "7501000000018",
+      "nombreProducto": "Galletas Surtidas 500g",
+      "categoriaNombre": "Dulcería",
+      "proveedorNombre": "Dulces y Snacks del Centro",
+      "precioCompra": 21.5,
+      "precioVenta": 32.0,
+      "critico": 5,
+      "bajo": 15,
+      "estatus": false,
+      "fechaActualizacion": "2025-11-20T11:59:40",
+      "urlImagen": "https://picsum.photos/seed/inv18/80/80",
+      "lotes": []
+    },
+    {
+      "idProducto": 70,
+      "sku": "SKU-00002",
+      "codigoBarras": "7501000000002",
+      "nombreProducto": "Leche Entera 1L",
+      "categoriaNombre": "Lácteos",
+      "proveedorNombre": "Lácteos del Valle",
+      "precioCompra": 15.2,
+      "precioVenta": 22.5,
+      "critico": 8,
+      "bajo": 18,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-04T08:11:02",
+      "urlImagen": "https://picsum.photos/seed/inv2/80/80",
+      "lotes": [
+        {
+          "idLote": 201,
+          "numeroLote": "L002-1",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-06",
+          "ubicacion": "LAC-01"
+        },
+        {
+          "idLote": 202,
+          "numeroLote": "L002-2",
+          "cantidad": 7,
+          "fechaExpiracion": "2025-12-20",
+          "ubicacion": "LAC-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 71,
+      "sku": "SKU-00003",
+      "codigoBarras": "7501000000003",
+      "nombreProducto": "Yogurt Natural 900g",
+      "categoriaNombre": "Lácteos",
+      "proveedorNombre": "AgroFresco",
+      "precioCompra": 18.0,
+      "precioVenta": 27.0,
+      "critico": 5,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-02T17:40:10",
+      "urlImagen": "https://picsum.photos/seed/inv3/80/80",
+      "lotes": [
+        {
+          "idLote": 301,
+          "numeroLote": "YOG-01",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-03",
+          "ubicacion": "LAC-02"
+        },
+        {
+          "idLote": 302,
+          "numeroLote": "YOG-02",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-10",
+          "ubicacion": "LAC-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 72,
+      "sku": "SKU-00004",
+      "codigoBarras": "7501000000004",
+      "nombreProducto": "Papas Fritas 150g",
+      "categoriaNombre": "Botanas",
+      "proveedorNombre": "SnacksGolosinas SA",
+      "precioCompra": 9.5,
+      "precioVenta": 15.0,
+      "critico": 4,
+      "bajo": 12,
+      "estatus": true,
+      "fechaActualizacion": "2025-11-30T12:05:44",
+      "urlImagen": "https://picsum.photos/seed/inv4/80/80",
+      "lotes": []
+    },
+    {
+      "idProducto": 73,
+      "sku": "SKU-00005",
+      "codigoBarras": "7501000000005",
+      "nombreProducto": "Arroz Blanco 1kg",
+      "categoriaNombre": "Abarrotes",
+      "proveedorNombre": "DespensaExpress",
+      "precioCompra": 16.0,
+      "precioVenta": 23.5,
+      "critico": 10,
+      "bajo": 25,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-01T09:21:18",
+      "urlImagen": "https://picsum.photos/seed/inv5/80/80",
+      "lotes": [
+        {
+          "idLote": 501,
+          "numeroLote": "ARZ-01",
+          "cantidad": 25,
+          "fechaExpiracion": "2026-05-30",
+          "ubicacion": "AB-01"
+        },
+        {
+          "idLote": 502,
+          "numeroLote": "ARZ-02",
+          "cantidad": 30,
+          "fechaExpiracion": "2026-08-10",
+          "ubicacion": "AB-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 74,
+      "sku": "SKU-00006",
+      "codigoBarras": "7501000000006",
+      "nombreProducto": "Frijol Negro 900g",
+      "categoriaNombre": "Cereales y Granos",
+      "proveedorNombre": "Grupo Alimentos Selectos",
+      "precioCompra": 19.8,
+      "precioVenta": 28.9,
+      "critico": 6,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T07:55:10",
+      "urlImagen": "https://picsum.photos/seed/inv6/80/80",
+      "lotes": [
+        {
+          "idLote": 601,
+          "numeroLote": "FRJ-01",
+          "cantidad": 4,
+          "fechaExpiracion": "2026-02-10",
+          "ubicacion": "AB-03"
+        },
+        {
+          "idLote": 602,
+          "numeroLote": "FRJ-02",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-16",
+          "ubicacion": "AB-03"
+        }
+      ]
+    },
+    {
+      "idProducto": 75,
+      "sku": "SKU-00007",
+      "codigoBarras": "7501000000007",
+      "nombreProducto": "Detergente Líquido 4L",
+      "categoriaNombre": "Limpieza del Hogar",
+      "proveedorNombre": "Plásticos Nova",
+      "precioCompra": 65.0,
+      "precioVenta": 89.0,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-04T21:35:01",
+      "urlImagen": "https://picsum.photos/seed/inv7/80/80",
+      "lotes": [
+        {
+          "idLote": 701,
+          "numeroLote": "LMP-01",
+          "cantidad": 10,
+          "fechaExpiracion": "2027-01-20",
+          "ubicacion": "LIM-01"
+        },
+        {
+          "idLote": 702,
+          "numeroLote": "LMP-02",
+          "cantidad": 8,
+          "fechaExpiracion": "2027-03-11",
+          "ubicacion": "LIM-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 76,
+      "sku": "SKU-00008",
+      "codigoBarras": "7501000000008",
+      "nombreProducto": "Shampoo Familiar 750ml",
+      "categoriaNombre": "Higiene Personal",
+      "proveedorNombre": "HigienePlus",
+      "precioCompra": 32.0,
+      "precioVenta": 48.0,
+      "critico": 5,
+      "bajo": 12,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-02T13:14:10",
+      "urlImagen": "https://picsum.photos/seed/inv8/80/80",
+      "lotes": [
+        {
+          "idLote": 801,
+          "numeroLote": "HIG-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2026-09-10",
+          "ubicacion": "HIG-01"
+        },
+        {
+          "idLote": 802,
+          "numeroLote": "HIG-02",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-25",
+          "ubicacion": "HIG-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 77,
+      "sku": "SKU-00009",
+      "codigoBarras": "7501000000009",
+      "nombreProducto": "Toallas de Papel 6 pzas",
+      "categoriaNombre": "Limpieza del Hogar",
+      "proveedorNombre": "Súper Distribuciones AR",
+      "precioCompra": 38.5,
+      "precioVenta": 55.9,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T11:08:18",
+      "urlImagen": "https://picsum.photos/seed/inv9/80/80",
+      "lotes": [
+        {
+          "idLote": 901,
+          "numeroLote": "PAP-01",
+          "cantidad": 3,
+          "fechaExpiracion": "2027-05-01",
+          "ubicacion": "LIM-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 78,
+      "sku": "SKU-00010",
+      "codigoBarras": "7501000000010",
+      "nombreProducto": "Manzana Roja Kg",
+      "categoriaNombre": "Frutas y Verduras",
+      "proveedorNombre": "Frutas Selectas",
+      "precioCompra": 24.0,
+      "precioVenta": 36.0,
+      "critico": 6,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T09:40:55",
+      "urlImagen": "https://picsum.photos/seed/inv10/80/80",
+      "lotes": [
+        {
+          "idLote": 1001,
+          "numeroLote": "FRU-01",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-07",
+          "ubicacion": "FV-01"
+        },
+        {
+          "idLote": 1002,
+          "numeroLote": "FRU-02",
+          "cantidad": 9,
+          "fechaExpiracion": "2025-12-13",
+          "ubicacion": "FV-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 79,
+      "sku": "SKU-00011",
+      "codigoBarras": "7501000000011",
+      "nombreProducto": "Pechuga de Pollo Kg",
+      "categoriaNombre": "Carnicería",
+      "proveedorNombre": "Cárnicos Premium",
+      "precioCompra": 76.0,
+      "precioVenta": 109.9,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T06:12:42",
+      "urlImagen": "https://picsum.photos/seed/inv11/80/80",
+      "lotes": [
+        {
+          "idLote": 1101,
+          "numeroLote": "CAR-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2025-12-05",
+          "ubicacion": "CAR-01"
+        },
+        {
+          "idLote": 1102,
+          "numeroLote": "CAR-02",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-09",
+          "ubicacion": "CAR-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 80,
+      "sku": "SKU-00012",
+      "codigoBarras": "7501000000012",
+      "nombreProducto": "Atún en Agua 140g",
+      "categoriaNombre": "Abarrotes",
+      "proveedorNombre": "Proveedor Express",
+      "precioCompra": 13.5,
+      "precioVenta": 19.9,
+      "critico": 8,
+      "bajo": 20,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-01T20:33:00",
+      "urlImagen": "https://picsum.photos/seed/inv12/80/80",
+      "lotes": [
+        {
+          "idLote": 1201,
+          "numeroLote": "ATN-01",
+          "cantidad": 18,
+          "fechaExpiracion": "2027-08-12",
+          "ubicacion": "AB-05"
+        },
+        {
+          "idLote": 1202,
+          "numeroLote": "ATN-02",
+          "cantidad": 18,
+          "fechaExpiracion": "2027-09-30",
+          "ubicacion": "AB-05"
+        }
+      ]
+    },
+    {
+      "idProducto": 81,
+      "sku": "SKU-00013",
+      "codigoBarras": "7501000000013",
+      "nombreProducto": "Croquetas Perro 20kg",
+      "categoriaNombre": "Mascotas",
+      "proveedorNombre": "AgroFresco",
+      "precioCompra": 380.0,
+      "precioVenta": 520.0,
+      "critico": 3,
+      "bajo": 8,
+      "estatus": true,
+      "fechaActualizacion": "2025-11-29T18:09:49",
+      "urlImagen": "https://picsum.photos/seed/inv13/80/80",
+      "lotes": [
+        {
+          "idLote": 1301,
+          "numeroLote": "PET-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2026-11-01",
+          "ubicacion": "MAS-01"
+        },
+        {
+          "idLote": 1302,
+          "numeroLote": "PET-02",
+          "cantidad": 2,
+          "fechaExpiracion": "2027-01-20",
+          "ubicacion": "MAS-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 82,
+      "sku": "SKU-00014",
+      "codigoBarras": "7501000000014",
+      "nombreProducto": "Café Molido 500g",
+      "categoriaNombre": "Bebidas",
+      "proveedorNombre": "Café Sierra Madre",
+      "precioCompra": 75.0,
+      "precioVenta": 112.0,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-03T15:45:26",
+      "urlImagen": "https://picsum.photos/seed/inv14/80/80",
+      "lotes": [
+        {
+          "idLote": 1401,
+          "numeroLote": "CAF-01",
+          "cantidad": 8,
+          "fechaExpiracion": "2026-06-01",
+          "ubicacion": "BEB-02"
+        },
+        {
+          "idLote": 1402,
+          "numeroLote": "CAF-02",
+          "cantidad": 8,
+          "fechaExpiracion": "2026-09-15",
+          "ubicacion": "BEB-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 83,
+      "sku": "SKU-00015",
+      "codigoBarras": "7501000000015",
+      "nombreProducto": "Pan de Caja Integral",
+      "categoriaNombre": "Panadería",
+      "proveedorNombre": "Panificadora San Miguel",
+      "precioCompra": 26.0,
+      "precioVenta": 38.0,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T05:22:10",
+      "urlImagen": "https://picsum.photos/seed/inv15/80/80",
+      "lotes": [
+        {
+          "idLote": 1501,
+          "numeroLote": "PAN-01",
+          "cantidad": 2,
+          "fechaExpiracion": "2025-12-06",
+          "ubicacion": "PAN-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 84,
+      "sku": "SKU-00016",
+      "codigoBarras": "7501000000016",
+      "nombreProducto": "Queso Manchego 400g",
+      "categoriaNombre": "Cremería y Embutidos",
+      "proveedorNombre": "Lácteos del Valle",
+      "precioCompra": 52.0,
+      "precioVenta": 79.0,
+      "critico": 5,
+      "bajo": 12,
+      "estatus": false,
+      "fechaActualizacion": "2025-11-25T14:12:20",
+      "urlImagen": "https://picsum.photos/seed/inv16/80/80",
+      "lotes": [
+        {
+          "idLote": 1601,
+          "numeroLote": "QMC-01",
+          "cantidad": 6,
+          "fechaExpiracion": "2025-12-04",
+          "ubicacion": "CRE-01"
+        },
+        {
+          "idLote": 1602,
+          "numeroLote": "QMC-02",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-15",
+          "ubicacion": "CRE-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 85,
+      "sku": "SKU-00017",
+      "codigoBarras": "7501000000017",
+      "nombreProducto": "Cereal de Maíz 500g",
+      "categoriaNombre": "Cereales y Granos",
+      "proveedorNombre": "Proveedor MX",
+      "precioCompra": 29.0,
+      "precioVenta": 44.0,
+      "critico": 6,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-02T19:05:11",
+      "urlImagen": "https://picsum.photos/seed/inv17/80/80",
+      "lotes": [
+        {
+          "idLote": 1701,
+          "numeroLote": "CER-01",
+          "cantidad": 12,
+          "fechaExpiracion": "2026-03-22",
+          "ubicacion": "AB-06"
+        },
+        {
+          "idLote": 1702,
+          "numeroLote": "CER-02",
+          "cantidad": 15,
+          "fechaExpiracion": "2026-05-30",
+          "ubicacion": "AB-06"
+        }
+      ]
+    },
+    {
+      "idProducto": 86,
+      "sku": "SKU-00018",
+      "codigoBarras": "7501000000018",
+      "nombreProducto": "Galletas Surtidas 500g",
+      "categoriaNombre": "Dulcería",
+      "proveedorNombre": "Dulces y Snacks del Centro",
+      "precioCompra": 21.5,
+      "precioVenta": 32.0,
+      "critico": 5,
+      "bajo": 15,
+      "estatus": false,
+      "fechaActualizacion": "2025-11-20T11:59:40",
+      "urlImagen": "https://picsum.photos/seed/inv18/80/80",
+      "lotes": []
+    },
+    {
+      "idProducto": 87,
+      "sku": "SKU-00002",
+      "codigoBarras": "7501000000002",
+      "nombreProducto": "Leche Entera 1L",
+      "categoriaNombre": "Lácteos",
+      "proveedorNombre": "Lácteos del Valle",
+      "precioCompra": 15.2,
+      "precioVenta": 22.5,
+      "critico": 8,
+      "bajo": 18,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-04T08:11:02",
+      "urlImagen": "https://picsum.photos/seed/inv2/80/80",
+      "lotes": [
+        {
+          "idLote": 201,
+          "numeroLote": "L002-1",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-06",
+          "ubicacion": "LAC-01"
+        },
+        {
+          "idLote": 202,
+          "numeroLote": "L002-2",
+          "cantidad": 7,
+          "fechaExpiracion": "2025-12-20",
+          "ubicacion": "LAC-01"
+        }
+      ]
+    },
+    {
+      "idProducto": 8,
+      "sku": "SKU-00003",
+      "codigoBarras": "7501000000003",
+      "nombreProducto": "Yogurt Natural 900g",
+      "categoriaNombre": "Lácteos",
+      "proveedorNombre": "AgroFresco",
+      "precioCompra": 18.0,
+      "precioVenta": 27.0,
+      "critico": 5,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-02T17:40:10",
+      "urlImagen": "https://picsum.photos/seed/inv3/80/80",
+      "lotes": [
+        {
+          "idLote": 301,
+          "numeroLote": "YOG-01",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-03",
+          "ubicacion": "LAC-02"
+        },
+        {
+          "idLote": 302,
+          "numeroLote": "YOG-02",
+          "cantidad": 3,
+          "fechaExpiracion": "2025-12-10",
+          "ubicacion": "LAC-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 89,
+      "sku": "SKU-00004",
+      "codigoBarras": "7501000000004",
+      "nombreProducto": "Papas Fritas 150g",
+      "categoriaNombre": "Botanas",
+      "proveedorNombre": "SnacksGolosinas SA",
+      "precioCompra": 9.5,
+      "precioVenta": 15.0,
+      "critico": 4,
+      "bajo": 12,
+      "estatus": true,
+      "fechaActualizacion": "2025-11-30T12:05:44",
+      "urlImagen": "https://picsum.photos/seed/inv4/80/80",
+      "lotes": []
+    },
+    {
+      "idProducto": 90,
+      "sku": "SKU-00005",
+      "codigoBarras": "7501000000005",
+      "nombreProducto": "Arroz Blanco 1kg",
+      "categoriaNombre": "Abarrotes",
+      "proveedorNombre": "DespensaExpress",
+      "precioCompra": 16.0,
+      "precioVenta": 23.5,
+      "critico": 10,
+      "bajo": 25,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-01T09:21:18",
+      "urlImagen": "https://picsum.photos/seed/inv5/80/80",
+      "lotes": [
+        {
+          "idLote": 501,
+          "numeroLote": "ARZ-01",
+          "cantidad": 25,
+          "fechaExpiracion": "2026-05-30",
+          "ubicacion": "AB-01"
+        },
+        {
+          "idLote": 502,
+          "numeroLote": "ARZ-02",
+          "cantidad": 30,
+          "fechaExpiracion": "2026-08-10",
+          "ubicacion": "AB-02"
+        }
+      ]
+    },
+    {
+      "idProducto": 91,
+      "sku": "SKU-00006",
+      "codigoBarras": "7501000000006",
+      "nombreProducto": "Frijol Negro 900g",
+      "categoriaNombre": "Cereales y Granos",
+      "proveedorNombre": "Grupo Alimentos Selectos",
+      "precioCompra": 19.8,
+      "precioVenta": 28.9,
+      "critico": 6,
+      "bajo": 15,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-05T07:55:10",
+      "urlImagen": "https://picsum.photos/seed/inv6/80/80",
+      "lotes": [
+        {
+          "idLote": 601,
+          "numeroLote": "FRJ-01",
+          "cantidad": 4,
+          "fechaExpiracion": "2026-02-10",
+          "ubicacion": "AB-03"
+        },
+        {
+          "idLote": 602,
+          "numeroLote": "FRJ-02",
+          "cantidad": 5,
+          "fechaExpiracion": "2025-12-16",
+          "ubicacion": "AB-03"
+        }
+      ]
+    },
+    {
+      "idProducto": 92,
+      "sku": "SKU-00007",
+      "codigoBarras": "7501000000007",
+      "nombreProducto": "Detergente Líquido 4L",
+      "categoriaNombre": "Limpieza del Hogar",
+      "proveedorNombre": "Plásticos Nova",
+      "precioCompra": 65.0,
+      "precioVenta": 89.0,
+      "critico": 4,
+      "bajo": 10,
+      "estatus": true,
+      "fechaActualizacion": "2025-12-04T21:35:01",
+      "urlImagen": "https://picsum.photos/seed/inv7/80/80",
+      "lotes": [
+        {
+          "idLote": 701,
+          "numeroLote": "LMP-01",
+          "cantidad": 10,
+          "fechaExpiracion": "2027-01-20",
+          "ubicacion": "LIM-01"
+        },
+        {
+          "idLote": 702,
+          "numeroLote": "LMP-02",
+          "cantidad": 8,
+          "fechaExpiracion": "2027-03-11",
+          "ubicacion": "LIM-01"
+        }
+      ]
+    }
+  ]
+}

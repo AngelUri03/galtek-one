@@ -1,0 +1,205 @@
+/* ══════════════════════════════════════════════════════
+   TicketPreview.css
+   Simula exactamente el papel térmico de 58mm (164pt)
+   ══════════════════════════════════════════════════════ */
+
+/* Contenedor centrado con scroll si hay muchos items */
+.ticket-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-height: 340px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.ticket-wrap::-webkit-scrollbar {
+  width: 4px;
+}
+.ticket-wrap::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+/* ── El "papel" físico del ticket ── */
+.ticket-paper {
+  width: 164px;          /* 58mm × 2.8346pt/mm = 164.4pt → 219px en 96dpi */
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 8px 6px 12px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 8px;
+  line-height: 1.5;
+  color: #1e293b;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1),
+              0 0 0 1px rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+}
+
+/* ── Encabezado ── */
+.ticket-header {
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+.ticket-negocio {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin: 0 0 1px;
+}
+
+.ticket-sub {
+  font-size: 7px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* ── Separadores ── */
+.ticket-sep {
+  color: #94a3b8;
+  font-size: 7px;
+  letter-spacing: -1px;
+  margin: 3px 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ticket-sep-light {
+  color: #cbd5e1;
+  font-size: 7px;
+  letter-spacing: -1px;
+  margin: 2px 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ── Filas de datos ── */
+.ticket-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 1px;
+}
+
+.ticket-label {
+  color: #475569;
+  flex-shrink: 0;
+}
+
+.ticket-value {
+  font-weight: 600;
+  text-align: right;
+}
+
+.ticket-badge {
+  background: #0a7463;
+  color: #fff;
+  padding: 0 4px;
+  border-radius: 2px;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+/* ── Encabezado columnas de productos ── */
+.ticket-col-header {
+  display: grid;
+  grid-template-columns: 1fr 24px 44px;
+  gap: 2px;
+  font-weight: 700;
+  font-size: 7px;
+  color: #334155;
+  margin-bottom: 1px;
+}
+
+.ticket-col-desc  { text-align: left; }
+.ticket-col-qty   { text-align: center; }
+.ticket-col-price { text-align: right; }
+
+/* ── Filas de productos ── */
+.ticket-item {
+  display: grid;
+  grid-template-columns: 1fr 24px 44px;
+  gap: 2px;
+  margin-bottom: 1px;
+}
+
+.ticket-item-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 7.5px;
+}
+
+.ticket-item-qty {
+  text-align: center;
+  color: #64748b;
+  font-size: 7px;
+}
+
+.ticket-item-total {
+  text-align: right;
+  font-weight: 600;
+}
+
+.ticket-empty {
+  text-align: center;
+  color: #94a3b8;
+  font-style: italic;
+  margin: 4px 0;
+}
+
+/* ── Fila de TOTAL ── */
+.ticket-total-row {
+  margin-top: 2px;
+  padding-top: 2px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.ticket-label-bold {
+  font-weight: 700;
+  font-size: 9px;
+  color: #0f172a;
+}
+
+.ticket-value-bold {
+  font-weight: 700;
+  font-size: 9px;
+  color: #0f172a;
+}
+
+/* ── Fila de CAMBIO ── */
+.ticket-cambio-row {
+  margin-top: 1px;
+}
+
+.ticket-cambio {
+  color: #0a7463 !important;
+}
+
+/* ── Pie del ticket ── */
+.ticket-footer {
+  text-align: center;
+  font-size: 7.5px;
+  font-weight: 700;
+  color: #334155;
+  margin: 4px 0 0;
+  letter-spacing: 0.2px;
+}
+
+/* ── Mensaje de error de impresión ── */
+.ticket-error-msg {
+  font-size: 0.75rem;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  margin: 0;
+}

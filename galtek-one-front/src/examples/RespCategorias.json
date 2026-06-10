@@ -1,0 +1,112 @@
+{
+  "statusCode": 200,
+  "status": "OK",
+  "message": "Categorías obtenidas con éxito",
+  "data": [
+    { "idCategoria": 1, "nombreCategoria": "Abarrotes", "estatus": true },
+    { "idCategoria": 2, "nombreCategoria": "Lácteos", "estatus": true },
+    {
+      "idCategoria": 3,
+      "nombreCategoria": "Panadería y Tortillería",
+      "estatus": true
+    },
+    {
+      "idCategoria": 4,
+      "nombreCategoria": "Carnes frías y Embutidos",
+      "estatus": true
+    },
+    {
+      "idCategoria": 5,
+      "nombreCategoria": "Cárnicos y Pollería",
+      "estatus": true
+    },
+    {
+      "idCategoria": 6,
+      "nombreCategoria": "Frutas y Verduras",
+      "estatus": true
+    },
+    { "idCategoria": 7, "nombreCategoria": "Bebidas", "estatus": true },
+    {
+      "idCategoria": 8,
+      "nombreCategoria": "Bebidas alcohólicas",
+      "estatus": true
+    },
+    {
+      "idCategoria": 9,
+      "nombreCategoria": "Botanas y Dulces",
+      "estatus": true
+    },
+    { "idCategoria": 10, "nombreCategoria": "Congelados", "estatus": true },
+    {
+      "idCategoria": 11,
+      "nombreCategoria": "Comida preparada",
+      "estatus": true
+    },
+
+    {
+      "idCategoria": 12,
+      "nombreCategoria": "Limpieza del hogar",
+      "estatus": true
+    },
+    {
+      "idCategoria": 13,
+      "nombreCategoria": "Detergentes y Jabones",
+      "estatus": true
+    },
+    {
+      "idCategoria": 14,
+      "nombreCategoria": "Cuidado de ropa",
+      "estatus": true
+    },
+    {
+      "idCategoria": 15,
+      "nombreCategoria": "Desechables y Plásticos",
+      "estatus": true
+    },
+
+    {
+      "idCategoria": 16,
+      "nombreCategoria": "Higiene personal",
+      "estatus": true
+    },
+    {
+      "idCategoria": 17,
+      "nombreCategoria": "Cuidado del bebé",
+      "estatus": true
+    },
+    { "idCategoria": 18, "nombreCategoria": "Farmacia y OTC", "estatus": true },
+
+    {
+      "idCategoria": 19,
+      "nombreCategoria": "Papelería y Oficina",
+      "estatus": true
+    },
+    { "idCategoria": 20, "nombreCategoria": "Mascotas", "estatus": true },
+    {
+      "idCategoria": 21,
+      "nombreCategoria": "Electrónicos básicos",
+      "estatus": true
+    },
+    {
+      "idCategoria": 22,
+      "nombreCategoria": "Ferretería ligera",
+      "estatus": true
+    },
+
+    {
+      "idCategoria": 23,
+      "nombreCategoria": "Temporada / Festividades",
+      "estatus": true
+    },
+    {
+      "idCategoria": 24,
+      "nombreCategoria": "Suplementos y Nutrición",
+      "estatus": true
+    },
+    {
+      "idCategoria": 25,
+      "nombreCategoria": "Gourmet y Especialidades",
+      "estatus": true
+    }
+  ]
+}
