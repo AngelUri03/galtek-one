@@ -85,6 +85,7 @@ galtek-one-front/src-tauri/resources/backend/*.jar
 galtek-one-front/src-tauri/resources/jre/
 
 # Desktop build artifacts
+dist-desktop/
 GaltekOne.exe
 *.exe
 *.msi
