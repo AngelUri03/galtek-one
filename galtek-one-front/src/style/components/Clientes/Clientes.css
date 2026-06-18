@@ -490,5 +490,103 @@ p, span, td, th, label, button, input, select {
   text-align: center;
 }
 
+/* Modal de Confirmación de Eliminación */
+.modal-eliminar-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1rem 0;
+}
 
+/* Icono de advertencia grande y VERDE */
+.modal-eliminar-icon {
+  font-size: 3.5rem !important;
+  color: #0a7463; /* Cambiado al verde principal de Galtek */
+  margin-bottom: 1rem;
+}
+
+/* Texto de confirmación */
+.modal-eliminar-text {
+  font-size: 1.1rem;
+  color: #4b4b4b;
+  margin-bottom: 2rem;
+}
+
+/* Contenedor de botones centrado con espacio entre ellos */
+.modal-eliminar-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* ===== NUEVO BOTÓN VERDE PARA EL MODAL ===== */
+.btn-verde-modal.p-button {
+  background: linear-gradient(135deg, #0a7463, #0f9f82) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 999px !important; /* Cápsula perfecta igual que tus otros botones */
+  min-width: 8rem;
+  font-weight: 600 !important;
+  box-shadow: none;
+  transition: transform 0.14s ease-out, box-shadow 0.14s ease-out, filter 0.12s ease-out;
+}
+
+.btn-verde-modal.p-button:hover {
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px rgba(15, 118, 110, 0.45);
+}
+
+.btn-verde-modal.p-button:active {
+  transform: translateY(0) scale(0.96);
+  box-shadow: 0 8px 16px rgba(15, 118, 110, 0.4);
+}
+
+/* Botón gris para cancelar con clase única para evitar conflictos */
+.btn-gris-cancelar.p-button {
+  background-color: #e4e4e4 !important; 
+  color: #333333 !important; 
+  border: none !important;
+  border-radius: 999px !important; /* Cápsula forzada */
+  min-width: 8rem;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+  transition: transform 0.14s ease-out, box-shadow 0.14s ease-out, background-color 0.12s ease-out !important;
+}
+
+.btn-gris-cancelar.p-button:hover {
+  background-color: #d4d4d4 !important; 
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.1) !important;
+}
+
+.btn-gris-cancelar.p-button:active {
+  transform: translateY(0) scale(0.96);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ===== MODAL ELIMINAR (ESTILO TARJETA) ===== */
+.dialog-eliminar {
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  border: none !important;
+  /* El mismo fondo de tu tarjeta */
+  background: radial-gradient(circle at 0% 0%, #ffffff 0%, #f6f7fb 55%, #f4f4f4 100%) !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(148, 163, 184, 0.12) !important;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out !important;
+}
+
+/* El efecto de "hacerse grande" y flotar al pasar el mouse */
+.dialog-eliminar:hover {
+  transform: translateY(-4px) scale(1.02) !important;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.16) !important;
+}
+
+/* Hacemos transparente el contenedor interno de PrimeReact para que se vea tu degradado */
+.dialog-eliminar .p-dialog-content {
+  background: transparent !important;
+  padding: 2.5rem 2rem 2rem 2rem !important;
+}
 
