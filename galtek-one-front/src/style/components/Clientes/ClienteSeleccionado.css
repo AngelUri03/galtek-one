@@ -30,7 +30,7 @@ p, span, td, th, label, button, input, select {
 
 .cliente-sel-wrapper { 
   padding: 2rem;            /* Elimina el espacio interno (lo verde) */
-  margin-top: -2.5rem;   /* Sube el bloque azul a la fuerza sobre el espacio blanco */
+  margin-top: 1rem;   /* Sube el bloque azul a la fuerza sobre el espacio blanco */
   width: 100%;
 }
 
@@ -50,7 +50,7 @@ p, span, td, th, label, button, input, select {
 
 .cliente-sel-card {
   margin: 0 auto;
-  margin-top: -1rem;
+  margin-top: 2rem;
   height: fit-content;
     min-height: auto;
     max-width: 32.5rem; /* Mantengo tus 520px */
@@ -91,7 +91,7 @@ p, span, td, th, label, button, input, select {
 }
 
 .cliente-sel-avatar {
-  margin-top: -3rem;
+  margin-top: 1rem;
   width: 7.5rem; 
   height: 7.5rem;
   border-radius: 999px;
@@ -107,7 +107,6 @@ p, span, td, th, label, button, input, select {
 
 /* “pastillas” de datos */
 .cliente-sel-pill {
-  margin-top: -2rem;
   width: 100%;
   height: 2.625rem;               /* 42px */
   border-radius: 999px;          /* pastilla como el mock */
@@ -123,9 +122,9 @@ p, span, td, th, label, button, input, select {
 
 /* Botonera */
 .cliente-sel-actions {
-  margin-top: -4rem;
+  margin-top: 1rem;
   padding-top: 0 !important;
-  padding-bottom: 0 !important;
+  padding-bottom: 1.5rem !important;
   height: fit-content;
   min-height: 0 !important;
   align-self: center;
