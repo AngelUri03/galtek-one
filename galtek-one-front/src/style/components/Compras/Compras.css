@@ -1,19 +1,8 @@
-
 /* Fuente general para todo el módulo Compras */
-.compras-wrapper,
-.compras-prod-wrapper,
-.compras-prov-wrapper,
-.compras-ticket-wrapper,
-.compras-content,
-.compras-table-section,
-.compras-sugerencia,
-.sugerencia-panel,
-.sugerencia-tabla,
-.p-button,
-.p-inputtext,
-.p-dialog,
-.p-datatable,
-.p-column-header-content {
+.compras-workspace-wrapper,
+.p-tabview,
+.p-tabview-nav-link,
+.p-tabview-panels {
   font-family: 'Kodchasan', sans-serif !important;
 }
 
@@ -21,65 +10,69 @@ h1, h2, h3 {
   font-weight: 700;
 }
 
-p, span, td, th, label, button, input, select {
+p, span, label, button, input, select {
   font-weight: 400;
 }
 
-.compras-wrapper {
-  padding: 1rem;
-  text-align: center;
+.compras-workspace-wrapper {
+  /* Redujimos el padding superior a 0.5rem para pegar los tabs arriba */
+  padding: 0.5rem 2rem 2rem 2rem; 
+  max-width: 1500px;
+  margin: 0 auto;
 }
 
-.compras-title {
+.compras-header {
+  margin-bottom: 2rem;
+}
+
+.compras-header h1 {
   font-size: 2.2rem;
+  color: #333;
+}
+
+/* Personalización de los Tabs de PrimeReact al estilo Galtek One */
+.compras-tabs-container .p-tabview-nav {
+  border-bottom: 2px solid #e4e4e4;
+}
+
+.compras-tabs-container .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  color: #00A38B !important;
+  border-color: #00A38B !important;
   font-weight: 700;
-  margin-top: 3rem !important;  /* fuerza el espacio superior */
-  margin-bottom: 4rem;
+}
+
+.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link {
+  color: #666;
+  padding: 1rem 1.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 163, 139, 0.2) !important;
+}
+
+.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link:not(.p-disabled):hover {
+  border-color: #00A38B;
+  color: #00A38B;
+}
+
+/* Íconos de las pestañas */
+.compras-tabs-container .mr-2 {
+  margin-right: 0.5rem;
+}
+
+/* Contenedores provisionales (Placeholders) */
+.placeholder-content {
+  padding: 4rem 2rem;
   text-align: center;
-}
-
-.compras-cards {
-  display: flex;
-  justify-content: center;
-  gap: 3rem;
-  flex-wrap: wrap;
-}
-
-.compras-card {
-  background-color: #009b85;
-  color: #fff;
-  text-decoration: none;
-  width: 20rem;
-  height: 10rem;
+  background: #f7f7f7;
   border-radius: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.25s ease, background-color 0.25s ease;
-  cursor: pointer;
+  margin-top: 1rem;
+  color: #666;
+  border: 2px dashed #ccc;
 }
 
-.compras-card i {
-  font-size: 2.2rem;
-  margin-bottom: 0.75rem;
-}
-
-.compras-card h3 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin: 0;
-  color : white;
-}
-
-.compras-card span {
-  font-size: 0.95rem;
-  font-weight: 500;
-  margin-top: 0.5rem;
-}
-
-/* hover animación */
-.compras-card:hover {
-  background-color: #008a75;
-  transform: scale(1.05);
+.placeholder-content h2 {
+  color: #00A38B;
+  margin-bottom: 1rem;
 }
