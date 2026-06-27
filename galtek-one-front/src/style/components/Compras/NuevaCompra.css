@@ -1,9 +1,30 @@
 .nueva-compra-container {
   display: grid;
-  grid-template-columns: 2fr 1.1fr 1.4fr; 
+  grid-template-columns: 2.6fr 1.1fr; 
   gap: 1.5rem;
   width: 100%;
-  align-items: start; 
+  align-items: stretch;
+  min-height: 80vh; /* Asegura que la altura mínima sea la altura de la ventana */ 
+}
+
+/* Hacemos que la columna derecha y su tarjeta usen todo el alto disponible */
+.nc-resumen-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.nc-resumen-section .nc-card {
+  flex-grow: 1; /* Obliga a la tarjeta a estirarse hasta abajo */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Magia extra: Empuja los botones de Guardar/Cancelar hasta el fondo de la tarjeta */
+.nc-acciones {
+  margin-top: auto; 
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .stepper-scrollable-content {

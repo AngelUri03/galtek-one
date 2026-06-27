@@ -7,7 +7,6 @@ import { Column } from "primereact/column";
 import { Stepper } from "primereact/stepper";
 import { StepperPanel } from "primereact/stepperpanel"; 
 import "../../style/components/Compras/NuevaCompra.css";
-import PanelSugerencias from "./PanelSugerencias"; // Asegúrate de importar el componente de sugerencias
 
 export default function NuevaCompra() {
   const stepperRef = useRef(null); // Referencia para controlar el Stepper
@@ -167,7 +166,7 @@ export default function NuevaCompra() {
               </div>
 
               <div className="nc-tabla-carrito">
-                <DataTable value={carrito} emptyMessage="No hay productos agregados." responsiveLayout="scroll">
+                <DataTable value={carrito} emptyMessage="No hay productos agregados." style={{ maxWidth: '100%' }}>
                   <Column field="nombre" header="Producto" />
                   <Column field="cantidad" header="Cantidad" align="center" />
                   <Column field="precio" header="Precio U." body={(r) => money(r.precio)} />
@@ -229,12 +228,6 @@ export default function NuevaCompra() {
           </div>
         </div>
       </div>
-
-      {/* COLUMNA 3: Sugerencias */}
-      <div className="nc-sugerencias-section">
-        <PanelSugerencias />
-      </div>
-
     </div>
   );
 }

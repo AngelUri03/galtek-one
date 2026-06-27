@@ -37,6 +37,7 @@ import { TabView, TabPanel } from "primereact/tabview";
 import NuevaCompra from "./NuevaCompra";
 import HistorialCompras from "./HistorialCompras";
 import "../../style/components/Compras/Compras.css";
+import PanelSugerencias from "./PanelSugerencias";
 // import useLockBodyScroll from "../../Hooks/UseLockBodyScroll"; // Eliminado para liberar el scroll general
 
 export default function Compras() {
@@ -62,6 +63,10 @@ export default function Compras() {
                 <h2>Borradores</h2>
                 <p>Espacio para retomar compras guardadas temporalmente.</p>
               </div>
+            </TabPanel>
+
+            <TabPanel header="Sugerencias" leftIcon="pi pi-lightbulb mr-2">
+              <PanelSugerencias /> 
             </TabPanel>
 
           </TabView>
