@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 6px 0 4px;
-  gap: 12px;
+  gap: 10px;
 }
 
 .inv-title {
@@ -18,10 +18,16 @@
 
 /* MESSAGE */
 
+/* ==========================================================================
+   MESSAGE / KPIS CONTAINER
+   ========================================================================== */
+
 .inv-counters {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.75rem; /* Ajustado para dar un buen respiro entre los recuadros */
+  flex-wrap: wrap;
+  width: fit-content; /* Esto es lo que evita que se estire a todo el ancho */
 }
 
 .inv-msg {
@@ -32,11 +38,12 @@
   min-height: 26px;
   align-items: center;
   border-width: 1.4px !important;
+  transition: all 0.18s ease-in-out; /* La transición es mejor ponerla en el elemento base */
 }
 
 .inv-msg,
 .inv-msg .p-inline-message,
-.inv-msg .p-inline-message-text{
+.inv-msg .p-inline-message-text {
   font-family: "Kodchasan", sans-serif !important;
 }
 
@@ -54,10 +61,11 @@
 .inv-counters span:hover .inv-msg {
   filter: brightness(1.03);
   transform: scale(1.03);
-  transition: all 0.18s ease-in-out;
 }
 
-/* TOOLTIP */
+/* ==========================================================================
+   TOOLTIP
+   ========================================================================== */
 
 .p-tooltip {
   font-family: "Kodchasan", sans-serif;
