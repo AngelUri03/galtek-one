@@ -623,49 +623,37 @@
                   stockEstadosOptions={stockEstadosOptions}
                 />
 
-          <DataTable
-              value={data}
-              loading={loading}
-              selection={selected}
-              onSelectionChange={(e) => setSelected(e.value)}
-              dataKey="id"
-              paginator
-              first={first}
-              rows={rowsPerPage}
-              onPage={(e) => { setFirst(e.first); setRowsPerPage(e.rows); }}
-              rowsPerPageOptions={[10, 20, 30]}
-              totalRecords={data.length}
-              currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords}"
-              paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
-              className="inv-table p-datatable-sm"
-              rowClassName={rowClassName}
-              sortMode="multiple"
-              scrollable
-              scrollHeight="calc(100vh - 380px)"
-              expandedRows={expandedRows}
-              onRowToggle={(e) => setExpandedRows(e.data)}
-              rowExpansionTemplate={rowExpansionTemplate}
-              emptyMessage="No se encontraron productos en el inventario."
-          >
-              <Column expander style={{ width: '3em' }} className="inv-col inv-col--expander" />
-              <Column header="Imagen" body={imagenBody} className="inv-col inv-col--imagen" />
-              <Column field="nombre" header="Nombre" sortable className="inv-col inv-col--nombre text-truncate" />
-              <Column field="sku" header="SKU" className="inv-col inv-col--sku" />
-              <Column field="proveedor" header="Proveedor" sortable className="inv-col inv-col--proveedor text-truncate" />
-              <Column field="stock" header="Stock" sortable className="inv-col inv-col--stock" body={stockBody} />
-              
-              <Column field="estadoStock" header="Estado" sortable body={(row) => {
-                  const estado = getStockEstado(row);
-                  const severity = estado === "OPTIMO" ? "success" : estado === "BAJO" ? "info" : "danger";
-                  return <Tag value={estado} severity={severity} rounded />;
-              }} />
-
-              <Column field="precioVenta" header="P. Venta" sortable body={(row) => (<span className="inv-price">${(Number(row.precioVenta) || 0).toFixed(2)}</span>)} />
-              
-              <Column field="almacen" header="Ubicación" sortable className="inv-col inv-col--ubicacion" />
-              
-              <Column header="Acciones" body={accionesBody} className="inv-col inv-col--acciones" frozen />
-          </DataTable>
+    <DataTable
+                value={data}
+                loading={loading}
+                selection={selected}
+                onSelectionChange={(e) => setSelected(e.value)}
+                dataKey="id"
+                paginator
+                rows={rowsPerPage}
+                expandedRows={expandedRows}
+                onRowToggle={(e) => setExpandedRows(e.data)}
+                rowExpansionTemplate={rowExpansionTemplate}
+                className="inv-table p-datatable-sm"
+                scrollable
+                scrollHeight="calc(100vh - 380px)"
+                emptyMessage="No se encontraron productos en el inventario."
+            >
+                <Column expander style={{ width: '3em' }} className="inv-col inv-col--expander" />
+                <Column header="Imagen" body={imagenBody} className="inv-col inv-col--imagen" />
+                <Column field="nombre" header="Nombre" sortable className="inv-col inv-col--nombre text-truncate" body={(row) => <span title={row.nombre}>{row.nombre}</span>} />
+                <Column field="sku" header="SKU" className="inv-col inv-col--sku" />
+                <Column field="proveedor" header="Proveedor" sortable className="inv-col inv-col--proveedor text-truncate" body={(row) => <span title={row.proveedor}>{row.proveedor}</span>} />
+                <Column field="stock" header="Stock" sortable className="inv-col inv-col--stock" body={stockBody} />
+                <Column field="estadoStock" header="Estado" sortable body={(row) => {
+                    const estado = getStockEstado(row);
+                    const severity = estado === "OPTIMO" ? "success" : estado === "BAJO" ? "info" : "danger";
+                    return <Tag value={estado} severity={severity} rounded />;
+                }} />
+                <Column field="precioVenta" header="P. Venta" sortable body={(row) => (<span className="inv-price">${(Number(row.precioVenta) || 0).toFixed(2)}</span>)} />
+                <Column field="almacen" header="Ubicación" sortable className="inv-col inv-col--ubicacion" />
+                <Column header="Acciones" body={accionesBody} className="inv-col inv-col--acciones" frozen />
+            </DataTable>
                 <ModalInformacion
                   open={modalInfo.open}
                   producto={modalInfo.producto}
