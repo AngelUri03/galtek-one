@@ -1,0 +1,201 @@
+.nueva-compra-container {
+  display: grid;
+  grid-template-columns: 2.6fr 1.1fr; 
+  gap: 1.5rem;
+  width: 100%;
+  align-items: stretch;
+  min-height: 80vh; /* Asegura que la altura mínima sea la altura de la ventana */ 
+}
+
+/* Hacemos que la columna derecha y su tarjeta usen todo el alto disponible */
+.nc-resumen-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.nc-resumen-section .nc-card {
+  flex-grow: 1; /* Obliga a la tarjeta a estirarse hasta abajo */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Magia extra: Empuja los botones de Guardar/Cancelar hasta el fondo de la tarjeta */
+.nc-acciones {
+  margin-top: auto; 
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.stepper-scrollable-content {
+  /* clamp(MÍNIMO, IDEAL, MÁXIMO) */
+  /* Así nos aseguramos de que empiece grande, pero nunca empuje el botón de Siguiente/Atrás */
+  height: clamp(280px, calc(100vh - 450px), 420px); 
+  
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* Tarjetas blancas estándar */
+.nc-card {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+  border: 1px solid #eef2f6;
+}
+
+.nc-card h3 {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  font-size: 1.15rem;
+  color: #333;
+}
+
+/* Grids internos */
+.nc-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.nc-form-grid .field label,
+.nc-agregar-grid .field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.nc-agregar-grid {
+  display: grid;
+  grid-template-columns: 4fr 1fr auto;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.nc-tabla-carrito {
+  border: 1px solid #e4e4e4;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  
+  /* Igual para la tabla, la controlamos para que no asfixie al botón de Atrás */
+  max-height: clamp(180px, calc(100vh - 580px), 280px); 
+  
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.nc-tabla-carrito::-webkit-scrollbar {
+  width: 6px;
+}
+.nc-tabla-carrito::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 4px;
+}
+
+/* Totales */
+.nc-totales-fila {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  color: #555;
+}
+
+.nc-totales-fila.total-final {
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #333;
+  border-top: 2px dashed #e4e4e4;
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+}
+
+/* Botones */
+.nc-acciones {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.btn-verde.p-button {
+  background-color: #00A38B !important;
+  border-color: #00A38B !important;
+}
+
+.btn-verde.p-button:hover {
+  background-color: #008a75 !important;
+}
+
+.btn-outline-verde.p-button {
+  color: #00A38B !important;
+  border-color: #00A38B !important;
+  background: transparent !important;
+}
+
+.btn-outline-verde.p-button:hover {
+  background: rgba(0, 163, 139, 0.05) !important;
+}
+
+/* Reutilizando tu botón gris de clientes */
+.btn-gris-cancelar.p-button {
+  background-color: #e4e4e4 !important; 
+  color: #333333 !important; 
+  border: none !important;
+}
+
+.texto-gris {
+  color: #888;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Quita el espacio excesivo (naranja en devtools) debajo de los números de paso */
+.p-stepper .p-stepper-nav {
+  margin-bottom: 0 !important;
+}
+
+/* Opcional: Reduce el espacio superior del contenido del Stepper para pegarlo más arriba */
+.p-stepper .p-stepper-panels {
+  padding-top: 0.5rem !important; 
+}
+
+/* --- ALINEACIÓN DE PESTAÑAS Y CONTENIDO --- */
+
+/* Quita el espaciado horizontal automático para que el contenido abarque el 100% de la línea */
+.compras-tabs-container .p-tabview-panels {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: 0 !important;
+  /* Mantenemos un poco de padding arriba para que no pegue con la línea gris */
+  padding-top: 1.5rem !important; 
+}
+
+/* --- FORZAR COLOR VERDE EN EL STEPPER --- */
+
+/* Atacamos la raíz con variables nativas por si tu versión las soporta */
+.p-stepper {
+  --primary-color: #00A38B !important;
+}
+
+/* Fuerza bruta a la bolita del número cuando está activa */
+.p-stepper .p-stepper-nav .p-stepper-header.p-highlight .p-stepper-number,
+.p-stepper .p-stepper-nav .p-stepper-action:focus .p-stepper-number,
+.p-stepper .p-stepper-nav .p-highlight .p-stepper-number {
+  background-color: #00A38B !important;
+  border-color: #00A38B !important;
+  color: #ffffff !important;
+}
+
+/* Fuerza bruta al título (Ej. "Datos del Documento") cuando está activo */
+.p-stepper .p-stepper-nav .p-stepper-header.p-highlight .p-stepper-title,
+.p-stepper .p-stepper-nav .p-highlight .p-stepper-title {
+  color: #00A38B !important;
+  font-weight: 700 !important;
+}

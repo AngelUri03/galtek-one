@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Shell from "../common/Shell";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -10,6 +10,7 @@ import "../../style/components/Clientes/Clientes.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import { APIfetchApi } from "../../API/APIfetch";
 import { endpoints } from "../../API/api";
+import { Toast } from "primereact/toast";
 
 const api = new APIfetchApi();
 
@@ -24,8 +25,11 @@ export default function Clientes() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [pedidoVisible, setPedidoVisible] = useState(false);
   const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
+  const [modalEliminarVisible, setModalEliminarVisible] = useState(false);
+  const [clienteAEliminar, setClienteAEliminar] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const toast = useRef(null);
 
   const money = (n) => `$${(Number(n) || 0).toFixed(2)}`;
 
@@ -64,6 +68,7 @@ export default function Clientes() {
     const eliminarId = location.state?.eliminarClienteId;
     if (eliminarId) {
       setClientes((prev) => prev.filter((c) => String(c.id) !== String(eliminarId)));
+      toast.current.show({ severity: 'error', summary: 'Eliminado', detail: 'El cliente fue eliminado correctamente', life: 3000 });
       navigate(".", { replace: true, state: null });
     }
   }, [location.state, navigate]);
@@ -77,13 +82,34 @@ export default function Clientes() {
     setPedidoVisible(true);
   };
 
-  const handleEliminarCliente = async (id) => {
+  /*const handleEliminarCliente = async (id) => {
     if (!window.confirm("Estas seguro de que deseas eliminar este cliente permanentemente?")) return;
 
     try {
       const response = await api.fetchApi({}, "DELETE", undefined, `${endpoints.clientes}/${id}`);
       if (response?.ok) {
         setClientes((prev) => prev.filter((c) => String(c.id) !== String(id)));
+      }
+    } catch (error) {
+      console.error("Error al eliminar cliente:", error);
+    }
+  };*/
+
+  // Función para abrir el modal de confirmación de eliminación
+  const confirmarEliminacion = (cliente) => {
+    setClienteAEliminar(cliente);
+    setModalEliminarVisible(true);
+  };
+  // Función para ejecutar la eliminación después de la confirmación
+  const ejecutarEliminacion = async () => {
+    if (!clienteAEliminar) return;
+    try {
+      const response = await api.fetchApi({}, "DELETE", undefined, `${endpoints.clientes}/${clienteAEliminar.id}`);
+      if (response?.ok) {
+        setClientes((prev) => prev.filter((c) => String(c.id) !== String(clienteAEliminar.id)));
+        setModalEliminarVisible(false);
+        setClienteAEliminar(null);
+        toast.current.show({ severity: 'error', summary: 'Eliminado', detail: 'El cliente fue eliminado correctamente', life: 3000 });
       }
     } catch (error) {
       console.error("Error al eliminar cliente:", error);
@@ -123,7 +149,7 @@ export default function Clientes() {
       <Button
         icon="pi pi-trash"
         className="p-button-rounded p-button-sm p-button-danger"
-        onClick={() => handleEliminarCliente(rowData.id)}
+        onClick={() => confirmarEliminacion(rowData)}
         aria-label="Eliminar"
         data-pr-tooltip="Eliminar"
         tooltipOptions={{ position: "top" }}
@@ -139,6 +165,7 @@ export default function Clientes() {
 
   return (
     <Shell>
+      <Toast ref={toast} position="top-right" />
       <Tooltip />
       <div className="clientes-container">
         <div className="clientes-header">
@@ -218,6 +245,26 @@ export default function Clientes() {
             </div>
           </div>
         )}
+      </Dialog>
+      <Dialog
+        visible={modalEliminarVisible}
+        onHide={() => setModalEliminarVisible(false)}
+        modal
+        dismissableMask
+        showHeader={false}
+        className="dialog-eliminar"
+        style={{ width: '30vw', minWidth: '300px' }}
+      >
+        <div className="modal-eliminar-content">
+          <i className="pi pi-exclamation-triangle modal-eliminar-icon"></i>
+          <span className="modal-eliminar-text">
+            ¿Estás seguro de que deseas eliminar permanentemente a <strong>{clienteAEliminar?.nombre}</strong>?
+          </span>
+          <div className="modal-eliminar-actions">
+            <Button label="Cancelar" icon="pi pi-times" className="btn-gris-cancelar" onClick={() => setModalEliminarVisible(false)} />
+            <Button label="Eliminar" icon="pi pi-check" className="btn-verde-modal" onClick={ejecutarEliminacion} />
+          </div>
+        </div>
       </Dialog>
     </Shell>
   );
