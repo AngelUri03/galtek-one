@@ -26,6 +26,7 @@ import Compras from "../components/Compras/Compras";
 import ComprasProducto from "../components/Compras/ComprasProducto";
 import ComprasTicket from "../components/Compras/ComprasTicket";
 import ComprasProveedor from "../components/Compras/ComprasProveedor";
+import Proveedores from "../components/Proveedores/Proveedores";
 
 /* --- REPORTES Y CONFIGURACIÓN --- */
 import ReporteCompras from "../components/Reportes/ReporteCompras/ReporteCompras";
@@ -62,6 +63,7 @@ export default function AppRouter() {
         <Route path="ventas" element={<Ventas />} />
         <Route path="inventario" element={<Inventario />} />
         <Route path="compras" element={<Compras />} />
+        <Route path="proveedores" element={<Proveedores />} />
         
         {/* Sub-rutas Compras */}
         <Route path="/compras/producto" element={<ComprasProducto />} />

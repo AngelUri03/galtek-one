@@ -38,6 +38,11 @@ const NavBar = () => {
       command: () => go("/compras"),
     },
     {
+      label: "Proveedores",
+      icon: "pi pi-truck",
+      command: () => go("/proveedores"),
+    },
+    {
       label: "Clientes",
       icon: "pi pi-users",
       command: () => go("/clientes"),

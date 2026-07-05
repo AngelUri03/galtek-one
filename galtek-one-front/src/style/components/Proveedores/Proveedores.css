@@ -1,0 +1,257 @@
+.proveedores-page,
+.proveedores-page .p-button,
+.proveedores-page .p-inputtext,
+.proveedores-page .p-datatable,
+.proveedores-page .p-column-header-content,
+.prov-dialog,
+.prov-dialog .p-inputtext,
+.prov-dialog .p-button {
+  font-family: "Kodchasan", sans-serif !important;
+}
+
+.proveedores-page {
+  padding: 2rem;
+  color: #182522;
+}
+
+.prov-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.prov-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.prov-header p {
+  margin: 0.35rem 0 0;
+  color: #64706d;
+  font-size: 0.95rem;
+}
+
+.prov-primary-btn.p-button,
+.p-button.prov-primary-btn {
+  background: linear-gradient(135deg, #0a7463, #0f9f82) !important;
+  border: none !important;
+  color: #fff !important;
+  border-radius: 0.75rem !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+}
+
+.prov-primary-btn.p-button:hover,
+.p-button.prov-primary-btn:hover {
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+}
+
+.prov-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.prov-stat {
+  background: #ffffff;
+  border: 1px solid #e4ebe9;
+  border-radius: 0.5rem;
+  padding: 0.9rem 1rem;
+}
+
+.prov-stat span {
+  display: block;
+  color: #66736f;
+  font-size: 0.82rem;
+  margin-bottom: 0.25rem;
+}
+
+.prov-stat strong {
+  color: #0a5045;
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.prov-table-panel {
+  background: #f7f8f8;
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.prov-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.prov-search {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  height: 2.75rem;
+  border: 1px solid #d0d8d6;
+  border-radius: 0.65rem;
+  background: #ffffff;
+}
+
+.prov-search > i {
+  left: 0.9rem;
+  color: #6b7774;
+}
+
+.prov-search .p-inputtext {
+  width: 100%;
+  height: 100%;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding-left: 2.6rem;
+}
+
+.prov-search:focus-within {
+  border-color: #0a7463;
+}
+
+.prov-refresh.p-button {
+  color: #0a7463 !important;
+}
+
+.prov-table.p-datatable .p-datatable-thead > tr > th {
+  background: #0a7463 !important;
+  color: #ffffff !important;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0.65rem 0.75rem;
+}
+
+.prov-table.p-datatable .p-datatable-thead > tr > th:first-child {
+  border-top-left-radius: 0.65rem;
+}
+
+.prov-table.p-datatable .p-datatable-thead > tr > th:last-child {
+  border-top-right-radius: 0.65rem;
+}
+
+.prov-table.p-datatable .p-datatable-tbody > tr {
+  background: #ffffff !important;
+}
+
+.prov-table.p-datatable .p-datatable-tbody > tr > td {
+  border: none !important;
+  border-bottom: 1px solid #e6ecea !important;
+  padding: 0.72rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.prov-table .p-sortable-column-icon,
+.prov-table .p-sortable-column.p-highlight,
+.prov-table .p-sortable-column.p-highlight .p-sortable-column-icon {
+  color: #ffffff !important;
+}
+
+.prov-contact-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.prov-contact-cell small {
+  color: #66736f;
+  font-size: 0.78rem;
+}
+
+.prov-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.prov-actions-header .p-column-header-content {
+  justify-content: center;
+}
+
+.prov-table .p-paginator {
+  background: transparent !important;
+  border: none !important;
+  padding: 0.8rem 0.2rem 0;
+}
+
+.prov-dialog .p-dialog-header {
+  border-bottom: 1px solid #edf1f0;
+}
+
+.prov-dialog .p-dialog-content {
+  padding-top: 1.25rem;
+}
+
+.prov-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.prov-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: #33413e;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.prov-form .p-inputtext {
+  width: 100%;
+  border-radius: 0.55rem;
+}
+
+.prov-form-full,
+.prov-status-toggle {
+  grid-column: 1 / -1;
+}
+
+.prov-status-toggle {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.55rem !important;
+  font-weight: 600 !important;
+}
+
+.prov-status-toggle input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #0a7463;
+}
+
+.prov-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+@media (max-width: 760px) {
+  .proveedores-page {
+    padding: 1rem;
+  }
+
+  .prov-header,
+  .prov-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .prov-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .prov-form {
+    grid-template-columns: 1fr;
+  }
+}
