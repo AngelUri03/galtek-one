@@ -129,7 +129,7 @@
 .inv-search-wrapper {
     position: relative;
     flex: 1;
-    max-width: 600px;
+    max-width: 1900px;
     display: flex;       /* Agregamos esto */
     align-items: center; /* Alineación vertical perfecta */
 }
@@ -352,14 +352,12 @@
   border-bottom: 1px solid rgba(255,255,255,0.6) !important;
 }
 
-.inv-table .p-datatable-tbody > tr > td,
-.inv-table .p-datatable-frozen-view .p-datatable-tbody > tr > td {
-  background: transparent !important;
-  padding: 10px 16px !important;
-  font-size: 0.9rem;
-  border: none !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.4) !important;
-}
+/* Esto fuerza que todo el contenido de las celdas esté alineado al centro verticalmente */
+.inv-table .p-datatable-tbody > tr > td {
+    vertical-align: middle !important;
+    padding: 0.5rem 1rem !important; /* Ajusta este padding si quieres que se vea más delgado */
+    display: table-cell;
+}                                   
 
 .inv-table .p-datatable-tbody > tr:hover > td {
   background: rgba(255, 255, 255, 0.3) !important;

@@ -443,7 +443,12 @@
               setLoading(false);
             }
           };
-
+            const ESTADO_PESO = {
+              "AGOTADO": 1,
+              "CRITICO": 2,
+              "BAJO": 3,
+              "OPTIMO": 4
+            };
           const handleAjusteStock = async (p, meta) => {
             try {
               setLoading(true);
@@ -517,38 +522,22 @@
               <Button icon="pi pi-trash" className="inv-action-btn danger" tooltip="Eliminar producto" tooltipOptions={{ position: "top" }} onClick={() => setModalEliminar({ open: true, producto: row })} />
             </div>
           );
-
           const rowExpansionTemplate = (data) => (
             <div className="p-3">
               <DataTable value={data.lotes} size="small" className="inv-lotes-table" responsive>
                 <Column field="id" header="Lote" />
-                
-                {/* Columna Cantidad */}
                 <Column field="cantidad" header="Cantidad" body={(l) => <span className="tabular">{l.cantidad}</span>} />
-                
-                {/* Columna Costo de Compra */}
-                <Column header="Costo Compra" body={() => (
-                    <span className="tabular">${Number(data.precioCompra || 0).toFixed(2)}</span>
-                )} />
-
-                {/* Columna Caducidad */}
+                <Column header="Costo Compra" body={() => <span className="tabular">${Number(data.precioCompra || 0).toFixed(2)}</span>} />
                 <Column field="fechaExp" header="Caducidad" body={(l) => {
                     if (!l.fechaExp) return "—";
                     const d = new Date(l.fechaExp);
-                    const time = d.getTime();
-                    const now = Date.now();
-                    const soon = now + 15 * 24 * 60 * 60 * 1000;
-                    let cls = "lote-exp-ok";
-                    if (time < now) cls = "lote-exp-bad"; else if (time <= soon) cls = "lote-exp-soon";
-                    return <span className={cls}>{d.toLocaleDateString("es-MX", { dateStyle: "medium" })}</span>;
+                    return <span>{d.toLocaleDateString("es-MX", { dateStyle: "medium" })}</span>;
                 }} />
-
-
-
-                {/* Columna Última Actualización */}
-                <Column header="Actualizado" body={() => (
-                    <span>{data.updatedAt.toLocaleDateString("es-MX", { dateStyle: "short" })}</span>
-                )} />
+                
+                {/* AQUÍ ESTÁ TU UBICACIÓN DENTRO DEL DESGLOSE */}
+                <Column field="ubicacion" header="Ubicación" />
+                
+                <Column header="Actualizado" body={() => <span>{data.updatedAt.toLocaleDateString("es-MX", { dateStyle: "short" })}</span>} />
               </DataTable>
             </div>
           );
@@ -651,7 +640,7 @@
                     return <Tag value={estado} severity={severity} rounded />;
                 }} />
                 <Column field="precioVenta" header="P. Venta" sortable body={(row) => (<span className="inv-price">${(Number(row.precioVenta) || 0).toFixed(2)}</span>)} />
-                <Column field="almacen" header="Ubicación" sortable className="inv-col inv-col--ubicacion" />
+
                 <Column header="Acciones" body={accionesBody} className="inv-col inv-col--acciones" frozen />
             </DataTable>
                 <ModalInformacion
