@@ -31,4 +31,12 @@ public interface ProveedorProductoService extends CommonService<ProveedorProduct
             Integer idEmpresa
     );
 
+    List<ProveedorProductoEntity> readByProveedor(Integer idProveedor);
+
+    ProveedorProductoEntity createForProveedor(Integer idProveedor, ProveedorProductoEntity obj, String user);
+
+    ProveedorProductoEntity updateForProveedor(Integer idProveedor, Integer idProveedorProducto, ProveedorProductoEntity obj, String user);
+
+    ProveedorProductoEntity deleteForProveedor(Integer idProveedor, Integer idProveedorProducto, String user);
+
 }
