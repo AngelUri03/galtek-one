@@ -1,3 +1,14 @@
+import {
+  buildAddressText,
+  buildLeadTimeText,
+  buildScheduleText,
+  buildVisitDaysText,
+  parseAddressText,
+  parseLeadTimeText,
+  parseScheduleText,
+  parseVisitDaysText,
+} from "./proveedorEditorUtils";
+
 export const ESTADO_OPTIONS = [
   { label: "Todos", value: "TODOS" },
   { label: "Activos", value: "ACTIVO" },
@@ -135,7 +146,6 @@ export const normalizeProveedor = (proveedor, detail = null) => {
   const productos = firstArray(detail?.productos, data.productos, data.productosAsociados);
   const activos = firstArray(detail?.activos, data.activos, data.activosPrestados);
   const documentos = firstArray(detail?.documentos, data.documentos);
-  const acuerdos = firstArray(detail?.acuerdos, data.acuerdos);
   const contactosNormalizados = contactos.map(normalizeContacto);
   const contactoPrincipal =
     contactosNormalizados.find((contacto) => contacto?.contactoPrincipal) ||
@@ -204,7 +214,6 @@ export const normalizeProveedor = (proveedor, detail = null) => {
     productosAsociados: normalizeCollection(productos),
     activosPrestados: normalizeCollection(activos),
     documentos: normalizeCollection(documentos),
-    acuerdos: normalizeCollection(acuerdos),
     detailLoaded: Boolean(detail),
     ultimaCompra: data.ultimaCompra ?? data.fechaUltimaCompra ?? "",
     ultimaActividad:
@@ -229,6 +238,7 @@ export const createProveedorForm = (proveedor = null) => {
       estadoProveedor: "ACTIVO",
       notasInternas: "",
       direccion: "",
+      ...parseAddressText(""),
       contactos: [createEmptyContact(true)],
       modalidadAbastecimiento: "ENTREGA_DOMICILIO",
       pedidoWhatsapp: false,
@@ -237,9 +247,18 @@ export const createProveedorForm = (proveedor = null) => {
       visitaRuta: false,
       compraMostrador: false,
       diasVisitaEntrega: "",
+      diasVisitaModo: "SEMANA",
+      diasSemanaVisita: [],
+      diasMesVisita: [],
       horarioHabitual: "",
+      horarioModo: "RANGO",
+      horarioInicio: "",
+      horarioFin: "",
       pedidoMinimo: null,
       tiempoEstimadoEntrega: "",
+      anticipacionCantidad: null,
+      anticipacionUnidad: "HORAS",
+      anticipacionContexto: "ENTREGA_RECURRENTE",
       costoEnvio: null,
       observacionesAbastecimiento: "",
       formaPagoPrincipal: "CONTADO",
@@ -255,6 +274,10 @@ export const createProveedorForm = (proveedor = null) => {
   }
 
   const base = proveedor.raw || proveedor;
+  const visitDays = parseVisitDaysText(proveedor.diasVisitaEntrega || "");
+  const schedule = parseScheduleText(proveedor.horarioHabitual || "");
+  const leadTime = parseLeadTimeText(proveedor.tiempoEstimadoEntrega || "");
+  const address = parseAddressText(proveedor.direccion || "");
   const contactos =
     proveedor.contactos?.length > 0
       ? proveedor.contactos.map(normalizeContacto)
@@ -283,6 +306,7 @@ export const createProveedorForm = (proveedor = null) => {
     estadoProveedor: proveedor.estadoProveedor || "ACTIVO",
     notasInternas: proveedor.notasInternas || base.notasInternas || "",
     direccion: proveedor.direccion || "",
+    ...address,
     contactos,
     modalidadAbastecimiento: proveedor.modalidadAbastecimiento || "ENTREGA_DOMICILIO",
     pedidoWhatsapp: proveedor.pedidoWhatsapp || false,
@@ -291,9 +315,12 @@ export const createProveedorForm = (proveedor = null) => {
     visitaRuta: proveedor.visitaRuta || false,
     compraMostrador: proveedor.compraMostrador || false,
     diasVisitaEntrega: proveedor.diasVisitaEntrega || "",
+    ...visitDays,
     horarioHabitual: proveedor.horarioHabitual || "",
+    ...schedule,
     pedidoMinimo: numberOrNull(proveedor.pedidoMinimo),
     tiempoEstimadoEntrega: proveedor.tiempoEstimadoEntrega || "",
+    ...leadTime,
     costoEnvio: numberOrNull(proveedor.costoEnvio),
     observacionesAbastecimiento: proveedor.observacionesAbastecimiento || "",
     formaPagoPrincipal: proveedor.formaPagoPrincipal || "CONTADO",
@@ -315,6 +342,22 @@ export const getPrincipalContact = (contactos = []) =>
 
 export const buildProveedorPayload = (form) => {
   const principal = getPrincipalContact(form.contactos);
+  const diasVisitaEntrega = buildVisitDaysText(
+    form.diasVisitaModo,
+    form.diasSemanaVisita,
+    form.diasMesVisita
+  );
+  const horarioHabitual = buildScheduleText(
+    form.horarioModo,
+    form.horarioInicio,
+    form.horarioFin
+  );
+  const tiempoEstimadoEntrega = buildLeadTimeText(
+    form.anticipacionCantidad,
+    form.anticipacionUnidad,
+    form.anticipacionContexto
+  );
+  const direccion = buildAddressText(form) || form.direccion;
 
   return {
     nombreProveedor: trim(form.nombreProveedor),
@@ -327,17 +370,17 @@ export const buildProveedorPayload = (form) => {
     contacto: trim(principal?.nombre),
     telefono: trim(principal?.telefono),
     correo: trim(principal?.correo),
-    direccion: trim(form.direccion),
+    direccion: trim(direccion),
     modalidadAbastecimiento: form.modalidadAbastecimiento || null,
     pedidoWhatsapp: Boolean(form.pedidoWhatsapp),
     pedidoLlamada: Boolean(form.pedidoLlamada),
     pedidoApp: Boolean(form.pedidoApp),
     visitaRuta: Boolean(form.visitaRuta),
     compraMostrador: Boolean(form.compraMostrador),
-    diasVisitaEntrega: trim(form.diasVisitaEntrega),
-    horarioHabitual: trim(form.horarioHabitual),
+    diasVisitaEntrega: trim(diasVisitaEntrega || form.diasVisitaEntrega),
+    horarioHabitual: trim(horarioHabitual || form.horarioHabitual),
     pedidoMinimo: numberOrNull(form.pedidoMinimo),
-    tiempoEstimadoEntrega: trim(form.tiempoEstimadoEntrega),
+    tiempoEstimadoEntrega: trim(tiempoEstimadoEntrega || form.tiempoEstimadoEntrega),
     costoEnvio: numberOrNull(form.costoEnvio),
     observacionesAbastecimiento: trim(form.observacionesAbastecimiento),
     formaPagoPrincipal: form.formaPagoPrincipal || null,

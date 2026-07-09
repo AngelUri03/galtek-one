@@ -12,6 +12,7 @@
     "web": "npm run dev",
     "db": "npm run db:setup",
     "db:setup": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\database-setup.ps1",
+    "db:seed": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\database-setup.ps1 -Seed",
     "front": "npm run front:dev",
     "front:deps": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\ensure-frontend-deps.ps1",
     "front:dev": "npm --prefix galtek-one-front start",

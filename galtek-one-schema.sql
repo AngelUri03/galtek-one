@@ -47,11 +47,40 @@ CREATE TABLE IF NOT EXISTS Proveedores (id_proveedor integer, estatus boolean, f
 
 CREATE TABLE IF NOT EXISTS ProveedorContacto (id_proveedor_contacto integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), nombre varchar(255) not null, rol varchar(255), telefono varchar(255), whatsapp varchar(255), correo varchar(255), notas varchar(2000), contacto_principal boolean, estado_contacto varchar(255), id_proveedor integer not null, id_empresa integer not null, primary key (id_proveedor_contacto));
 
-CREATE TABLE IF NOT EXISTS ProveedorActivo (id_proveedor_activo integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), nombre varchar(255) not null, tipo varchar(255), numero_serie varchar(255), fecha_entrega date, estado_fisico varchar(255), ubicacion_tienda varchar(255), condiciones_prestamo varchar(2000), deposito_garantia numeric(12,2), estado_activo_prestado varchar(255), notas varchar(2000), id_proveedor integer not null, id_empresa integer not null, primary key (id_proveedor_activo));
+CREATE TABLE IF NOT EXISTS ProveedorActivo (id_proveedor_activo integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), nombre varchar(255) not null, tipo varchar(255), numero_serie varchar(255), fecha_entrega date, fecha_regreso date, estado_fisico varchar(255), ubicacion_tienda varchar(255), condiciones_prestamo varchar(2000), deposito_garantia numeric(12,2), estado_activo_prestado varchar(255), notas varchar(2000), id_proveedor integer not null, id_empresa integer not null, primary key (id_proveedor_activo));
 
-CREATE TABLE IF NOT EXISTS ProveedorDocumento (id_proveedor_documento integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), nombre varchar(255) not null, tipo varchar(255), ruta_documento varchar(255), mime_type varchar(255), tamano_bytes integer, descripcion varchar(2000), estado_documento varchar(255), id_proveedor integer not null, id_proveedor_activo integer, id_empresa integer not null, primary key (id_proveedor_documento));
+ALTER TABLE ProveedorActivo ADD COLUMN fecha_regreso date;
+
+CREATE TABLE IF NOT EXISTS ProveedorActivoHistorial (id_proveedor_activo_historial integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), tipo_evento varchar(255) not null, estado_anterior varchar(255), estado_nuevo varchar(255), descripcion varchar(2000), detalle_anterior varchar(4000), detalle_nuevo varchar(4000), fecha_evento timestamp, evidencia_nombre varchar(255), evidencia_mime_type varchar(255), evidencia_base64 text, evidencia_tamano_bytes integer, id_proveedor_activo integer not null, id_proveedor integer not null, id_empresa integer not null, primary key (id_proveedor_activo_historial));
+
+ALTER TABLE ProveedorActivoHistorial ADD COLUMN evidencia_nombre varchar(255);
+ALTER TABLE ProveedorActivoHistorial ADD COLUMN evidencia_mime_type varchar(255);
+ALTER TABLE ProveedorActivoHistorial ADD COLUMN evidencia_base64 text;
+ALTER TABLE ProveedorActivoHistorial ADD COLUMN evidencia_tamano_bytes integer;
+ALTER TABLE ProveedorActivoHistorial ADD COLUMN detalle_anterior varchar(4000);
+ALTER TABLE ProveedorActivoHistorial ADD COLUMN detalle_nuevo varchar(4000);
+
+CREATE TABLE IF NOT EXISTS ProveedorActivoEvidencia (id_proveedor_activo_evidencia integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), evidencia_nombre varchar(255), evidencia_mime_type varchar(255), evidencia_base64 text, evidencia_tamano_bytes integer, id_proveedor_activo_historial integer not null, id_empresa integer not null, primary key (id_proveedor_activo_evidencia));
+
+CREATE TABLE IF NOT EXISTS ProveedorDocumento (id_proveedor_documento integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), nombre varchar(255) not null, tipo varchar(255), ruta_documento varchar(255), archivo_nombre varchar(255), mime_type varchar(255), tamano_bytes integer, archivo_base64 text, descripcion varchar(2000), estado_documento varchar(255), id_proveedor integer not null, id_proveedor_activo integer, id_empresa integer not null, primary key (id_proveedor_documento));
+
+ALTER TABLE ProveedorDocumento ADD COLUMN archivo_nombre varchar(255);
+ALTER TABLE ProveedorDocumento ADD COLUMN archivo_base64 text;
+
+CREATE TABLE IF NOT EXISTS ProveedorDocumentoHistorial (id_proveedor_documento_historial integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), id_proveedor_documento integer not null, id_proveedor integer not null, tipo_evento varchar(255) not null, descripcion varchar(2000), detalle_anterior varchar(4000), detalle_nuevo varchar(4000), fecha_evento timestamp, archivo_anterior_nombre varchar(255), archivo_anterior_mime_type varchar(255), archivo_anterior_tamano_bytes integer, archivo_anterior_base64 text, archivo_nuevo_nombre varchar(255), archivo_nuevo_mime_type varchar(255), archivo_nuevo_tamano_bytes integer, archivo_nuevo_base64 text, id_empresa integer not null, primary key (id_proveedor_documento_historial));
 
 CREATE TABLE IF NOT EXISTS ProveedorAcuerdo (id_proveedor_acuerdo integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), tipo varchar(255), descripcion varchar(2000) not null, fecha_inicio date, fecha_vigencia date, estado_acuerdo varchar(255), notas varchar(2000), id_proveedor integer not null, id_proveedor_documento integer, id_empresa integer not null, primary key (id_proveedor_acuerdo));
+
+UPDATE ProveedorAcuerdo
+SET id_proveedor_documento = NULL
+WHERE id_proveedor_documento IN (
+  SELECT id_proveedor_documento
+  FROM ProveedorDocumento
+  WHERE archivo_base64 IS NULL OR TRIM(archivo_base64) = ''
+);
+
+DELETE FROM ProveedorDocumento
+WHERE archivo_base64 IS NULL OR TRIM(archivo_base64) = '';
 
 CREATE TABLE IF NOT EXISTS Roles (id_rol integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), nombre_rol varchar(255), id_empresa integer not null, primary key (id_rol));
 

@@ -394,12 +394,325 @@ SELECT
   precio_compra, 1, id_producto, id_proveedor
 FROM seed_productos;
 
+UPDATE ProveedorProducto
+SET
+  sku_proveedor = 'PV-' || id_proveedor || '-' || id_producto,
+  ultimo_costo = (SELECT precio_compra FROM seed_productos p WHERE p.id_producto = ProveedorProducto.id_producto),
+  fecha_ultimo_costo = STRFTIME('%Y-%m-%d %H:%M:%f', 'now', '-' || ((id_producto % 28) + 2) || ' day'),
+  presentacion_compra = CASE
+    WHEN id_producto BETWEEN 1 AND 16 THEN CASE WHEN id_producto % 4 = 0 THEN 'Bulto 25 kg' ELSE 'Caja 12 pz' END
+    WHEN id_producto BETWEEN 17 AND 24 THEN CASE WHEN id_producto IN (18,20) THEN 'Charola 6 pz' ELSE 'Caja 24 pz' END
+    WHEN id_producto BETWEEN 25 AND 32 THEN 'Caja refrigerada 12 pz'
+    WHEN id_producto BETWEEN 33 AND 40 THEN CASE WHEN id_producto IN (34,35,36) THEN 'Canasta diaria' ELSE 'Caja 20 pz' END
+    WHEN id_producto BETWEEN 41 AND 56 THEN 'Caja exhibidora 24 pz'
+    WHEN id_producto BETWEEN 57 AND 72 THEN 'Caja 12 pz'
+    WHEN id_producto BETWEEN 73 AND 80 THEN 'Reja 20 kg'
+    WHEN id_producto BETWEEN 81 AND 88 THEN 'Caja fria 10 kg'
+    WHEN id_producto BETWEEN 89 AND 96 THEN 'Caja congelada 8 pz'
+    WHEN id_producto BETWEEN 97 AND 104 THEN 'Caja 10 pz'
+    WHEN id_producto BETWEEN 105 AND 112 THEN CASE WHEN id_producto IN (105,106,107) THEN 'Saco 10 pz' ELSE 'Caja 24 pz' END
+    WHEN id_producto BETWEEN 113 AND 120 THEN 'Paquete escolar 12 pz'
+    WHEN id_producto BETWEEN 121 AND 128 THEN 'Caja ferretera 10 pz'
+    WHEN id_producto BETWEEN 129 AND 136 THEN 'Bolsa mayoreo 20 pz'
+    ELSE 'Caja mixta 12 pz'
+  END,
+  cantidad_minima = CASE
+    WHEN id_producto BETWEEN 73 AND 88 THEN 5
+    WHEN id_producto BETWEEN 89 AND 96 THEN 4
+    WHEN id_producto IN (1,17,33,57,97,121,137) THEN 2
+    ELSE 1
+  END,
+  proveedor_preferido = CASE WHEN id_producto % 3 = 0 OR id_producto IN (1,17,25,41,73,89,129,137) THEN 1 ELSE 0 END,
+  estado_relacion = CASE
+    WHEN id_producto IN (1,37,73,97,113,129) THEN 'INACTIVA'
+    WHEN id_producto IN (16,48,88,104,120,136) THEN 'ARCHIVADA'
+    ELSE 'ACTIVA'
+  END,
+  estatus = CASE
+    WHEN id_producto IN (1,16,37,48,73,88,97,104,113,120,129,136) THEN 0
+    ELSE 1
+  END
+WHERE id_producto BETWEEN 1 AND 144;
+
+DROP TABLE IF EXISTS seed_proveedor_avanzado;
+CREATE TEMP TABLE seed_proveedor_avanzado (
+  id_proveedor INTEGER PRIMARY KEY,
+  estatus INTEGER,
+  razon_social TEXT,
+  rfc TEXT,
+  tipo_proveedor TEXT,
+  categoria_principal TEXT,
+  estado_proveedor TEXT,
+  estado_proveedor_anterior TEXT,
+  ultima_accion_estado TEXT,
+  motivo_cambio_estado TEXT,
+  usuario_cambio_estado TEXT,
+  fecha_cambio_estado TEXT,
+  notas_internas TEXT,
+  modalidad_abastecimiento TEXT,
+  pedido_whatsapp INTEGER,
+  pedido_llamada INTEGER,
+  pedido_app INTEGER,
+  visita_ruta INTEGER,
+  compra_mostrador INTEGER,
+  dias_visita_entrega TEXT,
+  horario_habitual TEXT,
+  pedido_minimo REAL,
+  tiempo_estimado_entrega TEXT,
+  costo_envio REAL,
+  observaciones_abastecimiento TEXT,
+  forma_pago_principal TEXT,
+  maneja_credito INTEGER,
+  dias_credito INTEGER,
+  limite_credito REAL,
+  permite_devoluciones INTEGER,
+  cambios_caducidad INTEGER,
+  bonificaciones INTEGER,
+  descuentos_frecuentes INTEGER,
+  notas_comerciales TEXT
+);
+
+INSERT INTO seed_proveedor_avanzado VALUES
+(1,1,'Abarrotes Central S.A. de C.V.','ACE010101AB1','ESTABLECIMIENTO_COMPRA','Abarrotes secos','ACTIVO',NULL,'REACTIVAR','Proveedor disponible para compras de mostrador','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-9 day'),'Conviene ir temprano; mejores precios por caja cerrada.','RECOGE_TENDERO',1,1,0,0,1,'Lunes a sabado','06:00-14:00',1500,'Mismo dia',0,'Compra directa en central; no entrega en tienda.','CONTADO',0,NULL,NULL,1,0,0,1,'Descuento por mayoreo desde 10 cajas.'),
+(2,1,'Bebidas Metropolitanas S.A. de C.V.','BME020202CD2','DISTRIBUIDOR_FORMAL','Bebidas y ruta','ACTIVO',NULL,'REACTIVAR','Ruta confirmada para zona norte','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-7 day'),'Ruta puntual; revisar retornables al recibir.','ENTREGA_DOMICILIO',1,1,1,1,0,'Martes y viernes','09:00-13:00',900,'24 horas',0,'Preventista toma pedido y repartidor entrega al dia siguiente.','CREDITO',1,7,8500,1,1,1,1,'Credito semanal; cambios por caducidad con evidencia.'),
+(3,1,'Lacteos La Pradera S.A. de C.V.','LPR030303EF3','DISTRIBUIDOR_FORMAL','Lacteos refrigerados','ACTIVO',NULL,'REACTIVAR','Proveedor prioritario de refrigerados','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day'),'Mantener cadena fria; revisar caducidades cortas.','ENTREGA_DOMICILIO',1,1,0,1,0,'Lunes, miercoles y sabado','07:00-11:00',600,'12 horas',0,'Entrega temprano; acepta cambios por caducidad si el producto no fue abierto.','MIXTO',1,15,12000,1,1,0,0,'Credito quincenal para lacteos con limite controlado.'),
+(4,1,'Panificadora El Trigal','PTR040404GH4','PROVEEDOR_INFORMAL','Pan y tortillas','ACTIVO',NULL,'REACTIVAR','Ruta diaria vigente','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-5 day'),'Entrega muy temprano; ajustar pedido por clima y dia de quincena.','ENTREGA_DOMICILIO',1,1,0,1,0,'Diario','05:30-08:30',250,'Mismo dia',0,'Pedido por llamada una tarde antes; factura solo bajo solicitud.','CONTADO',0,NULL,NULL,1,1,0,0,'Cambia pan frio del dia anterior en la siguiente visita.'),
+(5,1,'Botanas y Dulces Maya S.A.','BDM050505IJ5','DISTRIBUIDOR_FORMAL','Botanas y dulces','ACTIVO',NULL,'REACTIVAR','Exhibidores activos en tienda','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-4 day'),'Proveedor con material POP; cuidar ubicacion de exhibidores.','MIXTO',1,1,1,1,0,'Jueves','10:00-16:00',1200,'48 horas',80,'Puede entregar o permitir recoleccion en bodega.','CREDITO',1,7,6000,1,1,1,1,'Bonificacion por exhibicion y descuentos por caja cerrada.'),
+(6,0,'Limpieza y Hogar Plus S.A.','LHP060606KL6','DISTRIBUIDOR_FORMAL','Limpieza','INACTIVO','ACTIVO','DESACTIVAR','No surtio pedidos completos en tres visitas','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-12 day'),'Inactivo por incumplimiento; conservar historico de compras.','ENTREGA_DOMICILIO',1,0,0,0,0,'Sin ruta activa','09:00-18:00',700,'72 horas',120,'Consultar antes de reactivar.','CONTADO',0,NULL,NULL,0,0,0,0,'Solo reactivar si confirma inventario y tiempos.'),
+(7,1,'Higiene Total S.A.','HTO070707MN7','DISTRIBUIDOR_FORMAL','Higiene personal','ACTIVO',NULL,'REACTIVAR','Lista nueva cargada','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),'Proveedor estable; revisar promociones mensuales.','ENTREGA_DOMICILIO',1,0,1,0,0,'Miercoles','11:00-15:00',1000,'48 horas',0,'Pedidos por app comercial.','MIXTO',1,10,5000,0,0,1,1,'Descuentos frecuentes por temporada.'),
+(8,1,'Frutas y Verduras San Miguel','FSM080808OP8','PROVEEDOR_INFORMAL','Perecederos','ACTIVO',NULL,'REACTIVAR','Proveedor de mercado local activo','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-2 day'),'Calidad varia por temporada; revisar peso en bascula.','RECOGE_TENDERO',1,1,0,0,1,'Martes, jueves y domingo','05:00-09:00',500,'Mismo dia',0,'Compra directa en mercado; pago inmediato.','CONTADO',0,NULL,NULL,0,0,0,1,'Descuento por compra temprano y pago en efectivo.'),
+(9,1,'Carnes Frias del Norte S.A.','CFN090909QR9','DISTRIBUIDOR_FORMAL','Carnes frias','ACTIVO',NULL,'REACTIVAR','Ruta refrigerada vigente','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-2 day'),'Requiere espacio en refrigerador antes de recibir.','ENTREGA_DOMICILIO',1,1,0,1,0,'Lunes y jueves','08:00-12:00',1100,'24 horas',0,'Entrega con termometro; conservar ticket de temperatura.','CREDITO',1,7,7000,1,1,0,0,'Credito corto sujeto a devolucion documentada.'),
+(10,0,'Congelados Polar S.A.','CPO101010ST0','DISTRIBUIDOR_FORMAL','Congelados','ARCHIVADO','INACTIVO','ARCHIVAR','Proveedor sustituido; conservar documentos de equipo','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-21 day'),'Archivado por cambio de distribuidor; no usar en operaciones nuevas.','ENTREGA_DOMICILIO',0,1,0,0,0,'Sin ruta','09:00-17:00',1500,'72 horas',150,'Solo consulta historica.','CREDITO',1,14,9000,0,0,0,0,'Tiene activo perdido y comodato archivado.'),
+(11,1,'Farma Basica S.A.','FBA111111UV1','DISTRIBUIDOR_FORMAL','Farmacia basica','ACTIVO',NULL,'REACTIVAR','Credito aprobado','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-8 day'),'Documentos de credito vigentes.','ENTREGA_DOMICILIO',1,0,1,0,0,'Viernes','12:00-17:00',800,'48 horas',0,'Controlar caducidades largas y productos sensibles.','CREDITO',1,30,15000,0,1,0,1,'Credito mensual con documento firmado.'),
+(12,1,'Mascotas Amigas','MAM121212WX2','PROVEEDOR_INFORMAL','Mascotas','ACTIVO',NULL,'REACTIVAR','Proveedor atiende solo por WhatsApp','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'Pedido rapido por WhatsApp; no maneja factura.','MIXTO',1,0,0,0,1,'Sabado','10:00-14:00',400,'Mismo dia',60,'Puede entregar en moto o se recoge en local.','CONTADO',0,NULL,NULL,0,0,0,0,'Solo acepta efectivo o transferencia.'),
+(13,0,'Papeleria Escolar del Centro','PEC131313YZ3','ESTABLECIMIENTO_COMPRA','Papeleria','INACTIVO','ACTIVO','DESACTIVAR','Temporada escolar cerrada','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-16 day'),'Usar solo en temporada alta; revisar precios antes de reactivar.','RECOGE_TENDERO',0,1,0,0,1,'Agosto y septiembre','09:00-18:00',300,'Mismo dia',0,'Compra en mostrador por temporada.','CONTADO',0,NULL,NULL,0,0,0,1,'Descuento por paquete escolar completo.'),
+(14,1,'Ferreteria Express','FEX141414AB4','ESTABLECIMIENTO_COMPRA','Ferreteria','ACTIVO',NULL,'REACTIVAR','Proveedor eventual para emergencia','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-11 day'),'Proveedor de respaldo para pilas, focos y reparaciones.','MIXTO',1,1,0,0,1,'Bajo pedido','09:00-19:00',200,'Mismo dia',40,'Usar para faltantes y compras urgentes.','CONTADO',0,NULL,NULL,0,0,0,0,'Puede mandar por mensajeria local.'),
+(15,1,'Desechables Luna','DLU151515CD5','PROVEEDOR_INFORMAL','Desechables','ACTIVO',NULL,'REACTIVAR','Proveedor de fiesta y temporada','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-4 day'),'Buenos precios por volumen; confirmar disponibilidad.','MIXTO',1,1,0,0,1,'Lunes a viernes','08:00-17:00',500,'24 horas',50,'Entrega con costo o recoleccion en bodega.','MIXTO',1,7,3000,0,0,1,1,'Descuento por caja cerrada y pedido minimo flexible.'),
+(16,1,'Distribuidora Bebe Feliz S.A.','DBF161616EF6','DISTRIBUIDOR_FORMAL','Bebes','ACTIVO',NULL,'REACTIVAR','Proveedor activo con devolucion parcial','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day'),'Revisar lotes de formula y panales.','ENTREGA_DOMICILIO',1,0,1,1,0,'Miercoles y sabado','10:00-13:00',1000,'48 horas',0,'Pedidos por app y confirmacion por WhatsApp.','CREDITO',1,14,10000,1,1,0,1,'Cambios por defecto con fotografia y lote.');
+
+UPDATE Proveedores
+SET
+  estatus = (SELECT estatus FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  razon_social = (SELECT razon_social FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  rfc = (SELECT rfc FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  tipo_proveedor = (SELECT tipo_proveedor FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  categoria_principal = (SELECT categoria_principal FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  estado_proveedor = (SELECT estado_proveedor FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  estado_proveedor_anterior = (SELECT estado_proveedor_anterior FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  ultima_accion_estado = (SELECT ultima_accion_estado FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  motivo_cambio_estado = (SELECT motivo_cambio_estado FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  usuario_cambio_estado = (SELECT usuario_cambio_estado FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  fecha_cambio_estado = (SELECT fecha_cambio_estado FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  notas_internas = (SELECT notas_internas FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  modalidad_abastecimiento = (SELECT modalidad_abastecimiento FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  pedido_whatsapp = (SELECT pedido_whatsapp FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  pedido_llamada = (SELECT pedido_llamada FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  pedido_app = (SELECT pedido_app FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  visita_ruta = (SELECT visita_ruta FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  compra_mostrador = (SELECT compra_mostrador FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  dias_visita_entrega = (SELECT dias_visita_entrega FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  horario_habitual = (SELECT horario_habitual FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  pedido_minimo = (SELECT pedido_minimo FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  tiempo_estimado_entrega = (SELECT tiempo_estimado_entrega FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  costo_envio = (SELECT costo_envio FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  observaciones_abastecimiento = (SELECT observaciones_abastecimiento FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  forma_pago_principal = (SELECT forma_pago_principal FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  maneja_credito = (SELECT maneja_credito FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  dias_credito = (SELECT dias_credito FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  limite_credito = (SELECT limite_credito FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  permite_devoluciones = (SELECT permite_devoluciones FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  cambios_caducidad = (SELECT cambios_caducidad FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  bonificaciones = (SELECT bonificaciones FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  descuentos_frecuentes = (SELECT descuentos_frecuentes FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor),
+  notas_comerciales = (SELECT notas_comerciales FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor)
+WHERE id_proveedor IN (SELECT id_proveedor FROM seed_proveedor_avanzado);
+
+INSERT OR REPLACE INTO ProveedorContacto
+(id_proveedor_contacto, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, nombre, rol, telefono, whatsapp, correo, notas, contacto_principal, estado_contacto, id_proveedor, id_empresa)
+VALUES
+(1001,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-30 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day'),'system','system','Martha Gomez','ENCARGADO','5551001001','5551001001','ventas@abarrotescentral.mx','Encargada de pasillo y precios por caja.',1,'ACTIVO',1,1),
+(1002,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-30 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day'),'system','system','Don Chava','OTRO','5551001101','5551001101','','Carga pedidos en central.',0,'ACTIVO',1,1),
+(1003,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-28 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-5 day'),'system','system','Ivan Ruiz','VENDEDOR','5551001002','5551001002','pedidos@bebidasmetro.mx','Preventista de ruta.',1,'ACTIVO',2,1),
+(1004,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-28 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-5 day'),'system','system','Cesar Luna','REPARTIDOR','5551001202','5551001202','','Entrega y recibe retornables.',0,'ACTIVO',2,1),
+(1005,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-28 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-5 day'),'system','system','Laura Perez','COBRANZA','5551001302','','cobranza@bebidasmetro.mx','Cobra los viernes.',0,'ACTIVO',2,1),
+(1006,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-24 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-4 day'),'system','system','Diana Trejo','VENDEDOR','5551001003','5551001003','contacto@lapradera.mx','Toma pedido de lacteos.',1,'ACTIVO',3,1),
+(1007,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-24 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-4 day'),'system','system','Ruben Diaz','REPARTIDOR','5551001203','5551001203','','Entrega refrigerada.',0,'ACTIVO',3,1),
+(1008,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-20 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),'system','system','Raul Ortega','VENDEDOR','5551001004','5551001004','facturacion@trigal.mx','Confirma pan del dia.',1,'ACTIVO',4,1),
+(1009,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-18 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),'system','system','Nora Salas','VENDEDOR','5551001005','5551001005','ventas@mayabotanas.mx','Promociones y exhibidores.',1,'ACTIVO',5,1),
+(1010,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-18 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),'system','system','Tania Ramos','ATENCION_CLIENTES','5551001205','','atencion@mayabotanas.mx','Incidencias y cambios.',0,'ACTIVO',5,1),
+(1011,0,STRFTIME('%Y-%m-%d %H:%M:%f','now','-16 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-12 day'),'system','system','Oscar Leon','VENDEDOR','5551001006','5551001006','mayoreo@hogarplus.mx','Contacto inactivo por falta de surtido.',1,'INACTIVO',6,1),
+(1012,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-14 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),'system','system','Patricia Mora','VENDEDOR','5551001007','5551001007','pedidos@higienetotal.mx','Pedidos por app.',1,'ACTIVO',7,1),
+(1013,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-12 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-2 day'),'system','system','Jorge Rivas','ENCARGADO','5551001008','5551001008','compras@frutassan miguel.mx','Dueño de puesto.',1,'ACTIVO',8,1),
+(1014,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-10 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-2 day'),'system','system','Elena Padilla','VENDEDOR','5551001009','5551001009','pedidos@carnesnorte.mx','Venta refrigerada.',1,'ACTIVO',9,1),
+(1015,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-10 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-2 day'),'system','system','Hector Pina','REPARTIDOR','5551001209','5551001209','','Chofer de ruta fria.',0,'ACTIVO',9,1),
+(1016,0,STRFTIME('%Y-%m-%d %H:%M:%f','now','-40 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-21 day'),'system','system','Luis Tapia','VENDEDOR','5551001010','','ventas@polarcongelados.mx','Proveedor archivado.',1,'INACTIVO',10,1),
+(1017,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-8 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'system','system','Silvia Cano','VENDEDOR','5551001011','5551001011','mayoreo@farmabasica.mx','Cotizaciones de farmacia.',1,'ACTIVO',11,1),
+(1018,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-7 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'system','system','Mario Flores','ENCARGADO','5551001012','5551001012','ventas@mascotasamigas.mx','Solo atiende WhatsApp.',1,'ACTIVO',12,1),
+(1019,0,STRFTIME('%Y-%m-%d %H:%M:%f','now','-35 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-16 day'),'system','system','Claudia Vega','ATENCION_CLIENTES','5551001013','','pedidos@papeleriaescolar.mx','Contacto de temporada.',1,'INACTIVO',13,1),
+(1020,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-9 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'system','system','Tomas Ibarra','ENCARGADO','5551001014','5551001014','contacto@ferreexpress.mx','Compras urgentes.',1,'ACTIVO',14,1),
+(1021,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-9 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'system','system','Rocio Campos','VENDEDOR','5551001015','5551001015','ventas@desechablesluna.mx','Venta mayoreo.',1,'ACTIVO',15,1),
+(1022,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'system','system','Ana Beltran','VENDEDOR','5551001016','5551001016','pedidos@bebefeliz.mx','Pedidos de bebe.',1,'ACTIVO',16,1),
+(1023,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'system','system','Victor Rey','COBRANZA','5551001216','','cobranza@bebefeliz.mx','Cobranza quincenal.',0,'ACTIVO',16,1);
+
+INSERT OR REPLACE INTO ProveedorActivo
+(id_proveedor_activo, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, nombre, tipo, numero_serie, fecha_entrega, fecha_regreso, estado_fisico, ubicacion_tienda, condiciones_prestamo, deposito_garantia, estado_activo_prestado, notas, id_proveedor, id_empresa)
+VALUES
+(2001,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-70 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-8 day'),'system','system','Enfriador Coca-Cola 2 puertas','ENFRIADOR','CC-2026-0001',DATE('now','-70 day'),NULL,'Bueno','Entrada derecha','Prestamo condicionado a compra minima semanal de bebidas.',0,'EN_TIENDA','Revisar limpieza semanal.',2,1),
+(2002,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-65 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-5 day'),'system','system','Stand retornables refresco','STAND','ST-R-0202',DATE('now','-65 day'),NULL,'Rayado','Pasillo bebidas','Uso exclusivo para retornables.',0,'RETIRADO_DANO','Golpe lateral reportado.',2,1),
+(2003,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-50 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),'system','system','Refrigerador Lala vertical','REFRIGERADOR','LA-REF-330',DATE('now','-50 day'),NULL,'Falla termostato','Zona fria','Prestamo sujeto a compra de lacteos.',1200,'REPARACION','Tecnico programado.',3,1),
+(2004,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-44 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),'system','system','Exhibidor Sabritas mostrador','EXHIBIDOR','SB-EXH-014',DATE('now','-44 day'),NULL,'Bueno','Mostrador','Uso para botanas del proveedor.',0,'EN_EXHIBICION','Buen flujo de venta.',5,1),
+(2005,0,STRFTIME('%Y-%m-%d %H:%M:%f','now','-80 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-10 day'),'system','system','Sombrilla Barcel exterior','SOMBRILLA','BC-SOM-088',DATE('now','-80 day'),DATE('now','-10 day'),'Bueno','Exterior','Se devuelve al cerrar temporada.',0,'DEVUELTO','Devuelta completa.',5,1),
+(2006,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-30 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-2 day'),'system','system','Bascula de mercado 40 kg','BASCULA','BAS-4088',DATE('now','-30 day'),NULL,'Bueno','Area de frutas','Equipo usado para verificar peso.',500,'EN_TIENDA','Calibrar cada mes.',8,1),
+(2007,0,STRFTIME('%Y-%m-%d %H:%M:%f','now','-120 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-21 day'),'system','system','Congelador Polar horizontal','REFRIGERADOR','CP-FRZ-777',DATE('now','-120 day'),NULL,'Desconocido','Bodega fria','Comodato archivado.',0,'PERDIDO','No localizado al archivar proveedor.',10,1),
+(2008,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-4 day'),'system','system','Lona promocional desechables','LONA','DL-LONA-15',DATE('now','-25 day'),NULL,'Bueno','Fachada','Publicidad por temporada.',0,'EN_EXHIBICION','Retirar si se rompe.',15,1),
+(2009,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-18 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),'system','system','Anaquel pan dulce','ANAQUEL','TR-ANA-040',DATE('now','-18 day'),NULL,'Bueno','Pasillo pan','Uso para pan empacado.',0,'EN_TIENDA','Mantener seco.',4,1),
+(2010,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-12 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'system','system','Vitrina Farma Basica','EXHIBIDOR','FB-VIT-011',DATE('now','-12 day'),NULL,'Bisagra floja','Mostrador cerrado','Uso para productos sensibles.',800,'REPARACION','Pendiente ajuste de bisagra.',11,1);
+
+INSERT OR REPLACE INTO ProveedorActivoHistorial
+(id_proveedor_activo_historial, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, tipo_evento, estado_anterior, estado_nuevo, descripcion, detalle_anterior, detalle_nuevo, fecha_evento, evidencia_nombre, evidencia_mime_type, evidencia_base64, evidencia_tamano_bytes, id_proveedor_activo, id_proveedor, id_empresa)
+VALUES
+(21001,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-70 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-70 day'),'system','system','RECIBIDO',NULL,'RECIBIDO','Enfriador recibido del proveedor.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-70 day'),NULL,NULL,NULL,NULL,2001,2,1),
+(21002,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-69 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-69 day'),'system','system','EN_TIENDA','RECIBIDO','EN_TIENDA','Enfriador colocado en entrada derecha.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-69 day'),NULL,NULL,NULL,NULL,2001,2,1),
+(21003,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-65 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-65 day'),'system','system','RECIBIDO',NULL,'RECIBIDO','Stand recibido para retornables.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-65 day'),NULL,NULL,NULL,NULL,2002,2,1),
+(21004,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-5 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-5 day'),'system','system','RETIRADO_DANO','EN_TIENDA','RETIRADO_DANO','Golpe lateral reportado con evidencia fotografica.','Estado fisico: Bueno','Estado fisico: Rayado',STRFTIME('%Y-%m-%d %H:%M:%f','now','-5 day'),'golpe-stand.png','image/png','iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=',68,2002,2,1),
+(21005,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-50 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-50 day'),'system','system','RECIBIDO',NULL,'RECIBIDO','Refrigerador recibido para lacteos.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-50 day'),NULL,NULL,NULL,NULL,2003,3,1),
+(21006,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-49 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-49 day'),'system','system','EN_TIENDA','RECIBIDO','EN_TIENDA','Refrigerador colocado en zona fria.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-49 day'),NULL,NULL,NULL,NULL,2003,3,1),
+(21007,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-7 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-7 day'),'system','system','RETIRADO_DANO','EN_TIENDA','RETIRADO_DANO','Se detecto falla en termostato.','Estado fisico: Bueno','Estado fisico: Falla termostato',STRFTIME('%Y-%m-%d %H:%M:%f','now','-7 day'),'termostato-falla.png','image/png','iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=',68,2003,3,1),
+(21008,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),'system','system','REPARACION','RETIRADO_DANO','REPARACION','Proveedor envio tecnico para revision.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),NULL,NULL,NULL,NULL,2003,3,1),
+(21009,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-44 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-44 day'),'system','system','RECIBIDO',NULL,'RECIBIDO','Exhibidor recibido para mostrador.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-44 day'),NULL,NULL,NULL,NULL,2004,5,1),
+(21010,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-43 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-43 day'),'system','system','EN_EXHIBICION','RECIBIDO','EN_EXHIBICION','Exhibidor colocado en mostrador.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-43 day'),NULL,NULL,NULL,NULL,2004,5,1),
+(21011,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-80 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-80 day'),'system','system','RECIBIDO',NULL,'RECIBIDO','Sombrilla recibida para exterior.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-80 day'),NULL,NULL,NULL,NULL,2005,5,1),
+(21012,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-10 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-10 day'),'system','system','DEVUELTO','EN_TIENDA','DEVUELTO','Sombrilla devuelta completa al proveedor.','Fecha regreso: --','Fecha regreso: hoy',STRFTIME('%Y-%m-%d %H:%M:%f','now','-10 day'),'devolucion-sombrilla.png','image/png','iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=',68,2005,5,1),
+(21013,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-120 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-120 day'),'system','system','RECIBIDO',NULL,'RECIBIDO','Congelador recibido en bodega fria.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-120 day'),NULL,NULL,NULL,NULL,2007,10,1),
+(21014,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-21 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-21 day'),'system','system','PERDIDO','EN_TIENDA','PERDIDO','Activo no localizado al archivar proveedor.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-21 day'),NULL,NULL,NULL,NULL,2007,10,1),
+(21015,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),'system','system','RECIBIDO',NULL,'RECIBIDO','Lona recibida para fachada.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),NULL,NULL,NULL,NULL,2008,15,1),
+(21016,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-24 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-24 day'),'system','system','EN_EXHIBICION','RECIBIDO','EN_EXHIBICION','Lona colocada en fachada.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-24 day'),NULL,NULL,NULL,NULL,2008,15,1),
+(21017,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-12 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-12 day'),'system','system','RECIBIDO',NULL,'RECIBIDO','Vitrina recibida para productos sensibles.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-12 day'),NULL,NULL,NULL,NULL,2010,11,1),
+(21018,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'system','system','REPARACION','EN_TIENDA','REPARACION','Bisagra floja; proveedor pendiente de ajuste.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),NULL,NULL,NULL,NULL,2010,11,1);
+
+INSERT OR REPLACE INTO ProveedorActivoEvidencia
+(id_proveedor_activo_evidencia, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, evidencia_nombre, evidencia_mime_type, evidencia_base64, evidencia_tamano_bytes, id_proveedor_activo_historial, id_empresa)
+VALUES
+(21101,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-5 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-5 day'),'system','system','golpe-stand-frente.png','image/png','iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=',68,21004,1),
+(21102,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-5 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-5 day'),'system','system','golpe-stand-lateral.png','image/png','iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=',68,21004,1),
+(21103,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-7 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-7 day'),'system','system','termostato-falla.png','image/png','iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=',68,21007,1);
+
+INSERT OR REPLACE INTO ProveedorDocumento
+(id_proveedor_documento, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, nombre, tipo, ruta_documento, mime_type, tamano_bytes, descripcion, estado_documento, id_proveedor, id_proveedor_activo, id_empresa)
+VALUES
+(3001,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-70 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-8 day'),'system','system','Comodato enfriador bebidas','COMODATO','/data/proveedores/bebidas/comodato-enfriador.pdf','application/pdf',842120,'Comodato del enfriador principal.','ACTIVO',2,2001,1),
+(3002,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-12 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-4 day'),'system','system','Lista precios bebidas julio','LISTA_PRECIOS','/data/proveedores/bebidas/lista-precios-julio.xlsx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',326420,'Lista vigente de bebidas.','ACTIVO',2,NULL,1),
+(3003,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-50 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),'system','system','Comodato refrigerador lacteos','COMODATO','/data/proveedores/lacteos/comodato-refrigerador.pdf','application/pdf',712240,'Documento de prestamo del refrigerador.','ACTIVO',3,2003,1),
+(3004,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),'system','system','Foto falla termostato','EVIDENCIA','/data/proveedores/lacteos/evidencia-termostato.jpg','image/jpeg',412820,'Evidencia fotografica de reparacion.','ACTIVO',3,2003,1),
+(3005,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-44 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-4 day'),'system','system','Contrato exhibicion botanas','CONTRATO','/data/proveedores/botanas/contrato-exhibicion.pdf','application/pdf',924000,'Contrato de exhibicion y bonificacion.','ACTIVO',5,2004,1),
+(3006,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-20 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-4 day'),'system','system','Catalogo dulces temporada','CATALOGO','/data/proveedores/botanas/catalogo-temporada.pdf','application/pdf',1320000,'Catalogo vigente de dulces.','ACTIVO',5,NULL,1),
+(3007,0,STRFTIME('%Y-%m-%d %H:%M:%f','now','-16 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-12 day'),'system','system','Identificacion vendedor limpieza','IDENTIFICACION','/data/proveedores/limpieza/identificacion-vendedor.png','image/png',186000,'Identificacion del contacto anterior.','ARCHIVADO',6,NULL,1),
+(3008,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-9 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-2 day'),'system','system','Precios mercado verduras','LISTA_PRECIOS','/data/proveedores/frutas/precios-mercado.csv','text/csv',18420,'Lista manual de precios de mercado.','ACTIVO',8,NULL,1),
+(3009,0,STRFTIME('%Y-%m-%d %H:%M:%f','now','-120 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-21 day'),'system','system','Comodato congelador archivado','COMODATO','/data/proveedores/congelados/comodato-archivado.pdf','application/pdf',688200,'Comodato conservado por historial.','ARCHIVADO',10,2007,1),
+(3010,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-8 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'system','system','Documento credito Farma Basica','DOCUMENTO_CREDITO','/data/proveedores/farma/credito-firmado.docx','application/vnd.openxmlformats-officedocument.wordprocessingml.document',246700,'Credito aprobado a 30 dias.','ACTIVO',11,NULL,1),
+(3011,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-4 day'),'system','system','Evidencia lona fachada','EVIDENCIA','/data/proveedores/desechables/lona-fachada.webp','image/webp',304120,'Foto de lona colocada.','ACTIVO',15,2008,1),
+(3012,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-10 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day'),'system','system','Catalogo abarrotes central','CATALOGO','/data/proveedores/abarrotes/catalogo-central.pdf','application/pdf',524400,'Catalogo de pasillos frecuentes.','ACTIVO',1,NULL,1),
+(3013,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-18 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),'system','system','Contrato ruta pan','CONTRATO','/data/proveedores/pan/contrato-ruta.pdf','application/pdf',384920,'Condiciones de ruta diaria.','ACTIVO',4,2009,1),
+(3014,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-9 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'system','system','Notas proveedor ferreteria','OTRO','/data/proveedores/ferreteria/notas-operacion.txt','text/plain',6200,'Notas internas de compras urgentes.','ACTIVO',14,NULL,1);
+
+UPDATE ProveedorDocumento
+SET ruta_documento = 'BASE_DATOS',
+    archivo_nombre = 'Precios mercado verduras.csv',
+    archivo_base64 = 'cHJvZHVjdG8sY29zdG8KVG9tYXRlLDE4CkNpbGFudHJvLDEyCg==',
+    mime_type = 'text/csv',
+    tamano_bytes = 35
+WHERE id_proveedor_documento = 3008;
+
+UPDATE ProveedorDocumento
+SET ruta_documento = 'BASE_DATOS',
+    archivo_nombre = 'Notas proveedor ferreteria.txt',
+    archivo_base64 = 'Tm90YXMgZGUgb3BlcmFjaW9uIGRlbCBwcm92ZWVkb3IuCkF0aWVuZGUgcG9yIFdoYXRzQXBwIHkgZW50cmVnYSBlbiBtb3N0cmFkb3IuCg==',
+    mime_type = 'text/plain',
+    tamano_bytes = 80
+WHERE id_proveedor_documento = 3014;
+
+UPDATE ProveedorDocumento
+SET ruta_documento = 'BASE_DATOS',
+    archivo_nombre = 'Evidencia lona fachada.png',
+    archivo_base64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=',
+    mime_type = 'image/png',
+    tamano_bytes = 68
+WHERE id_proveedor_documento = 3011;
+
+UPDATE ProveedorAcuerdo
+SET id_proveedor_documento = NULL
+WHERE id_proveedor_documento IN (
+  SELECT id_proveedor_documento
+  FROM ProveedorDocumento
+  WHERE archivo_base64 IS NULL OR TRIM(archivo_base64) = ''
+);
+
+DELETE FROM ProveedorDocumento
+WHERE archivo_base64 IS NULL OR TRIM(archivo_base64) = '';
+
+INSERT OR REPLACE INTO ProveedorDocumentoHistorial
+(id_proveedor_documento_historial, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, id_proveedor_documento, id_proveedor, tipo_evento, descripcion, detalle_anterior, detalle_nuevo, fecha_evento, archivo_anterior_nombre, archivo_anterior_mime_type, archivo_anterior_tamano_bytes, archivo_anterior_base64, archivo_nuevo_nombre, archivo_nuevo_mime_type, archivo_nuevo_tamano_bytes, archivo_nuevo_base64, id_empresa)
+VALUES
+(32001,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-9 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-9 day'),'system','system',3008,8,'CREACION','Documento agregado al proveedor.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-9 day'),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1),
+(32002,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),'system','system',3011,15,'CREACION','Documento agregado al proveedor.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1),
+(32003,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-10 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-10 day'),'system','system',3014,14,'CREACION','Documento agregado al proveedor.',NULL,NULL,STRFTIME('%Y-%m-%d %H:%M:%f','now','-10 day'),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1),
+(32004,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day'),'admin','admin',3014,14,'EDICION','Metadatos del documento actualizados.','Descripcion: Notas iniciales del proveedor','Descripcion: Notas internas de compras urgentes',STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day'),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1),
+(32005,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'admin','admin',3014,14,'NUEVA_VERSION','Se sustituyo por version corregida con condiciones actualizadas.','Archivo: Notas proveedor ferreteria borrador.txt'||char(10)||'Tamano: 16','Archivo: Notas proveedor ferreteria.txt'||char(10)||'Tamano: 80',STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'Notas proveedor ferreteria borrador.txt','text/plain',16,'Tm90YXMgaW5pY2lhbGVzCg==','Notas proveedor ferreteria.txt','text/plain',80,'Tm90YXMgZGUgb3BlcmFjaW9uIGRlbCBwcm92ZWVkb3IuCkF0aWVuZGUgcG9yIFdoYXRzQXBwIHkgZW50cmVnYSBlbiBtb3N0cmFkb3IuCg==',1);
+
+INSERT OR REPLACE INTO ProveedorAcuerdo
+(id_proveedor_acuerdo, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, tipo, descripcion, fecha_inicio, fecha_vigencia, estado_acuerdo, notas, id_proveedor, id_proveedor_documento, id_empresa)
+VALUES
+(4001,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-70 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-8 day'),'system','system','PRESTAMO_ACTIVO','Enfriador prestado con compra minima semanal de bebidas.',DATE('now','-70 day'),NULL,'ACTIVO','Cuidar limpieza y disponibilidad de espacio.',2,3001,1),
+(4002,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-40 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-5 day'),'system','system','CREDITO','Credito a 7 dias para ruta de bebidas.',DATE('now','-40 day'),NULL,'ACTIVO','Liquidar cada viernes.',2,NULL,1),
+(4003,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-35 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),'system','system','CAMBIO_CADUCIDAD','Cambio por caducidad en lacteos cerrados.',DATE('now','-35 day'),NULL,'ACTIVO','Requiere evidencia y lote visible.',3,3004,1),
+(4004,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-30 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),'system','system','ENTREGA','Entrega lunes, miercoles y sabado antes de las 11.',DATE('now','-30 day'),NULL,'ACTIVO','No recibir si llega sin frio.',3,NULL,1),
+(4005,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-28 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-4 day'),'system','system','DESCUENTO','Descuento por caja cerrada en botanas seleccionadas.',DATE('now','-28 day'),DATE('now','+60 day'),'ACTIVO','Aplica con pedido mixto.',5,3005,1),
+(4006,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-28 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-4 day'),'system','system','PEDIDO_MINIMO','Pedido minimo de 1200 para entrega sin costo.',DATE('now','-28 day'),NULL,'ACTIVO','Si baja de minimo se recoge en bodega.',5,NULL,1),
+(4007,0,STRFTIME('%Y-%m-%d %H:%M:%f','now','-16 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-12 day'),'system','system','CONTACTO','Solo atender por correo hasta confirmar reactivacion.',DATE('now','-16 day'),DATE('now','-1 day'),'ARCHIVADO','Proveedor inactivo por incumplimiento.',6,3007,1),
+(4008,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-12 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-2 day'),'system','system','PAGO','Solo acepta efectivo en mercado.',DATE('now','-12 day'),NULL,'ACTIVO','Llevar cambio temprano.',8,NULL,1),
+(4009,0,STRFTIME('%Y-%m-%d %H:%M:%f','now','-120 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-21 day'),'system','system','PRESTAMO_ACTIVO','Congelador asociado a comodato archivado.',DATE('now','-120 day'),DATE('now','-21 day'),'ARCHIVADO','Conservar historial por activo no localizado.',10,3009,1),
+(4010,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-8 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'system','system','CREDITO','Credito a 30 dias autorizado para Farma Basica.',DATE('now','-8 day'),NULL,'ACTIVO','Limite sujeto a puntualidad.',11,3010,1),
+(4011,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-7 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'system','system','CONTACTO','Solo atiende por WhatsApp y confirma existencia por foto.',DATE('now','-7 day'),NULL,'ACTIVO','No llamar fuera de horario.',12,NULL,1),
+(4012,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-4 day'),'system','system','PEDIDO_MINIMO','Pedido minimo flexible para temporada de fiestas.',DATE('now','-25 day'),DATE('now','+45 day'),'ACTIVO','Aplica en desechables de alto volumen.',15,3011,1),
+(4013,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-10 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day'),'system','system','DESCUENTO','Descuento por comprar antes de las 8 AM.',DATE('now','-10 day'),NULL,'ACTIVO','Confirmar precio antes de cargar.',1,3012,1),
+(4014,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-18 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-3 day'),'system','system','ENTREGA','Ruta diaria de pan entre 5:30 y 8:30.',DATE('now','-18 day'),NULL,'ACTIVO','Ajustar cantidades por merma.',4,3013,1),
+(4015,0,STRFTIME('%Y-%m-%d %H:%M:%f','now','-60 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-5 day'),'system','system','OTRO','Acuerdo eventual de mensajeria local vencido.',DATE('now','-60 day'),DATE('now','-5 day'),'VENCIDO','Revisar si se renueva.',14,3014,1),
+(4016,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'system','system','CAMBIO_CADUCIDAD','Cambios por defecto o lote danado con fotografia.',DATE('now','-6 day'),NULL,'ACTIVO','Aplica a formula y panales sellados.',16,NULL,1);
+
+UPDATE ProveedorAcuerdo
+SET id_proveedor_documento = NULL
+WHERE id_proveedor_documento IN (
+  SELECT id_proveedor_documento
+  FROM ProveedorDocumento
+  WHERE archivo_base64 IS NULL OR TRIM(archivo_base64) = ''
+);
+
 INSERT OR REPLACE INTO HistorialCostos
 (id_historial_costos, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, precio_compra, id_empresa, id_producto, id_proveedor)
 SELECT
   id_producto, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now', '-45 day'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now', '-45 day'), 'system', 'system',
-  CAST(ROUND(precio_compra, 0) AS INTEGER), 1, id_producto, id_proveedor
+  ROUND(precio_compra, 2), 1, id_producto, id_proveedor
 FROM seed_productos;
+
+INSERT OR REPLACE INTO HistorialCostos
+(id_historial_costos, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, precio_compra, id_empresa, id_producto, id_proveedor)
+VALUES
+(10001,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-180 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-180 day'),'system','system',21.50,1,1,1),
+(10002,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-150 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-150 day'),'system','system',22.25,1,1,1),
+(10003,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-120 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-120 day'),'system','system',23.00,1,1,1),
+(10004,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),'system','system',23.60,1,1,1),
+(10005,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-60 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-60 day'),'system','system',24.20,1,1,1),
+(10006,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-30 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-30 day'),'system','system',25.00,1,1,1),
+(10007,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-135 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-135 day'),'system','system',6.80,1,25,3),
+(10008,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-105 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-105 day'),'system','system',7.10,1,25,3),
+(10009,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-75 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-75 day'),'system','system',7.25,1,25,3),
+(10010,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-45 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-45 day'),'system','system',7.40,1,25,3),
+(10011,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-15 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-15 day'),'system','system',7.50,1,25,3),
+(10012,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),'system','system',8.10,1,41,5),
+(10013,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-55 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-55 day'),'system','system',8.60,1,41,5),
+(10014,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-20 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-20 day'),'system','system',9.00,1,41,5),
+(10015,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-70 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-70 day'),'system','system',42.00,1,89,10),
+(10016,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),'system','system',45.00,1,89,10);
 
 DROP TABLE IF EXISTS seed_compra_header;
 CREATE TEMP TABLE seed_compra_header (
@@ -619,6 +932,15 @@ UPDATE ProductoEstadoStock SET fecha_creacion = fecha_creacion || '.000' WHERE f
 UPDATE ProductoEstadoStock SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
 UPDATE ProveedorProducto SET fecha_creacion = fecha_creacion || '.000' WHERE fecha_creacion IS NOT NULL AND LENGTH(fecha_creacion) = 19;
 UPDATE ProveedorProducto SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
+UPDATE ProveedorProducto SET fecha_ultimo_costo = fecha_ultimo_costo || '.000' WHERE fecha_ultimo_costo IS NOT NULL AND LENGTH(fecha_ultimo_costo) = 19;
+UPDATE ProveedorContacto SET fecha_creacion = fecha_creacion || '.000' WHERE fecha_creacion IS NOT NULL AND LENGTH(fecha_creacion) = 19;
+UPDATE ProveedorContacto SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
+UPDATE ProveedorActivo SET fecha_creacion = fecha_creacion || '.000' WHERE fecha_creacion IS NOT NULL AND LENGTH(fecha_creacion) = 19;
+UPDATE ProveedorActivo SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
+UPDATE ProveedorDocumento SET fecha_creacion = fecha_creacion || '.000' WHERE fecha_creacion IS NOT NULL AND LENGTH(fecha_creacion) = 19;
+UPDATE ProveedorDocumento SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
+UPDATE ProveedorAcuerdo SET fecha_creacion = fecha_creacion || '.000' WHERE fecha_creacion IS NOT NULL AND LENGTH(fecha_creacion) = 19;
+UPDATE ProveedorAcuerdo SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
 UPDATE HistorialCostos SET fecha_creacion = fecha_creacion || '.000' WHERE fecha_creacion IS NOT NULL AND LENGTH(fecha_creacion) = 19;
 UPDATE HistorialCostos SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
 UPDATE Compras SET fecha_compra = fecha_compra || '.000' WHERE fecha_compra IS NOT NULL AND LENGTH(fecha_compra) = 19;
@@ -649,6 +971,7 @@ DROP TABLE IF EXISTS seed_venta_line;
 DROP TABLE IF EXISTS seed_venta_header;
 DROP TABLE IF EXISTS seed_compra_line;
 DROP TABLE IF EXISTS seed_compra_header;
+DROP TABLE IF EXISTS seed_proveedor_avanzado;
 DROP TABLE IF EXISTS seed_productos;
 
 

@@ -12,49 +12,44 @@ export const ACTIVO_TIPO_OPTIONS = [
   { label: "Exhibidor", value: "EXHIBIDOR" },
   { label: "Lona", value: "LONA" },
   { label: "Sombrilla", value: "SOMBRILLA" },
-  { label: "Bascula", value: "BASCULA" },
+  { label: "Báscula", value: "BASCULA" },
   { label: "Otro", value: "OTRO" },
 ];
 
 export const ACTIVO_ESTADO_OPTIONS = [
+  { label: "Recibido", value: "RECIBIDO" },
   { label: "En tienda", value: "EN_TIENDA" },
-  { label: "Danado", value: "DANADO" },
-  { label: "Reparacion", value: "REPARACION" },
+  { label: "En exhibición", value: "EN_EXHIBICION" },
+  { label: "Retirado por daño", value: "RETIRADO_DANO" },
+  { label: "Reparación", value: "REPARACION" },
   { label: "Devuelto", value: "DEVUELTO" },
   { label: "Perdido", value: "PERDIDO" },
 ];
+
+export const ACTIVO_FLOW_TRANSITIONS = {
+  RECIBIDO: ["EN_TIENDA", "EN_EXHIBICION", "RETIRADO_DANO", "DEVUELTO"],
+  EN_TIENDA: ["EN_EXHIBICION", "RETIRADO_DANO", "REPARACION", "DEVUELTO", "PERDIDO"],
+  EN_EXHIBICION: ["EN_TIENDA", "RETIRADO_DANO", "REPARACION", "DEVUELTO", "PERDIDO"],
+  RETIRADO_DANO: ["REPARACION", "EN_TIENDA", "EN_EXHIBICION", "DEVUELTO", "PERDIDO"],
+  REPARACION: ["EN_TIENDA", "EN_EXHIBICION", "DEVUELTO", "PERDIDO"],
+  DEVUELTO: ["RECIBIDO", "EN_TIENDA"],
+  PERDIDO: ["RECIBIDO", "EN_TIENDA"],
+  INACTIVO: ["RECIBIDO", "EN_TIENDA", "EN_EXHIBICION"],
+};
 
 export const DOCUMENTO_TIPO_OPTIONS = [
   { label: "Contrato", value: "CONTRATO" },
   { label: "Comodato", value: "COMODATO" },
   { label: "Lista de precios", value: "LISTA_PRECIOS" },
-  { label: "Catalogo", value: "CATALOGO" },
+  { label: "Catálogo", value: "CATALOGO" },
   { label: "Evidencia", value: "EVIDENCIA" },
-  { label: "Documento de credito", value: "DOCUMENTO_CREDITO" },
-  { label: "Identificacion", value: "IDENTIFICACION" },
+  { label: "Documento de crédito", value: "DOCUMENTO_CREDITO" },
+  { label: "Identificación", value: "IDENTIFICACION" },
   { label: "Otro", value: "OTRO" },
 ];
 
 export const DOCUMENTO_ESTADO_OPTIONS = [
   { label: "Activo", value: "ACTIVO" },
-  { label: "Archivado", value: "ARCHIVADO" },
-];
-
-export const ACUERDO_TIPO_OPTIONS = [
-  { label: "Credito", value: "CREDITO" },
-  { label: "Cambio por caducidad", value: "CAMBIO_CADUCIDAD" },
-  { label: "Prestamo de activo", value: "PRESTAMO_ACTIVO" },
-  { label: "Descuento", value: "DESCUENTO" },
-  { label: "Entrega", value: "ENTREGA" },
-  { label: "Pedido minimo", value: "PEDIDO_MINIMO" },
-  { label: "Pago", value: "PAGO" },
-  { label: "Contacto", value: "CONTACTO" },
-  { label: "Otro", value: "OTRO" },
-];
-
-export const ACUERDO_ESTADO_OPTIONS = [
-  { label: "Activo", value: "ACTIVO" },
-  { label: "Vencido", value: "VENCIDO" },
   { label: "Archivado", value: "ARCHIVADO" },
 ];
 
@@ -67,10 +62,14 @@ export const DOCUMENTO_MIME_OPTIONS = [
   { label: "Excel XLS", value: "application/vnd.ms-excel" },
   { label: "CSV", value: "text/csv" },
   { label: "Word DOCX", value: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
+  { label: "Word DOC", value: "application/msword" },
+  { label: "PowerPoint PPTX", value: "application/vnd.openxmlformats-officedocument.presentationml.presentation" },
+  { label: "PowerPoint PPT", value: "application/vnd.ms-powerpoint" },
   { label: "Texto", value: "text/plain" },
 ];
 
 export const MAX_DOCUMENT_BYTES = 25 * 1024 * 1024;
+export const MAX_ASSET_EVIDENCE_BYTES = 10 * 1024 * 1024;
 
 export const trim = (value) => (value == null ? "" : String(value).trim());
 
@@ -92,22 +91,50 @@ export const dateTimeLocal = (value) => {
 
 export const enumText = (value) => {
   if (!value) return "Sin dato";
-  return String(value)
+  const normalized = String(value).trim().toUpperCase();
+  const labels = {
+    BASCULA: "Báscula",
+    CREDITO: "Crédito",
+    DANADO: "Retirado por daño",
+    RETIRADO_DANO: "Retirado por daño",
+    RECIBIDO: "Recibido",
+    EN_TIENDA: "En tienda",
+    EN_EXHIBICION: "En exhibición",
+    REPARACION: "Reparación",
+    IDENTIFICACION: "Identificación",
+    DOCUMENTO_CREDITO: "Documento de crédito",
+    CATALOGO: "Catálogo",
+    ARCHIVADA: "Archivada",
+    ARCHIVADO: "Archivado",
+    INACTIVA: "Inactiva",
+    INACTIVO: "Inactivo",
+  };
+  if (labels[normalized]) return labels[normalized];
+  return normalized
     .toLowerCase()
     .replaceAll("_", " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 };
 
-export const productLabel = (producto = {}) =>
-  producto.nombreProducto || producto.nombre || producto.descripcion || "Producto";
+export const productLabel = (producto = {}) => {
+  const data = producto || {};
+  return data.nombreProducto || data.nombre || data.descripcion || "Producto";
+};
 
-export const productSku = (producto = {}) =>
-  producto.codigoBarras || producto.sku || producto.codigo || "";
+export const productSku = (producto = {}) => {
+  const data = producto || {};
+  return data.codigoBarras || data.sku || data.codigo || "";
+};
 
-export const relationProductName = (row = {}) =>
-  productLabel(row.producto || row) || row.skuProveedor || "Producto asociado";
+export const relationProductName = (row = {}) => {
+  const data = row || {};
+  return productLabel(data.producto || data) || data.skuProveedor || "Producto asociado";
+};
 
-export const relationProductSku = (row = {}) => productSku(row.producto || row);
+export const relationProductSku = (row = {}) => {
+  const data = row || {};
+  return productSku(data.producto || data);
+};
 
 export const buildProductoPayload = (form) => ({
   producto: { idProducto: Number(form.idProducto) },
@@ -140,13 +167,24 @@ export const buildActivoPayload = (form) => ({
   tipo: form.tipo || "OTRO",
   numeroSerie: trim(form.numeroSerie),
   fechaEntrega: trim(form.fechaEntrega) || null,
-  estadoFisico: trim(form.estadoFisico),
-  ubicacionTienda: trim(form.ubicacionTienda),
+  fechaRegreso: trim(form.fechaRegreso) || null,
+  estadoFisico: form.idProveedorActivo ? undefined : trim(form.estadoFisico),
+  ubicacionTienda: form.idProveedorActivo ? undefined : trim(form.ubicacionTienda),
   condicionesPrestamo: trim(form.condicionesPrestamo),
   depositoGarantia: numberOrNull(form.depositoGarantia),
-  estadoActivoPrestado: form.estadoActivoPrestado || "EN_TIENDA",
+  estadoActivoPrestado: form.idProveedorActivo ? undefined : form.estadoActivoPrestado || "RECIBIDO",
   notas: trim(form.notas),
-  estatus: !["DEVUELTO", "PERDIDO"].includes(form.estadoActivoPrestado),
+  evidencias: form.idProveedorActivo
+    ? undefined
+    : (form.evidencias || []).map((evidence) => ({
+      evidenciaNombre: evidence.name,
+      evidenciaMimeType: evidence.mimeType,
+      evidenciaBase64: evidence.base64,
+      evidenciaTamanoBytes: evidence.size,
+    })),
+  estatus: form.idProveedorActivo
+    ? undefined
+    : !["DEVUELTO", "PERDIDO"].includes(form.estadoActivoPrestado || "RECIBIDO"),
 });
 
 export const createActivoForm = (row = null) => ({
@@ -155,61 +193,44 @@ export const createActivoForm = (row = null) => ({
   tipo: row?.tipo || "OTRO",
   numeroSerie: row?.numeroSerie || "",
   fechaEntrega: dateOnly(row?.fechaEntrega),
+  fechaRegreso: dateOnly(row?.fechaRegreso),
   estadoFisico: row?.estadoFisico || "",
   ubicacionTienda: row?.ubicacionTienda || "",
   condicionesPrestamo: row?.condicionesPrestamo || "",
   depositoGarantia: numberOrNull(row?.depositoGarantia),
-  estadoActivoPrestado: row?.estadoActivoPrestado || "EN_TIENDA",
+  estadoActivoPrestado: row?.estadoActivoPrestado || "RECIBIDO",
   notas: row?.notas || "",
+  evidencias: [],
 });
 
-export const buildDocumentoPayload = (form) => ({
-  nombre: trim(form.nombre),
-  tipo: form.tipo || "OTRO",
-  rutaDocumento: trim(form.rutaDocumento),
-  mimeType: trim(form.mimeType),
-  tamanoBytes: numberOrNull(form.tamanoBytes),
-  descripcion: trim(form.descripcion),
-  estadoDocumento: form.estadoDocumento || "ACTIVO",
-  activo: form.idProveedorActivo ? { idProveedorActivo: Number(form.idProveedorActivo) } : null,
-  estatus: (form.estadoDocumento || "ACTIVO") === "ACTIVO",
-});
+export const buildDocumentoPayload = (form) => {
+  const editing = Boolean(form.idProveedorDocumento);
+  return {
+    nombre: trim(form.nombre),
+    tipo: form.tipo || "OTRO",
+    rutaDocumento: "BASE_DATOS",
+    archivoNombre: editing ? undefined : trim(form.archivoNombre),
+    archivoBase64: editing ? undefined : trim(form.archivoBase64),
+    mimeType: editing ? undefined : trim(form.mimeType),
+    tamanoBytes: editing ? undefined : numberOrNull(form.tamanoBytes),
+    descripcion: trim(form.descripcion),
+    estadoDocumento: form.estadoDocumento || "ACTIVO",
+    activo: null,
+    estatus: (form.estadoDocumento || "ACTIVO") === "ACTIVO",
+  };
+};
 
 export const createDocumentoForm = (row = null) => ({
   idProveedorDocumento: row?.idProveedorDocumento || null,
   nombre: row?.nombre || "",
   tipo: row?.tipo || "OTRO",
   rutaDocumento: row?.rutaDocumento || "",
+  archivoNombre: row?.archivoNombre || "",
+  archivoBase64: row?.archivoBase64 || "",
   mimeType: row?.mimeType || "",
   tamanoBytes: numberOrNull(row?.tamanoBytes),
   descripcion: row?.descripcion || "",
   estadoDocumento: row?.estadoDocumento || "ACTIVO",
-  idProveedorActivo: row?.activo?.idProveedorActivo || row?.idProveedorActivo || null,
-});
-
-export const buildAcuerdoPayload = (form) => ({
-  tipo: form.tipo || "OTRO",
-  descripcion: trim(form.descripcion),
-  fechaInicio: trim(form.fechaInicio) || null,
-  fechaVigencia: trim(form.fechaVigencia) || null,
-  estadoAcuerdo: form.estadoAcuerdo || "ACTIVO",
-  documentoRelacionado: form.idProveedorDocumento
-    ? { idProveedorDocumento: Number(form.idProveedorDocumento) }
-    : null,
-  notas: trim(form.notas),
-  estatus: (form.estadoAcuerdo || "ACTIVO") === "ACTIVO",
-});
-
-export const createAcuerdoForm = (row = null) => ({
-  idProveedorAcuerdo: row?.idProveedorAcuerdo || null,
-  tipo: row?.tipo || "OTRO",
-  descripcion: row?.descripcion || "",
-  fechaInicio: dateOnly(row?.fechaInicio),
-  fechaVigencia: dateOnly(row?.fechaVigencia),
-  estadoAcuerdo: row?.estadoAcuerdo || "ACTIVO",
-  idProveedorDocumento:
-    row?.documentoRelacionado?.idProveedorDocumento || row?.idProveedorDocumento || null,
-  notas: row?.notas || "",
 });
 
 export const normalizeProductosCatalog = (payload) => {

@@ -1,17 +1,24 @@
 package com.galtekone.services.impl;
 
+import java.time.LocalDateTime;
+import java.util.Base64;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.galtekone.config.EmpresaContextHolder;
+import com.galtekone.dto.proveedor.ProveedorDocumentoVersionRequest;
 import com.galtekone.entity.EmpresasEntity;
-import com.galtekone.entity.ProveedorActivoEntity;
 import com.galtekone.entity.ProveedorDocumentoEntity;
+import com.galtekone.entity.ProveedorDocumentoHistorialEntity;
 import com.galtekone.entity.ProveedoresEntity;
-import com.galtekone.repository.ProveedorActivoRepository;
+import com.galtekone.repository.ProveedorDocumentoHistorialRepository;
 import com.galtekone.repository.ProveedorDocumentoRepository;
 import com.galtekone.repository.ProveedoresRepository;
 import com.galtekone.services.ProveedorDocumentoService;
@@ -40,8 +47,11 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
             "image/webp",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             "application/vnd.ms-excel",
-            "text/csv",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "application/vnd.ms-powerpoint",
+            "text/csv",
             "text/plain"
     );
     private static final Set<String> EXTENSIONES = Set.of(
@@ -52,25 +62,31 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
             ".webp",
             ".xlsx",
             ".xls",
-            ".csv",
             ".docx",
+            ".doc",
+            ".pptx",
+            ".ppt",
+            ".csv",
             ".txt"
     );
+    private static final String RUTA_DB = "BASE_DATOS";
 
     @Autowired
     private ProveedorDocumentoRepository repository;
 
     @Autowired
-    private ProveedoresRepository proveedoresRepository;
+    private ProveedorDocumentoHistorialRepository historialRepository;
 
     @Autowired
-    private ProveedorActivoRepository activoRepository;
+    private ProveedoresRepository proveedoresRepository;
 
     @Override
     public List<ProveedorDocumentoEntity> readByProveedor(Integer idProveedor) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
         ensureProveedor(idProveedor, empresaId);
-        return repository.findByProveedor_IdProveedorAndEmpresa_IdEmpresa(idProveedor, empresaId);
+        List<ProveedorDocumentoEntity> documentos = repository.findByProveedor_IdProveedorAndEmpresa_IdEmpresa(idProveedor, empresaId);
+        attachHistorial(documentos, empresaId);
+        return documentos;
     }
 
     @Override
@@ -81,12 +97,15 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
         normalize(obj);
 
         obj.setProveedor(proveedor);
-        obj.setActivo(resolveActivo(obj.getActivo(), idProveedor, empresaId));
+        obj.setActivo(null);
         obj.setEmpresa(empresa(empresaId));
         obj.setUsuarioCreacion(user);
         syncEstatus(obj);
 
-        return repository.save(obj);
+        ProveedorDocumentoEntity saved = repository.save(obj);
+        recordHistory(saved, "CREACION", "Documento agregado al proveedor.", null, null, false, user, empresaId);
+        attachHistorial(List.of(saved), empresaId);
+        return saved;
     }
 
     @Override
@@ -95,11 +114,50 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
         ensureProveedor(idProveedor, empresaId);
         ProveedorDocumentoEntity entity = find(idProveedor, idProveedorDocumento, empresaId);
         validate(obj, false);
-        applyUpdate(entity, obj, idProveedor, empresaId);
+
+        Map<String, String> before = snapshot(entity);
+        applyUpdate(entity, obj);
+        ensureHasArchivo(entity);
         entity.setUsuarioModificacion(user);
         syncEstatus(entity);
 
-        return repository.save(entity);
+        ProveedorDocumentoEntity saved = repository.save(entity);
+        Map<String, String> after = snapshot(saved);
+        recordEditIfNeeded(saved, before, after, user, empresaId);
+        attachHistorial(List.of(saved), empresaId);
+        return saved;
+    }
+
+    @Override
+    public ProveedorDocumentoEntity newVersion(Integer idProveedor, Integer idProveedorDocumento, ProveedorDocumentoVersionRequest request, String user) {
+        Integer empresaId = EmpresaContextHolder.getEmpresaId();
+        ensureProveedor(idProveedor, empresaId);
+        ProveedorDocumentoEntity entity = find(idProveedor, idProveedorDocumento, empresaId);
+
+        if (request == null || isBlank(request.getMotivo())) {
+            throw new IllegalArgumentException("El motivo de nueva version es obligatorio");
+        }
+        if (isBlank(request.getArchivoBase64())) {
+            throw new IllegalArgumentException("El archivo de la nueva version es obligatorio");
+        }
+
+        Map<String, String> before = snapshot(entity);
+        ProveedorDocumentoEntity previousFile = copyFileSnapshot(entity);
+
+        ProveedorDocumentoEntity fileSource = new ProveedorDocumentoEntity();
+        fileSource.setNombre(entity.getNombre());
+        fileSource.setArchivoNombre(request.getArchivoNombre());
+        fileSource.setMimeType(request.getMimeType());
+        fileSource.setArchivoBase64(request.getArchivoBase64());
+        applyArchivo(entity, fileSource);
+        entity.setUsuarioModificacion(user);
+        syncEstatus(entity);
+
+        ProveedorDocumentoEntity saved = repository.save(entity);
+        Map<String, String> after = snapshot(saved);
+        recordHistory(saved, "NUEVA_VERSION", request.getMotivo(), detailDiff(before, after, true), detailDiff(before, after, false), true, user, empresaId, previousFile);
+        attachHistorial(List.of(saved), empresaId);
+        return saved;
     }
 
     @Override
@@ -107,12 +165,17 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
         ensureProveedor(idProveedor, empresaId);
         ProveedorDocumentoEntity entity = find(idProveedor, idProveedorDocumento, empresaId);
+        Map<String, String> before = snapshot(entity);
 
         entity.setEstadoDocumento("ARCHIVADO");
         entity.setEstatus(false);
         entity.setUsuarioModificacion(user);
 
-        return repository.save(entity);
+        ProveedorDocumentoEntity saved = repository.save(entity);
+        Map<String, String> after = snapshot(saved);
+        recordHistory(saved, "ARCHIVADO", "Documento archivado para conservar historial.", detailDiff(before, after, true), detailDiff(before, after, false), false, user, empresaId);
+        attachHistorial(List.of(saved), empresaId);
+        return saved;
     }
 
     private ProveedoresEntity ensureProveedor(Integer idProveedor, Integer empresaId) {
@@ -125,6 +188,15 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
                 .orElseThrow(() -> new EntityNotFoundException("Documento no encontrado o no pertenece al proveedor"));
     }
 
+    private void attachHistorial(List<ProveedorDocumentoEntity> documentos, Integer empresaId) {
+        documentos.forEach(documento -> documento.setHistorial(
+                historialRepository.findByIdProveedorDocumentoAndEmpresa_IdEmpresaOrderByFechaEventoDesc(
+                        documento.getIdProveedorDocumento(),
+                        empresaId
+                )
+        ));
+    }
+
     private void validate(ProveedorDocumentoEntity obj, boolean creating) {
         if (obj == null) throw new IllegalArgumentException("El documento es obligatorio");
         if (creating && isBlank(obj.getNombre())) throw new IllegalArgumentException("El nombre del documento es obligatorio");
@@ -133,26 +205,21 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
         }
         if (!isBlank(obj.getTipo())) validateValue("tipo", obj.getTipo(), TIPOS);
         if (!isBlank(obj.getEstadoDocumento())) validateValue("estadoDocumento", obj.getEstadoDocumento(), ESTADOS);
-        if (obj.getTamanoBytes() != null && (obj.getTamanoBytes() < 0 || obj.getTamanoBytes() > MAX_DOCUMENT_BYTES)) {
-            throw new IllegalArgumentException("tamanoBytes debe estar entre 0 y " + MAX_DOCUMENT_BYTES);
-        }
         if (!isBlank(obj.getMimeType()) && !MIME_TYPES.contains(obj.getMimeType().trim().toLowerCase())) {
             throw new IllegalArgumentException("mimeType no es valido para documentos de proveedor");
         }
-        if (!isBlank(obj.getRutaDocumento()) && !hasAllowedExtension(obj.getRutaDocumento())) {
-            throw new IllegalArgumentException("La ruta del documento debe apuntar a un formato permitido");
+        if (creating && isBlank(obj.getArchivoBase64())) {
+            throw new IllegalArgumentException("El archivo del documento es obligatorio");
         }
     }
 
-    private void applyUpdate(ProveedorDocumentoEntity target, ProveedorDocumentoEntity source, Integer idProveedor, Integer empresaId) {
+    private void applyUpdate(ProveedorDocumentoEntity target, ProveedorDocumentoEntity source) {
         if (source.getNombre() != null) target.setNombre(source.getNombre().trim());
         if (source.getTipo() != null) target.setTipo(normalizeValue(source.getTipo()));
-        if (source.getRutaDocumento() != null) target.setRutaDocumento(trimToNull(source.getRutaDocumento()));
-        if (source.getMimeType() != null) target.setMimeType(trimToNull(source.getMimeType()));
-        if (source.getTamanoBytes() != null) target.setTamanoBytes(source.getTamanoBytes());
+        refreshArchivoNombre(target);
         if (source.getDescripcion() != null) target.setDescripcion(trimToNull(source.getDescripcion()));
         if (source.getEstadoDocumento() != null) target.setEstadoDocumento(validateValue("estadoDocumento", source.getEstadoDocumento(), ESTADOS));
-        if (source.getActivo() != null) target.setActivo(resolveActivo(source.getActivo(), idProveedor, empresaId));
+        target.setActivo(null);
         if (source.getEstatus() != null && source.getEstadoDocumento() == null) {
             target.setEstadoDocumento(source.getEstatus() ? "ACTIVO" : "ARCHIVADO");
         }
@@ -161,21 +228,104 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
     private void normalize(ProveedorDocumentoEntity obj) {
         obj.setNombre(obj.getNombre().trim());
         obj.setTipo(isBlank(obj.getTipo()) ? "OTRO" : normalizeValue(obj.getTipo()));
-        obj.setRutaDocumento(trimToNull(obj.getRutaDocumento()));
-        obj.setMimeType(trimToNull(obj.getMimeType()));
         obj.setDescripcion(trimToNull(obj.getDescripcion()));
         obj.setEstadoDocumento(isBlank(obj.getEstadoDocumento()) ? "ACTIVO" : validateValue("estadoDocumento", obj.getEstadoDocumento(), ESTADOS));
+        applyArchivo(obj, obj);
+        ensureHasArchivo(obj);
     }
 
-    private ProveedorActivoEntity resolveActivo(ProveedorActivoEntity activo, Integer idProveedor, Integer empresaId) {
-        if (activo == null || activo.getIdProveedorActivo() == null) return null;
+    private void ensureHasArchivo(ProveedorDocumentoEntity obj) {
+        if (obj == null || isBlank(obj.getArchivoBase64())) {
+            throw new IllegalArgumentException("El documento debe tener un archivo guardado en base de datos");
+        }
+    }
 
-        return activoRepository.findByIdProveedorActivoAndProveedor_IdProveedorAndEmpresa_IdEmpresa(
-                        activo.getIdProveedorActivo(),
-                        idProveedor,
-                        empresaId
-                )
-                .orElseThrow(() -> new EntityNotFoundException("Activo relacionado no encontrado o no pertenece al proveedor"));
+    private void recordEditIfNeeded(ProveedorDocumentoEntity documento, Map<String, String> before, Map<String, String> after, String user, Integer empresaId) {
+        if (!hasDiff(before, after)) return;
+        recordHistory(documento, "EDICION", "Metadatos del documento actualizados.", detailDiff(before, after, true), detailDiff(before, after, false), false, user, empresaId);
+    }
+
+    private void recordHistory(
+            ProveedorDocumentoEntity documento,
+            String tipoEvento,
+            String descripcion,
+            String detalleAnterior,
+            String detalleNuevo,
+            boolean includeFileSnapshot,
+            String user,
+            Integer empresaId
+    ) {
+        recordHistory(documento, tipoEvento, descripcion, detalleAnterior, detalleNuevo, includeFileSnapshot, user, empresaId, null);
+    }
+
+    private void recordHistory(
+            ProveedorDocumentoEntity documento,
+            String tipoEvento,
+            String descripcion,
+            String detalleAnterior,
+            String detalleNuevo,
+            boolean includeFileSnapshot,
+            String user,
+            Integer empresaId,
+            ProveedorDocumentoEntity previousFile
+    ) {
+        ProveedorDocumentoHistorialEntity event = new ProveedorDocumentoHistorialEntity();
+        event.setIdProveedorDocumento(documento.getIdProveedorDocumento());
+        event.setIdProveedor(documento.getProveedor() == null ? null : documento.getProveedor().getIdProveedor());
+        event.setTipoEvento(tipoEvento);
+        event.setDescripcion(trimToNull(descripcion));
+        event.setDetalleAnterior(trimToNull(detalleAnterior));
+        event.setDetalleNuevo(trimToNull(detalleNuevo));
+        event.setFechaEvento(LocalDateTime.now());
+        event.setEmpresa(empresa(empresaId));
+        event.setEstatus(true);
+        event.setUsuarioCreacion(user);
+
+        if (includeFileSnapshot) {
+            ProveedorDocumentoEntity previous = previousFile == null ? documento : previousFile;
+            event.setArchivoAnteriorNombre(previous.getArchivoNombre());
+            event.setArchivoAnteriorMimeType(previous.getMimeType());
+            event.setArchivoAnteriorTamanoBytes(previous.getTamanoBytes());
+            event.setArchivoAnteriorBase64(previous.getArchivoBase64());
+            event.setArchivoNuevoNombre(documento.getArchivoNombre());
+            event.setArchivoNuevoMimeType(documento.getMimeType());
+            event.setArchivoNuevoTamanoBytes(documento.getTamanoBytes());
+            event.setArchivoNuevoBase64(documento.getArchivoBase64());
+        }
+
+        historialRepository.save(event);
+    }
+
+    private ProveedorDocumentoEntity copyFileSnapshot(ProveedorDocumentoEntity source) {
+        ProveedorDocumentoEntity copy = new ProveedorDocumentoEntity();
+        copy.setArchivoNombre(source.getArchivoNombre());
+        copy.setMimeType(source.getMimeType());
+        copy.setTamanoBytes(source.getTamanoBytes());
+        copy.setArchivoBase64(source.getArchivoBase64());
+        return copy;
+    }
+
+    private Map<String, String> snapshot(ProveedorDocumentoEntity documento) {
+        Map<String, String> values = new LinkedHashMap<>();
+        values.put("Nombre", safeText(documento.getNombre(), "--"));
+        values.put("Tipo", safeText(documento.getTipo(), "--"));
+        values.put("Estado", safeText(documento.getEstadoDocumento(), "--"));
+        values.put("Descripcion", safeText(documento.getDescripcion(), "--"));
+        values.put("Archivo", safeText(documento.getArchivoNombre(), "--"));
+        values.put("Formato", safeText(documento.getMimeType(), "--"));
+        values.put("Tamano", documento.getTamanoBytes() == null ? "--" : documento.getTamanoBytes().toString());
+        return values;
+    }
+
+    private boolean hasDiff(Map<String, String> before, Map<String, String> after) {
+        return before.keySet().stream().anyMatch(key -> !Objects.equals(before.get(key), after.get(key)));
+    }
+
+    private String detailDiff(Map<String, String> before, Map<String, String> after, boolean previous) {
+        return before.keySet().stream()
+                .filter(key -> !Objects.equals(before.get(key), after.get(key)))
+                .map(key -> key + ": " + (previous ? before.get(key) : after.get(key)))
+                .collect(Collectors.joining("\n"));
     }
 
     private void syncEstatus(ProveedorDocumentoEntity obj) {
@@ -215,6 +365,104 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
             normalized = normalized.substring(0, hashIndex);
         }
         return EXTENSIONES.stream().anyMatch(normalized::endsWith);
+    }
+
+    private void applyArchivo(ProveedorDocumentoEntity target, ProveedorDocumentoEntity source) {
+        String base64 = stripDataUrlPrefix(source.getArchivoBase64());
+        if (isBlank(base64)) return;
+
+        String mimeType = detectMimeType(source);
+        byte[] bytes;
+        try {
+            bytes = Base64.getDecoder().decode(base64);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("archivoBase64 no tiene un formato valido");
+        }
+        if (bytes.length <= 0 || bytes.length > MAX_DOCUMENT_BYTES) {
+            throw new IllegalArgumentException("El archivo debe pesar entre 1 byte y " + MAX_DOCUMENT_BYTES + " bytes");
+        }
+
+        target.setArchivoBase64(base64);
+        target.setMimeType(mimeType);
+        target.setTamanoBytes((long) bytes.length);
+        target.setArchivoNombre(buildArchivoNombre(target.getNombre(), mimeType));
+        target.setRutaDocumento(RUTA_DB);
+    }
+
+    private String detectMimeType(ProveedorDocumentoEntity source) {
+        String mimeType = trimToNull(source.getMimeType());
+        if (mimeType != null) {
+            mimeType = mimeType.toLowerCase();
+            if (!MIME_TYPES.contains(mimeType)) {
+                throw new IllegalArgumentException("mimeType no es valido para documentos de proveedor");
+            }
+            return mimeType;
+        }
+
+        String name = trimToNull(source.getArchivoNombre());
+        if (name == null) name = trimToNull(source.getRutaDocumento());
+        if (name == null || !hasAllowedExtension(name)) {
+            throw new IllegalArgumentException("No se pudo reconocer automaticamente el formato del archivo");
+        }
+
+        String normalized = name.toLowerCase();
+        if (normalized.endsWith(".pdf")) return "application/pdf";
+        if (normalized.endsWith(".jpg") || normalized.endsWith(".jpeg")) return "image/jpeg";
+        if (normalized.endsWith(".png")) return "image/png";
+        if (normalized.endsWith(".webp")) return "image/webp";
+        if (normalized.endsWith(".xlsx")) return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        if (normalized.endsWith(".xls")) return "application/vnd.ms-excel";
+        if (normalized.endsWith(".docx")) return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        if (normalized.endsWith(".doc")) return "application/msword";
+        if (normalized.endsWith(".pptx")) return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+        if (normalized.endsWith(".ppt")) return "application/vnd.ms-powerpoint";
+        if (normalized.endsWith(".csv")) return "text/csv";
+        if (normalized.endsWith(".txt")) return "text/plain";
+        throw new IllegalArgumentException("No se pudo reconocer automaticamente el formato del archivo");
+    }
+
+    private void refreshArchivoNombre(ProveedorDocumentoEntity target) {
+        if (!isBlank(target.getArchivoBase64()) && !isBlank(target.getMimeType()) && !isBlank(target.getNombre())) {
+            target.setArchivoNombre(buildArchivoNombre(target.getNombre(), target.getMimeType()));
+        }
+    }
+
+    private String buildArchivoNombre(String nombre, String mimeType) {
+        String cleanName = trimToNull(nombre);
+        if (cleanName == null) cleanName = "documento-proveedor";
+        cleanName = cleanName.replaceAll("[\\\\/:*?\"<>|]", " ").replaceAll("\\s+", " ").trim();
+        String extension = extensionFromMime(mimeType);
+        return cleanName.toLowerCase().endsWith(extension) ? cleanName : cleanName + extension;
+    }
+
+    private String extensionFromMime(String mimeType) {
+        return switch (mimeType == null ? "" : mimeType.toLowerCase()) {
+            case "application/pdf" -> ".pdf";
+            case "image/jpeg" -> ".jpg";
+            case "image/png" -> ".png";
+            case "image/webp" -> ".webp";
+            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" -> ".xlsx";
+            case "application/vnd.ms-excel" -> ".xls";
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document" -> ".docx";
+            case "application/msword" -> ".doc";
+            case "application/vnd.openxmlformats-officedocument.presentationml.presentation" -> ".pptx";
+            case "application/vnd.ms-powerpoint" -> ".ppt";
+            case "text/csv" -> ".csv";
+            case "text/plain" -> ".txt";
+            default -> ".bin";
+        };
+    }
+
+    private String stripDataUrlPrefix(String value) {
+        String text = trimToNull(value);
+        if (text == null) return null;
+        int comma = text.indexOf(",");
+        if (text.startsWith("data:") && comma >= 0) text = text.substring(comma + 1);
+        return text.replaceAll("\\s+", "");
+    }
+
+    private String safeText(String value, String fallback) {
+        return isBlank(value) ? fallback : value.trim();
     }
 
     private String trimToNull(String value) {

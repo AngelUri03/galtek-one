@@ -11,9 +11,11 @@ import org.springframework.stereotype.Service;
 
 import com.galtekone.config.EmpresaContextHolder;
 import com.galtekone.entity.EmpresasEntity;
+import com.galtekone.entity.HistorialCostosEntity;
 import com.galtekone.entity.ProductosEntity;
 import com.galtekone.entity.ProveedorProductoEntity;
 import com.galtekone.entity.ProveedoresEntity;
+import com.galtekone.repository.HistorialCostosRepository;
 import com.galtekone.repository.ProductosRepository;
 import com.galtekone.repository.ProveedorProductoRespository;
 import com.galtekone.repository.ProveedoresRepository;
@@ -35,6 +37,9 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
     @Autowired
     private ProductosRepository productosRepository;
 
+    @Autowired
+    private HistorialCostosRepository historialCostosRepository;
+
     @Override
     public ProveedorProductoEntity create(ProveedorProductoEntity obj, String user, Integer idEmpresa) {
         if (idEmpresa == null) {
@@ -49,7 +54,9 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
         obj.setUsuarioCreacion(user);
         syncEstatus(obj);
 
-        return proveedorProductoRepository.save(obj);
+        ProveedorProductoEntity saved = proveedorProductoRepository.save(obj);
+        registerCostHistory(saved, user);
+        return saved;
     }
 
     @Override
@@ -75,11 +82,14 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
                 .orElseThrow(() -> new EntityNotFoundException("ProveedorProducto no encontrado o no pertenece a la empresa"));
 
         validate(obj, false);
+        BigDecimal previousCost = entity.getUltimoCosto();
         applyUpdate(entity, obj, idEmpresa);
         entity.setUsuarioModificacion(user);
         syncEstatus(entity);
 
-        return proveedorProductoRepository.save(entity);
+        ProveedorProductoEntity saved = proveedorProductoRepository.save(entity);
+        registerCostHistoryIfChanged(saved, previousCost, user);
+        return saved;
     }
 
     @Override
@@ -120,7 +130,9 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
         obj.setUsuarioCreacion(user);
         syncEstatus(obj);
 
-        return proveedorProductoRepository.save(obj);
+        ProveedorProductoEntity saved = proveedorProductoRepository.save(obj);
+        registerCostHistory(saved, user);
+        return saved;
     }
 
     @Override
@@ -132,11 +144,14 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
                 .orElseThrow(() -> new EntityNotFoundException("Producto asociado no encontrado o no pertenece al proveedor"));
 
         validate(obj, false);
+        BigDecimal previousCost = entity.getUltimoCosto();
         applyUpdate(entity, obj, empresaId);
         entity.setUsuarioModificacion(user);
         syncEstatus(entity);
 
-        return proveedorProductoRepository.save(entity);
+        ProveedorProductoEntity saved = proveedorProductoRepository.save(entity);
+        registerCostHistoryIfChanged(saved, previousCost, user);
+        return saved;
     }
 
     @Override
@@ -152,6 +167,24 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
         entity.setUsuarioModificacion(user);
 
         return proveedorProductoRepository.save(entity);
+    }
+
+    @Override
+    public Object readCostHistory(Integer idProveedor, Integer idProveedorProducto) {
+        Integer empresaId = EmpresaContextHolder.getEmpresaId();
+        ensureProveedor(idProveedor, empresaId);
+        ProveedorProductoEntity relation = proveedorProductoRepository
+                .findByIdProveedorProductoAndProveedor_IdProveedorAndEmpresa_IdEmpresa(idProveedorProducto, idProveedor, empresaId)
+                .orElseThrow(() -> new EntityNotFoundException("Producto asociado no encontrado o no pertenece al proveedor"));
+
+        Integer idProducto = relation.getProducto() == null ? null : relation.getProducto().getIdProducto();
+        if (idProducto == null) {
+            throw new IllegalStateException("La relacion no tiene producto interno asociado");
+        }
+
+        return historialCostosRepository
+                .findByProveedor_IdProveedorAndProducto_IdProductoAndEmpresa_IdEmpresaOrderByFechaCreacionDesc(
+                        idProveedor, idProducto, empresaId);
     }
 
     @Override
@@ -230,6 +263,29 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
         if (obj.getUltimoCosto() != null && obj.getFechaUltimoCosto() == null) {
             obj.setFechaUltimoCosto(LocalDateTime.now());
         }
+    }
+
+    private void registerCostHistoryIfChanged(ProveedorProductoEntity entity, BigDecimal previousCost, String user) {
+        BigDecimal currentCost = entity.getUltimoCosto();
+        if (currentCost == null) return;
+        if (previousCost != null && previousCost.compareTo(currentCost) == 0) return;
+        registerCostHistory(entity, user);
+    }
+
+    private void registerCostHistory(ProveedorProductoEntity entity, String user) {
+        BigDecimal cost = entity.getUltimoCosto();
+        if (cost == null || entity.getProveedor() == null || entity.getProducto() == null || entity.getEmpresa() == null) {
+            return;
+        }
+
+        HistorialCostosEntity history = new HistorialCostosEntity();
+        history.setProveedor(entity.getProveedor());
+        history.setProducto(entity.getProducto());
+        history.setEmpresa(entity.getEmpresa());
+        history.setPrecioCompra(cost);
+        history.setUsuarioCreacion(user);
+        history.setEstatus(true);
+        historialCostosRepository.save(history);
     }
 
     private ProveedoresEntity ensureProveedor(Integer idProveedor, Integer empresaId) {

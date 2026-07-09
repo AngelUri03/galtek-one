@@ -43,7 +43,7 @@ npm run setup
 
 - Instala dependencias del frontend si faltan.
 - Crea `galtek-one-front\.env` desde `.env.example` si no existe.
-- Crea o actualiza la base SQLite local.
+- Crea o actualiza la base SQLite local. Si la base no existe, tambien carga datos demo iniciales.
 - Compila el backend.
 
 La base queda por defecto en:
@@ -67,6 +67,7 @@ npm start
 ```
 
 Ambos comandos preparan `.env`, preparan la base y dejan corriendo backend + frontend en la misma terminal.
+Si la base ya existe, estos comandos no vuelven a cargar el seed demo para no pisar datos capturados durante desarrollo.
 
 URLs locales:
 
@@ -82,6 +83,14 @@ npm run db
 npm run back
 npm run front
 ```
+
+Para recargar datos demo de forma intencional:
+
+```powershell
+npm run db:seed
+```
+
+Ese comando puede reemplazar datos demo con IDs fijos; usalo solo cuando quieras refrescar la base de pruebas.
 
 Comandos utiles:
 

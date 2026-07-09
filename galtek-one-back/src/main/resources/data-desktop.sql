@@ -394,12 +394,72 @@ SELECT
   precio_compra, 1, id_producto, id_proveedor
 FROM seed_productos;
 
+UPDATE ProveedorProducto
+SET
+  sku_proveedor = 'PV-' || id_proveedor || '-' || id_producto,
+  ultimo_costo = (SELECT precio_compra FROM seed_productos p WHERE p.id_producto = ProveedorProducto.id_producto),
+  fecha_ultimo_costo = STRFTIME('%Y-%m-%d %H:%M:%f', 'now', '-' || ((id_producto % 28) + 2) || ' day'),
+  presentacion_compra = CASE
+    WHEN id_producto BETWEEN 1 AND 16 THEN CASE WHEN id_producto % 4 = 0 THEN 'Bulto 25 kg' ELSE 'Caja 12 pz' END
+    WHEN id_producto BETWEEN 17 AND 24 THEN CASE WHEN id_producto IN (18,20) THEN 'Charola 6 pz' ELSE 'Caja 24 pz' END
+    WHEN id_producto BETWEEN 25 AND 32 THEN 'Caja refrigerada 12 pz'
+    WHEN id_producto BETWEEN 33 AND 40 THEN CASE WHEN id_producto IN (34,35,36) THEN 'Canasta diaria' ELSE 'Caja 20 pz' END
+    WHEN id_producto BETWEEN 41 AND 56 THEN 'Caja exhibidora 24 pz'
+    WHEN id_producto BETWEEN 57 AND 72 THEN 'Caja 12 pz'
+    WHEN id_producto BETWEEN 73 AND 80 THEN 'Reja 20 kg'
+    WHEN id_producto BETWEEN 81 AND 88 THEN 'Caja fria 10 kg'
+    WHEN id_producto BETWEEN 89 AND 96 THEN 'Caja congelada 8 pz'
+    WHEN id_producto BETWEEN 97 AND 104 THEN 'Caja 10 pz'
+    WHEN id_producto BETWEEN 105 AND 112 THEN CASE WHEN id_producto IN (105,106,107) THEN 'Saco 10 pz' ELSE 'Caja 24 pz' END
+    WHEN id_producto BETWEEN 113 AND 120 THEN 'Paquete escolar 12 pz'
+    WHEN id_producto BETWEEN 121 AND 128 THEN 'Caja ferretera 10 pz'
+    WHEN id_producto BETWEEN 129 AND 136 THEN 'Bolsa mayoreo 20 pz'
+    ELSE 'Caja mixta 12 pz'
+  END,
+  cantidad_minima = CASE
+    WHEN id_producto BETWEEN 73 AND 88 THEN 5
+    WHEN id_producto BETWEEN 89 AND 96 THEN 4
+    WHEN id_producto IN (1,17,33,57,97,121,137) THEN 2
+    ELSE 1
+  END,
+  proveedor_preferido = CASE WHEN id_producto % 3 = 0 OR id_producto IN (1,17,25,41,73,89,129,137) THEN 1 ELSE 0 END,
+  estado_relacion = CASE
+    WHEN id_producto IN (1,37,73,97,113,129) THEN 'INACTIVA'
+    WHEN id_producto IN (16,48,88,104,120,136) THEN 'ARCHIVADA'
+    ELSE 'ACTIVA'
+  END,
+  estatus = CASE
+    WHEN id_producto IN (1,16,37,48,73,88,97,104,113,120,129,136) THEN 0
+    ELSE 1
+  END
+WHERE id_producto BETWEEN 1 AND 144;
+
 INSERT OR REPLACE INTO HistorialCostos
 (id_historial_costos, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, precio_compra, id_empresa, id_producto, id_proveedor)
 SELECT
   id_producto, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now', '-45 day'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now', '-45 day'), 'system', 'system',
-  CAST(ROUND(precio_compra, 0) AS INTEGER), 1, id_producto, id_proveedor
+  ROUND(precio_compra, 2), 1, id_producto, id_proveedor
 FROM seed_productos;
+
+INSERT OR REPLACE INTO HistorialCostos
+(id_historial_costos, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, precio_compra, id_empresa, id_producto, id_proveedor)
+VALUES
+(10001,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-180 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-180 day'),'system','system',21.50,1,1,1),
+(10002,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-150 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-150 day'),'system','system',22.25,1,1,1),
+(10003,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-120 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-120 day'),'system','system',23.00,1,1,1),
+(10004,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),'system','system',23.60,1,1,1),
+(10005,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-60 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-60 day'),'system','system',24.20,1,1,1),
+(10006,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-30 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-30 day'),'system','system',25.00,1,1,1),
+(10007,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-135 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-135 day'),'system','system',6.80,1,25,3),
+(10008,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-105 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-105 day'),'system','system',7.10,1,25,3),
+(10009,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-75 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-75 day'),'system','system',7.25,1,25,3),
+(10010,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-45 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-45 day'),'system','system',7.40,1,25,3),
+(10011,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-15 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-15 day'),'system','system',7.50,1,25,3),
+(10012,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),'system','system',8.10,1,41,5),
+(10013,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-55 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-55 day'),'system','system',8.60,1,41,5),
+(10014,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-20 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-20 day'),'system','system',9.00,1,41,5),
+(10015,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-70 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-70 day'),'system','system',42.00,1,89,10),
+(10016,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),'system','system',45.00,1,89,10);
 
 DROP TABLE IF EXISTS seed_compra_header;
 CREATE TEMP TABLE seed_compra_header (
@@ -619,6 +679,7 @@ UPDATE ProductoEstadoStock SET fecha_creacion = fecha_creacion || '.000' WHERE f
 UPDATE ProductoEstadoStock SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
 UPDATE ProveedorProducto SET fecha_creacion = fecha_creacion || '.000' WHERE fecha_creacion IS NOT NULL AND LENGTH(fecha_creacion) = 19;
 UPDATE ProveedorProducto SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
+UPDATE ProveedorProducto SET fecha_ultimo_costo = fecha_ultimo_costo || '.000' WHERE fecha_ultimo_costo IS NOT NULL AND LENGTH(fecha_ultimo_costo) = 19;
 UPDATE HistorialCostos SET fecha_creacion = fecha_creacion || '.000' WHERE fecha_creacion IS NOT NULL AND LENGTH(fecha_creacion) = 19;
 UPDATE HistorialCostos SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
 UPDATE Compras SET fecha_compra = fecha_compra || '.000' WHERE fecha_compra IS NOT NULL AND LENGTH(fecha_compra) = 19;

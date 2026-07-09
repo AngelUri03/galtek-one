@@ -1,8 +1,11 @@
 package com.galtekone.entity;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.time.LocalDate;
 
+import com.galtekone.dto.proveedor.ProveedorActivoEvidenciaRequest;
 import com.galtekone.utils.BaseEmpresa;
 
 import jakarta.persistence.Column;
@@ -14,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -44,6 +48,9 @@ public class ProveedorActivoEntity extends CommonEntity implements BaseEmpresa {
     @Column(name = "fecha_entrega")
     private LocalDate fechaEntrega;
 
+    @Column(name = "fecha_regreso")
+    private LocalDate fechaRegreso;
+
     @Column(name = "estado_fisico")
     private String estadoFisico;
 
@@ -57,10 +64,16 @@ public class ProveedorActivoEntity extends CommonEntity implements BaseEmpresa {
     private BigDecimal depositoGarantia;
 
     @Column(name = "estado_activo_prestado")
-    private String estadoActivoPrestado = "EN_TIENDA";
+    private String estadoActivoPrestado = "RECIBIDO";
 
     @Column(name = "notas", length = 2000)
     private String notas;
+
+    @Transient
+    private List<ProveedorActivoHistorialEntity> historial = new ArrayList<>();
+
+    @Transient
+    private List<ProveedorActivoEvidenciaRequest> evidencias = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_empresa", nullable = false)

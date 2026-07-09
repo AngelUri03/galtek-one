@@ -1,324 +1,290 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
-import { Checkbox } from "primereact/checkbox";
-import { Dropdown } from "primereact/dropdown";
-import { InputNumber } from "primereact/inputnumber";
-import { Tag } from "primereact/tag";
 import { APIfetchApi } from "../../API/APIfetch";
 import { endpoints } from "../../API/api";
 import { formatDate, moneyOrDash, readApiPayload } from "./proveedoresUtils";
 import {
-  RELACION_PRODUCTO_OPTIONS,
-  buildProductoPayload,
-  createProductoForm,
-  normalizeProductosCatalog,
-  productLabel,
+  enumText,
   relationProductName,
   relationProductSku,
 } from "./proveedorAdvancedUtils";
 import {
-  AdvancedCardActions,
   AdvancedEmpty,
-  AdvancedFormActions,
   AdvancedSection,
   ConfirmActionDialog,
-  TextField,
 } from "./ProveedorAdvancedShared";
+import ProveedorProductoCostHistory from "./ProveedorProductoCostHistory";
 
 const api = new APIfetchApi();
 
 function getProductoUrl(idProveedor, idRelacion) {
-  return idRelacion
-    ? `${endpoints.proveedores}/${idProveedor}/productos/${idRelacion}`
-    : `${endpoints.proveedores}/${idProveedor}/productos`;
+  return `${endpoints.proveedores}/${idProveedor}/productos/${idRelacion}`;
 }
 
-function selectedSku(catalog, idProducto) {
-  return catalog.find((producto) => producto.value === idProducto)?.codigoBarras || "";
+function relationState(row) {
+  return String(row?.estadoRelacion || "ACTIVA").trim().toUpperCase();
+}
+
+function relationStateClass(row) {
+  const state = relationState(row);
+  if (state === "INACTIVA") return "is-inactive";
+  if (state === "ARCHIVADA") return "is-archived";
+  return "is-active";
+}
+
+function productId(row) {
+  return row?.producto?.idProducto || row?.idProducto || null;
+}
+
+function valueOrDash(value) {
+  if (value === null || value === undefined || value === "") return "--";
+  return value;
 }
 
 export default function ProveedorProductosSection({
   proveedor,
-  items,
+  items = [],
   onRefresh,
   showToast,
 }) {
   const navigate = useNavigate();
-  const [catalog, setCatalog] = useState([]);
-  const [loadingCatalog, setLoadingCatalog] = useState(false);
-  const [form, setForm] = useState(null);
-  const [saving, setSaving] = useState(false);
   const [confirm, setConfirm] = useState(null);
-  const [errors, setErrors] = useState({});
-
+  const [saving, setSaving] = useState(false);
+  const [historyItem, setHistoryItem] = useState(null);
+  const [updatingRelation, setUpdatingRelation] = useState(null);
   const hasItems = items.length > 0;
-  const editing = Boolean(form?.idProveedorProducto);
 
-  const catalogById = useMemo(
-    () => new Map(catalog.map((producto) => [producto.value, producto])),
-    [catalog]
-  );
-
-  const loadCatalog = async () => {
-    if (catalog.length || loadingCatalog) return;
-    setLoadingCatalog(true);
-    try {
-      const response = await api.fetchApi({}, "GET", undefined, endpoints.ventasProductos);
-      const payload = await readApiPayload(response, "productos");
-      setCatalog(normalizeProductosCatalog(payload));
-    } catch (error) {
-      showToast("error", "Productos", error?.message || "No se pudo cargar catalogo.");
-    } finally {
-      setLoadingCatalog(false);
-    }
+  const openInventory = (item) => {
+    const idProducto = productId(item);
+    const query = idProducto ? `?producto=${idProducto}` : "";
+    navigate(`/inventario${query}`, {
+      state: {
+        from: "proveedores",
+        proveedorId: proveedor?.idProveedor,
+        productoId: idProducto,
+      },
+    });
   };
 
-  useEffect(() => {
-    if (form) loadCatalog();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
-
-  const openCreate = () => {
-    setForm(createProductoForm());
-    setErrors({});
+  const openPurchases = (item) => {
+    const idProducto = productId(item);
+    const params = new URLSearchParams();
+    if (idProducto) params.set("producto", idProducto);
+    if (proveedor?.idProveedor) params.set("proveedor", proveedor.idProveedor);
+    const query = params.toString();
+    navigate(`/compras/producto${query ? `?${query}` : ""}`, {
+      state: {
+        from: "proveedores",
+        proveedorId: proveedor?.idProveedor,
+        productoId: idProducto,
+      },
+    });
   };
 
-  const openEdit = (row) => {
-    setForm(createProductoForm(row));
-    setErrors({});
+  const deactivate = async (item) => {
+    const response = await api.fetchApi(
+      {},
+      "DELETE",
+      undefined,
+      getProductoUrl(proveedor.idProveedor, item.idProveedorProducto)
+    );
+    await readApiPayload(response, "desactivar producto asociado");
+    showToast?.("success", "Productos asociados", "Relacion desactivada.");
   };
 
-  const update = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => ({ ...prev, [field]: "" }));
+  const reactivate = async (item) => {
+    const response = await api.fetchApi(
+      {},
+      "PUT",
+      { estadoRelacion: "ACTIVA", estatus: true },
+      getProductoUrl(proveedor.idProveedor, item.idProveedorProducto)
+    );
+    await readApiPayload(response, "reactivar producto asociado");
+    showToast?.("success", "Productos asociados", "Relacion reactivada.");
   };
 
-  const validate = () => {
-    const nextErrors = {};
-    if (!form.idProducto) nextErrors.idProducto = "Selecciona el producto interno.";
-    if (form.ultimoCosto != null && Number(form.ultimoCosto) < 0) {
-      nextErrors.ultimoCosto = "No puede ser negativo.";
-    }
-    if (form.cantidadMinima != null && Number(form.cantidadMinima) < 0) {
-      nextErrors.cantidadMinima = "No puede ser negativa.";
-    }
-    setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
-  };
+  const applyStateAction = async () => {
+    if (!confirm?.item) return;
 
-  const save = async () => {
-    if (!validate()) return;
-
+    const currentAction = confirm;
+    setUpdatingRelation({
+      id: currentAction.item.idProveedorProducto,
+      action: currentAction.action,
+    });
+    setConfirm(null);
     setSaving(true);
     try {
-      const response = await api.fetchApi(
-        {},
-        editing ? "PUT" : "POST",
-        buildProductoPayload(form),
-        getProductoUrl(proveedor.idProveedor, form.idProveedorProducto)
+      if (currentAction.action === "reactivar") {
+        await reactivate(currentAction.item);
+      } else {
+        await deactivate(currentAction.item);
+      }
+      setHistoryItem((current) =>
+        current?.idProveedorProducto === currentAction.item.idProveedorProducto ? null : current
       );
-      await readApiPayload(response, "guardar producto asociado");
-      showToast("success", "Productos asociados", "Relacion comercial guardada.");
-      setForm(null);
-      await onRefresh();
+      await onRefresh?.();
     } catch (error) {
-      showToast("error", "Productos asociados", error?.message || "No se pudo guardar.");
+      showToast?.("error", "Productos asociados", error?.message || "No se pudo completar.");
     } finally {
       setSaving(false);
-    }
-  };
-
-  const archive = async () => {
-    if (!confirm) return;
-
-    setSaving(true);
-    try {
-      const response = await api.fetchApi(
-        {},
-        "DELETE",
-        undefined,
-        getProductoUrl(proveedor.idProveedor, confirm.idProveedorProducto)
-      );
-      await readApiPayload(response, "desactivar producto asociado");
-      showToast("success", "Productos asociados", "Relacion desactivada.");
-      setConfirm(null);
-      await onRefresh();
-    } catch (error) {
-      showToast("error", "Productos asociados", error?.message || "No se pudo completar.");
-    } finally {
-      setSaving(false);
+      setUpdatingRelation(null);
     }
   };
 
   return (
     <AdvancedSection
       title="Productos asociados"
-      subtitle="Relacion comercial de surtido, costos y presentacion."
+      subtitle="Relacion comercial de surtido, preferencia y costos."
       icon="pi pi-box"
-      addLabel="Agregar producto"
-      onAdd={openCreate}
     >
-      {form ? (
-        <div className="prov-adv-form">
-          <div className="prov-form-grid">
-            <label className="prov-field prov-field-wide">
-              <span>Producto interno</span>
-              <Dropdown
-                value={form.idProducto}
-                options={catalog}
-                onChange={(event) => {
-                  update("idProducto", event.value);
-                  update("skuInterno", selectedSku(catalog, event.value));
-                }}
-                loading={loadingCatalog}
-                filter
-                placeholder="Selecciona un producto"
-                emptyMessage="No hay productos disponibles"
-              />
-              {errors.idProducto ? <small className="prov-field-error">{errors.idProducto}</small> : null}
-            </label>
-            <TextField
-              label="SKU interno"
-              value={form.skuInterno || selectedSku(catalog, form.idProducto)}
-              onChange={() => {}}
-              disabled
-            />
-            <TextField
-              label="SKU del proveedor"
-              value={form.skuProveedor}
-              onChange={(value) => update("skuProveedor", value)}
-            />
-            <label className="prov-field">
-              <span>Ultimo costo</span>
-              <InputNumber
-                value={form.ultimoCosto}
-                onValueChange={(event) => update("ultimoCosto", event.value)}
-                mode="currency"
-                currency="MXN"
-                locale="es-MX"
-                min={0}
-              />
-              {errors.ultimoCosto ? <small className="prov-field-error">{errors.ultimoCosto}</small> : null}
-            </label>
-            <TextField
-              label="Fecha ultimo costo"
-              type="datetime-local"
-              value={form.fechaUltimoCosto}
-              onChange={(value) => update("fechaUltimoCosto", value)}
-            />
-            <TextField
-              label="Presentacion de compra"
-              value={form.presentacionCompra}
-              onChange={(value) => update("presentacionCompra", value)}
-              placeholder="Caja, paquete, charola"
-            />
-            <label className="prov-field">
-              <span>Cantidad minima</span>
-              <InputNumber
-                value={form.cantidadMinima}
-                onValueChange={(event) => update("cantidadMinima", event.value)}
-                min={0}
-                minFractionDigits={0}
-                maxFractionDigits={3}
-              />
-              {errors.cantidadMinima ? <small className="prov-field-error">{errors.cantidadMinima}</small> : null}
-            </label>
-            <label className="prov-field">
-              <span>Estado de relacion</span>
-              <Dropdown
-                value={form.estadoRelacion}
-                options={RELACION_PRODUCTO_OPTIONS}
-                onChange={(event) => update("estadoRelacion", event.value)}
-              />
-            </label>
-            <label className={`prov-credit-switch ${form.proveedorPreferido ? "is-selected" : ""}`}>
-              <Checkbox
-                checked={form.proveedorPreferido}
-                onChange={(event) => update("proveedorPreferido", event.checked)}
-              />
-              <span>Proveedor preferido</span>
-            </label>
-          </div>
-          <AdvancedFormActions
-            editing={editing}
-            saving={saving}
-            onCancel={() => setForm(null)}
-            onSave={save}
-          />
-        </div>
+      {historyItem ? (
+        <ProveedorProductoCostHistory
+          proveedor={proveedor}
+          item={historyItem}
+          onClose={() => setHistoryItem(null)}
+          showToast={showToast}
+        />
       ) : null}
 
       {hasItems ? (
-        <div className="prov-adv-card-grid">
+        <div className="prov-product-card-grid">
           {items.map((item) => {
-            const skuInterno = relationProductSku(item);
-            const catalogProduct = item.producto?.idProducto
-              ? catalogById.get(item.producto.idProducto)
-              : null;
             const title = relationProductName(item);
+            const skuInterno = relationProductSku(item);
+            const state = relationState(item);
+            const isActive = state === "ACTIVA";
+            const isInactive = state === "INACTIVA";
+            const isUpdating = updatingRelation?.id === item.idProveedorProducto;
+
             return (
-              <article className="prov-adv-card" key={item.idProveedorProducto || title}>
-                <div className="prov-adv-card-main">
-                  <div>
+              <article
+                className={`prov-product-card ${isUpdating ? "is-updating" : ""}`}
+                key={item.idProveedorProducto || title}
+              >
+                <div className="prov-product-card-head">
+                  <div className="prov-product-title">
                     <strong title={title}>{title}</strong>
                     <span title={item.skuProveedor || skuInterno}>
                       {skuInterno ? `SKU interno ${skuInterno}` : "Sin SKU interno"}
                       {item.skuProveedor ? ` - Prov. ${item.skuProveedor}` : ""}
                     </span>
                   </div>
-                  <Tag
-                    value={(item.estadoRelacion || "ACTIVA").toLowerCase()}
-                    severity={item.estadoRelacion === "ACTIVA" ? "success" : "secondary"}
-                    className="prov-state-tag"
+                  <div className="prov-product-badges">
+                    <span
+                      className={`prov-relation-status ${
+                        isUpdating ? "is-updating" : relationStateClass(item)
+                      }`}
+                    >
+                      {isUpdating ? (
+                        <>
+                          <i className="pi pi-spin pi-spinner" />
+                          Actualizando
+                        </>
+                      ) : (
+                        enumText(state)
+                      )}
+                    </span>
+                    {item.proveedorPreferido ? (
+                      <span className="prov-preferred-pill">
+                        <i className="pi pi-star-fill" />
+                        Preferido
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="prov-product-meta-grid">
+                  <span>
+                    Ultimo costo
+                    <strong>{moneyOrDash(item.ultimoCosto ?? item.precioCompra)}</strong>
+                  </span>
+                  <span>
+                    Fecha del costo
+                    <strong>{formatDate(item.fechaUltimoCosto)}</strong>
+                  </span>
+                  <span>
+                    Presentacion
+                    <strong>{valueOrDash(item.presentacionCompra)}</strong>
+                  </span>
+                  <span>
+                    Minimo
+                    <strong>{valueOrDash(item.cantidadMinima)}</strong>
+                  </span>
+                </div>
+
+                <div className="prov-product-actions">
+                  <Button
+                    icon="pi pi-box"
+                    className="prov-row-action"
+                    onClick={() => openInventory(item)}
+                    disabled={isUpdating}
+                    aria-label="Abrir en inventario"
+                    tooltip="Abrir en inventario"
+                    tooltipOptions={{ position: "top" }}
                   />
+                  <Button
+                    icon="pi pi-shopping-cart"
+                    className="prov-row-action"
+                    onClick={() => openPurchases(item)}
+                    disabled={isUpdating}
+                    aria-label="Ver en compras"
+                    tooltip="Ver en compras"
+                    tooltipOptions={{ position: "top" }}
+                  />
+                  <Button
+                    icon="pi pi-chart-line"
+                    className="prov-row-action"
+                    onClick={() => setHistoryItem(item)}
+                    disabled={isUpdating}
+                    aria-label="Historial de costos"
+                    tooltip="Historial de costos"
+                    tooltipOptions={{ position: "top" }}
+                  />
+                  {isActive ? (
+                    <Button
+                      icon="pi pi-ban"
+                      className="prov-row-action"
+                      onClick={() => setConfirm({ action: "desactivar", item })}
+                      disabled={isUpdating}
+                      loading={isUpdating && updatingRelation?.action === "desactivar"}
+                      aria-label="Desactivar relacion"
+                      tooltip="Desactivar relacion"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  ) : null}
+                  {isInactive ? (
+                    <Button
+                      icon="pi pi-refresh"
+                      className="prov-row-action"
+                      onClick={() => setConfirm({ action: "reactivar", item })}
+                      disabled={isUpdating}
+                      loading={isUpdating && updatingRelation?.action === "reactivar"}
+                      aria-label="Reactivar relacion"
+                      tooltip="Reactivar relacion"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  ) : null}
                 </div>
-                <div className="prov-adv-meta-grid">
-                  <span>Ultimo costo <strong>{moneyOrDash(item.ultimoCosto || item.precioCompra)}</strong></span>
-                  <span>Fecha <strong>{formatDate(item.fechaUltimoCosto)}</strong></span>
-                  <span>Presentacion <strong>{item.presentacionCompra || "--"}</strong></span>
-                  <span>Minimo <strong>{item.cantidadMinima ?? "--"}</strong></span>
-                </div>
-                <AdvancedCardActions
-                  onEdit={() => openEdit(item)}
-                  onArchive={() => setConfirm(item)}
-                  archiveLabel="Desactivar relacion"
-                  extra={
-                    <>
-                      <Button
-                        icon="pi pi-box"
-                        className="prov-row-action"
-                        onClick={() => navigate("/inventario")}
-                        aria-label="Abrir inventario"
-                        tooltip={catalogProduct ? productLabel(catalogProduct) : "Abrir inventario"}
-                        tooltipOptions={{ position: "top" }}
-                      />
-                      <Button
-                        icon="pi pi-shopping-cart"
-                        className="prov-row-action"
-                        onClick={() => navigate("/compras/proveedor")}
-                        aria-label="Ver compras"
-                        tooltip="Ver compras"
-                        tooltipOptions={{ position: "top" }}
-                      />
-                    </>
-                  }
-                />
               </article>
             );
           })}
         </div>
       ) : (
-        <AdvancedEmpty text="Sin productos asociados. Agrega los productos que este proveedor puede surtir." />
+        <AdvancedEmpty text="Sin productos asociados para este proveedor." />
       )}
 
       <ConfirmActionDialog
         visible={Boolean(confirm)}
-        title="Desactivar relacion"
-        detail="La relacion con el producto quedara inactiva. No se modifica inventario ni stock."
+        title={confirm?.action === "reactivar" ? "Reactivar relacion" : "Desactivar relacion"}
+        detail={
+          confirm?.action === "reactivar"
+            ? "La relacion volvera a quedar activa para este proveedor. No se modifica inventario, compras ni stock."
+            : "La relacion con el producto quedara inactiva. No se modifica inventario, compras ni stock."
+        }
         loading={saving}
         onCancel={() => setConfirm(null)}
-        onConfirm={archive}
+        onConfirm={applyStateAction}
       />
     </AdvancedSection>
   );

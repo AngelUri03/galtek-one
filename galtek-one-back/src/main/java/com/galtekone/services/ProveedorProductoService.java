@@ -39,4 +39,6 @@ public interface ProveedorProductoService extends CommonService<ProveedorProduct
 
     ProveedorProductoEntity deleteForProveedor(Integer idProveedor, Integer idProveedorProducto, String user);
 
+    Object readCostHistory(Integer idProveedor, Integer idProveedorProducto);
+
 }

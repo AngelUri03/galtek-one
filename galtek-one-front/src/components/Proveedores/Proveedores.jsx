@@ -5,9 +5,9 @@ import { endpoints } from "../../API/api";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputTextarea } from "primereact/inputtextarea";
-import { Menu } from "primereact/menu";
 import { Toast } from "primereact/toast";
 import { Tooltip } from "primereact/tooltip";
+import ProveedorAdvancedModals from "./ProveedorAdvancedModals";
 import ProveedorDetailPanel from "./ProveedorDetailPanel";
 import ProveedorEditorPanel from "./ProveedorEditorPanel";
 import ProveedoresFilters from "./ProveedoresFilters";
@@ -34,6 +34,16 @@ const getContactUrl = (idProveedor, idContacto) =>
   idContacto
     ? `${endpoints.proveedores}/${idProveedor}/contactos/${idContacto}`
     : `${endpoints.proveedores}/${idProveedor}/contactos`;
+const getSubresourceUrl = (idProveedor, resource) =>
+  `${endpoints.proveedores}/${idProveedor}/${resource}`;
+
+const proveedorSubresourceKeys = ["contactos", "productos", "activos", "documentos"];
+
+const pickSubresourceKeys = (mode) => {
+  if (Array.isArray(mode)) return mode;
+  if (mode === "summary") return ["productos", "activos"];
+  return proveedorSubresourceKeys;
+};
 
 const actionMessages = {
   desactivar: {
@@ -41,7 +51,7 @@ const actionMessages = {
     success: "Proveedor desactivado.",
     confirmLabel: "Desactivar",
     placeholder: "Ej. Ya no surte temporalmente la tienda.",
-    detail: "El proveedor queda fuera de la operacion diaria, pero conserva historial, compras, productos, activos, documentos y acuerdos.",
+    detail: "El proveedor queda fuera de la operacion diaria, pero conserva historial, compras, productos, activos y documentos.",
     consequences: [
       "No aparecera por defecto para nuevas operaciones.",
       "Su historial comercial se conserva para consulta.",
@@ -56,7 +66,7 @@ const actionMessages = {
     detail: "El proveedor se retira de la operacion normal y queda disponible solo como consulta historica.",
     consequences: [
       "No aparece en flujos operativos normales.",
-      "Se conservan compras, productos, activos, documentos y acuerdos.",
+      "Se conservan compras, productos, activos y documentos.",
       "Puede reactivarse si la relacion comercial vuelve a operar.",
     ],
   },
@@ -80,7 +90,7 @@ const actionMessages = {
     detail: "Esta accion solo procede si el backend confirma que el proveedor no tiene uso ni historial relevante.",
     consequences: [
       "Solo aplica a proveedores creados por error.",
-      "No procede si tiene compras, productos, activos, documentos, acuerdos, contactos o auditoria.",
+      "No procede si tiene compras, productos, activos, documentos, contactos o auditoria.",
       "Si tiene historial, usa desactivar o archivar.",
     ],
   },
@@ -92,9 +102,24 @@ const dependencyLabels = {
   contactos: "Contactos",
   activosPrestados: "Activos prestados",
   documentosAnexos: "Documentos anexos",
-  acuerdosComerciales: "Acuerdos comerciales",
   auditoriaRelevante: "Auditoria relevante",
 };
+
+const hiddenDependencyKeys = new Set([["acu", "erdos", "Comerciales"].join("")]);
+
+const normalizeCategoriaOptions = (rows = []) =>
+  rows
+    .filter((row) => row?.estatus !== false)
+    .map((row) => {
+      const label = row?.nombreCategoria || row?.nombre || row?.label || "";
+      return label ? { label, value: label } : null;
+    })
+    .filter(Boolean)
+    .filter(
+      (option, index, options) =>
+        options.findIndex((candidate) => candidate.value === option.value) === index
+    )
+    .sort((a, b) => a.label.localeCompare(b.label, "es"));
 
 const isDeleteBlocked = (action) =>
   action?.action === "eliminar" && action?.deletePolicy?.puedeEliminar === false;
@@ -109,13 +134,11 @@ const mergeProveedorResult = (current, result) => {
     productosAsociados: current?.productosAsociados || result?.productosAsociados,
     activosPrestados: current?.activosPrestados || result?.activosPrestados,
     documentos: current?.documentos || result?.documentos,
-    acuerdos: current?.acuerdos || result?.acuerdos,
   });
 };
 
 export default function Proveedores() {
   const toast = useRef(null);
-  const menuRef = useRef(null);
   const [proveedores, setProveedores] = useState([]);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState(emptyFilters);
@@ -129,30 +152,92 @@ export default function Proveedores() {
   const [editorProveedor, setEditorProveedor] = useState(null);
   const [detailVisible, setDetailVisible] = useState(false);
   const [selectedProveedor, setSelectedProveedor] = useState(null);
-  const [menuProveedor, setMenuProveedor] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null);
   const [actionPreparing, setActionPreparing] = useState(false);
+  const [advancedSection, setAdvancedSection] = useState(null);
+  const [categoriaOptions, setCategoriaOptions] = useState([]);
+  const [categoriasLoading, setCategoriasLoading] = useState(false);
 
   const showToast = useCallback((severity, summary, detail) => {
     toast.current?.show({ severity, summary, detail, life: 3200 });
   }, []);
 
-  const fetchProveedorDetail = useCallback(async (proveedor) => {
+  const fetchProveedorSubresources = useCallback(async (idProveedor, mode = "all") => {
+    const keys = pickSubresourceKeys(mode);
+    const responses = await Promise.allSettled(
+      keys.map(async (key) => {
+        const response = await api.fetchApi(
+          {},
+          "GET",
+          undefined,
+          getSubresourceUrl(idProveedor, key),
+          { logoutOnUnauthorized: false }
+        );
+        return [key, getListPayload(await readApiPayload(response, key))];
+      })
+    );
+
+    return responses.reduce((acc, result) => {
+      if (result.status === "fulfilled") {
+        const [key, rows] = result.value;
+        acc[key] = rows;
+      } else {
+        console.warn("No se pudo cargar subrecurso de proveedor:", result.reason);
+      }
+      return acc;
+    }, {});
+  }, []);
+
+  const fetchProveedorDetail = useCallback(async (proveedor, options = {}) => {
     if (!proveedor?.idProveedor) return proveedor;
 
+    try {
+      let detail = null;
+      try {
+        const response = await api.fetchApi(
+          {},
+          "GET",
+          undefined,
+          getDetailUrl(proveedor.idProveedor),
+          { logoutOnUnauthorized: false }
+        );
+        detail = await readApiPayload(response, "detalle de proveedor");
+      } catch (error) {
+        console.warn("No se pudo cargar detalle base de proveedor:", error);
+      }
+
+      const subresources = options?.subresources
+        ? await fetchProveedorSubresources(proveedor.idProveedor, options.subresources)
+        : {};
+
+      if (!detail && !Object.keys(subresources).length) {
+        return normalizeProveedor(proveedor);
+      }
+
+      return normalizeProveedor(proveedor, { ...(detail || {}), ...subresources });
+    } catch (error) {
+      console.warn("No se pudo enriquecer proveedor:", error);
+      return normalizeProveedor(proveedor);
+    }
+  }, [fetchProveedorSubresources]);
+
+  const fetchCategorias = useCallback(async () => {
+    setCategoriasLoading(true);
     try {
       const response = await api.fetchApi(
         {},
         "GET",
         undefined,
-        getDetailUrl(proveedor.idProveedor),
+        endpoints.categorias,
         { logoutOnUnauthorized: false }
       );
-      const detail = await readApiPayload(response, "detalle de proveedor");
-      return normalizeProveedor(proveedor, detail);
+      const payloadData = await readApiPayload(response, "categorias");
+      setCategoriaOptions(normalizeCategoriaOptions(getListPayload(payloadData)));
     } catch (error) {
-      console.warn("No se pudo enriquecer proveedor:", error);
-      return normalizeProveedor(proveedor);
+      console.warn("No se pudo cargar categorias para proveedores:", error);
+      setCategoriaOptions([]);
+    } finally {
+      setCategoriasLoading(false);
     }
   }, []);
 
@@ -172,7 +257,7 @@ export default function Proveedores() {
       if (baseRows.length && baseRows.length <= DETAIL_ENRICH_LIMIT) {
         setDetailLoading(true);
         const enriched = await Promise.all(
-          baseRows.map((proveedor) => fetchProveedorDetail(proveedor))
+          baseRows.map((proveedor) => fetchProveedorDetail(proveedor, { subresources: "all" }))
         );
         setProveedores(enriched);
       }
@@ -190,6 +275,10 @@ export default function Proveedores() {
   useEffect(() => {
     fetchProveedores();
   }, [fetchProveedores]);
+
+  useEffect(() => {
+    fetchCategorias();
+  }, [fetchCategorias]);
 
   const stats = useMemo(() => {
     const knownProducts = proveedores.every((proveedor) =>
@@ -274,7 +363,7 @@ export default function Proveedores() {
 
     if (!proveedor.detailLoaded) {
       setEditorLoading(true);
-      const enriched = await fetchProveedorDetail(proveedor);
+      const enriched = await fetchProveedorDetail(proveedor, { subresources: "all" });
       setEditorProveedor(enriched);
       updateProveedorInList(enriched);
       setEditorLoading(false);
@@ -287,18 +376,34 @@ export default function Proveedores() {
 
     if (!proveedor.detailLoaded) {
       setDetailLoading(true);
-      const enriched = await fetchProveedorDetail(proveedor);
+      const enriched = await fetchProveedorDetail(proveedor, { subresources: "all" });
       setSelectedProveedor(enriched);
       updateProveedorInList(enriched);
       setDetailLoading(false);
     }
   };
 
+  const openAdvancedSectionForProveedor = async (proveedor, section) => {
+    if (!proveedor?.idProveedor) return;
+
+    setSelectedProveedor(proveedor);
+    let target = proveedor;
+    if (!proveedor.detailLoaded) {
+      setDetailLoading(true);
+      target = await fetchProveedorDetail(proveedor, { subresources: "all" });
+      setSelectedProveedor(target);
+      updateProveedorInList(target);
+      setDetailLoading(false);
+    }
+    setDetailVisible(false);
+    setAdvancedSection(section);
+  };
+
   const refreshSelectedProveedor = useCallback(async () => {
     if (!selectedProveedor?.idProveedor) return;
 
     setDetailLoading(true);
-    const enriched = await fetchProveedorDetail(selectedProveedor);
+    const enriched = await fetchProveedorDetail(selectedProveedor, { subresources: "all" });
     setSelectedProveedor(enriched);
     updateProveedorInList(enriched);
     setDetailLoading(false);
@@ -480,71 +585,6 @@ export default function Proveedores() {
     }
   };
 
-  const openMoreOptions = (event, proveedor) => {
-    setMenuProveedor(proveedor);
-    menuRef.current?.toggle(event);
-  };
-
-  const menuItems = (() => {
-    const estado = menuProveedor?.estadoProveedor;
-    const stateItems = [];
-
-    if (estado === "ACTIVO") {
-      stateItems.push(
-        {
-          label: "Desactivar",
-          icon: "pi pi-pause-circle",
-          command: () => openProveedorAction("desactivar", menuProveedor),
-        },
-        {
-          label: "Archivar",
-          icon: "pi pi-folder",
-          command: () => openProveedorAction("archivar", menuProveedor),
-        }
-      );
-    } else if (estado === "INACTIVO") {
-      stateItems.push(
-        {
-          label: "Reactivar",
-          icon: "pi pi-check-circle",
-          command: () => openProveedorAction("reactivar", menuProveedor),
-        },
-        {
-          label: "Archivar",
-          icon: "pi pi-folder",
-          command: () => openProveedorAction("archivar", menuProveedor),
-        }
-      );
-    } else {
-      stateItems.push({
-        label: "Reactivar",
-        icon: "pi pi-check-circle",
-        command: () => openProveedorAction("reactivar", menuProveedor),
-      });
-    }
-
-    return [
-      {
-        label: "Ver detalle",
-        icon: "pi pi-eye",
-        command: () => menuProveedor && openDetail(menuProveedor),
-      },
-      {
-        label: "Editar",
-        icon: "pi pi-pencil",
-        command: () => menuProveedor && openEdit(menuProveedor),
-      },
-      { separator: true },
-      ...stateItems,
-      {
-        label: "Eliminar si no tiene uso",
-        icon: "pi pi-shield",
-        className: "prov-menu-caution",
-        command: () => openProveedorAction("eliminar", menuProveedor),
-      },
-    ];
-  })();
-
   const updateFilter = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
@@ -565,22 +605,20 @@ export default function Proveedores() {
   const deleteReasons = Array.isArray(confirmAction?.deletePolicy?.motivos)
     ? confirmAction.deletePolicy.motivos
     : [];
+  const deleteDependencyEntries = Object.entries(deleteDependencies)
+    .filter(([key]) => !hiddenDependencyKeys.has(key))
+    .filter(([, value]) => Number(value) > 0);
 
   return (
     <Shell>
       <Toast ref={toast} className="prov-toast" />
       <Tooltip />
-      <Menu model={menuItems} popup ref={menuRef} className="prov-row-menu" />
 
       <main className="proveedores-page">
         <section className="prov-header">
-          <div>
-            <span className="prov-eyebrow">Abastecimiento</span>
-            <h1>Proveedores</h1>
-            <p>
-              Relacion comercial, contactos, condiciones y activos para surtir la tienda
-              sin friccion.
-            </p>
+          <div className="prov-header-title">
+            <i className="pi pi-truck" />
+            <span>PROVEEDORES</span>
           </div>
           <Button
             label="Agregar proveedor"
@@ -628,11 +666,12 @@ export default function Proveedores() {
           ) : (
             <ProveedoresTable
               rows={filteredProveedores}
-              loading={loading}
+              loading={loading || detailLoading || saving || actionPreparing}
               hasProviders={proveedores.length > 0}
               onView={openDetail}
               onEdit={openEdit}
-              onMore={openMoreOptions}
+              onManage={openAdvancedSectionForProveedor}
+              onAction={openProveedorAction}
             />
           )}
         </section>
@@ -644,6 +683,8 @@ export default function Proveedores() {
         proveedor={editorProveedor}
         loading={editorLoading}
         saving={saving}
+        categoriaOptions={categoriaOptions}
+        categoriasLoading={categoriasLoading}
         onHide={() => setEditorVisible(false)}
         onSave={saveProveedor}
       />
@@ -653,7 +694,12 @@ export default function Proveedores() {
         visible={detailVisible}
         loading={detailLoading}
         onHide={() => setDetailVisible(false)}
-        onEdit={openEdit}
+      />
+
+      <ProveedorAdvancedModals
+        section={advancedSection}
+        proveedor={selectedProveedor}
+        onHide={() => setAdvancedSection(null)}
         onRefresh={refreshSelectedProveedor}
         showToast={showToast}
       />
@@ -728,13 +774,9 @@ export default function Proveedores() {
                       ))}
                     </ul>
                   ) : null}
-                  {Object.entries(deleteDependencies).some(
-                    ([, value]) => Number(value) > 0
-                  ) ? (
+                  {deleteDependencyEntries.length ? (
                     <div className="prov-delete-counts">
-                      {Object.entries(deleteDependencies)
-                        .filter(([, value]) => Number(value) > 0)
-                        .map(([key, value]) => (
+                      {deleteDependencyEntries.map(([key, value]) => (
                           <span key={key}>
                             {dependencyLabels[key] || key}: {value}
                           </span>

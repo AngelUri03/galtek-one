@@ -25,6 +25,9 @@ import com.galtekone.entity.ProveedorContactoEntity;
 import com.galtekone.entity.ProveedorDocumentoEntity;
 import com.galtekone.entity.ProveedorProductoEntity;
 import com.galtekone.entity.ProveedoresEntity;
+import com.galtekone.dto.proveedor.ProveedorActivoIncidenteRequest;
+import com.galtekone.dto.proveedor.ProveedorActivoEstadoRequest;
+import com.galtekone.dto.proveedor.ProveedorDocumentoVersionRequest;
 import com.galtekone.services.ProveedorActivoService;
 import com.galtekone.services.ProveedorAcuerdoService;
 import com.galtekone.services.ProveedorContactoService;
@@ -295,6 +298,20 @@ public class ProveedoresController {
         }
     }
 
+    @GetMapping(path = "/{id}/productos/{idProveedorProducto}/historial-costos", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getProductoHistorialCostos(
+            @RequestHeader(name = "user", required = true) String user,
+            @PathVariable Integer id,
+            @PathVariable Integer idProveedorProducto) {
+        long startTime = System.currentTimeMillis();
+        try {
+            Object resp = proveedorProductoService.readCostHistory(id, idProveedorProducto);
+            return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Historial de costos obtenido con exito");
+        } catch (Exception e) {
+            return handleError(user, startTime, "Error al obtener historial de costos: " + e.getMessage(), e);
+        }
+    }
+
     @GetMapping(path = "/{id}/activos", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getActivos(@RequestHeader(name = "user", required = true) String user, @PathVariable Integer id) {
         long startTime = System.currentTimeMillis();
@@ -328,6 +345,21 @@ public class ProveedoresController {
         }
     }
 
+    @PutMapping(path = "/{id}/activos/{idActivo}/estado", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> putEstadoActivo(
+            @RequestHeader(name = "user", required = true) String user,
+            @PathVariable Integer id,
+            @PathVariable Integer idActivo,
+            @RequestBody ProveedorActivoEstadoRequest request) {
+        long startTime = System.currentTimeMillis();
+        try {
+            Object resp = proveedorActivoService.changeState(id, idActivo, request, user);
+            return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Estado de activo actualizado con exito");
+        } catch (Exception e) {
+            return handleError(user, startTime, "Error al cambiar estado de activo: " + e.getMessage(), e);
+        }
+    }
+
     @DeleteMapping(path = "/{id}/activos/{idActivo}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> deleteActivo(@RequestHeader(name = "user", required = true) String user, @PathVariable Integer id, @PathVariable Integer idActivo) {
         long startTime = System.currentTimeMillis();
@@ -336,6 +368,21 @@ public class ProveedoresController {
             return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Activo de proveedor desactivado con exito");
         } catch (Exception e) {
             return handleError(user, startTime, "Error al desactivar activo: " + e.getMessage(), e);
+        }
+    }
+
+    @PostMapping(path = "/{id}/activos/{idActivo}/incidentes", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> postIncidenteActivo(
+            @RequestHeader(name = "user", required = true) String user,
+            @PathVariable Integer id,
+            @PathVariable Integer idActivo,
+            @RequestBody ProveedorActivoIncidenteRequest request) {
+        long startTime = System.currentTimeMillis();
+        try {
+            Object resp = proveedorActivoService.reportIncident(id, idActivo, request, user);
+            return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Incidente de activo registrado con exito");
+        } catch (Exception e) {
+            return handleError(user, startTime, "Error al registrar incidente de activo: " + e.getMessage(), e);
         }
     }
 
@@ -369,6 +416,21 @@ public class ProveedoresController {
             return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Documento de proveedor actualizado con exito");
         } catch (Exception e) {
             return handleError(user, startTime, "Error al actualizar documento: " + e.getMessage(), e);
+        }
+    }
+
+    @PutMapping(path = "/{id}/documentos/{idDocumento}/version", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> putDocumentoVersion(
+            @RequestHeader(name = "user", required = true) String user,
+            @PathVariable Integer id,
+            @PathVariable Integer idDocumento,
+            @RequestBody ProveedorDocumentoVersionRequest request) {
+        long startTime = System.currentTimeMillis();
+        try {
+            Object resp = proveedorDocumentoService.newVersion(id, idDocumento, request, user);
+            return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Nueva version de documento registrada con exito");
+        } catch (Exception e) {
+            return handleError(user, startTime, "Error al registrar nueva version de documento: " + e.getMessage(), e);
         }
     }
 

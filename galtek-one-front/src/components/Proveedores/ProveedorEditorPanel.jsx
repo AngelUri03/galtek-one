@@ -1,13 +1,34 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Button } from "primereact/button";
+import { Calendar } from "primereact/calendar";
 import { Checkbox } from "primereact/checkbox";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
+import { MultiSelect } from "primereact/multiselect";
 import { Sidebar } from "primereact/sidebar";
 import { Skeleton } from "primereact/skeleton";
+import {
+  CATEGORY_OTHER_VALUE,
+  LEAD_TIME_CONTEXT_OPTIONS,
+  LEAD_TIME_UNIT_OPTIONS,
+  MONTH_DAY_OPTIONS,
+  SCHEDULE_MODE_OPTIONS,
+  VISIT_DAY_MODE_OPTIONS,
+  WEEK_DAY_OPTIONS,
+  buildAddressText,
+  buildLeadTimeText,
+  buildScheduleText,
+  buildVisitDaysText,
+  dateToTimeString,
+  isValidEmail,
+  isValidPhone,
+  sanitizeEmailInput,
+  sanitizePhoneInput,
+  timeStringToDate,
+} from "./proveedorEditorUtils";
 import {
   ESTADO_PROVEEDOR_FORM_OPTIONS,
   MODALIDAD_OPTIONS,
@@ -41,6 +62,12 @@ const commercialFlags = [
 
 const rfcPattern = /^[A-Z&Ñ]{3,4}[0-9]{6}[A-Z0-9]{3}$/;
 
+const resolveCategoryValue = (value, options = []) => {
+  const category = String(value || "").trim();
+  if (!category) return "";
+  return options.some((option) => option.value === category) ? category : CATEGORY_OTHER_VALUE;
+};
+
 function normalizeSnapshot(form, deletedContactIds) {
   return JSON.stringify({ form, deletedContactIds });
 }
@@ -73,7 +100,7 @@ function FieldError({ value }) {
 
 function TextField({ label, value, onChange, error, className = "", ...props }) {
   return (
-    <label className={`prov-field ${className}`}>
+    <label className={`prov-field ${error ? "has-error" : ""} ${className}`}>
       <span>{label}</span>
       <InputText value={value || ""} onChange={(event) => onChange(event.target.value)} {...props} />
       <FieldError value={error} />
@@ -101,6 +128,8 @@ export default function ProveedorEditorPanel({
   proveedor,
   loading,
   saving,
+  categoriaOptions = [],
+  categoriasLoading = false,
   onHide,
   onSave,
 }) {
@@ -109,16 +138,32 @@ export default function ProveedorEditorPanel({
   const [deletedContactIds, setDeletedContactIds] = useState([]);
   const [errors, setErrors] = useState({});
   const [confirmClose, setConfirmClose] = useState(false);
+  const [categoryValue, setCategoryValue] = useState("");
 
   useEffect(() => {
     if (!visible || loading) return;
 
     const nextForm = createProveedorForm(proveedor);
     setForm(nextForm);
+    setCategoryValue(resolveCategoryValue(nextForm.categoriaPrincipal));
     setDeletedContactIds([]);
     setErrors({});
     setInitialSnapshot(normalizeSnapshot(nextForm, []));
   }, [loading, proveedor, visible]);
+
+  useEffect(() => {
+    if (!visible || loading) return;
+    if (categoryValue === CATEGORY_OTHER_VALUE && !form.categoriaPrincipal) return;
+    setCategoryValue(resolveCategoryValue(form.categoriaPrincipal, categoriaOptions));
+  }, [categoriaOptions, categoryValue, form.categoriaPrincipal, loading, visible]);
+
+  const categoryOptionsWithOther = useMemo(
+    () => [
+      ...categoriaOptions,
+      { label: "Otro", value: CATEGORY_OTHER_VALUE },
+    ],
+    [categoriaOptions]
+  );
 
   const isEditing = mode === "edit";
   const currentSnapshot = useMemo(
@@ -138,6 +183,25 @@ export default function ProveedorEditorPanel({
     setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
+  const updateAddressField = (field, value) => {
+    const nextValue =
+      field === "direccionCodigoPostal"
+        ? String(value || "").replace(/\D/g, "").slice(0, 5)
+        : value;
+
+    setForm((prev) => {
+      const next = {
+        ...prev,
+        [field]: nextValue,
+        direccionEsLegacy: false,
+      };
+      return {
+        ...next,
+        direccion: buildAddressText(next),
+      };
+    });
+  };
+
   const updateContact = (index, field, value) => {
     setForm((prev) => {
       const contactos = prev.contactos.map((contacto, contactoIndex) => {
@@ -151,6 +215,66 @@ export default function ProveedorEditorPanel({
       return { ...prev, contactos };
     });
     setErrors((prev) => ({ ...prev, [`contactos.${index}.${field}`]: "", contactos: "" }));
+  };
+
+  const updatePhoneContact = (index, field, value) => {
+    updateContact(index, field, sanitizePhoneInput(value));
+  };
+
+  const updateEmailContact = (index, value) => {
+    updateContact(index, "correo", sanitizeEmailInput(value));
+  };
+
+  const updateCategory = (value) => {
+    setCategoryValue(value);
+    updateField("categoriaPrincipal", value === CATEGORY_OTHER_VALUE ? "" : value);
+  };
+
+  const updateVisitSchedule = (field, value) => {
+    setForm((prev) => {
+      const next = { ...prev, [field]: value };
+      if (field === "diasVisitaModo") {
+        next.diasSemanaVisita = value === "SEMANA" ? prev.diasSemanaVisita : [];
+        next.diasMesVisita = value === "MES" ? prev.diasMesVisita : [];
+      }
+      next.diasVisitaEntrega = buildVisitDaysText(
+        next.diasVisitaModo,
+        next.diasSemanaVisita,
+        next.diasMesVisita
+      );
+      return next;
+    });
+  };
+
+  const updateSchedule = (field, value) => {
+    setForm((prev) => {
+      const next = { ...prev, [field]: value };
+      if (field === "horarioModo" && value === "SIN_HORARIO") {
+        next.horarioInicio = "";
+        next.horarioFin = "";
+      }
+      if (field === "horarioModo" && value === "HORA") {
+        next.horarioFin = "";
+      }
+      next.horarioHabitual = buildScheduleText(
+        next.horarioModo,
+        next.horarioInicio,
+        next.horarioFin
+      );
+      return next;
+    });
+  };
+
+  const updateLeadTime = (field, value) => {
+    setForm((prev) => {
+      const next = { ...prev, [field]: value };
+      next.tiempoEstimadoEntrega = buildLeadTimeText(
+        next.anticipacionCantidad,
+        next.anticipacionUnidad,
+        next.anticipacionContexto
+      );
+      return next;
+    });
   };
 
   const addContact = () => {
@@ -207,6 +331,17 @@ export default function ProveedorEditorPanel({
       if (!hasContactData(contacto)) return;
       if (!String(contacto.nombre || "").trim()) {
         nextErrors[`contactos.${index}.nombre`] = "Captura el nombre del contacto.";
+      }
+      if (!isValidPhone(contacto.telefono)) {
+        nextErrors[`contactos.${index}.telefono`] =
+          "Usa 10 digitos o formato + lada y 10 digitos.";
+      }
+      if (!isValidPhone(contacto.whatsapp)) {
+        nextErrors[`contactos.${index}.whatsapp`] =
+          "Usa 10 digitos o formato + lada y 10 digitos.";
+      }
+      if (!isValidEmail(contacto.correo)) {
+        nextErrors[`contactos.${index}.correo`] = "Captura un correo valido.";
       }
     });
 
@@ -273,12 +408,6 @@ export default function ProveedorEditorPanel({
         header={header}
       >
         <div className="prov-editor">
-          <div className="prov-editor-topbar">
-            <button className="prov-editor-close" type="button" onClick={requestClose}>
-              <i className="pi pi-times" />
-            </button>
-          </div>
-
           {loading ? (
             <LoadingEditor />
           ) : (
@@ -290,6 +419,7 @@ export default function ProveedorEditorPanel({
                     value={form.nombreProveedor}
                     onChange={(value) => updateField("nombreProveedor", value)}
                     error={errors.nombreProveedor}
+                    placeholder="Ej. Abarrotes Central"
                     className="prov-field-wide"
                     autoFocus
                   />
@@ -297,12 +427,15 @@ export default function ProveedorEditorPanel({
                     label="Razon social"
                     value={form.razonSocial}
                     onChange={(value) => updateField("razonSocial", value)}
+                    placeholder="Ej. Comercial Central SA de CV"
                   />
                   <TextField
                     label="RFC"
                     value={form.rfc}
                     onChange={(value) => updateField("rfc", value.toUpperCase())}
                     error={errors.rfc}
+                    placeholder="Ej. CEC010101AB1"
+                    maxLength={13}
                   />
                   <label className="prov-field">
                     <span>Tipo de proveedor</span>
@@ -310,26 +443,101 @@ export default function ProveedorEditorPanel({
                       value={form.tipoProveedor}
                       options={tipoOptions}
                       onChange={(event) => updateField("tipoProveedor", event.value)}
+                      placeholder="Selecciona tipo"
                     />
                   </label>
-                  <TextField
-                    label="Categoria principal"
-                    value={form.categoriaPrincipal}
-                    onChange={(value) => updateField("categoriaPrincipal", value)}
-                  />
+                  <label className="prov-field">
+                    <span>Categoria principal</span>
+                    <Dropdown
+                      value={categoryValue}
+                      options={categoryOptionsWithOther}
+                      onChange={(event) => updateCategory(event.value)}
+                      loading={categoriasLoading}
+                      placeholder={
+                        categoriasLoading ? "Cargando categorias" : "Selecciona categoria"
+                      }
+                      panelClassName="prov-category-panel"
+                      filter
+                    />
+                  </label>
+                  {categoryValue === CATEGORY_OTHER_VALUE ? (
+                    <TextField
+                      label="Otra categoria"
+                      value={form.categoriaPrincipal}
+                      onChange={(value) => updateField("categoriaPrincipal", value)}
+                      placeholder="Ej. Cremeria local"
+                    />
+                  ) : null}
                   <label className="prov-field">
                     <span>Estado</span>
                     <Dropdown
                       value={form.estadoProveedor}
                       options={ESTADO_PROVEEDOR_FORM_OPTIONS}
                       onChange={(event) => updateField("estadoProveedor", event.value)}
+                      placeholder="Selecciona estado"
                     />
                   </label>
-                  <TextField
-                    label="Direccion o zona"
-                    value={form.direccion}
-                    onChange={(value) => updateField("direccion", value)}
-                  />
+                  <div className="prov-address-block prov-field-wide">
+                    <div className="prov-address-title">Direccion o zona</div>
+                    <div className="prov-address-grid">
+                      <TextField
+                        label="Calle o avenida"
+                        value={form.direccionCalle}
+                        onChange={(value) => updateAddressField("direccionCalle", value)}
+                        placeholder="Ej. Av. Central"
+                      />
+                      <TextField
+                        label="No. exterior"
+                        value={form.direccionNumeroExterior}
+                        onChange={(value) =>
+                          updateAddressField("direccionNumeroExterior", value)
+                        }
+                        placeholder="Ej. 120"
+                      />
+                      <TextField
+                        label="No. interior"
+                        value={form.direccionNumeroInterior}
+                        onChange={(value) =>
+                          updateAddressField("direccionNumeroInterior", value)
+                        }
+                        placeholder="Ej. Local 4"
+                      />
+                      <TextField
+                        label="Colonia o zona"
+                        value={form.direccionColonia}
+                        onChange={(value) => updateAddressField("direccionColonia", value)}
+                        placeholder="Ej. Centro"
+                      />
+                      <TextField
+                        label="Municipio o ciudad"
+                        value={form.direccionMunicipio}
+                        onChange={(value) => updateAddressField("direccionMunicipio", value)}
+                        placeholder="Ej. Queretaro"
+                      />
+                      <TextField
+                        label="Estado"
+                        value={form.direccionEstado}
+                        onChange={(value) => updateAddressField("direccionEstado", value)}
+                        placeholder="Ej. Queretaro"
+                      />
+                      <TextField
+                        label="Codigo postal"
+                        value={form.direccionCodigoPostal}
+                        onChange={(value) =>
+                          updateAddressField("direccionCodigoPostal", value)
+                        }
+                        placeholder="Ej. 76000"
+                        inputMode="numeric"
+                        maxLength={5}
+                      />
+                      <TextField
+                        label="Referencia"
+                        value={form.direccionReferencia}
+                        onChange={(value) => updateAddressField("direccionReferencia", value)}
+                        placeholder="Ej. Nave A-12, atras de cremeria"
+                      />
+                    </div>
+                  </div>
                   <label className="prov-field prov-field-wide">
                     <span>Notas internas</span>
                     <InputTextarea
@@ -337,6 +545,7 @@ export default function ProveedorEditorPanel({
                       onChange={(event) => updateField("notasInternas", event.target.value)}
                       autoResize
                       rows={2}
+                      placeholder="Ej. Atiende rapido por WhatsApp, confirmar disponibilidad antes de pedir."
                     />
                   </label>
                 </div>
@@ -370,6 +579,7 @@ export default function ProveedorEditorPanel({
                           value={contacto.nombre}
                           onChange={(value) => updateContact(index, "nombre", value)}
                           error={errors[`contactos.${index}.nombre`]}
+                          placeholder="Ej. Martha Gomez"
                         />
                         <label className="prov-field">
                           <span>Rol</span>
@@ -377,27 +587,41 @@ export default function ProveedorEditorPanel({
                             value={contacto.rol}
                             options={ROL_CONTACTO_OPTIONS}
                             onChange={(event) => updateContact(index, "rol", event.value)}
+                            placeholder="Selecciona rol"
                           />
                         </label>
                         <TextField
                           label="Telefono"
                           value={contacto.telefono}
-                          onChange={(value) => updateContact(index, "telefono", value)}
+                          onChange={(value) => updatePhoneContact(index, "telefono", value)}
+                          error={errors[`contactos.${index}.telefono`]}
+                          placeholder="5551234567 o +525551234567"
+                          inputMode="tel"
+                          maxLength={14}
                         />
                         <TextField
                           label="WhatsApp"
                           value={contacto.whatsapp}
-                          onChange={(value) => updateContact(index, "whatsapp", value)}
+                          onChange={(value) => updatePhoneContact(index, "whatsapp", value)}
+                          error={errors[`contactos.${index}.whatsapp`]}
+                          placeholder="5551234567 o +525551234567"
+                          inputMode="tel"
+                          maxLength={14}
                         />
                         <TextField
                           label="Correo"
                           value={contacto.correo}
-                          onChange={(value) => updateContact(index, "correo", value)}
+                          onChange={(value) => updateEmailContact(index, value)}
+                          error={errors[`contactos.${index}.correo`]}
+                          placeholder="ventas@proveedor.com"
+                          inputMode="email"
+                          maxLength={120}
                         />
                         <TextField
                           label="Notas"
                           value={contacto.notas}
                           onChange={(value) => updateContact(index, "notas", value)}
+                          placeholder="Ej. Responde mejor por la tarde"
                         />
                       </div>
                     </div>
@@ -422,26 +646,137 @@ export default function ProveedorEditorPanel({
                       onChange={(event) =>
                         updateField("modalidadAbastecimiento", event.value)
                       }
+                      placeholder="Selecciona modalidad"
                     />
                   </label>
-                  <TextField
-                    label="Dias de visita o entrega"
-                    value={form.diasVisitaEntrega}
-                    onChange={(value) => updateField("diasVisitaEntrega", value)}
-                    placeholder="Lunes, miercoles y viernes"
-                  />
-                  <TextField
-                    label="Horario habitual"
-                    value={form.horarioHabitual}
-                    onChange={(value) => updateField("horarioHabitual", value)}
-                    placeholder="9:00 a 13:00"
-                  />
-                  <TextField
-                    label="Tiempo estimado de entrega"
-                    value={form.tiempoEstimadoEntrega}
-                    onChange={(value) => updateField("tiempoEstimadoEntrega", value)}
-                    placeholder="24 horas"
-                  />
+                  <label className="prov-field">
+                    <span>Frecuencia de visita</span>
+                    <Dropdown
+                      value={form.diasVisitaModo}
+                      options={VISIT_DAY_MODE_OPTIONS}
+                      onChange={(event) => updateVisitSchedule("diasVisitaModo", event.value)}
+                      placeholder="Selecciona frecuencia"
+                    />
+                  </label>
+                  <label className="prov-field prov-field-wide">
+                    <span>
+                      {form.diasVisitaModo === "MES"
+                        ? "Dias del mes"
+                        : "Dias de visita o entrega"}
+                    </span>
+                    <MultiSelect
+                      value={
+                        form.diasVisitaModo === "MES"
+                          ? form.diasMesVisita
+                          : form.diasSemanaVisita
+                      }
+                      options={
+                        form.diasVisitaModo === "MES"
+                          ? MONTH_DAY_OPTIONS
+                          : WEEK_DAY_OPTIONS
+                      }
+                      onChange={(event) =>
+                        updateVisitSchedule(
+                          form.diasVisitaModo === "MES"
+                            ? "diasMesVisita"
+                            : "diasSemanaVisita",
+                          event.value
+                        )
+                      }
+                      display="chip"
+                      maxSelectedLabels={4}
+                      showSelectAll={false}
+                      placeholder={
+                        form.diasVisitaModo === "MES"
+                          ? "Selecciona dias del mes"
+                          : "Lunes, Miercoles, Viernes"
+                      }
+                      panelClassName="prov-select-panel"
+                    />
+                  </label>
+                  <div className="prov-field prov-field-wide">
+                    <span>Horario habitual</span>
+                    <div className="prov-time-box">
+                      <Dropdown
+                        value={form.horarioModo}
+                        options={SCHEDULE_MODE_OPTIONS}
+                        onChange={(event) => updateSchedule("horarioModo", event.value)}
+                        placeholder="Selecciona horario"
+                      />
+                      {form.horarioModo !== "SIN_HORARIO" ? (
+                        <div
+                          className={`prov-time-range ${
+                            form.horarioModo === "HORA" ? "is-single" : ""
+                          }`}
+                        >
+                          <Calendar
+                            value={timeStringToDate(form.horarioInicio)}
+                            onChange={(event) =>
+                              updateSchedule("horarioInicio", dateToTimeString(event.value))
+                            }
+                            timeOnly
+                            hourFormat="24"
+                            showIcon
+                            icon="pi pi-clock"
+                            placeholder="09:00"
+                            className="prov-time-calendar"
+                            panelClassName="prov-time-panel"
+                          />
+                          {form.horarioModo === "RANGO" ? (
+                            <>
+                              <span className="prov-time-separator">a</span>
+                              <Calendar
+                                value={timeStringToDate(form.horarioFin)}
+                                onChange={(event) =>
+                                  updateSchedule("horarioFin", dateToTimeString(event.value))
+                                }
+                                timeOnly
+                                hourFormat="24"
+                                showIcon
+                                icon="pi pi-clock"
+                                placeholder="13:00"
+                                className="prov-time-calendar"
+                                panelClassName="prov-time-panel"
+                              />
+                            </>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div className="prov-field prov-field-wide">
+                    <span>Anticipacion requerida para recibir el pedido</span>
+                    <div className="prov-lead-grid">
+                      <InputNumber
+                        value={form.anticipacionCantidad}
+                        onValueChange={(event) =>
+                          updateLeadTime("anticipacionCantidad", event.value)
+                        }
+                        min={0}
+                        max={365}
+                        placeholder="Ej. 24"
+                      />
+                      <Dropdown
+                        value={form.anticipacionUnidad}
+                        options={LEAD_TIME_UNIT_OPTIONS}
+                        onChange={(event) =>
+                          updateLeadTime("anticipacionUnidad", event.value)
+                        }
+                        placeholder="Unidad"
+                      />
+                      <Dropdown
+                        value={form.anticipacionContexto}
+                        options={LEAD_TIME_CONTEXT_OPTIONS}
+                        onChange={(event) =>
+                          updateLeadTime("anticipacionContexto", event.value)
+                        }
+                        placeholder="Contexto"
+                      />
+                    </div>
+                    <small className="prov-field-hint">
+                      Define si se pide horas o dias antes de la entrega, o si es espera en mostrador.
+                    </small>
+                  </div>
                   <label className="prov-field">
                     <span>Pedido minimo</span>
                     <InputNumber
@@ -451,6 +786,7 @@ export default function ProveedorEditorPanel({
                       currency="MXN"
                       locale="es-MX"
                       min={0}
+                      placeholder="$0.00"
                     />
                     <FieldError value={errors.pedidoMinimo} />
                   </label>
@@ -463,6 +799,7 @@ export default function ProveedorEditorPanel({
                       currency="MXN"
                       locale="es-MX"
                       min={0}
+                      placeholder="$0.00"
                     />
                     <FieldError value={errors.costoEnvio} />
                   </label>
@@ -495,18 +832,20 @@ export default function ProveedorEditorPanel({
                     }
                     autoResize
                     rows={2}
+                    placeholder="Ej. Pedir antes de mediodia para recibir al dia siguiente."
                   />
                 </label>
               </Section>
 
               <Section eyebrow="04" title="Condiciones comerciales">
-                <div className="prov-form-grid">
+                <div className="prov-form-grid prov-commercial-grid">
                   <label className="prov-field">
                     <span>Condicion de pago</span>
                     <Dropdown
                       value={form.formaPagoPrincipal}
                       options={pagoOptions}
                       onChange={(event) => updateField("formaPagoPrincipal", event.value)}
+                      placeholder="Selecciona pago"
                     />
                   </label>
                   <label className="prov-field">
@@ -515,6 +854,8 @@ export default function ProveedorEditorPanel({
                       value={form.diasCredito}
                       onValueChange={(event) => updateField("diasCredito", event.value)}
                       min={0}
+                      max={365}
+                      placeholder="Ej. 7"
                       disabled={!form.manejaCredito}
                     />
                     <FieldError value={errors.diasCredito} />
@@ -528,6 +869,7 @@ export default function ProveedorEditorPanel({
                       currency="MXN"
                       locale="es-MX"
                       min={0}
+                      placeholder="$0.00"
                       disabled={!form.manejaCredito}
                     />
                     <FieldError value={errors.limiteCredito} />
@@ -541,7 +883,7 @@ export default function ProveedorEditorPanel({
                   </label>
                 </div>
 
-                <div className="prov-chip-grid">
+                <div className="prov-chip-grid prov-commercial-flags">
                   {commercialFlags.map((flag) => (
                     <label
                       className={`prov-check-chip ${form[flag.field] ? "is-selected" : ""}`}
@@ -563,6 +905,7 @@ export default function ProveedorEditorPanel({
                     onChange={(event) => updateField("notasComerciales", event.target.value)}
                     autoResize
                     rows={2}
+                    placeholder="Ej. Cambia producto caducado solo con ticket y empaque cerrado."
                   />
                 </label>
               </Section>
@@ -572,7 +915,6 @@ export default function ProveedorEditorPanel({
           <div className="prov-editor-footer">
             <Button
               label="Cancelar"
-              icon="pi pi-times"
               className="p-button-text prov-text-btn"
               onClick={requestClose}
               disabled={saving}

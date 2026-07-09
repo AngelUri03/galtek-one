@@ -4,7 +4,7 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 
-export function AdvancedSection({ title, subtitle, icon, onAdd, addLabel, children }) {
+export function AdvancedSection({ title, subtitle, icon, onAdd, addLabel, addDisabled = false, children }) {
   return (
     <section className="prov-adv-section">
       <div className="prov-adv-section-head">
@@ -23,6 +23,7 @@ export function AdvancedSection({ title, subtitle, icon, onAdd, addLabel, childr
             icon="pi pi-plus"
             className="prov-soft-btn"
             onClick={onAdd}
+            disabled={addDisabled}
           />
         ) : null}
       </div>
@@ -40,7 +41,7 @@ export function AdvancedEmpty({ text }) {
   );
 }
 
-export function AdvancedCardActions({ onEdit, onArchive, archiveLabel = "Archivar", extra }) {
+export function AdvancedCardActions({ onEdit, onArchive, archiveLabel = "Archivar", extra, disabled = false }) {
   return (
     <div className="prov-adv-card-actions">
       {extra}
@@ -49,6 +50,7 @@ export function AdvancedCardActions({ onEdit, onArchive, archiveLabel = "Archiva
           icon="pi pi-pencil"
           className="prov-row-action"
           onClick={onEdit}
+          disabled={disabled}
           aria-label="Editar"
           tooltip="Editar"
           tooltipOptions={{ position: "top" }}
@@ -59,6 +61,7 @@ export function AdvancedCardActions({ onEdit, onArchive, archiveLabel = "Archiva
           icon="pi pi-ban"
           className="prov-row-action"
           onClick={onArchive}
+          disabled={disabled}
           aria-label={archiveLabel}
           tooltip={archiveLabel}
           tooltipOptions={{ position: "top" }}
@@ -109,6 +112,8 @@ export function ConfirmActionDialog({
       modal
       draggable={false}
       dismissableMask
+      focusOnShow={false}
+      closeButtonProps={{ tabIndex: -1 }}
       className="prov-confirm-dialog"
       style={{ width: "32rem" }}
       footer={
