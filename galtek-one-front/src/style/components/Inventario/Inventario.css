@@ -5,27 +5,69 @@
 :root {
   /* Variables Glassmorphism */
   --glass-bg: rgba(255, 255, 255, 0.45);
-  --glass-bg-hover: rgba(255, 255, 255, 0.65);
   --glass-border: 1px solid rgba(255, 255, 255, 0.6);
   --glass-blur: blur(16px);
   --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.05);
   --inv-brand: #0a7463;
 }
-
 /* ======================== */
-/* PÁGINA                   */
+/* PÁGINA (Layout Fijo)     */
 /* ======================== */
 .inv-page {
     display: flex;
     flex-direction: column;
-    width: calc(100% - 3rem); /* Restamos el margen que queremos (1.5rem de cada lado) */
-    height: calc(100vh - 2rem); /* Restamos margen superior e inferior */
-    margin: 1rem 1.5rem; /* Margen superior/inferior de 1rem, laterales de 1.5rem */
-    
-    /* Mantenemos el bloqueo de scroll general */
-    overflow: hidden; 
-    
+    width: calc(100% - 3rem);
+    height: 100vh;
+    margin: 0 1.5rem;
+    overflow: hidden; /* Congela el scroll general */
     animation: fadeIn 0.4s ease-in-out;
+}
+
+/* Efecto luces desenfocadas atrás del cristal */
+.inv-page::before,
+.inv-page::after {
+  content: ''; position: absolute; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.6; pointer-events: none;
+}
+.inv-page::before { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #bae6fd; }
+.inv-page::after { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #bbf7d0; }
+
+.inv-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1.5rem; /* Ajustado para que sea delgado */
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: var(--glass-border);
+    border-radius: 12px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.inv-table {
+    background: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 12px;
+}
+
+.inv-table .p-datatable-thead > tr > th,
+.inv-table .p-datatable-tbody > tr {
+    background: transparent !important;
+}
+
+.text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+    display: block;
+}
+
+/* Forzar transparencia de celdas */
+.p-datatable .p-datatable-wrapper, 
+.p-datatable .p-datatable-table {
+    background: transparent !important;
 }
 /* Efecto luces desenfocadas atrás del cristal */
 .inv-page::before,
@@ -36,20 +78,19 @@
 .inv-page::after { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #bbf7d0; }
 
 /* ========================================== */
-/* HEADER PRINCIPAL TIPO REPORTES             */
+/* HEADER PRINCIPAL                         */
 /* ========================================== */
-
 .inv-header-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    /* Reducimos el padding: 0.5rem arriba/abajo, 1.5rem a los lados */
-    padding: 0.5rem 1.5rem; 
-    background-color: var(--surface-card, #ffffff);
+    padding: 0.5rem 1.5rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: var(--glass-border);
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-    margin-bottom: 1.5rem;
     margin-top: 1rem;
+    margin-bottom: 1rem;
     flex-wrap: wrap;
     gap: 1rem;
 }
@@ -57,12 +98,10 @@
 .inv-header-title { 
   font-size: 1.15rem; 
   font-weight: 800; 
-  letter-spacing: 0.5px; 
   color: var(--inv-brand); 
   display: flex; 
   align-items: center; 
   gap: 0.8rem; 
-  margin: 0; 
   text-transform: uppercase; 
 }
 
@@ -71,9 +110,8 @@
 }
 
 /* ========================================== */
-/* TOOLBAR Y BUSCADOR MEJORADO (LIQUID GLASS) */
+/* TOOLBAR Y BUSCADOR (LIQUID GLASS)        */
 /* ========================================== */
-
 .inv-toolbar-glass {
   display: flex; 
   gap: 15px; 
@@ -81,7 +119,6 @@
   justify-content: space-between;
   background: var(--glass-bg); 
   backdrop-filter: var(--glass-blur); 
-  -webkit-backdrop-filter: var(--glass-blur);
   border: var(--glass-border); 
   box-shadow: var(--glass-shadow);
   padding: 16px 24px; 
@@ -89,27 +126,30 @@
   margin-bottom: 20px;
 }
 
-.inv-search-wrapper { 
-  flex: 1; 
-  max-width: 600px; 
+.inv-search-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 1900px;
+    display: flex;       /* Agregamos esto */
+    align-items: center; /* Alineación vertical perfecta */
 }
 
-.inv-search-wrapper .pi { 
-  color: var(--inv-brand); 
-  font-size: 1.1rem; 
+.inv-search-wrapper .pi-search {
+    position: absolute;
+    left: 1.2rem;
+    /* Quitamos el top y transform y dejamos que el flex del wrapper lo alinee */
+    pointer-events: none; 
+    color: var(--inv-brand);
 }
 
 .inv-search-input {
-  width: 100% !important; 
-  height: 46px !important; 
-  border-radius: 14px !important;
-  padding-left: 2.8rem !important; 
-  font-size: 0.95rem !important;
-  background: rgba(255, 255, 255, 0.65) !important; 
-  color: #0f172a !important;
-  border: 1px solid rgba(255, 255, 255, 0.9) !important;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.02) !important; 
-  transition: all 0.2s ease;
+    width: 100% !important; 
+    height: 46px !important; 
+    border-radius: 14px !important;
+    padding-left: 3.2rem !important;
+    /* Aseguramos que el contenido interno también esté centrado */
+    display: flex;
+    align-items: center;
 }
 
 .inv-search-input:focus {
@@ -261,17 +301,40 @@
 /* =========================== */
 /* TABLA INVENTARIO            */
 /* =========================== */
-
 .inv-table {
-  font-family: "Kodchasan", sans-serif !important;
-  /* Contenedor principal de la tabla en cristal */
-  background: var(--glass-bg) !important;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--glass-border);
-  border-radius: 18px;
-  box-shadow: var(--glass-shadow);
-  padding: 10px;
+    background: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Forzar transparencia total en capas internas */
+.p-datatable .p-datatable-wrapper, 
+.p-datatable .p-datatable-table,
+.inv-table .p-datatable-thead > tr > th,
+.inv-table .p-datatable-tbody > tr {
+    background: transparent !important;
+}
+
+.text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+    display: block;
+}
+
+
+/* Ajuste para que las filas tengan un ligero fondo al pasar el mouse */
+.inv-table .p-datatable-tbody > tr:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Asegurar que el paginador también sea transparente */
+.inv-table .p-paginator {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .inv-table .p-datatable-wrapper {
@@ -289,14 +352,12 @@
   border-bottom: 1px solid rgba(255,255,255,0.6) !important;
 }
 
-.inv-table .p-datatable-tbody > tr > td,
-.inv-table .p-datatable-frozen-view .p-datatable-tbody > tr > td {
-  background: transparent !important;
-  padding: 10px 16px !important;
-  font-size: 0.9rem;
-  border: none !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.4) !important;
-}
+/* Esto fuerza que todo el contenido de las celdas esté alineado al centro verticalmente */
+.inv-table .p-datatable-tbody > tr > td {
+    vertical-align: middle !important;
+    padding: 0.5rem 1rem !important; /* Ajusta este padding si quieres que se vea más delgado */
+    display: table-cell;
+}                                   
 
 .inv-table .p-datatable-tbody > tr:hover > td {
   background: rgba(255, 255, 255, 0.3) !important;
@@ -320,10 +381,8 @@
 /* ========================== */
 /* TABLA INTERNA (LOTES)      */
 /* ========================== */
-
 .inv-lotes-table {
-  font-family: "Kodchasan", sans-serif;
-  background: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.3) !important;
   border-radius: 10px;
   overflow: hidden;
 }
@@ -390,18 +449,17 @@
   gap: 0.5rem;
 }
 
+/* ========================== */
+/* BOTONES DE ACCIÓN          */
+/* ========================== */
 .inv-action-btn {
-  background: rgba(255,255,255,0.5) !important;
-  border: var(--glass-border) !important;
-  width: 34px; height: 34px; border-radius: 10px;
-  color: var(--inv-brand) !important;
-  transition: all 0.2s ease;
-  padding: 0 !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    background: rgba(255, 255, 255, 0.4) !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    width: 34px; height: 34px; border-radius: 10px;
+    color: var(--inv-brand) !important;
 }
-
 .inv-action-btn:hover {
   background: #fff !important;
   transform: translateY(-2px);
@@ -424,13 +482,13 @@
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15) !important;
   border-radius: 14px;
 }
-
-/* Suponiendo que el sidebar tiene la clase .layout-sidebar */
+/* ========================== */
+/* AJUSTES GLOBALES           */
+/* ========================== */
 .layout-sidebar {
     display: none !important;
 }
 
-/* Y quizás necesites quitarle el margen izquierdo al contenedor principal del Shell */
 .layout-main-container {
     margin-left: 0 !important;
 }

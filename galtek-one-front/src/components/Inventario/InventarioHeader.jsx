@@ -32,7 +32,7 @@ export default function InventarioHeader({ rows = [], getStockEstado }) {
 
   return (
     <div className="inv-header">
-      <div className="inv-title">Inventario</div>
+      <div className="inv-title"></div>
 
       <div className="inv-counters">
         <span className="inv-tip-total">
