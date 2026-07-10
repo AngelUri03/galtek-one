@@ -22,11 +22,10 @@ p, span, label, button, input, select {
   font-weight: 400;
 }
 
-/* 
-  FONDO PRINCIPAL: Aquí mantenemos el gradiente azul/verde 
+/* FONDO PRINCIPAL: Aquí mantenemos el gradiente azul/verde 
 */
 .compras-workspace-wrapper {
-  padding: 0.5rem 2rem 2rem 2rem; 
+  padding: 1rem 2rem 2rem 2rem; /* <-- Tu padding original respetado */
   max-width: 1500px;
   margin: 0 auto;
   min-height: 100vh;
@@ -42,36 +41,59 @@ p, span, label, button, input, select {
   color: #333;
 }
 
-/* --- TABS: BLANCOS SÓLIDOS PARA QUE NO SE VEAN AZULES --- */
+/* ==========================================================================
+   TABS: ESTILO BARRA FLOTANTE (TIPO INVENTARIO)
+   ========================================================================== */
 .compras-tabs-container .p-tabview-nav {
-  border-bottom: 2px solid #e4e4e4;
   background: #ffffff !important; 
-  border-radius: 0.5rem 0.5rem 0 0; /* Un pequeño redondeo para que se vea limpio */
+  border-radius: 12px !important; 
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03) !important; 
+  border: none !important; 
+  padding: 0.5rem 1rem !important; 
+  margin-bottom: 1.5rem !important; 
+  display: flex;
+  gap: 0.5rem; 
 }
 
+/* Estilo de cada botón (pestaña) inactivo */
+.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link {
+  color: #0a7463 !important; /* <-- Verde oscuro tipo Inventario */
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px !important; 
+  transition: all 0.2s ease-in-out;
+  background: transparent !important;
+  border: 0 none !important; /* <-- Elimina bordes ocultos */
+  outline: none !important;
+  box-shadow: none !important;
+  font-weight: 600;
+}
+
+/* Efecto Hover para pestañas inactivas */
+.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link:not(.p-disabled):hover {
+  background: rgba(10, 116, 99, 0.08) !important; 
+  color: #0a7463 !important;
+}
+
+/* Estilo de la pestaña ACTIVA */
 .compras-tabs-container .p-tabview-nav li.p-highlight .p-tabview-nav-link {
   color: #00A38B !important;
-  border-color: #00A38B !important;
+  background: rgba(0, 163, 139, 0.1) !important; 
   font-weight: 700;
-  background: #ffffff !important;
+  border: 0 none !important; /* <-- Elimina recuadro fantasma */
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link {
-  color: #666;
-  padding: 1rem 1.5rem;
-  transition: all 0.2s ease-in-out;
-  background: #ffffff !important;
+/* Quitar el anillo azul de enfoque por defecto del navegador y PrimeReact */
+.compras-tabs-container .p-tabview-nav li,
+.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link,
+.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link:focus,
+.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link:focus {
-  box-shadow: 0 0 0 0.2rem rgba(0, 163, 139, 0.2) !important;
-}
-
-.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link:not(.p-disabled):hover {
-  border-color: #00A38B;
-  color: #00A38B;
-}
-
+/* Panel de contenido */
 .compras-tabs-container .p-tabview-panels {
   background: transparent !important;
   padding: 0 !important;
@@ -81,12 +103,15 @@ p, span, label, button, input, select {
   margin-right: 0.5rem;
 }
 
-/* 
-  TARJETAS PRINCIPALES: Eliminamos el borde blanco molesto y mantenemos el volumen 
+/* ==========================================================================
+   TARJETAS PRINCIPALES Y CONTENEDORES INTERNOS
+   ========================================================================== */
+
+/* TARJETAS PRINCIPALES: Eliminamos el borde blanco molesto y mantenemos el volumen 
 */
 .compras-workspace-wrapper .nc-card {
   background: linear-gradient(145deg, #ffffff 0%, #f4f9fa 100%) !important;
-  border: none !important; /* <-- Esto elimina la línea blanca de la imagen 45cfe5.png */
+  border: none !important; 
   outline: none !important;
   border-radius: 1.25rem !important; 
   box-shadow: 
@@ -94,7 +119,7 @@ p, span, label, button, input, select {
     inset 0 -3px 10px rgba(220, 230, 240, 0.5), 
     0 8px 24px rgba(0, 0, 0, 0.04) !important;
   transition: all 0.3s ease;
-  overflow: hidden; /* Asegura que nada se desborde por los bordes redondeados */
+  overflow: hidden; 
 }
 
 .compras-workspace-wrapper .nc-card:hover {
@@ -121,22 +146,18 @@ p, span, label, button, input, select {
   margin-bottom: 1rem;
 }
 
-/* 
-  CONTENEDORES INTERNOS: 
-  Los hacemos completamente transparentes para que hereden 
-  el degradado y el volumen de la .nc-card sin cortes ni bordes.
-*/
+/* CONTENEDORES INTERNOS */
 .compras-workspace-wrapper .p-stepper,
 .compras-workspace-wrapper .p-stepper-panels,
 .compras-workspace-wrapper .p-stepper-panel,
 .compras-workspace-wrapper .sugerencia-panel {
   background: transparent !important;
   border: none !important;
-  box-shadow: none !important; /* Quitamos la sombra doble */
+  box-shadow: none !important; 
   outline: none !important;
 }
 
-/* Opcional: Aseguramos que los fondos de las cabeceras del stepper de PrimeReact también sean transparentes */
+/* Aseguramos que los fondos de las cabeceras del stepper también sean transparentes */
 .compras-workspace-wrapper .p-stepper .p-stepper-nav {
   background: transparent !important;
   border: none !important;
@@ -150,7 +171,7 @@ p, span, label, button, input, select {
 .compras-workspace-wrapper .p-stepper-panels,
 .compras-workspace-wrapper .p-stepper-panel {
   overflow-x: hidden !important;
-  min-width: 0 !important; /* Fix crucial para contenedores Grid/Flex */
+  min-width: 0 !important; 
 }
 
 /* 2. Evitar el scroll interno de la tabla y forzar ajuste (Scroll interior) */
@@ -165,7 +186,7 @@ p, span, label, button, input, select {
   table-layout: auto !important;
 }
 
-/* Opcional: Permitir que el texto largo en la tabla baje de línea en lugar de empujar */
+/* Permitir que el texto largo en la tabla baje de línea en lugar de empujar */
 .compras-workspace-wrapper .p-datatable .p-datatable-tbody > tr > td {
   white-space: normal !important;
   word-wrap: break-word !important;
