@@ -179,6 +179,14 @@ VALUES
 (11, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', NULL, 'Calle Palma 5', 'natalia.soto@example.com', 'Natalia Soto', '5552000011', 1),
 (12, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', NULL, 'Av. Central 30', 'adrian.luna@example.com', 'Adrian Luna', '5552000012', 1);
 
+UPDATE Clientes SET alias = 'Mari', tipo_cliente = 'PERSONA', estado_cliente = 'ACTIVO', whatsapp = '5552000001', direccion_calle = 'Calle Fresno', direccion_numero_exterior = '14', direccion_colonia = 'Centro', direccion_municipio = 'Queretaro', direccion_estado = 'Queretaro', direccion_codigo_postal = '76000', direccion_referencia = 'Casa blanca frente a la tienda', notas_internas = 'Prefiere WhatsApp para pedidos' WHERE id_cliente = 1;
+UPDATE Clientes SET alias = 'Don Carlos', tipo_cliente = 'NEGOCIO', estado_cliente = 'ACTIVO', whatsapp = '5552000002', direccion_calle = 'Av. Norte', direccion_numero_exterior = '221', direccion_colonia = 'Industrial', direccion_municipio = 'Queretaro', direccion_estado = 'Queretaro', direccion_codigo_postal = '76130', notas_internas = 'Compra para negocio y suele pedir factura', rfc = 'MEMC800101AB1', razon_social = 'Carlos Mendez Comercio', codigo_postal_fiscal = '76130', correo_fiscal = 'facturas.carlos@example.com', regimen_fiscal = '612', uso_cfdi = 'G03' WHERE id_cliente = 2;
+UPDATE Clientes SET alias = 'Lucy', tipo_cliente = 'PERSONA', estado_cliente = 'INACTIVO', estatus = 0, whatsapp = '5552000003', direccion_calle = 'Privada Olivo', direccion_numero_exterior = '9', direccion_colonia = 'Jardines', direccion_municipio = 'Queretaro', direccion_estado = 'Queretaro', direccion_codigo_postal = '76040', notas_internas = 'No compra desde hace varias semanas' WHERE id_cliente = 3;
+UPDATE Clientes SET tipo_cliente = 'PERSONA', estado_cliente = 'ARCHIVADO', estatus = 0, whatsapp = '5552000004', direccion_calle = 'Calle Roble', direccion_numero_exterior = '51', direccion_colonia = 'La Cruz', direccion_municipio = 'Queretaro', direccion_estado = 'Queretaro', direccion_codigo_postal = '76020', notas_internas = 'Cliente archivado para consulta historica' WHERE id_cliente = 4;
+UPDATE Clientes SET alias = 'Pao', tipo_cliente = 'PERSONA', estado_cliente = 'ACTIVO', whatsapp = '5552000005', direccion_calle = 'Av. Reforma', direccion_numero_exterior = '88', direccion_colonia = 'Centro', direccion_municipio = 'Queretaro', direccion_estado = 'Queretaro', direccion_codigo_postal = '76000', notas_internas = 'Pide ticket en cada compra' WHERE id_cliente = 5;
+UPDATE Clientes SET tipo_cliente = 'NEGOCIO', estado_cliente = 'ACTIVO', whatsapp = '5552000006', direccion_calle = 'Calle Mango', direccion_numero_exterior = '102', direccion_colonia = 'Mercado Sur', direccion_municipio = 'Queretaro', direccion_estado = 'Queretaro', direccion_codigo_postal = '76150', rfc = 'NARR810101XY1', razon_social = 'Ricardo Nava Abarrotes', codigo_postal_fiscal = '76150', correo_fiscal = 'ricardo.factura@example.com', uso_cfdi = 'G03', notas_internas = 'Compra para negocio' WHERE id_cliente = 6;
+UPDATE Clientes SET tipo_cliente = 'PERSONA', estado_cliente = 'ACTIVO' WHERE id_cliente IN (7,8,9,10,11,12);
+
 DROP TABLE IF EXISTS seed_productos;
 CREATE TEMP TABLE seed_productos (
   id_producto INTEGER PRIMARY KEY,
@@ -937,10 +945,14 @@ UPDATE ProveedorContacto SET fecha_creacion = fecha_creacion || '.000' WHERE fec
 UPDATE ProveedorContacto SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
 UPDATE ProveedorActivo SET fecha_creacion = fecha_creacion || '.000' WHERE fecha_creacion IS NOT NULL AND LENGTH(fecha_creacion) = 19;
 UPDATE ProveedorActivo SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
+UPDATE ProveedorActivo SET fecha_entrega = SUBSTR(fecha_entrega, 1, 10) WHERE fecha_entrega IS NOT NULL AND LENGTH(fecha_entrega) > 10;
+UPDATE ProveedorActivo SET fecha_regreso = SUBSTR(fecha_regreso, 1, 10) WHERE fecha_regreso IS NOT NULL AND LENGTH(fecha_regreso) > 10;
 UPDATE ProveedorDocumento SET fecha_creacion = fecha_creacion || '.000' WHERE fecha_creacion IS NOT NULL AND LENGTH(fecha_creacion) = 19;
 UPDATE ProveedorDocumento SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
 UPDATE ProveedorAcuerdo SET fecha_creacion = fecha_creacion || '.000' WHERE fecha_creacion IS NOT NULL AND LENGTH(fecha_creacion) = 19;
 UPDATE ProveedorAcuerdo SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
+UPDATE ProveedorAcuerdo SET fecha_inicio = SUBSTR(fecha_inicio, 1, 10) WHERE fecha_inicio IS NOT NULL AND LENGTH(fecha_inicio) > 10;
+UPDATE ProveedorAcuerdo SET fecha_vigencia = SUBSTR(fecha_vigencia, 1, 10) WHERE fecha_vigencia IS NOT NULL AND LENGTH(fecha_vigencia) > 10;
 UPDATE HistorialCostos SET fecha_creacion = fecha_creacion || '.000' WHERE fecha_creacion IS NOT NULL AND LENGTH(fecha_creacion) = 19;
 UPDATE HistorialCostos SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
 UPDATE Compras SET fecha_compra = fecha_compra || '.000' WHERE fecha_compra IS NOT NULL AND LENGTH(fecha_compra) = 19;
@@ -963,9 +975,9 @@ UPDATE EntradasSalidas SET fecha_hora = fecha_hora || '.000' WHERE fecha_hora IS
 UPDATE EntradasSalidas SET fecha_creacion = fecha_creacion || '.000' WHERE fecha_creacion IS NOT NULL AND LENGTH(fecha_creacion) = 19;
 UPDATE EntradasSalidas SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
 
-UPDATE Empresas SET fecha_inicio = fecha_inicio || ' 00:00:00.000' WHERE fecha_inicio IS NOT NULL AND LENGTH(fecha_inicio) = 10;
-UPDATE Empresas SET fecha_fin = fecha_fin || ' 00:00:00.000' WHERE fecha_fin IS NOT NULL AND LENGTH(fecha_fin) = 10;
-UPDATE Lote SET fecha_caducidad = fecha_caducidad || ' 00:00:00.000' WHERE fecha_caducidad IS NOT NULL AND LENGTH(fecha_caducidad) = 10;
+UPDATE Empresas SET fecha_inicio = SUBSTR(fecha_inicio, 1, 10) WHERE fecha_inicio IS NOT NULL AND LENGTH(fecha_inicio) > 10;
+UPDATE Empresas SET fecha_fin = SUBSTR(fecha_fin, 1, 10) WHERE fecha_fin IS NOT NULL AND LENGTH(fecha_fin) > 10;
+UPDATE Lote SET fecha_caducidad = SUBSTR(fecha_caducidad, 1, 10) WHERE fecha_caducidad IS NOT NULL AND LENGTH(fecha_caducidad) > 10;
 
 DROP TABLE IF EXISTS seed_venta_line;
 DROP TABLE IF EXISTS seed_venta_header;

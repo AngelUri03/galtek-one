@@ -1,269 +1,650 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Shell from "../common/Shell";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
-import { Dialog } from "primereact/dialog";
-import { Tooltip } from "primereact/tooltip";
-import "../../style/components/Clientes/Clientes.css";
-import { useLocation, useNavigate } from "react-router-dom";
 import { APIfetchApi } from "../../API/APIfetch";
 import { endpoints } from "../../API/api";
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
+import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
+import { Tooltip } from "primereact/tooltip";
+import ClienteDetailPanel from "./ClienteDetailPanel";
+import ClienteEditorPanel from "./ClienteEditorPanel";
+import ClienteAdvancedModals from "./ClienteAdvancedModals";
+import ClientesFilters from "./ClientesFilters";
+import ClientesSummary from "./ClientesSummary";
+import ClientesTable from "./ClientesTable";
+import {
+  emptyFilters,
+  getListPayload,
+  hasAddressData,
+  hasFiscalData,
+  normalizeCliente,
+  readApiPayload,
+  searchableText,
+} from "./clientesUtils";
+import "../../style/components/Clientes/Clientes.css";
 
 const api = new APIfetchApi();
 
-const normalizeCliente = (cliente) => ({
-  ...cliente,
-  id: cliente?.idCliente ?? cliente?.id,
-  pedidos: Array.isArray(cliente?.pedidos) ? cliente.pedidos : [],
-});
+const DETAIL_ENRICH_LIMIT = 80;
+
+const getDetailUrl = (idCliente) => `${endpoints.clientes}/${idCliente}`;
+const getDeleteReviewUrl = (idCliente) =>
+  `${endpoints.clientes}/${idCliente}/eliminacion-segura`;
+
+const actionMessages = {
+  desactivar: {
+    title: "Desactivar cliente",
+    success: "Cliente desactivado.",
+    confirmLabel: "Desactivar",
+    placeholder: "Ej. Cliente duplicado o temporalmente fuera de uso.",
+    detail: "El cliente deja de estar disponible por defecto, pero conserva historial y datos registrados.",
+    consequences: [
+      "No deberia aparecer por defecto en seleccion operativa.",
+      "Sus ventas y datos fiscales se conservan.",
+      "Puede reactivarse cuando vuelva a operar.",
+    ],
+  },
+  archivar: {
+    title: "Archivar cliente",
+    success: "Cliente archivado.",
+    confirmLabel: "Archivar",
+    placeholder: "Ej. Cliente historico, conservar solo para consulta.",
+    detail: "El cliente queda fuera de operacion normal y se conserva como referencia historica.",
+    consequences: [
+      "Se retira del uso diario.",
+      "El historial permanece disponible para consulta.",
+      "Puede reactivarse si vuelve a comprar.",
+    ],
+  },
+  reactivar: {
+    title: "Reactivar cliente",
+    success: "Cliente reactivado.",
+    confirmLabel: "Reactivar",
+    placeholder: "Ej. Volvio a comprar y se confirma informacion.",
+    detail: "El cliente vuelve a quedar disponible para operacion diaria.",
+    consequences: [
+      "Aparecera como cliente activo.",
+      "Conserva su historial previo.",
+      "Sus datos fiscales siguen siendo opcionales.",
+    ],
+  },
+  eliminar: {
+    title: "Eliminar cliente fisicamente",
+    success: "Cliente eliminado.",
+    confirmLabel: "Eliminar fisicamente",
+    placeholder: "Ej. Alta capturada por error y sin ventas.",
+    detail: "Esta accion solo procede si el backend confirma que no tiene ventas, datos fiscales ni auditoria relevante.",
+    consequences: [
+      "Solo aplica a altas creadas por error.",
+      "No procede si tiene ventas o datos fiscales capturados.",
+      "Si tiene historial, usa desactivar o archivar.",
+    ],
+  },
+};
+
+const dependencyLabels = {
+  ventasHistoricas: "Ventas historicas",
+  datosFiscales: "Datos fiscales",
+  auditoriaRelevante: "Auditoria relevante",
+};
+
+const isDeleteBlocked = (action) =>
+  action?.action === "eliminar" && action?.deletePolicy?.puedeEliminar === false;
+
+const mergeClienteResult = (current, result) =>
+  normalizeCliente({
+    ...(current?.raw || {}),
+    ...(current || {}),
+    ...(result || {}),
+    pedidos: current?.pedidos || result?.pedidos,
+    comprasRegistradas: current?.comprasRegistradas ?? result?.comprasRegistradas,
+  });
 
 export default function Clientes() {
-  const [clientes, setClientes] = useState([]);
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [pedidoVisible, setPedidoVisible] = useState(false);
-  const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
-  const [modalEliminarVisible, setModalEliminarVisible] = useState(false);
-  const [clienteAEliminar, setClienteAEliminar] = useState(null);
-  const navigate = useNavigate();
-  const location = useLocation();
   const toast = useRef(null);
+  const [clientes, setClientes] = useState([]);
+  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState(emptyFilters);
+  const [loading, setLoading] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [editorVisible, setEditorVisible] = useState(false);
+  const [editorLoading, setEditorLoading] = useState(false);
+  const [editorMode, setEditorMode] = useState("create");
+  const [editorCliente, setEditorCliente] = useState(null);
+  const [detailVisible, setDetailVisible] = useState(false);
+  const [selectedCliente, setSelectedCliente] = useState(null);
+  const [confirmAction, setConfirmAction] = useState(null);
+  const [actionPreparing, setActionPreparing] = useState(false);
+  const [advancedSection, setAdvancedSection] = useState(null);
 
-  const money = (n) => `$${(Number(n) || 0).toFixed(2)}`;
+  const showToast = useCallback((severity, summary, detail) => {
+    toast.current?.show({ severity, summary, detail, life: 3200 });
+  }, []);
 
-  async function fetchClientes() {
+  const updateClienteInList = useCallback((cliente) => {
+    setClientes((prev) =>
+      prev.map((item) => (item.idCliente === cliente.idCliente ? cliente : item))
+    );
+  }, []);
+
+  const fetchClienteDetail = useCallback(async (cliente) => {
+    if (!cliente?.idCliente) return cliente;
+
+    try {
+      const response = await api.fetchApi(
+        {},
+        "GET",
+        undefined,
+        getDetailUrl(cliente.idCliente),
+        { logoutOnUnauthorized: false }
+      );
+      const detail = await readApiPayload(response, "detalle de cliente");
+      return normalizeCliente(cliente, detail);
+    } catch (error) {
+      console.warn("No se pudo cargar detalle de cliente:", error);
+      return normalizeCliente(cliente);
+    }
+  }, []);
+
+  const fetchClientes = useCallback(async () => {
+    setLoading(true);
+    setLoadError("");
+
     try {
       const response = await api.fetchApi({}, "GET", undefined, endpoints.clientes);
-      if (!response?.ok) {
-        setClientes([]);
-        return;
-      }
+      const payloadData = await readApiPayload(response, "clientes");
+      const baseRows = getListPayload(payloadData).map((cliente) =>
+        normalizeCliente(cliente)
+      );
 
-      const payload = await response.json();
-      setClientes((payload?.data || []).map(normalizeCliente));
+      setClientes(baseRows);
+
+      if (baseRows.length && baseRows.length <= DETAIL_ENRICH_LIMIT) {
+        setDetailLoading(true);
+        const enriched = await Promise.all(baseRows.map(fetchClienteDetail));
+        setClientes(enriched);
+      }
     } catch (error) {
       console.error("Error al obtener clientes:", error);
       setClientes([]);
+      setLoadError(error?.message || "No se pudo cargar clientes.");
+      showToast("error", "Clientes", "No se pudo cargar la lista.");
+    } finally {
+      setLoading(false);
+      setDetailLoading(false);
     }
-  }
+  }, [fetchClienteDetail, showToast]);
 
   useEffect(() => {
     fetchClientes();
+  }, [fetchClientes]);
+
+  const stats = useMemo(
+    () => ({
+      total: clientes.length,
+      activos: clientes.filter((cliente) => cliente.estadoCliente === "ACTIVO").length,
+      inactivos: clientes.filter((cliente) => cliente.estadoCliente === "INACTIVO").length,
+      archivados: clientes.filter((cliente) => cliente.estadoCliente === "ARCHIVADO").length,
+      conFiscales: clientes.filter(hasFiscalData).length,
+      conDireccion: clientes.filter(hasAddressData).length,
+    }),
+    [clientes]
+  );
+
+  const filteredClientes = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    return clientes.filter((cliente) => {
+      const matchesSearch = !query || searchableText(cliente).includes(query);
+      const matchesEstado =
+        filters.estado === "TODOS" || cliente.estadoCliente === filters.estado;
+      const matchesTipo = filters.tipo === "TODOS" || cliente.tipoCliente === filters.tipo;
+      const matchesFiscal =
+        filters.fiscales === "TODOS" ||
+        (filters.fiscales === "CON_FISCALES" && hasFiscalData(cliente)) ||
+        (filters.fiscales === "SIN_FISCALES" && !hasFiscalData(cliente));
+      const matchesDireccion =
+        filters.direccion === "TODOS" ||
+        (filters.direccion === "CON_DIRECCION" && hasAddressData(cliente)) ||
+        (filters.direccion === "SIN_DIRECCION" && !hasAddressData(cliente));
+      const comprasCount = Number(cliente.comprasRegistradas || 0);
+      const matchesCompras =
+        filters.compras === "TODOS" ||
+        (filters.compras === "CON_COMPRAS" && comprasCount > 0) ||
+        (filters.compras === "SIN_COMPRAS" && comprasCount === 0);
+
+      return (
+        matchesSearch &&
+        matchesEstado &&
+        matchesTipo &&
+        matchesFiscal &&
+        matchesDireccion &&
+        matchesCompras
+      );
+    });
+  }, [clientes, filters, search]);
+
+  const openCreate = () => {
+    setEditorMode("create");
+    setEditorCliente(null);
+    setEditorLoading(false);
+    setEditorVisible(true);
+  };
+
+  const openEdit = async (cliente) => {
+    if (!cliente) return;
+
+    setDetailVisible(false);
+    setEditorMode("edit");
+    setEditorCliente(cliente);
+    setEditorVisible(true);
+
+    if (!cliente.detailLoaded) {
+      setEditorLoading(true);
+      const enriched = await fetchClienteDetail(cliente);
+      setEditorCliente(enriched);
+      updateClienteInList(enriched);
+      setEditorLoading(false);
+    }
+  };
+
+  const openDetail = async (cliente) => {
+    setSelectedCliente(cliente);
+    setDetailVisible(true);
+
+    if (!cliente.detailLoaded) {
+      setDetailLoading(true);
+      const enriched = await fetchClienteDetail(cliente);
+      setSelectedCliente(enriched);
+      updateClienteInList(enriched);
+      setDetailLoading(false);
+    }
+  };
+
+  const openAdvancedSectionForCliente = async (cliente, section) => {
+    if (!cliente?.idCliente) return;
+
+    setSelectedCliente(cliente);
+    let target = cliente;
+    if (!cliente.detailLoaded) {
+      setDetailLoading(true);
+      target = await fetchClienteDetail(cliente);
+      setSelectedCliente(target);
+      updateClienteInList(target);
+      setDetailLoading(false);
+    }
+    setDetailVisible(false);
+    setAdvancedSection(section);
+  };
+
+  const saveCliente = async (payload) => {
+    setSaving(true);
+    try {
+      const editing = editorMode === "edit" && editorCliente?.idCliente;
+      const url = editing
+        ? `${endpoints.clientes}/${editorCliente.idCliente}`
+        : endpoints.clientes;
+      const method = editing ? "PUT" : "POST";
+      const response = await api.fetchApi({}, method, payload, url);
+      await readApiPayload(response, "guardar cliente");
+
+      showToast(
+        "success",
+        "Cliente guardado",
+        editing ? "Cliente actualizado correctamente." : "Cliente creado correctamente."
+      );
+      setEditorVisible(false);
+      setEditorCliente(null);
+      await fetchClientes();
+    } catch (error) {
+      console.error("Error al guardar cliente:", error);
+      showToast("error", "Clientes", error?.message || "No se pudo guardar.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const fetchDeletePolicy = async (cliente) => {
+    const response = await api.fetchApi(
+      {},
+      "GET",
+      undefined,
+      getDeleteReviewUrl(cliente.idCliente)
+    );
+    return readApiPayload(response, "revisar eliminacion");
+  };
+
+  const openClienteAction = async (action, cliente) => {
+    if (!cliente || !actionMessages[action]) return;
+
+    const baseAction = {
+      action,
+      cliente,
+      motivo: "",
+      deletePolicy: null,
+      ...actionMessages[action],
+    };
+
+    if (action !== "eliminar") {
+      setConfirmAction(baseAction);
+      return;
+    }
+
+    setActionPreparing(true);
+    setConfirmAction({ ...baseAction, loadingPolicy: true });
+    try {
+      const deletePolicy = await fetchDeletePolicy(cliente);
+      setConfirmAction((prev) =>
+        prev?.cliente?.idCliente === cliente.idCliente
+          ? { ...prev, deletePolicy, loadingPolicy: false }
+          : prev
+      );
+    } catch (error) {
+      console.error("Error al revisar eliminacion:", error);
+      setConfirmAction((prev) =>
+        prev?.cliente?.idCliente === cliente.idCliente
+          ? {
+              ...prev,
+              deletePolicy: {
+                puedeEliminar: false,
+                motivos: [error?.message || "No se pudo revisar la eliminacion segura."],
+                mensaje: "No se puede confirmar eliminacion sin validacion del backend.",
+              },
+              loadingPolicy: false,
+            }
+          : prev
+      );
+      showToast("error", "Clientes", "No se pudo revisar la eliminacion segura.");
+    } finally {
+      setActionPreparing(false);
+    }
+  };
+
+  const updateSelectedFromAction = useCallback((cliente, result) => {
+    setSelectedCliente((prev) => {
+      if (!prev || prev.idCliente !== cliente.idCliente) return prev;
+      return mergeClienteResult(prev, result);
+    });
   }, []);
 
-  useEffect(() => {
-    const actualizado = location.state?.actualizadoCliente;
-    if (actualizado) {
-      const normalized = normalizeCliente(actualizado);
-      setClientes((prev) =>
-        prev.map((c) => (String(c.id) === String(normalized.id) ? { ...c, ...normalized } : c))
+  const runClienteAction = async (action, cliente, motivo) => {
+    const urls = {
+      desactivar: `${endpoints.clientes}/${cliente.idCliente}/desactivar`,
+      archivar: `${endpoints.clientes}/${cliente.idCliente}/archivar`,
+      reactivar: `${endpoints.clientes}/${cliente.idCliente}/reactivar`,
+      eliminar: `${endpoints.clientes}/${cliente.idCliente}`,
+    };
+
+    const method = action === "eliminar" ? "DELETE" : "PUT";
+    const response = await api.fetchApi({}, method, { motivo }, urls[action]);
+    return readApiPayload(response, action);
+  };
+
+  const confirmClienteAction = async () => {
+    if (!confirmAction) return;
+    if (!confirmAction.motivo?.trim()) {
+      showToast("warn", "Motivo requerido", "Captura el motivo para continuar.");
+      return;
+    }
+    if (isDeleteBlocked(confirmAction)) {
+      showToast("warn", "Eliminacion bloqueada", "Usa desactivar o archivar para conservar historial.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const result = await runClienteAction(
+        confirmAction.action,
+        confirmAction.cliente,
+        confirmAction.motivo
       );
-      navigate(".", { replace: true, state: null });
-    }
-  }, [location.state, navigate]);
-
-  useEffect(() => {
-    const eliminarId = location.state?.eliminarClienteId;
-    if (eliminarId) {
-      setClientes((prev) => prev.filter((c) => String(c.id) !== String(eliminarId)));
-      toast.current.show({ severity: 'error', summary: 'Eliminado', detail: 'El cliente fue eliminado correctamente', life: 3000 });
-      navigate(".", { replace: true, state: null });
-    }
-  }, [location.state, navigate]);
-
-  const abrirModalPedidos = (cliente) => {
-    const pedidos = [...(cliente?.pedidos || [])];
-    pedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    const pedido = pedidos[0] || null;
-    if (!pedido) return;
-    setPedidoSeleccionado(pedido);
-    setPedidoVisible(true);
-  };
-
-  /*const handleEliminarCliente = async (id) => {
-    if (!window.confirm("Estas seguro de que deseas eliminar este cliente permanentemente?")) return;
-
-    try {
-      const response = await api.fetchApi({}, "DELETE", undefined, `${endpoints.clientes}/${id}`);
-      if (response?.ok) {
-        setClientes((prev) => prev.filter((c) => String(c.id) !== String(id)));
+      if (confirmAction.action === "eliminar") {
+        setClientes((prev) =>
+          prev.filter((item) => item.idCliente !== confirmAction.cliente.idCliente)
+        );
+        if (selectedCliente?.idCliente === confirmAction.cliente.idCliente) {
+          setDetailVisible(false);
+          setSelectedCliente(null);
+        }
+      } else {
+        const updated = mergeClienteResult(confirmAction.cliente, result);
+        updateClienteInList(updated);
+        updateSelectedFromAction(confirmAction.cliente, result);
       }
+      setConfirmAction(null);
+      showToast("success", "Clientes", confirmAction.success);
     } catch (error) {
-      console.error("Error al eliminar cliente:", error);
-    }
-  };*/
-
-  // Función para abrir el modal de confirmación de eliminación
-  const confirmarEliminacion = (cliente) => {
-    setClienteAEliminar(cliente);
-    setModalEliminarVisible(true);
-  };
-  // Función para ejecutar la eliminación después de la confirmación
-  const ejecutarEliminacion = async () => {
-    if (!clienteAEliminar) return;
-    try {
-      const response = await api.fetchApi({}, "DELETE", undefined, `${endpoints.clientes}/${clienteAEliminar.id}`);
-      if (response?.ok) {
-        setClientes((prev) => prev.filter((c) => String(c.id) !== String(clienteAEliminar.id)));
-        setModalEliminarVisible(false);
-        setClienteAEliminar(null);
-        toast.current.show({ severity: 'error', summary: 'Eliminado', detail: 'El cliente fue eliminado correctamente', life: 3000 });
-      }
-    } catch (error) {
-      console.error("Error al eliminar cliente:", error);
+      console.error("Error en accion de cliente:", error);
+      showToast("error", "Clientes", error?.message || "No se pudo completar la accion.");
+    } finally {
+      setSaving(false);
     }
   };
 
-  const pedidosTemplate = (rowData) => (
-    <Button
-      label="Mostrar"
-      className="p-button-rounded p-button-sm btn-verde"
-      onClick={() => abrirModalPedidos(rowData)}
-      disabled={!rowData?.pedidos?.length}
-      data-pr-tooltip="Ver pedido"
-      tooltipOptions={{ position: "top" }}
-    />
-  );
+  const updateFilter = (field, value) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  };
 
-  const accionesTemplate = (rowData) => (
-    <div className="acciones-cell">
-      <Tooltip />
-      <Button
-        icon="pi pi-check"
-        className="p-button-rounded p-button-sm p-button-icon-only btn-seleccionar"
-        onClick={() => navigate(`/clientes/${rowData.id}`, { state: { cliente: rowData } })}
-        aria-label="Seleccionar"
-        data-pr-tooltip="Seleccionar"
-        tooltipOptions={{ position: "top" }}
-      />
-      <Button
-        icon="pi pi-pencil"
-        className="p-button-rounded p-button-sm p-button-secondary"
-        onClick={() => navigate(`/clientes/${rowData.id}/editar`, { state: { cliente: rowData } })}
-        aria-label="Editar"
-        data-pr-tooltip="Editar"
-        tooltipOptions={{ position: "top" }}
-      />
-      <Button
-        icon="pi pi-trash"
-        className="p-button-rounded p-button-sm p-button-danger"
-        onClick={() => confirmarEliminacion(rowData)}
-        aria-label="Eliminar"
-        data-pr-tooltip="Eliminar"
-        tooltipOptions={{ position: "top" }}
-      />
-    </div>
-  );
+  const clearFilters = () => {
+    setSearch("");
+    setFilters(emptyFilters);
+  };
 
-  const headerPedidos = (
-    <div className="modal-header">
-      <span>Pedidos Realizados</span>
-    </div>
+  const deleteBlocked = isDeleteBlocked(confirmAction);
+  const confirmDisabled =
+    saving ||
+    actionPreparing ||
+    confirmAction?.loadingPolicy ||
+    !confirmAction?.motivo?.trim() ||
+    deleteBlocked;
+  const deleteDependencies = confirmAction?.deletePolicy?.dependencias || {};
+  const deleteReasons = Array.isArray(confirmAction?.deletePolicy?.motivos)
+    ? confirmAction.deletePolicy.motivos
+    : [];
+  const deleteDependencyEntries = Object.entries(deleteDependencies).filter(
+    ([, value]) => Number(value) > 0
   );
 
   return (
     <Shell>
-      <Toast ref={toast} position="top-right" />
+      <Toast ref={toast} className="cli-toast" />
       <Tooltip />
-      <div className="clientes-container">
-        <div className="clientes-header">
-          <div className="search-box">
-            <span className="p-input-icon-left clientes-search">
-              <i className="pi pi-search" />
-              <InputText
-                placeholder="Buscar un cliente"
-                value={globalFilter}
-                onChange={(e) => setGlobalFilter(e.target.value)}
+
+      <main className="clientes-page">
+        <section className="cli-header">
+          <div>
+            <div className="cli-header-title">
+              <i className="pi pi-users" />
+              <span>CLIENTES</span>
+            </div>
+          </div>
+          <Button
+            label="Agregar cliente"
+            icon="pi pi-plus"
+            className="cli-primary-btn"
+            onClick={openCreate}
+          />
+        </section>
+
+        <ClientesSummary stats={stats} loading={loading && !clientes.length} />
+
+        <ClientesFilters
+          search={search}
+          filters={filters}
+          loading={loading || detailLoading}
+          onSearchChange={setSearch}
+          onFilterChange={updateFilter}
+          onClear={clearFilters}
+          onRefresh={fetchClientes}
+        />
+
+        <section className="cli-table-shell">
+          <div className="cli-table-head">
+            <div>
+              <strong>Directorio de compradores</strong>
+              <span>
+                {filteredClientes.length} de {clientes.length} clientes
+              </span>
+            </div>
+            {detailLoading ? <small>Actualizando ultimas compras...</small> : null}
+          </div>
+
+          {loadError ? (
+            <div className="cli-error-state">
+              <i className="pi pi-exclamation-triangle" />
+              <strong>No se pudo cargar clientes</strong>
+              <span>{loadError}</span>
+              <Button
+                label="Reintentar"
+                icon="pi pi-refresh"
+                className="cli-soft-btn"
+                onClick={fetchClientes}
               />
-            </span>
-          </div>
-
-          <div className="acciones-header">
-            <Button
-              label="Agregar Cliente"
-              icon="pi pi-plus"
-              className="p-button-sm btn-verde"
-              onClick={() => navigate("/clientes/crear")}
+            </div>
+          ) : (
+            <ClientesTable
+              rows={filteredClientes}
+              loading={loading || detailLoading || saving || actionPreparing}
+              hasClientes={clientes.length > 0}
+              onView={openDetail}
+              onEdit={openEdit}
+              onManage={openAdvancedSectionForCliente}
+              onAction={openClienteAction}
             />
-          </div>
-        </div>
+          )}
+        </section>
+      </main>
 
-        <div className="clientes-table">
-          <DataTable
-            value={clientes}
-            paginator
-            rows={5}
-            stripedRows
-            responsiveLayout="scroll"
-            globalFilter={globalFilter}
-            emptyMessage="Sin clientes registrados"
-          >
-            <Column field="nombre" header="NOMBRE" sortable />
-            <Column field="email" header="CORREO" />
-            <Column field="telefono" header="TELEFONO" />
-            <Column field="pedidos" header="PEDIDOS" body={pedidosTemplate} />
-            <Column body={accionesTemplate} header="ACCIONES" headerClassName="acciones-header-cell" />
-          </DataTable>
-        </div>
-      </div>
+      <ClienteEditorPanel
+        visible={editorVisible}
+        mode={editorMode}
+        cliente={editorCliente}
+        loading={editorLoading}
+        saving={saving}
+        onHide={() => setEditorVisible(false)}
+        onSave={saveCliente}
+      />
+
+      <ClienteDetailPanel
+        cliente={selectedCliente}
+        visible={detailVisible}
+        loading={detailLoading}
+        onHide={() => setDetailVisible(false)}
+      />
+
+      <ClienteAdvancedModals
+        section={advancedSection}
+        cliente={selectedCliente}
+        loading={detailLoading}
+        onHide={() => setAdvancedSection(null)}
+      />
 
       <Dialog
-        header={headerPedidos}
-        visible={pedidoVisible}
-        onHide={() => setPedidoVisible(false)}
-        dismissableMask
+        header={confirmAction?.title || ""}
+        visible={Boolean(confirmAction)}
+        onHide={() => setConfirmAction(null)}
         modal
-        blockScroll
-        className="pedido-dialog"
-        breakpoints={{ "960px": "70vw", "640px": "95vw" }}
-        style={{ width: "45vw" }}
+        draggable={false}
+        dismissableMask
+        className="cli-confirm-dialog"
+        style={{ width: "34rem" }}
+        footer={
+          <div className="cli-dialog-footer">
+            <Button
+              label={deleteBlocked ? "Cerrar" : "Cancelar"}
+              className="p-button-text cli-text-btn"
+              onClick={() => setConfirmAction(null)}
+              disabled={saving || actionPreparing}
+            />
+            {!deleteBlocked ? (
+              <Button
+                label={confirmAction?.confirmLabel || "Confirmar"}
+                icon={confirmAction?.action === "eliminar" ? "pi pi-trash" : "pi pi-check"}
+                className={
+                  confirmAction?.action === "eliminar"
+                    ? "cli-danger-btn"
+                    : "cli-primary-btn"
+                }
+                onClick={confirmClienteAction}
+                loading={saving}
+                disabled={confirmDisabled}
+              />
+            ) : null}
+          </div>
+        }
       >
-        {pedidoSeleccionado && (
-          <div className="pedido-panel">
-            <div className="pedido-row pedido-row--top">
-              <div className="pedido-cell">
-                <span className="label">No. Orden:</span>
-                <span className="value">{pedidoSeleccionado.noOrden}</span>
-              </div>
-              <div className="pedido-cell pedido-cell--right">
-                <span className="label">Fecha:</span>
-                <span className="value">{pedidoSeleccionado.fecha}</span>
-              </div>
-            </div>
+        <div className="cli-safe-action-body">
+          <p className="cli-confirm-text">{confirmAction?.detail}</p>
 
-            <div className="pedido-row">
-              <div className="pedido-cell">
-                <span className="label">Productos Totales:</span>
-                <span className="value">{pedidoSeleccionado.productosTotales}</span>
-              </div>
-              <div className="pedido-cell pedido-cell--right">
-                <span className="label">Importe total:</span>
-                <span className="value">{money(pedidoSeleccionado.importeTotal)}</span>
-              </div>
+          {confirmAction?.consequences?.length ? (
+            <div className="cli-safe-box">
+              <strong>Consecuencias</strong>
+              <ul>
+                {confirmAction.consequences.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
             </div>
-          </div>
-        )}
-      </Dialog>
-      <Dialog
-        visible={modalEliminarVisible}
-        onHide={() => setModalEliminarVisible(false)}
-        modal
-        dismissableMask
-        showHeader={false}
-        className="dialog-eliminar"
-        style={{ width: '30vw', minWidth: '300px' }}
-      >
-        <div className="modal-eliminar-content">
-          <i className="pi pi-exclamation-triangle modal-eliminar-icon"></i>
-          <span className="modal-eliminar-text">
-            ¿Estás seguro de que deseas eliminar permanentemente a <strong>{clienteAEliminar?.nombre}</strong>?
-          </span>
-          <div className="modal-eliminar-actions">
-            <Button label="Cancelar" icon="pi pi-times" className="btn-gris-cancelar" onClick={() => setModalEliminarVisible(false)} />
-            <Button label="Eliminar" icon="pi pi-check" className="btn-verde-modal" onClick={ejecutarEliminacion} />
-          </div>
+          ) : null}
+
+          {confirmAction?.action === "eliminar" ? (
+            <div className={deleteBlocked ? "cli-delete-policy is-blocked" : "cli-delete-policy"}>
+              {confirmAction.loadingPolicy ? (
+                <span>Revisando ventas, datos fiscales y auditoria del cliente...</span>
+              ) : (
+                <>
+                  <strong>
+                    {confirmAction.deletePolicy?.puedeEliminar
+                      ? "Eliminacion permitida"
+                      : "Eliminacion bloqueada"}
+                  </strong>
+                  <p>
+                    {confirmAction.deletePolicy?.mensaje ||
+                      "El backend debe validar que no exista uso antes de eliminar."}
+                  </p>
+                  {deleteReasons.length ? (
+                    <ul>
+                      {deleteReasons.map((reason) => (
+                        <li key={reason}>{reason}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {deleteDependencyEntries.length ? (
+                    <div className="cli-delete-counts">
+                      {deleteDependencyEntries.map(([key, value]) => (
+                        <span key={key}>
+                          {dependencyLabels[key] || key}: {value}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </>
+              )}
+            </div>
+          ) : null}
+
+          {!deleteBlocked ? (
+            <label className="cli-field cli-safe-reason">
+              <span>Motivo</span>
+              <InputTextarea
+                value={confirmAction?.motivo || ""}
+                onChange={(event) =>
+                  setConfirmAction((prev) =>
+                    prev ? { ...prev, motivo: event.target.value } : prev
+                  )
+                }
+                rows={3}
+                autoResize
+                maxLength={500}
+                placeholder={confirmAction?.placeholder}
+                disabled={saving || actionPreparing || confirmAction?.loadingPolicy}
+              />
+              <small>Este motivo queda asociado a la auditoria del cliente.</small>
+            </label>
+          ) : null}
         </div>
       </Dialog>
     </Shell>

@@ -9,7 +9,31 @@ CREATE TABLE IF NOT EXISTS Cajas (id_caja integer, estatus boolean, fecha_creaci
 
 CREATE TABLE IF NOT EXISTS Categorias (id_categoria integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), nombre varchar(255), id_empresa integer not null, primary key (id_categoria));
 
-CREATE TABLE IF NOT EXISTS Clientes (id_cliente integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), avatar varchar(255), direccion varchar(255), email varchar(255), nombre varchar(255), telefono varchar(255), id_empresa integer, primary key (id_cliente));
+CREATE TABLE IF NOT EXISTS Clientes (id_cliente integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), avatar varchar(255), direccion varchar(255), email varchar(255), nombre varchar(255) not null, telefono varchar(255), alias varchar(255), tipo_cliente varchar(255), estado_cliente varchar(255), estado_cliente_anterior varchar(255), ultima_accion_estado varchar(255), motivo_cambio_estado varchar(500), usuario_cambio_estado varchar(255), fecha_cambio_estado timestamp, whatsapp varchar(255), direccion_calle varchar(255), direccion_numero_exterior varchar(255), direccion_numero_interior varchar(255), direccion_colonia varchar(255), direccion_municipio varchar(255), direccion_estado varchar(255), direccion_codigo_postal varchar(255), direccion_referencia varchar(1000), notas_internas varchar(2000), rfc varchar(255), razon_social varchar(255), codigo_postal_fiscal varchar(255), correo_fiscal varchar(255), regimen_fiscal varchar(255), uso_cfdi varchar(255), id_empresa integer, primary key (id_cliente));
+ALTER TABLE Clientes ADD COLUMN alias varchar(255);
+ALTER TABLE Clientes ADD COLUMN tipo_cliente varchar(255);
+ALTER TABLE Clientes ADD COLUMN estado_cliente varchar(255);
+ALTER TABLE Clientes ADD COLUMN estado_cliente_anterior varchar(255);
+ALTER TABLE Clientes ADD COLUMN ultima_accion_estado varchar(255);
+ALTER TABLE Clientes ADD COLUMN motivo_cambio_estado varchar(500);
+ALTER TABLE Clientes ADD COLUMN usuario_cambio_estado varchar(255);
+ALTER TABLE Clientes ADD COLUMN fecha_cambio_estado timestamp;
+ALTER TABLE Clientes ADD COLUMN whatsapp varchar(255);
+ALTER TABLE Clientes ADD COLUMN direccion_calle varchar(255);
+ALTER TABLE Clientes ADD COLUMN direccion_numero_exterior varchar(255);
+ALTER TABLE Clientes ADD COLUMN direccion_numero_interior varchar(255);
+ALTER TABLE Clientes ADD COLUMN direccion_colonia varchar(255);
+ALTER TABLE Clientes ADD COLUMN direccion_municipio varchar(255);
+ALTER TABLE Clientes ADD COLUMN direccion_estado varchar(255);
+ALTER TABLE Clientes ADD COLUMN direccion_codigo_postal varchar(255);
+ALTER TABLE Clientes ADD COLUMN direccion_referencia varchar(1000);
+ALTER TABLE Clientes ADD COLUMN notas_internas varchar(2000);
+ALTER TABLE Clientes ADD COLUMN rfc varchar(255);
+ALTER TABLE Clientes ADD COLUMN razon_social varchar(255);
+ALTER TABLE Clientes ADD COLUMN codigo_postal_fiscal varchar(255);
+ALTER TABLE Clientes ADD COLUMN correo_fiscal varchar(255);
+ALTER TABLE Clientes ADD COLUMN regimen_fiscal varchar(255);
+ALTER TABLE Clientes ADD COLUMN uso_cfdi varchar(255);
 
 CREATE TABLE IF NOT EXISTS CompraDetalle (id_compra_detalle integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), cantidad integer not null, precio_unitario numeric(9,2) not null, subtotal numeric(9,2) not null, id_compra integer not null, id_producto integer not null unique, primary key (id_compra_detalle));
 
@@ -103,3 +127,11 @@ CREATE TABLE IF NOT EXISTS Ventas (id_venta integer, estatus boolean, fecha_crea
 CREATE INDEX IF NOT EXISTS idx_mov_caja_caja_empresa on MovimientoCaja (id_caja, id_empresa);
 
 CREATE INDEX IF NOT EXISTS idx_mov_caja_empresa_fecha on MovimientoCaja (id_empresa, fecha);
+
+UPDATE Empresas SET fecha_inicio = SUBSTR(fecha_inicio, 1, 10) WHERE fecha_inicio IS NOT NULL AND LENGTH(fecha_inicio) > 10;
+UPDATE Empresas SET fecha_fin = SUBSTR(fecha_fin, 1, 10) WHERE fecha_fin IS NOT NULL AND LENGTH(fecha_fin) > 10;
+UPDATE Lote SET fecha_caducidad = SUBSTR(fecha_caducidad, 1, 10) WHERE fecha_caducidad IS NOT NULL AND LENGTH(fecha_caducidad) > 10;
+UPDATE ProveedorActivo SET fecha_entrega = SUBSTR(fecha_entrega, 1, 10) WHERE fecha_entrega IS NOT NULL AND LENGTH(fecha_entrega) > 10;
+UPDATE ProveedorActivo SET fecha_regreso = SUBSTR(fecha_regreso, 1, 10) WHERE fecha_regreso IS NOT NULL AND LENGTH(fecha_regreso) > 10;
+UPDATE ProveedorAcuerdo SET fecha_inicio = SUBSTR(fecha_inicio, 1, 10) WHERE fecha_inicio IS NOT NULL AND LENGTH(fecha_inicio) > 10;
+UPDATE ProveedorAcuerdo SET fecha_vigencia = SUBSTR(fecha_vigencia, 1, 10) WHERE fecha_vigencia IS NOT NULL AND LENGTH(fecha_vigencia) > 10;
