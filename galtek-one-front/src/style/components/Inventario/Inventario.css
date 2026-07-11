@@ -10,89 +10,50 @@
   --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.05);
   --inv-brand: #0a7463;
 }
+
 /* ======================== */
 /* PÁGINA (Layout Fijo)     */
 /* ======================== */
 .inv-page {
-    display: flex;
-    flex-direction: column;
-    width: calc(100% - 3rem);
-    height: 100vh;
-    margin: 0 1.5rem;
-    overflow: hidden; /* Congela el scroll general */
-    animation: fadeIn 0.4s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 3rem);
+  height: 100vh;
+  margin: 0 1.5rem;
+  overflow: hidden; /* Congela el scroll general */
+  animation: fadeIn 0.4s ease-in-out;
 }
 
 /* Efecto luces desenfocadas atrás del cristal */
 .inv-page::before,
 .inv-page::after {
-  content: ''; position: absolute; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.6; pointer-events: none;
-}
-.inv-page::before { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #bae6fd; }
-.inv-page::after { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #bbf7d0; }
-
-.inv-header-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1.5rem; /* Ajustado para que sea delgado */
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    border: var(--glass-border);
-    border-radius: 12px;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-}
-
-.inv-table {
-    background: rgba(255, 255, 255, 0.2) !important;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    border-radius: 12px;
-}
-
-.inv-table .p-datatable-thead > tr > th,
-.inv-table .p-datatable-tbody > tr {
-    background: transparent !important;
-}
-
-.text-truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 150px;
-    display: block;
-}
-
-/* Forzar transparencia de celdas */
-.p-datatable .p-datatable-wrapper, 
-.p-datatable .p-datatable-table {
-    background: transparent !important;
-}
-/* Efecto luces desenfocadas atrás del cristal */
-.inv-page::before,
-.inv-page::after {
-  content: ''; position: absolute; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.6; pointer-events: none;
+  content: ''; 
+  position: absolute; 
+  border-radius: 50%; 
+  filter: blur(80px); 
+  z-index: -1; 
+  opacity: 0.6; 
+  pointer-events: none;
 }
 .inv-page::before { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #bae6fd; }
 .inv-page::after { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #bbf7d0; }
 
 /* ========================================== */
-/* HEADER PRINCIPAL                         */
+/* HEADER PRINCIPAL                           */
 /* ========================================== */
 .inv-header-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1.5rem;
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    border: var(--glass-border);
-    border-radius: 12px;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-    gap: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1.5rem; /* Ajustado para que sea delgado */
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: var(--glass-border);
+  border-radius: 12px;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .inv-header-title { 
@@ -126,30 +87,22 @@
   margin-bottom: 20px;
 }
 
-.inv-search-wrapper {
-    position: relative;
-    flex: 1;
-    max-width: 1900px;
-    display: flex;       /* Agregamos esto */
-    align-items: center; /* Alineación vertical perfecta */
-}
-
-.inv-search-wrapper .pi-search {
-    position: absolute;
-    left: 1.2rem;
-    /* Quitamos el top y transform y dejamos que el flex del wrapper lo alinee */
-    pointer-events: none; 
-    color: var(--inv-brand);
+/* --- Lupa centrada --- */
+.inv-search-wrapper { 
+  flex: 2 !important; 
+  max-width: 800px !important; /* Ajustado a un tamaño intermedio óptimo */
 }
 
 .inv-search-input {
-    width: 100% !important; 
-    height: 46px !important; 
-    border-radius: 14px !important;
-    padding-left: 3.2rem !important;
-    /* Aseguramos que el contenido interno también esté centrado */
-    display: flex;
-    align-items: center;
+  width: 100% !important;
+  height: 50px !important; 
+  padding-left: 3.2rem !important; 
+}
+
+.inv-search-wrapper .pi-search { 
+  position: absolute; 
+  left: 1.2rem; 
+  color: var(--inv-brand); 
 }
 
 .inv-search-input:focus {
@@ -164,6 +117,9 @@
   align-items: center; 
 }
 
+/* ========================================== */
+/* BOTONES                                    */
+/* ========================================== */
 .inv-btn { 
   height: 46px !important; 
   border-radius: 14px !important; 
@@ -205,16 +161,34 @@
   justify-content: center; 
 }
 
-@media (max-width: 768px) {
-  .inv-toolbar-glass { flex-direction: column; align-items: stretch; }
-  .inv-search-wrapper { max-width: 100%; }
-  .inv-toolbar-actions { justify-content: flex-end; flex-wrap: wrap; }
+.inv-action-btn {
+  background: rgba(255, 255, 255, 0.4) !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  width: 34px; 
+  height: 34px; 
+  border-radius: 10px;
+  color: var(--inv-brand) !important;
+}
+
+.inv-action-btn:hover {
+  background: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+}
+
+.inv-action-btn.danger { color: #ef4444 !important; }
+.inv-action-btn.danger:hover { background: #fee2e2 !important; color: #dc2626 !important; }
+
+/* Eliminar el efecto morado de los botones genéricos al hacer focus */
+.p-button:focus {
+  box-shadow: 0 0 0 2px var(--inv-brand) !important;
 }
 
 /* ========================================== */
 /* CONTROLES GLOBALES (Inputs, Dropdowns)     */
 /* ========================================== */
-
 .inv-page .p-inputtext, 
 .inv-page .p-dropdown, 
 .inv-page .p-multiselect, 
@@ -246,7 +220,6 @@
 /* ========================================== */
 /* PANELES DESPLEGABLES (Dropdown/Modals)     */
 /* ========================================== */
-
 .p-dropdown-panel, .p-multiselect-panel, .p-datepicker { 
   border-radius: 12px !important; 
   background: rgba(255, 255, 255, 0.85) !important; 
@@ -302,39 +275,16 @@
 /* TABLA INVENTARIO            */
 /* =========================== */
 .inv-table {
-    background: rgba(255, 255, 255, 0.2) !important;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Forzar transparencia total en capas internas */
 .p-datatable .p-datatable-wrapper, 
-.p-datatable .p-datatable-table,
-.inv-table .p-datatable-thead > tr > th,
-.inv-table .p-datatable-tbody > tr {
-    background: transparent !important;
-}
-
-.text-truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 150px;
-    display: block;
-}
-
-
-/* Ajuste para que las filas tengan un ligero fondo al pasar el mouse */
-.inv-table .p-datatable-tbody > tr:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* Asegurar que el paginador también sea transparente */
-.inv-table .p-paginator {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+.p-datatable .p-datatable-table {
+  background: transparent !important;
 }
 
 .inv-table .p-datatable-wrapper {
@@ -352,17 +302,41 @@
   border-bottom: 1px solid rgba(255,255,255,0.6) !important;
 }
 
-/* Esto fuerza que todo el contenido de las celdas esté alineado al centro verticalmente */
-.inv-table .p-datatable-tbody > tr > td {
-    vertical-align: middle !important;
-    padding: 0.5rem 1rem !important; /* Ajusta este padding si quieres que se vea más delgado */
-    display: table-cell;
-}                                   
+.inv-table .p-datatable-tbody > tr {
+  background: transparent !important;
+}
 
+.inv-table .p-datatable-tbody > tr > td {
+  vertical-align: middle !important;
+  padding: 0.5rem 1rem !important; 
+  display: table-cell;
+}                                  
+
+/* Hover y Selección de Filas en Verde (Limpieza de Morado) */
 .inv-table .p-datatable-tbody > tr:hover > td {
   background: rgba(255, 255, 255, 0.3) !important;
 }
 
+.p-datatable .p-datatable-tbody > tr.p-highlight {
+  background: rgba(10, 116, 99, 0.2) !important; 
+  color: var(--inv-brand) !important;
+}
+
+/* Foco y navegación con flechas en la tabla */
+.inv-table .p-datatable-tbody > tr:focus,
+.inv-action-btn:focus,
+.inv-search-input:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(10, 116, 99, 0.4) !important;
+  border-color: var(--inv-brand) !important;
+}
+
+.p-datatable .p-datatable-tbody > tr:focus {
+  outline: 2px solid var(--inv-brand) !important;
+  background: rgba(10, 116, 99, 0.1) !important;
+}
+
+/* Ordenamiento (Sort) */
 .inv-table .p-datatable-thead .p-sortable-column .p-sortable-column-icon,
 .inv-table .p-datatable-thead .p-sortable-column .pi {
   color: #334155 !important;
@@ -401,10 +375,10 @@
 /* ======================================= */
 /* PAGINACIÓN PREMIUM                      */
 /* ======================================= */
-
 .inv-table .p-paginator {
   background: transparent !important;
   border: none !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
   padding: 1rem 0.5rem 0.5rem !important;
   font-family: "Kodchasan", sans-serif !important;
 }
@@ -432,7 +406,17 @@
   box-shadow: 0 4px 10px rgba(10, 116, 99, 0.3) !important;
 }
 
-/* Imagen */
+/* ========================================== */
+/* COMPONENTES ADICIONALES Y UTILS            */
+/* ========================================== */
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+  display: block;
+}
+
 .inv-thumb {
   width: 56px;
   height: 56px;
@@ -442,36 +426,21 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-/* Acciones */
 .table-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-/* ========================== */
-/* BOTONES DE ACCIÓN          */
-/* ========================== */
-.inv-action-btn {
-    background: rgba(255, 255, 255, 0.4) !important;
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-    width: 34px; height: 34px; border-radius: 10px;
-    color: var(--inv-brand) !important;
+.inv-tooltip {
+  background: #475569 !important;
+  color: #ffffff !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  font-size: 0.85rem !important;
+  z-index: 99999 !important;
 }
-.inv-action-btn:hover {
-  background: #fff !important;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
-}
-
-.inv-action-btn.danger { color: #ef4444 !important; }
-.inv-action-btn.danger:hover { background: #fee2e2 !important; color: #dc2626 !important; }
-
-/* ========================= */
-/* TOAST INV                 */
-/* ========================= */
+.inv-tooltip .p-tooltip-arrow { border-top-color: #475569 !important; }
 
 .inv-toast { font-family: "Kodchasan", sans-serif !important; }
 .inv-toast .p-toast-message {
@@ -482,13 +451,21 @@
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15) !important;
   border-radius: 14px;
 }
+
 /* ========================== */
-/* AJUSTES GLOBALES           */
+/* REESCRITURAS DE LAYOUT GBL */
 /* ========================== */
 .layout-sidebar {
-    display: none !important;
+  display: none !important;
 }
 
 .layout-main-container {
-    margin-left: 0 !important;
+  margin-left: 0 !important;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .inv-toolbar-glass { flex-direction: column; align-items: stretch; }
+  .inv-search-wrapper { max-width: 100% !important; }
+  .inv-toolbar-actions { justify-content: flex-end; flex-wrap: wrap; }
 }
