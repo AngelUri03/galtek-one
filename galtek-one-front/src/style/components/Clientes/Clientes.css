@@ -646,6 +646,39 @@
   font-weight: 800;
 }
 
+.cli-filter-panel.p-dropdown-panel {
+  border: 1px solid rgba(21, 43, 38, 0.1) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  box-shadow: 0 16px 32px rgba(14, 33, 29, 0.13) !important;
+  font-family: "Kodchasan", sans-serif !important;
+}
+
+.cli-filter-panel .p-dropdown-items-wrapper,
+.cli-filter-panel .p-dropdown-items {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.cli-filter-panel .p-dropdown-item {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 36px;
+  margin: 0 !important;
+  padding: 0 0.86rem !important;
+  border-radius: 0 !important;
+  color: #334541 !important;
+  font-size: 0.84rem !important;
+  font-weight: 760 !important;
+}
+
+.cli-filter-panel .p-dropdown-item.p-highlight,
+.cli-filter-panel .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover {
+  background: rgba(10, 116, 99, 0.1) !important;
+  color: #0a7463 !important;
+}
+
 .cli-table-skeleton {
   display: grid;
   gap: 0;

@@ -9,7 +9,12 @@ import lombok.Data;
 public class TicketPrintRequest {
     private String folio;
     private String cajero;
+    private String caja;
+    private String fecha;
     private String metodoPago;
+    private String printerName;
+    private String clienteNombre;
+    private String clienteTelefono;
     private List<Item> items;
     private BigDecimal subtotal;
     private BigDecimal descuento;

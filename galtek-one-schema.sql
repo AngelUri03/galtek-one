@@ -43,7 +43,38 @@ CREATE TABLE IF NOT EXISTS Devoluciones (id_devolucion integer, estatus boolean,
 
 CREATE TABLE IF NOT EXISTS DevolucionesDetalle (id_devolucion_detalle integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), cantidad_devuelta integer, subtotal_devuelto numeric(38,2), id_devolucion integer not null, id_producto integer not null, primary key (id_devolucion_detalle));
 
-CREATE TABLE IF NOT EXISTS Empresas (id_empresa integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), direccion varchar(255) not null, fecha_fin date, fecha_inicio date not null, nombre varchar(255), token_licencia varchar(255), id_tipo_suscripcion integer not null, primary key (id_empresa));
+CREATE TABLE IF NOT EXISTS Empresas (id_empresa integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), direccion varchar(255) not null, direccion_calle varchar(255), direccion_numero_exterior varchar(60), direccion_numero_interior varchar(60), direccion_colonia varchar(255), direccion_municipio varchar(255), direccion_estado varchar(255), direccion_codigo_postal varchar(30), direccion_referencia varchar(500), fecha_fin date, fecha_inicio date not null, nombre varchar(255), razon_social varchar(255), rfc varchar(255), telefono varchar(255), whatsapp varchar(255), correo varchar(255), horario_operacion varchar(255), horario_config text, horario_lunes_viernes_apertura varchar(10), horario_lunes_viernes_cierre varchar(10), horario_sabado_domingo_apertura varchar(10), horario_sabado_domingo_cierre varchar(10), horario_sabado_domingo_cerrado boolean, horario_notas varchar(255), moneda varchar(10), zona_horaria varchar(80), ticket_mensaje varchar(500), logo_nombre varchar(255), logo_mime_type varchar(100), logo_base64 text, token_licencia varchar(255), id_tipo_suscripcion integer not null, primary key (id_empresa));
+
+CREATE TABLE IF NOT EXISTS ConfiguracionTicket (id_configuracion_ticket integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), id_empresa integer not null, paper_size varchar(10), density varchar(20), font_size varchar(20), separator_style varchar(20), alignment varchar(20), default_printer_name varchar(255), copies integer, auto_print boolean, ask_before_print boolean, allow_reprint boolean, show_logo boolean, footer_message varchar(120), template_json text, primary key (id_configuracion_ticket));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_configuracion_ticket_empresa ON ConfiguracionTicket(id_empresa);
+
+ALTER TABLE Empresas ADD COLUMN razon_social varchar(255);
+ALTER TABLE Empresas ADD COLUMN rfc varchar(255);
+ALTER TABLE Empresas ADD COLUMN telefono varchar(255);
+ALTER TABLE Empresas ADD COLUMN whatsapp varchar(255);
+ALTER TABLE Empresas ADD COLUMN correo varchar(255);
+ALTER TABLE Empresas ADD COLUMN direccion_calle varchar(255);
+ALTER TABLE Empresas ADD COLUMN direccion_numero_exterior varchar(60);
+ALTER TABLE Empresas ADD COLUMN direccion_numero_interior varchar(60);
+ALTER TABLE Empresas ADD COLUMN direccion_colonia varchar(255);
+ALTER TABLE Empresas ADD COLUMN direccion_municipio varchar(255);
+ALTER TABLE Empresas ADD COLUMN direccion_estado varchar(255);
+ALTER TABLE Empresas ADD COLUMN direccion_codigo_postal varchar(30);
+ALTER TABLE Empresas ADD COLUMN direccion_referencia varchar(500);
+ALTER TABLE Empresas ADD COLUMN horario_operacion varchar(255);
+ALTER TABLE Empresas ADD COLUMN horario_config text;
+ALTER TABLE Empresas ADD COLUMN horario_lunes_viernes_apertura varchar(10);
+ALTER TABLE Empresas ADD COLUMN horario_lunes_viernes_cierre varchar(10);
+ALTER TABLE Empresas ADD COLUMN horario_sabado_domingo_apertura varchar(10);
+ALTER TABLE Empresas ADD COLUMN horario_sabado_domingo_cierre varchar(10);
+ALTER TABLE Empresas ADD COLUMN horario_sabado_domingo_cerrado boolean;
+ALTER TABLE Empresas ADD COLUMN horario_notas varchar(255);
+ALTER TABLE Empresas ADD COLUMN moneda varchar(10);
+ALTER TABLE Empresas ADD COLUMN zona_horaria varchar(80);
+ALTER TABLE Empresas ADD COLUMN ticket_mensaje varchar(500);
+ALTER TABLE Empresas ADD COLUMN logo_nombre varchar(255);
+ALTER TABLE Empresas ADD COLUMN logo_mime_type varchar(100);
+ALTER TABLE Empresas ADD COLUMN logo_base64 text;
 
 CREATE TABLE IF NOT EXISTS EntradasSalidas (id_registro integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), fecha_hora timestamp not null, tipo varchar(255) not null, id_empresa integer not null, id_usuario integer not null, primary key (id_registro));
 
@@ -116,7 +147,7 @@ CREATE TABLE IF NOT EXISTS TipoSuscripcion (id_tipo_suscripcion integer, estatus
 
 CREATE TABLE IF NOT EXISTS Unidades (id_unidad integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), nombre varchar(255), primary key (id_unidad));
 
-CREATE TABLE IF NOT EXISTS Usuarios (id_usuario integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), activo integer not null, avatarUrl LONGTEXT, correo_usuario varchar(255), nombre_usuario varchar(255), password varchar(255) not null, telefono_usuario varchar(255) not null, usuario varchar(255) not null, id_empresa integer not null, id_rol integer not null, primary key (id_usuario));
+CREATE TABLE IF NOT EXISTS Usuarios (id_usuario integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), activo integer not null, requiere_cambio_password boolean not null default 0, avatarUrl LONGTEXT, correo_usuario varchar(255), nombre_usuario varchar(255), password varchar(255) not null, telefono_usuario varchar(255) not null, usuario varchar(255) not null, id_empresa integer not null, id_rol integer not null, primary key (id_usuario));
 
 CREATE TABLE IF NOT EXISTS UsuariosPermisos (id_usuarios_permisos integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), efecto varchar(10) not null, motivo varchar(180), id_permiso integer not null, id_usuario integer not null, primary key (id_usuarios_permisos));
 

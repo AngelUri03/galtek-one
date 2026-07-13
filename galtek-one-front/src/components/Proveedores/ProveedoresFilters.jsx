@@ -55,6 +55,7 @@ export default function ProveedoresFilters({
               options={field.options}
               onChange={(event) => onFilterChange(field.key, event.value)}
               className="prov-filter-dropdown"
+              panelClassName="prov-filter-panel"
             />
           </label>
         ))}

@@ -55,6 +55,9 @@ public class UsuariosEntity extends CommonEntity {
     
     @Column(columnDefinition = "LONGTEXT")
     private String avatarUrl;
+
+    @Column(name = "requiere_cambio_password", nullable = false)
+    private Boolean requiereCambioPassword = false;
     
     @PrePersist
     @PreUpdate

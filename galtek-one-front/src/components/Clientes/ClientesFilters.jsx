@@ -53,6 +53,7 @@ export default function ClientesFilters({
               options={field.options}
               onChange={(event) => onFilterChange(field.key, event.value)}
               className="cli-filter-dropdown"
+              panelClassName="cli-filter-panel"
             />
           </label>
         ))}

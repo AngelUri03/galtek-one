@@ -13,11 +13,17 @@ VALUES
 (1, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'Local escritorio');
 
 INSERT OR REPLACE INTO Empresas
-(id_empresa, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, direccion, fecha_inicio, fecha_fin, nombre, token_licencia, id_tipo_suscripcion)
+(id_empresa, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, direccion, direccion_calle, direccion_numero_exterior, direccion_numero_interior, direccion_colonia, direccion_municipio, direccion_estado, direccion_codigo_postal, direccion_referencia, fecha_inicio, fecha_fin, nombre, razon_social, telefono, whatsapp, correo, horario_operacion, horario_config, horario_lunes_viernes_apertura, horario_lunes_viernes_cierre, horario_sabado_domingo_apertura, horario_sabado_domingo_cierre, horario_sabado_domingo_cerrado, horario_notas, moneda, zona_horaria, ticket_mensaje, token_licencia, id_tipo_suscripcion)
 VALUES
 (1, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system',
- 'Av. Comercio 245, Col. Centro, CDMX', STRFTIME('%Y-%m-%d 00:00:00.000', 'now', '-180 day'), NULL,
- 'Abarrotes La Esquina - Demo Galtek One', 'LOCAL-DESKTOP-DEMO', 1);
+ 'Av. Comercio 245, No. 245, Centro, Cuauhtemoc, Ciudad de Mexico, CP 06000',
+ 'Av. Comercio', '245', NULL, 'Centro', 'Cuauhtemoc', 'Ciudad de Mexico', '06000', NULL,
+ STRFTIME('%Y-%m-%d 00:00:00.000', 'now', '-180 day'), NULL,
+ 'Abarrotes La Esquina - Demo Galtek One', 'Abarrotes La Esquina', '5555550001', '5555550001', 'admin@galtek.one',
+ 'Lun a Vie 08:00-20:00, Sab y Dom 09:00-16:00',
+ '{"mode":"WEEKDAY_WEEKEND","weekdays":{"status":"OPEN","open":"08:00","close":"20:00"},"weekend":{"status":"OPEN","open":"09:00","close":"16:00"},"base":{"status":"OPEN","open":"08:00","close":"20:00"},"exceptions":{},"days":{},"notes":""}',
+ '08:00', '20:00', '09:00', '16:00', 0, NULL,
+ 'MXN', 'America/Mexico_City', 'Gracias por su compra', 'LOCAL-DESKTOP-DEMO', 1);
 
 INSERT OR REPLACE INTO Roles
 (id_rol, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, nombre_rol, id_empresa)
@@ -28,51 +34,155 @@ VALUES
 (23, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'Supervisor', 1),
 (24, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'Invitado', 1);
 
-INSERT OR REPLACE INTO Permisos
-(id_permiso, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, accion, clave, descripcion, modulo, nombre)
-VALUES
-(1, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'VER', 'VENTAS_VER', 'Consultar pantalla e historial de ventas', 'VENTAS', 'Ver ventas'),
-(2, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'CREAR', 'VENTAS_CREAR', 'Registrar ventas y pagos', 'VENTAS', 'Crear ventas'),
-(3, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'CANCELAR', 'VENTAS_CANCELAR', 'Cancelar ventas y registrar devoluciones', 'VENTAS', 'Cancelar ventas'),
-(4, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'VER', 'INVENTARIO_VER', 'Consultar existencias, lotes y alertas', 'INVENTARIO', 'Ver inventario'),
-(5, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'EDITAR', 'INVENTARIO_EDITAR', 'Crear productos y ajustar stock', 'INVENTARIO', 'Editar inventario'),
-(6, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'VER', 'CLIENTES_VER', 'Consultar clientes', 'CLIENTES', 'Ver clientes'),
-(7, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'EDITAR', 'CLIENTES_EDITAR', 'Crear y editar clientes', 'CLIENTES', 'Editar clientes'),
-(8, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'VER', 'COMPRAS_VER', 'Consultar compras y proveedores', 'COMPRAS', 'Ver compras'),
-(9, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'CREAR', 'COMPRAS_CREAR', 'Registrar compras y costos', 'COMPRAS', 'Crear compras'),
-(10, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'VER', 'REPORTES_VER', 'Consultar reportes financieros', 'REPORTES', 'Ver reportes'),
-(11, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'ADMIN', 'CONFIG_USUARIOS', 'Administrar usuarios, roles y permisos', 'CONFIGURACION', 'Administrar usuarios'),
-(12, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'EDITAR', 'CONFIG_TIENDA', 'Configurar tienda, cajas y parametros', 'CONFIGURACION', 'Configurar tienda'),
-(13, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'VER', 'CAJA_VER', 'Consultar balance y movimientos de caja', 'CAJA', 'Ver caja'),
-(14, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'EDITAR', 'CAJA_MOVIMIENTOS', 'Registrar ingresos y egresos manuales', 'CAJA', 'Movimientos de caja');
-
-DELETE FROM RolesPermisos WHERE id_roles_permisos BETWEEN 1 AND 200;
-
-INSERT OR REPLACE INTO RolesPermisos
-(id_roles_permisos, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, id_permiso, id_rol)
-SELECT id, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', permiso, rol
-FROM (
-  SELECT 1 id, 20 rol, 1 permiso UNION ALL SELECT 2,20,2 UNION ALL SELECT 3,20,3 UNION ALL SELECT 4,20,4
-  UNION ALL SELECT 5,20,5 UNION ALL SELECT 6,20,6 UNION ALL SELECT 7,20,7 UNION ALL SELECT 8,20,8
-  UNION ALL SELECT 9,20,9 UNION ALL SELECT 10,20,10 UNION ALL SELECT 11,20,11 UNION ALL SELECT 12,20,12
-  UNION ALL SELECT 13,20,13 UNION ALL SELECT 14,20,14
-  UNION ALL SELECT 21,21,1 UNION ALL SELECT 22,21,2 UNION ALL SELECT 23,21,4 UNION ALL SELECT 24,21,6
-  UNION ALL SELECT 25,21,7
-  UNION ALL SELECT 31,22,1 UNION ALL SELECT 32,22,2 UNION ALL SELECT 33,22,6 UNION ALL SELECT 34,22,13
-  UNION ALL SELECT 35,22,14
-  UNION ALL SELECT 41,23,1 UNION ALL SELECT 42,23,2 UNION ALL SELECT 43,23,3 UNION ALL SELECT 44,23,4
-  UNION ALL SELECT 45,23,5 UNION ALL SELECT 46,23,8 UNION ALL SELECT 47,23,9 UNION ALL SELECT 48,23,10
-  UNION ALL SELECT 49,23,13 UNION ALL SELECT 50,23,14
-  UNION ALL SELECT 61,24,1
+DROP TABLE IF EXISTS seed_permisos_catalogo;
+CREATE TEMP TABLE seed_permisos_catalogo (
+  id_permiso INTEGER,
+  accion TEXT,
+  clave TEXT,
+  descripcion TEXT,
+  modulo TEXT,
+  nombre TEXT
 );
 
+INSERT INTO seed_permisos_catalogo VALUES
+(1, 'VER', 'VENTAS_VER', 'Consultar pantalla e historial de ventas', 'VENTAS', 'Ver ventas'),
+(2, 'CREAR', 'VENTAS_CREAR', 'Registrar ventas y pagos', 'VENTAS', 'Crear ventas'),
+(3, 'CANCELAR', 'VENTAS_CANCELAR', 'Cancelar ventas y registrar devoluciones', 'VENTAS', 'Cancelar ventas'),
+(4, 'VER', 'INVENTARIO_VER', 'Consultar existencias, lotes y alertas', 'INVENTARIO', 'Ver inventario'),
+(5, 'EDITAR', 'INVENTARIO_EDITAR', 'Crear productos y ajustar stock', 'INVENTARIO', 'Editar inventario'),
+(6, 'VER', 'CLIENTES_VER', 'Consultar clientes', 'CLIENTES', 'Ver clientes'),
+(7, 'EDITAR', 'CLIENTES_EDITAR', 'Crear y editar clientes', 'CLIENTES', 'Editar clientes'),
+(8, 'VER', 'COMPRAS_VER', 'Consultar compras y proveedores', 'COMPRAS', 'Ver compras'),
+(9, 'CREAR', 'COMPRAS_CREAR', 'Registrar compras y costos', 'COMPRAS', 'Crear compras'),
+(10, 'VER', 'REPORTES_VER', 'Consultar reportes financieros', 'REPORTES', 'Ver reportes'),
+(11, 'ADMIN', 'CONFIG_USUARIOS', 'Administrar usuarios, roles y permisos', 'CONFIGURACION', 'Administrar usuarios'),
+(12, 'EDITAR', 'CONFIG_TIENDA', 'Configurar tienda, cajas y parametros', 'CONFIGURACION', 'Configurar tienda'),
+(13, 'VER', 'CAJA_VER', 'Consultar balance y movimientos de caja', 'CAJA', 'Ver caja'),
+(14, 'EDITAR', 'CAJA_MOVIMIENTOS', 'Registrar ingresos y egresos manuales', 'CAJA', 'Movimientos de caja'),
+(15, 'DESCUENTO', 'VENTAS_APLICAR_DESCUENTO', 'Autorizar descuentos durante la venta', 'VENTAS', 'Aplicar descuentos'),
+(16, 'PRECIO_EDITAR', 'VENTAS_CAMBIAR_PRECIO', 'Modificar precio manualmente durante la venta', 'VENTAS', 'Cambiar precio'),
+(17, 'DEVOLUCION', 'VENTAS_DEVOLUCION', 'Registrar devoluciones de productos vendidos', 'VENTAS', 'Procesar devoluciones'),
+(18, 'REIMPRIMIR_TICKET', 'VENTAS_REIMPRIMIR_TICKET', 'Reimprimir comprobantes de venta', 'VENTAS', 'Reimprimir ticket'),
+(19, 'VER', 'VENTAS_VER_HISTORIAL', 'Consultar ventas anteriores', 'VENTAS', 'Ver historial de ventas'),
+(20, 'CLIENTE', 'VENTAS_SELECCIONAR_CLIENTE', 'Asignar cliente a una venta', 'VENTAS', 'Seleccionar cliente'),
+(21, 'ABRIR', 'CAJA_ABRIR', 'Iniciar caja operativa', 'CAJA', 'Abrir caja'),
+(22, 'CERRAR', 'CAJA_CERRAR_PROPIA', 'Cerrar la caja del usuario actual', 'CAJA', 'Cerrar caja propia'),
+(23, 'CERRAR', 'CAJA_CERRAR_AJENA', 'Cerrar caja operada por otro usuario', 'CAJA', 'Cerrar caja ajena'),
+(24, 'ENTRADA', 'CAJA_ENTRADA_EFECTIVO', 'Registrar ingresos manuales de efectivo', 'CAJA', 'Entrada de efectivo'),
+(25, 'RETIRO', 'CAJA_RETIRO_EFECTIVO', 'Registrar retiros manuales de efectivo', 'CAJA', 'Retiro de efectivo'),
+(26, 'ARQUEO', 'CAJA_VER_ARQUEO', 'Consultar conteos y diferencias de caja', 'CAJA', 'Ver arqueo'),
+(27, 'AJUSTAR', 'CAJA_AJUSTAR_DIFERENCIA', 'Corregir diferencias de arqueo', 'CAJA', 'Ajustar diferencia'),
+(28, 'CREAR', 'INVENTARIO_CREAR_PRODUCTO', 'Dar de alta productos en inventario', 'INVENTARIO', 'Crear producto'),
+(29, 'EDITAR', 'INVENTARIO_EDITAR_PRODUCTO', 'Modificar datos generales de productos', 'INVENTARIO', 'Editar producto'),
+(30, 'PRECIO_EDITAR', 'INVENTARIO_EDITAR_PRECIO', 'Modificar precios de venta', 'INVENTARIO', 'Editar precio'),
+(31, 'COSTO_VER', 'INVENTARIO_VER_COSTOS', 'Consultar costos y margen base', 'INVENTARIO', 'Ver costos'),
+(32, 'AJUSTAR', 'INVENTARIO_AJUSTE_STOCK', 'Corregir existencias manualmente', 'INVENTARIO', 'Ajustar stock'),
+(33, 'AJUSTAR', 'INVENTARIO_AJUSTE_POSITIVO', 'Aumentar existencias manualmente', 'INVENTARIO', 'Ajuste positivo'),
+(34, 'AJUSTAR', 'INVENTARIO_AJUSTE_NEGATIVO', 'Disminuir existencias manualmente', 'INVENTARIO', 'Ajuste negativo'),
+(35, 'ARCHIVAR', 'INVENTARIO_ARCHIVAR_PRODUCTO', 'Ocultar producto sin borrar historial', 'INVENTARIO', 'Archivar producto'),
+(36, 'ELIMINAR', 'INVENTARIO_ELIMINAR_SIN_USO', 'Eliminar productos sin movimientos', 'INVENTARIO', 'Eliminar producto sin uso'),
+(37, 'IMPORTAR', 'INVENTARIO_IMPORTAR', 'Cargar datos masivos de productos', 'INVENTARIO', 'Importar inventario'),
+(38, 'EXPORTAR', 'INVENTARIO_EXPORTAR', 'Exportar datos de inventario', 'INVENTARIO', 'Exportar inventario'),
+(39, 'CONFIRMAR', 'COMPRAS_CONFIRMAR', 'Confirmar recepcion y afectar inventario', 'COMPRAS', 'Confirmar compras'),
+(40, 'CANCELAR', 'COMPRAS_CANCELAR', 'Cancelar compras registradas', 'COMPRAS', 'Cancelar compras'),
+(41, 'DEVOLUCION', 'COMPRAS_DEVOLVER', 'Registrar devoluciones a proveedores', 'COMPRAS', 'Devolver compra'),
+(42, 'COSTO_VER', 'COMPRAS_VER_COSTOS', 'Consultar costos dentro de compras', 'COMPRAS', 'Ver costos de compra'),
+(43, 'PAGO', 'COMPRAS_GESTIONAR_PAGO', 'Administrar pagos a proveedores', 'COMPRAS', 'Gestionar pagos'),
+(44, 'CREAR', 'COMPRAS_ALTA_RAPIDA_PRODUCTO', 'Crear productos desde compras', 'COMPRAS', 'Alta rapida de producto'),
+(45, 'CREAR', 'COMPRAS_ALTA_RAPIDA_PROVEEDOR', 'Crear proveedores desde compras', 'COMPRAS', 'Alta rapida de proveedor'),
+(46, 'VER', 'PROVEEDORES_VER', 'Consultar directorio de proveedores', 'PROVEEDORES', 'Ver proveedores'),
+(47, 'EDITAR', 'PROVEEDORES_CREAR_EDITAR', 'Modificar datos de proveedores', 'PROVEEDORES', 'Crear y editar proveedores'),
+(48, 'PRODUCTOS', 'PROVEEDORES_PRODUCTOS', 'Relacionar productos con proveedores', 'PROVEEDORES', 'Gestionar productos'),
+(49, 'ACTIVOS', 'PROVEEDORES_ACTIVOS', 'Activar o desactivar proveedores', 'PROVEEDORES', 'Gestionar activos'),
+(50, 'DOCUMENTOS', 'PROVEEDORES_DOCUMENTOS', 'Administrar documentos asociados', 'PROVEEDORES', 'Documentos de proveedores'),
+(51, 'AUDITORIA', 'PROVEEDORES_VER_AUDITORIA', 'Consultar historial de cambios', 'PROVEEDORES', 'Ver auditoria'),
+(52, 'ARCHIVAR', 'PROVEEDORES_ARCHIVAR', 'Sacar proveedor de operacion sin borrar historial', 'PROVEEDORES', 'Archivar proveedor'),
+(53, 'ELIMINAR', 'PROVEEDORES_ELIMINAR_SEGURO', 'Eliminar solo si no rompe historial', 'PROVEEDORES', 'Eliminar proveedor seguro'),
+(54, 'EDITAR', 'CLIENTES_CREAR_EDITAR', 'Modificar datos generales de clientes', 'CLIENTES', 'Crear y editar clientes'),
+(55, 'FISCALES', 'CLIENTES_VER_FISCALES', 'Consultar datos fiscales de clientes', 'CLIENTES', 'Ver fiscales'),
+(56, 'FISCALES', 'CLIENTES_EDITAR_FISCALES', 'Modificar datos fiscales de clientes', 'CLIENTES', 'Editar fiscales'),
+(57, 'HISTORIAL', 'CLIENTES_VER_COMPRAS', 'Consultar historial de compras del cliente', 'CLIENTES', 'Ver compras del cliente'),
+(58, 'ARCHIVAR', 'CLIENTES_ARCHIVAR', 'Sacar cliente de operacion sin borrar historial', 'CLIENTES', 'Archivar cliente'),
+(59, 'ELIMINAR', 'CLIENTES_ELIMINAR_SEGURO', 'Eliminar solo si no rompe historial', 'CLIENTES', 'Eliminar cliente seguro'),
+(60, 'VENTAS', 'REPORTES_VENTAS', 'Consultar reportes de ventas', 'REPORTES', 'Reportes de ventas'),
+(61, 'COMPRAS', 'REPORTES_COMPRAS', 'Consultar reportes de compras', 'REPORTES', 'Reportes de compras'),
+(62, 'BALANCE', 'REPORTES_BALANCE', 'Consultar balance general', 'REPORTES', 'Balance operativo'),
+(63, 'UTILIDAD', 'REPORTES_VER_UTILIDAD', 'Consultar utilidad y margen', 'REPORTES', 'Ver utilidad'),
+(64, 'EXPORTAR', 'REPORTES_EXPORTAR', 'Exportar informacion de reportes', 'REPORTES', 'Exportar reportes'),
+(65, 'VER', 'CONFIG_VER', 'Consultar ajustes del sistema', 'CONFIGURACION', 'Ver configuracion'),
+(66, 'VER', 'CONFIG_USUARIOS_VER', 'Consultar usuarios del sistema', 'CONFIGURACION', 'Ver usuarios'),
+(67, 'USUARIOS', 'CONFIG_USUARIOS_GESTIONAR', 'Crear, editar o desactivar usuarios', 'CONFIGURACION', 'Gestionar usuarios'),
+(68, 'RESET_PASSWORD', 'CONFIG_USUARIOS_PASSWORD', 'Generar password temporal para usuarios', 'CONFIGURACION', 'Restablecer password'),
+(69, 'VER', 'CONFIG_ROLES_VER', 'Consultar roles y permisos asignados', 'CONFIGURACION', 'Ver roles'),
+(70, 'ROLES', 'CONFIG_ROLES_GESTIONAR', 'Crear, editar o desactivar roles', 'CONFIGURACION', 'Gestionar roles'),
+(71, 'ROLES', 'CONFIG_ROLES_PERMISOS', 'Asignar permisos existentes a roles', 'CONFIGURACION', 'Gestionar permisos de roles'),
+(72, 'OVERRIDES', 'CONFIG_OVERRIDES_GESTIONAR', 'Autorizar permisos especiales por usuario', 'CONFIGURACION', 'Gestionar overrides'),
+(73, 'EDITAR', 'CONFIG_CAJA_EDITAR', 'Modificar reglas de caja', 'CONFIGURACION', 'Editar caja'),
+(74, 'EDITAR', 'CONFIG_PAGOS_EDITAR', 'Modificar metodos de pago y terminal', 'CONFIGURACION', 'Editar pagos'),
+(75, 'EDITAR', 'CONFIG_TICKET_EDITAR', 'Modificar formato de ticket', 'CONFIGURACION', 'Editar ticket'),
+(76, 'EDITAR', 'CONFIG_INVENTARIO_EDITAR', 'Modificar configuracion de inventario', 'CONFIGURACION', 'Editar reglas de inventario'),
+(77, 'EDITAR', 'CONFIG_COMPRAS_EDITAR', 'Modificar configuracion de compras', 'CONFIGURACION', 'Editar reglas de compras'),
+(78, 'EDITAR', 'CONFIG_CLIENTES_EDITAR', 'Modificar configuracion de clientes', 'CONFIGURACION', 'Editar reglas de clientes'),
+(79, 'EDITAR', 'CONFIG_PROVEEDORES_EDITAR', 'Modificar configuracion de proveedores', 'CONFIGURACION', 'Editar reglas de proveedores'),
+(80, 'RESPALDO', 'CONFIG_RESPALDOS', 'Generar y borrar respaldos', 'CONFIGURACION', 'Gestionar respaldos'),
+(81, 'RESTAURAR', 'CONFIG_RESTAURAR_RESPALDO', 'Restaurar informacion desde respaldo', 'CONFIGURACION', 'Restaurar respaldo'),
+(82, 'AUDITORIA', 'CONFIG_AUDITORIA_VER', 'Consultar bitacora de acciones', 'CONFIGURACION', 'Ver auditoria'),
+(83, 'VER', 'FACTURACION_VER_DATOS', 'Consultar datos de facturacion', 'FACTURACION', 'Ver datos fiscales'),
+(84, 'EDITAR', 'FACTURACION_EDITAR_DATOS', 'Modificar datos de facturacion', 'FACTURACION', 'Editar datos fiscales'),
+(85, 'EXPORTAR', 'FACTURACION_EXPORTAR_INFO', 'Exportar datos fiscales', 'FACTURACION', 'Exportar informacion fiscal');
+
+-- Catalogo cerrado: insertar por clave si falta, sin duplicar ni pisar permisos ya existentes.
+INSERT OR IGNORE INTO Permisos
+(id_permiso, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, accion, clave, descripcion, modulo, nombre)
+SELECT sp.id_permiso, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system',
+       sp.accion, sp.clave, sp.descripcion, sp.modulo, sp.nombre
+FROM seed_permisos_catalogo sp
+WHERE NOT EXISTS (SELECT 1 FROM Permisos p WHERE p.clave = sp.clave);
+
+DELETE FROM RolesPermisos
+WHERE id_roles_permisos BETWEEN 1 AND 200
+   OR id_roles_permisos BETWEEN 20000 AND 24999;
+
+INSERT OR IGNORE INTO RolesPermisos
+(id_roles_permisos, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, id_permiso, id_rol)
+SELECT 20000 + p.id_permiso, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', p.id_permiso, 20
+FROM Permisos p
+UNION ALL
+SELECT 21000 + p.id_permiso, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', p.id_permiso, 21
+FROM Permisos p
+WHERE p.clave IN ('VENTAS_VER', 'VENTAS_CREAR', 'VENTAS_SELECCIONAR_CLIENTE', 'VENTAS_REIMPRIMIR_TICKET', 'VENTAS_VER_HISTORIAL', 'CLIENTES_VER')
+UNION ALL
+SELECT 22000 + p.id_permiso, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', p.id_permiso, 22
+FROM Permisos p
+WHERE p.clave IN ('VENTAS_VER', 'VENTAS_CREAR', 'VENTAS_SELECCIONAR_CLIENTE', 'VENTAS_REIMPRIMIR_TICKET', 'CAJA_VER', 'CAJA_ABRIR', 'CAJA_CERRAR_PROPIA', 'CLIENTES_VER')
+UNION ALL
+SELECT 23000 + p.id_permiso, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', p.id_permiso, 23
+FROM Permisos p
+WHERE p.clave IN (
+  'VENTAS_VER', 'VENTAS_CREAR', 'VENTAS_APLICAR_DESCUENTO', 'VENTAS_CANCELAR', 'VENTAS_DEVOLUCION',
+  'VENTAS_REIMPRIMIR_TICKET', 'VENTAS_VER_HISTORIAL', 'VENTAS_SELECCIONAR_CLIENTE',
+  'CAJA_VER', 'CAJA_ABRIR', 'CAJA_CERRAR_PROPIA', 'CAJA_CERRAR_AJENA', 'CAJA_ENTRADA_EFECTIVO',
+  'CAJA_RETIRO_EFECTIVO', 'CAJA_VER_ARQUEO', 'CAJA_MOVIMIENTOS',
+  'INVENTARIO_VER', 'COMPRAS_VER', 'COMPRAS_CREAR', 'COMPRAS_CONFIRMAR', 'COMPRAS_CANCELAR',
+  'COMPRAS_DEVOLVER', 'COMPRAS_VER_COSTOS', 'PROVEEDORES_VER', 'PROVEEDORES_CREAR_EDITAR',
+  'PROVEEDORES_PRODUCTOS', 'PROVEEDORES_VER_AUDITORIA', 'CLIENTES_VER', 'CLIENTES_CREAR_EDITAR',
+  'CLIENTES_VER_FISCALES', 'CLIENTES_VER_COMPRAS', 'REPORTES_VER', 'REPORTES_VENTAS',
+  'REPORTES_COMPRAS', 'REPORTES_BALANCE'
+)
+UNION ALL
+SELECT 24000 + p.id_permiso, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', p.id_permiso, 24
+FROM Permisos p
+WHERE p.clave IN ('VENTAS_VER');
+
+DROP TABLE IF EXISTS seed_permisos_catalogo;
+
 INSERT OR REPLACE INTO Usuarios
-(id_usuario, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, activo, avatarUrl, correo_usuario, nombre_usuario, password, telefono_usuario, usuario, id_empresa, id_rol)
+(id_usuario, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, activo, requiere_cambio_password, avatarUrl, correo_usuario, nombre_usuario, password, telefono_usuario, usuario, id_empresa, id_rol)
 VALUES
-(1, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 1, NULL, 'admin@galtek.one', 'Administrador General', '$2a$10$3zgQSqcbCOao5yOcqPx0U.s3KzHHHMqzYiWg8eNRJ3lXkzF0GkHy.', '5555550001', 'admin', 1, 20),
-(2, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 1, NULL, 'caja1@galtek.one', 'Laura Martinez', '$2a$10$3zgQSqcbCOao5yOcqPx0U.s3KzHHHMqzYiWg8eNRJ3lXkzF0GkHy.', '5555550002', 'caja1', 1, 22),
-(3, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 1, NULL, 'ventas@galtek.one', 'Diego Ramirez', '$2a$10$3zgQSqcbCOao5yOcqPx0U.s3KzHHHMqzYiWg8eNRJ3lXkzF0GkHy.', '5555550003', 'vendedor', 1, 21),
-(4, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 1, NULL, 'supervisor@galtek.one', 'Sofia Hernandez', '$2a$10$3zgQSqcbCOao5yOcqPx0U.s3KzHHHMqzYiWg8eNRJ3lXkzF0GkHy.', '5555550004', 'supervisor', 1, 23);
+(1, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 1, 0, NULL, 'admin@galtek.one', 'Administrador General', '$2a$10$3zgQSqcbCOao5yOcqPx0U.s3KzHHHMqzYiWg8eNRJ3lXkzF0GkHy.', '5555550001', 'admin', 1, 20),
+(2, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 1, 0, NULL, 'caja1@galtek.one', 'Laura Martinez', '$2a$10$3zgQSqcbCOao5yOcqPx0U.s3KzHHHMqzYiWg8eNRJ3lXkzF0GkHy.', '5555550002', 'caja1', 1, 22),
+(3, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 1, 0, NULL, 'ventas@galtek.one', 'Diego Ramirez', '$2a$10$3zgQSqcbCOao5yOcqPx0U.s3KzHHHMqzYiWg8eNRJ3lXkzF0GkHy.', '5555550003', 'vendedor', 1, 21),
+(4, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 1, 0, NULL, 'supervisor@galtek.one', 'Sofia Hernandez', '$2a$10$3zgQSqcbCOao5yOcqPx0U.s3KzHHHMqzYiWg8eNRJ3lXkzF0GkHy.', '5555550004', 'supervisor', 1, 23);
 
 INSERT OR REPLACE INTO UsuariosPermisos
 (id_usuarios_permisos, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, efecto, motivo, id_permiso, id_usuario)

@@ -10,9 +10,13 @@ import "../../style/components/common/UserProfileMenu.css";
 
 import CambiarPerfil from "./CambiarPerfil";
 
-function resolveAvatarImage(avatarB64) {
-  if (!avatarB64) return null;
-  return `data:image/png;base64,${avatarB64}`;
+function resolveAvatarImage(rawAvatar) {
+  if (!rawAvatar) return null;
+  const value = String(rawAvatar).trim();
+  if (!value) return null;
+  if (value.startsWith("data:image/")) return value;
+  if (value.includes(";base64,")) return `data:${value}`;
+  return `data:image/png;base64,${value.replace(/\s/g, "")}`;
 }
 
 export default function UserProfileMenu() {
@@ -41,7 +45,7 @@ export default function UserProfileMenu() {
   const empresaNombre = user?.nombreEmpresa || null;
 
   const avatarImage = resolveAvatarImage(user?.avatarUrl);
-  const hasAvatar = Boolean(user?.avatarUrl);
+  const hasAvatar = Boolean(avatarImage);
 
   const realignPanel = (ev = null) => {
     const panel = panelRef.current;
