@@ -61,8 +61,12 @@ CREATE TABLE IF NOT EXISTS UsuariosPermisos (id_usuarios_permisos integer, estat
 
 CREATE TABLE IF NOT EXISTS VentaDetalle (id_venta_detalle integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), cantidad numeric(10,3) not null, precio_unitario float, subtotal float, id_empresa integer not null, id_producto integer not null, id_venta integer not null, primary key (id_venta_detalle));
 
+
+
 CREATE TABLE IF NOT EXISTS Ventas (id_venta integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), estado varchar(255) not null, total float not null, id_caja integer not null, id_cliente integer, id_empresa integer not null, id_metodo_pago integer not null, id_usuario integer not null, primary key (id_venta));
 
 CREATE INDEX IF NOT EXISTS idx_mov_caja_caja_empresa on MovimientoCaja (id_caja, id_empresa);
 
 CREATE INDEX IF NOT EXISTS idx_mov_caja_empresa_fecha on MovimientoCaja (id_empresa, fecha);
+
+CREATE TABLE IF NOT EXISTS LocalDevice (installation_id varchar(36) not null, cash_register_id integer, cpu_hash varchar(64), motherboard_hash varchar(64), mac_hash varchar(64), disk_hash varchar(255), license_token varchar(2500), created_at timestamp, primary key (installation_id));

@@ -25,14 +25,16 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter,
+			com.galtekone.security.HardwareLockFilter hardwareLockFilter,
 			RestAuthenticationEntryPoint authEntryPoint, RestAccessDeniedHandler accessDeniedHandler) throws Exception {
 
 		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.exceptionHandling(
 						ex -> ex.authenticationEntryPoint(authEntryPoint).accessDeniedHandler(accessDeniedHandler))
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/auth/login", "/auth/keys/public").permitAll()
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/auth/login", "/auth/keys/public", "/device/identity", "/device/activate").permitAll()
 						.anyRequest().authenticated())
+				.addFilterBefore(hardwareLockFilter, UsernamePasswordAuthenticationFilter.class)
 				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
