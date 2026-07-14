@@ -116,7 +116,11 @@ const LoginForm = () => {
         usuario: payload?.data?.usuario,
         nombreUsuario: payload?.data?.nombreUsuario,
         rol: payload?.data?.rol,
+        avatarUrl: payload?.data?.avatarUrl,
         idEmpresa: payload?.data?.idEmpresa,
+        nombreEmpresa: payload?.data?.nombreEmpresa,
+        idUsuario: payload?.data?.idUsuario,
+        requiereCambioPassword: Boolean(payload?.data?.requiereCambioPassword),
       });
 
       showToast("success", "Bienvenido", "Inicio de sesion correcto");

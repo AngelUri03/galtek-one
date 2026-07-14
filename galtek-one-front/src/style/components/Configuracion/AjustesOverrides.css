@@ -1,0 +1,1358 @@
+.uov-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.uov-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.uov-summary-card,
+.uov-controls,
+.uov-table-shell,
+.uov-panel-card,
+.uov-permissions-card {
+  border: 1px solid rgba(0, 128, 112, 0.12);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 12px 28px rgba(12, 66, 60, 0.06);
+  backdrop-filter: blur(16px);
+}
+
+.uov-summary-card {
+  min-height: 58px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+}
+
+.uov-summary-card > i,
+.uov-avatar-mini,
+.uov-avatar-large,
+.uov-module-icon,
+.uov-permission-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  background: rgba(0, 128, 112, 0.12);
+  color: #007f70;
+  border: 1px solid rgba(0, 128, 112, 0.16);
+}
+
+.uov-summary-card > i {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.uov-summary-card span,
+.uov-filter > span,
+.uov-table-head span,
+.uov-card-head p,
+.uov-panel-hero p,
+.uov-modal-hero small,
+.uov-override-count span,
+.uov-active-override span,
+.uov-active-override small,
+.uov-effective-module span,
+.uov-mini-permission span {
+  color: #5f6e6b;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.uov-summary-card strong {
+  display: block;
+  color: #152522;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.uov-controls {
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: minmax(300px, 1.05fr) minmax(560px, 1.55fr) auto;
+  gap: 10px;
+  align-items: end;
+  padding: 10px 12px;
+}
+
+.uov-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.uov-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(110px, 1fr));
+  gap: 10px;
+}
+
+.uov-control-actions {
+  display: flex;
+  align-items: end;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.uov-search-wrap {
+  height: 42px;
+  border: 1px solid rgba(18, 53, 48, 0.16);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.9);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.uov-search-wrap > i {
+  color: #007f70;
+  font-size: 1rem;
+}
+
+.uov-search-wrap .p-inputtext,
+.ajx-page .uov-search-wrap .p-inputtext:not(.p-inputtextarea),
+.ajx-page .uov-search-wrap .p-inputtext:enabled:focus {
+  flex: 1 1 auto;
+  width: 1%;
+  min-width: 0;
+  height: 38px;
+  min-height: 38px;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent;
+  padding: 0;
+  color: #172a26;
+  font-weight: 700;
+}
+
+.uov-search-wrap:focus-within,
+.uov-filter .p-dropdown.p-focus {
+  border-color: rgba(0, 128, 112, 0.72) !important;
+  box-shadow: 0 0 0 3px rgba(0, 128, 112, 0.13) !important;
+}
+
+.uov-filter .p-dropdown,
+.ajx-page .uov-filter .p-dropdown {
+  width: 100%;
+  height: 42px;
+  min-height: 42px;
+  border-radius: 8px !important;
+  border: 1px solid rgba(18, 53, 48, 0.16) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  box-shadow: none !important;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  column-gap: 0;
+}
+
+.uov-filter .p-dropdown-label,
+.ajx-page .uov-filter .p-dropdown .p-dropdown-label {
+  flex: 1 1 auto;
+  min-height: 40px;
+  padding: 10px 12px !important;
+  border: 0 !important;
+  border-right: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #223633;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+}
+
+.uov-filter .p-dropdown > .p-inputtext,
+.uov-filter .p-dropdown > .p-dropdown-label,
+.ajx-page .uov-filter .p-dropdown > .p-inputtext,
+.ajx-page .uov-filter .p-dropdown > .p-dropdown-label {
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.uov-filter .p-dropdown-trigger,
+.ajx-page .uov-filter .p-dropdown .p-dropdown-trigger {
+  width: 40px;
+  color: #007f70;
+  height: 100% !important;
+  border: 0 !important;
+  border-left: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  flex: 0 0 40px;
+  margin-left: 0 !important;
+  border-radius: 0 !important;
+}
+
+.uov-filter .p-dropdown-trigger-icon,
+.ajx-page .uov-filter .p-dropdown .p-dropdown-trigger-icon {
+  color: #007f70 !important;
+}
+
+.uov-filter .p-dropdown-trigger::before,
+.uov-filter .p-dropdown-trigger::after {
+  display: none !important;
+}
+
+.uov-primary-btn.p-button,
+.uov-soft-btn.p-button,
+.uov-text-btn.p-button,
+.uov-icon-btn.p-button,
+.uov-row-action.p-button,
+.uov-page-btn.p-button {
+  border-radius: 8px;
+  box-shadow: none;
+  font-weight: 700;
+}
+
+.uov-primary-btn.p-button {
+  min-height: 44px;
+  border: 1px solid #007f70;
+  background: #007f70;
+  color: #fff;
+  padding: 0 18px;
+}
+
+.uov-primary-btn.p-button:not(:disabled):hover {
+  background: #006f62;
+  border-color: #006f62;
+}
+
+.uov-soft-btn.p-button,
+.uov-icon-btn.p-button,
+.uov-row-action.p-button,
+.uov-page-btn.p-button {
+  min-height: 40px;
+  border: 1px solid rgba(0, 128, 112, 0.16);
+  background: rgba(255, 255, 255, 0.76);
+  color: #007f70;
+}
+
+.uov-text-btn.p-button {
+  min-height: 44px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #007f70;
+  padding: 0 16px;
+}
+
+.uov-icon-btn.p-button {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+}
+
+.uov-icon-btn--small.p-button,
+.uov-row-action.p-button,
+.uov-page-btn.p-button {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
+}
+
+.uov-workspace {
+  display: block;
+  min-height: 0;
+}
+
+.uov-table-shell {
+  border-radius: 8px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.uov-table-head,
+.uov-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(18, 53, 48, 0.1);
+}
+
+.uov-table-head strong,
+.uov-card-head h3,
+.uov-panel-hero h3 {
+  color: #152522;
+  font-size: 1.02rem;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.uov-table-head span,
+.uov-card-head p {
+  display: block;
+  margin-top: 2px;
+}
+
+.uov-table-scroll {
+  max-height: calc(100vh - 466px);
+  min-height: 250px;
+  overflow: auto;
+}
+
+.uov-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.uov-table th,
+.uov-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(18, 53, 48, 0.08);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.uov-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: rgba(247, 252, 250, 0.96);
+  color: #53625f;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.uov-table th:nth-child(1) { width: 34%; }
+.uov-table th:nth-child(2) { width: 20%; }
+.uov-table th:nth-child(3) { width: 18%; }
+.uov-table th:nth-child(4) { width: 14%; }
+.uov-table th:nth-child(5) { width: 14%; }
+
+.uov-table tbody tr {
+  transition: background 0.18s ease;
+}
+
+.uov-table tbody tr:hover,
+.uov-table tbody tr.is-selected {
+  background: rgba(0, 128, 112, 0.07);
+}
+
+.uov-table-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.uov-table-user > div {
+  min-width: 0;
+}
+
+.uov-table-user strong,
+.uov-table-user span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uov-table-user strong {
+  color: #152522;
+  font-size: 0.94rem;
+}
+
+.uov-table-user span {
+  color: #5f6e6b;
+  font-size: 0.79rem;
+  font-weight: 700;
+}
+
+.uov-avatar-mini {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  overflow: hidden;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.uov-avatar-mini.has-initials,
+.uov-avatar-large.has-initials {
+  display: inline-grid !important;
+  place-items: center !important;
+  padding-top: 1px;
+}
+
+.uov-avatar-mini img,
+.uov-avatar-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.uov-chip,
+.uov-status-tag,
+.uov-risk-pill,
+.uov-base-pill,
+.uov-count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.uov-chip,
+.uov-status-tag.is-on,
+.uov-risk-pill.is-consulta,
+.uov-base-pill.is-on,
+.uov-count-pill {
+  background: rgba(0, 128, 112, 0.11);
+  border: 1px solid rgba(0, 128, 112, 0.18);
+  color: #007f70;
+}
+
+.uov-chip.is-protected,
+.uov-risk-pill.is-critico {
+  background: rgba(187, 126, 0, 0.12);
+  border-color: rgba(187, 126, 0, 0.25);
+  color: #946300;
+}
+
+.uov-risk-pill.is-destructivo,
+.uov-status-tag.is-off,
+.uov-base-pill.is-off {
+  background: rgba(171, 67, 67, 0.1);
+  border: 1px solid rgba(171, 67, 67, 0.2);
+  color: #a43c3c;
+}
+
+.uov-risk-pill.is-operacion {
+  background: rgba(35, 103, 170, 0.1);
+  border: 1px solid rgba(35, 103, 170, 0.18);
+  color: #2367aa;
+}
+
+.uov-override-count strong,
+.uov-override-count span {
+  display: block;
+}
+
+.uov-override-count strong {
+  color: #152522;
+  font-size: 1rem;
+}
+
+.uov-override-count span {
+  line-height: 1.25;
+}
+
+.uov-role-cell {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.uov-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.uov-table-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 10px 12px;
+  border-top: 1px solid rgba(18, 53, 48, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.uov-page-size {
+  position: relative;
+  margin-right: auto;
+}
+
+.uov-page-size-control {
+  height: 38px;
+  min-width: 66px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 128, 112, 0.18);
+  background: rgba(255, 255, 255, 0.9);
+  color: #1c332f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 12px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.uov-page-size-control:focus,
+.uov-page-size.is-open .uov-page-size-control {
+  outline: none;
+  border-color: rgba(0, 128, 112, 0.7);
+  box-shadow: 0 0 0 3px rgba(0, 128, 112, 0.13);
+}
+
+.uov-page-size-control i {
+  color: #007f70;
+  transition: transform 0.18s ease;
+}
+
+.uov-page-size.is-open .uov-page-size-control i {
+  transform: rotate(180deg);
+}
+
+.uov-page-size-menu {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 6px);
+  z-index: 20;
+  min-width: 66px;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 128, 112, 0.14);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 18px 34px rgba(12, 66, 60, 0.16);
+}
+
+.uov-page-size-option {
+  width: 100%;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  color: #29413c;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.uov-page-size-option:hover,
+.uov-page-size-option.is-selected {
+  background: rgba(0, 128, 112, 0.12);
+  color: #007f70;
+}
+
+.uov-pager {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.uov-page-number.is-current.p-button {
+  background: #007f70;
+  border-color: #007f70;
+  color: #fff;
+}
+
+.uov-page-report {
+  color: #5f6e6b;
+  font-size: 0.88rem;
+  font-weight: 800;
+  min-width: 70px;
+}
+
+.uov-panel-hero,
+.uov-modal-hero {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.uov-avatar-large {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  overflow: hidden;
+  font-size: 1.1rem;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.uov-panel-hero > div,
+.uov-modal-hero > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.uov-panel-hero h3,
+.uov-modal-hero strong,
+.uov-modal-hero small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uov-section-kicker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 2px 9px;
+  border-radius: 8px;
+  background: rgba(0, 128, 112, 0.1);
+  border: 1px solid rgba(0, 128, 112, 0.18);
+  color: #007f70;
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.uov-security-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(0, 128, 112, 0.1);
+  border: 1px solid rgba(0, 128, 112, 0.14);
+  color: #29413c;
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.uov-security-note i {
+  color: #007f70;
+}
+
+.uov-panel-stats,
+.uov-modal-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.uov-panel-stats article,
+.uov-modal-stats article {
+  min-height: 56px;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(18, 53, 48, 0.1);
+}
+
+.uov-panel-stats span,
+.uov-modal-stats span {
+  display: block;
+  color: #5f6e6b;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.uov-panel-stats strong,
+.uov-modal-stats strong {
+  display: block;
+  color: #152522;
+  font-size: 1.24rem;
+  line-height: 1;
+  margin-top: 4px;
+}
+
+.uov-panel-actions .uov-primary-btn {
+  width: 100%;
+}
+
+.uov-panel-card {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.uov-active-list,
+.uov-effective-modules,
+.uov-mini-permissions {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.uov-active-override,
+.uov-effective-module,
+.uov-mini-permission {
+  border-radius: 8px;
+  border: 1px solid rgba(18, 53, 48, 0.1);
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.uov-active-override {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+}
+
+.uov-active-override.is-readonly {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.uov-active-override strong,
+.uov-mini-permission strong {
+  color: #152522;
+  font-size: 0.88rem;
+}
+
+.uov-active-override strong,
+.uov-active-override span,
+.uov-active-override small,
+.uov-mini-permission strong,
+.uov-mini-permission span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uov-effective-module {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+}
+
+.uov-effective-module i {
+  color: #007f70;
+}
+
+.uov-mini-permission {
+  padding: 9px 10px;
+}
+
+.uov-inline-empty,
+.uov-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 140px;
+  padding: 18px;
+  color: #5f6e6b;
+  text-align: center;
+}
+
+.uov-inline-empty.is-panel {
+  min-height: 100%;
+}
+
+.uov-inline-empty i,
+.uov-error-state i {
+  color: #007f70;
+  font-size: 1.4rem;
+}
+
+.uov-error-state strong,
+.uov-inline-empty strong {
+  color: #152522;
+}
+
+.uov-error-state.is-compact {
+  min-height: 120px;
+  border-radius: 8px;
+  border: 1px solid rgba(18, 53, 48, 0.1);
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.uov-dialog.p-dialog {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(18, 53, 48, 0.16);
+  box-shadow: 0 24px 80px rgba(14, 35, 32, 0.28);
+}
+
+.uov-dialog .p-dialog-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid rgba(18, 53, 48, 0.1);
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.uov-dialog .p-dialog-title {
+  color: #152522;
+  font-size: 1.12rem;
+  font-weight: 900;
+}
+
+.uov-dialog .p-dialog-header-icon {
+  border-radius: 8px;
+  color: #1d3430;
+}
+
+.uov-dialog .p-dialog-content {
+  padding: 0 18px 18px;
+  background: rgba(250, 252, 251, 0.9);
+  overflow: hidden;
+}
+
+.uov-management-dialog .p-dialog-content {
+  padding-bottom: 12px;
+}
+
+.uov-filter-dialog .p-dialog-content {
+  overflow: visible;
+}
+
+.uov-filter-dialog-body {
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+}
+
+.uov-detail-body {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+  height: min(72vh, 640px);
+  max-height: min(76vh, 760px);
+  overflow: hidden;
+  padding-top: 14px;
+}
+
+.uov-detail-content {
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+}
+
+.uov-detail-overrides-card {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.uov-detail-overrides-card .uov-active-list {
+  min-height: 0;
+  overflow: auto;
+}
+
+.uov-detail-hero {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 128, 112, 0.14);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(235, 250, 246, 0.82));
+  padding: 12px;
+}
+
+.uov-detail-hero > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.uov-detail-hero h3,
+.uov-detail-hero p {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uov-detail-hero h3 {
+  margin: 0;
+  color: #152522;
+  font-size: 1.08rem;
+}
+
+.uov-detail-hero p {
+  margin: 2px 0 0;
+  color: #5f6e6b;
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.uov-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.uov-detail-loading {
+  display: grid;
+  gap: 10px;
+}
+
+.uov-management-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: auto;
+  max-height: min(76vh, 760px);
+  min-height: 0;
+  padding-top: 12px;
+  padding-bottom: 6px;
+}
+
+.uov-management-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 12px;
+}
+
+.uov-modal-hero,
+.uov-modal-stats article {
+  border-radius: 8px;
+  border: 1px solid rgba(0, 128, 112, 0.14);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(235, 250, 246, 0.82));
+  padding: 12px;
+}
+
+.uov-modal-hero strong {
+  display: block;
+  color: #152522;
+  font-size: 1rem;
+}
+
+.uov-permissions-card {
+  flex: 0 1 auto;
+  border-radius: 8px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  max-height: min(50vh, 500px);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.uov-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uov-permission-actions {
+  align-self: end;
+  justify-content: flex-end;
+}
+
+.uov-mini-action.p-button {
+  width: 42px;
+  height: 42px;
+  min-height: 42px;
+  padding: 0;
+}
+
+.uov-permission-controls {
+  display: grid;
+  grid-template-columns: minmax(460px, 1fr) 220px 180px auto;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(18, 53, 48, 0.1);
+}
+
+.uov-permission-scroll {
+  min-height: 0;
+  max-height: min(42vh, 410px);
+  overflow: auto;
+  padding: 10px 12px 12px;
+}
+
+.uov-permission-group {
+  border: 1px solid rgba(0, 128, 112, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+}
+
+.uov-permission-group + .uov-permission-group {
+  margin-top: 8px;
+}
+
+.uov-permission-group > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  background: rgba(0, 128, 112, 0.07);
+}
+
+.uov-permission-group-main {
+  border: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.uov-module-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+}
+
+.uov-permission-group-main strong,
+.uov-permission-group-main small {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uov-permission-group-main strong {
+  color: #152522;
+  font-size: 0.94rem;
+}
+
+.uov-permission-group-main small {
+  color: #5f6e6b;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.uov-permission-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px;
+}
+
+.uov-permission-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px;
+  padding: 9px;
+  border-radius: 8px;
+  border: 1px solid rgba(18, 53, 48, 0.1);
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.uov-permission-item.has-override {
+  border-color: rgba(0, 128, 112, 0.28);
+  background: rgba(235, 250, 246, 0.72);
+}
+
+.uov-permission-main {
+  grid-column: 1;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.uov-permission-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+}
+
+.uov-permission-main strong,
+.uov-permission-main span,
+.uov-permission-main small {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uov-permission-main strong {
+  color: #152522;
+  font-size: 0.9rem;
+}
+
+.uov-permission-main span,
+.uov-permission-main small {
+  color: #5f6e6b;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.uov-permission-state {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+  max-width: 300px;
+}
+
+.uov-permission-action-btn {
+  grid-column: 1 / -1;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 128, 112, 0.16);
+  background: rgba(255, 255, 255, 0.86);
+  color: #29413c;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.uov-permission-action-btn.is-allow,
+.uov-permission-action-btn.is-inherit {
+  background: #007f70;
+  border-color: #007f70;
+  color: #fff;
+}
+
+.uov-permission-action-btn.is-deny {
+  border-color: rgba(171, 67, 67, 0.24);
+  color: #8f3737;
+}
+
+.uov-permission-action-btn.is-locked {
+  border-color: rgba(18, 53, 48, 0.12);
+  color: #5f6e6b;
+}
+
+.uov-permission-action-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.46;
+}
+
+.uov-permission-note {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  background: rgba(0, 128, 112, 0.08);
+  color: #48615d;
+  padding: 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.uov-reason-field {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 4px;
+}
+
+.uov-reason-field span,
+.uov-reason-field small {
+  color: #5f6e6b;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.uov-reason-field textarea {
+  width: 100%;
+  min-height: 58px;
+  resize: vertical;
+  border-radius: 8px;
+  border: 1px solid rgba(18, 53, 48, 0.16);
+  background: rgba(255, 255, 255, 0.92);
+  color: #172a26;
+  padding: 10px 12px;
+  font: inherit;
+  font-weight: 700;
+  outline: none;
+}
+
+.uov-reason-field textarea:focus {
+  border-color: rgba(0, 128, 112, 0.72);
+  box-shadow: 0 0 0 3px rgba(0, 128, 112, 0.13);
+}
+
+.uov-reason-field.is-invalid textarea {
+  border-color: rgba(171, 67, 67, 0.45);
+}
+
+.uov-dialog-footer {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0 4px;
+  margin-top: 0;
+  background: transparent;
+  border: 0;
+}
+
+.uov-select-panel.p-dropdown-panel {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 128, 112, 0.14);
+  box-shadow: 0 18px 34px rgba(12, 66, 60, 0.15);
+}
+
+.uov-select-panel .p-dropdown-items,
+.uov-select-panel .p-dropdown-items-wrapper {
+  padding: 0 !important;
+}
+
+.uov-select-panel .p-dropdown-item {
+  min-height: 40px;
+  padding: 10px 14px !important;
+  color: #29413c;
+  font-weight: 700;
+}
+
+.uov-select-panel .p-dropdown-item.p-highlight,
+.uov-select-panel .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover {
+  background: rgba(0, 128, 112, 0.12);
+  color: #007f70;
+}
+
+.uov-confirm-dialog.p-confirm-dialog .p-dialog-content,
+.uov-confirm-dialog.p-dialog .p-dialog-content {
+  background: transparent !important;
+}
+
+.uov-confirm-dialog.p-dialog {
+  overflow: hidden;
+  border: 1px solid rgba(21, 43, 38, 0.12) !important;
+  border-radius: 14px !important;
+  background:
+    linear-gradient(180deg, rgba(249, 252, 251, 0.96), rgba(239, 248, 245, 0.94)),
+    #eef7f3 !important;
+  box-shadow: 0 24px 70px rgba(14, 35, 32, 0.24) !important;
+}
+
+.uov-confirm-dialog .p-dialog-header,
+.uov-confirm-dialog .p-dialog-content,
+.uov-confirm-dialog .p-dialog-footer {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.uov-confirm-dialog .p-dialog-header {
+  padding: 18px 22px 12px !important;
+}
+
+.uov-confirm-dialog .p-dialog-content {
+  padding: 16px 24px 12px !important;
+}
+
+.uov-confirm-dialog .p-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0 24px 22px !important;
+}
+
+.uov-confirm-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.uov-confirm-copy strong {
+  color: #152522;
+}
+
+.uov-confirm-copy span {
+  color: #5f6e6b;
+}
+
+.uov-wrap .p-button:focus,
+.uov-wrap .p-button:focus-visible,
+.uov-dialog .p-button:focus,
+.uov-dialog .p-button:focus-visible,
+.uov-dialog .p-dialog-header-icon:focus,
+.uov-dialog .p-dialog-header-icon:focus-visible,
+.uov-dialog .p-dropdown.p-focus,
+.uov-dialog .uov-search-wrap:focus-within,
+.uov-permission-action-btn:focus,
+.uov-permission-action-btn:focus-visible,
+.uov-permission-group-main:focus,
+.uov-permission-group-main:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(0, 128, 112, 0.16) !important;
+}
+
+.uov-wrap .p-button:focus:not(:focus-visible),
+.uov-dialog .p-button:focus:not(:focus-visible),
+.uov-dialog .p-dialog-header-icon:focus:not(:focus-visible),
+.uov-permission-action-btn:focus:not(:focus-visible),
+.uov-permission-group-main:focus:not(:focus-visible) {
+  box-shadow: none !important;
+}
+
+@media (max-width: 1500px) {
+  .uov-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .uov-permission-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 1366px) {
+  .uov-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .uov-management-body {
+    height: auto;
+    max-height: min(78vh, 700px);
+  }
+
+  .uov-management-head,
+  .uov-permission-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .uov-permission-actions {
+    justify-content: flex-start;
+  }
+
+  .uov-permission-item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .uov-permission-state {
+    grid-column: 1;
+    grid-row: auto;
+    justify-content: flex-start;
+    max-width: none;
+  }
+}
+
+@media (max-width: 1120px) {
+  .uov-controls {
+    grid-template-columns: 1fr auto;
+  }
+
+  .uov-filter-grid {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .uov-control-actions {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}

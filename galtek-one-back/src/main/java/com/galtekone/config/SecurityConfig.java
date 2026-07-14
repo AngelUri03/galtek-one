@@ -6,6 +6,7 @@ import com.galtekone.security.RestAuthHandlers.RestAuthenticationEntryPoint;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -32,7 +33,9 @@ public class SecurityConfig {
 				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.exceptionHandling(
 						ex -> ex.authenticationEntryPoint(authEntryPoint).accessDeniedHandler(accessDeniedHandler))
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/auth/login", "/auth/keys/public", "/device/identity", "/device/activate").permitAll()
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+						.requestMatchers("/auth/login", "/auth/keys/public", "/device/identity", "/device/activate").permitAll()
 						.anyRequest().authenticated())
 				.addFilterBefore(hardwareLockFilter, UsernamePasswordAuthenticationFilter.class)
 				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

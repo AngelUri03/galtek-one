@@ -1,108 +1,147 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Dialog } from "primereact/dialog";
-import { Avatar } from "primereact/avatar";
-import { InputText } from "primereact/inputtext";
-import { Password } from "primereact/password";
-import { Dropdown } from "primereact/dropdown";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
+import { Dropdown } from "primereact/dropdown";
+import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 
 import { APIfetchApi } from "../../API/APIfetch";
-import { endpoints } from "../../API/api"; // no se modifica
+import { endpoints } from "../../API/api";
 import { encryptRSAOAEPToBase64 } from "../../utils/rsa";
-
-import "./Css/CrearUsuario.css";
+import {
+  fileToDataUrl,
+  isValidEmail,
+  isValidPhone,
+  readAuthSession,
+  readPayload,
+  resolveUsuariosURL,
+  safeTrim,
+  validateImageFile,
+} from "./Usuarios/usuariosUtils";
 
 const api = new APIfetchApi();
 
-/** Resolver URL sin modificar API */
-function resolveUsuariosURL() {
-  if (endpoints && endpoints.usuarios) return endpoints.usuarios;
-
-  const base = (process.env.REACT_APP_API_BASE_URL || "").trim();
-  if (base) return `${base.replace(/\/+$/, "")}/usuarios`;
-
-  return endpoints.usuarios;
-}
-
-/** Construye URL de imagen por usuario (si tu backend lo soporta) */
-function resolveUsuarioImagenURL(idUsuario) {
-  // Ajusta si tu endpoint es distinto:
-  // /usuarios/{id}/imagen
-  const usuarios = resolveUsuariosURL();
-  return `${usuarios.replace(/\/+$/, "")}/${idUsuario}/imagen`;
+function normalizeRoleOption(role) {
+  return {
+    label: role?.nombreRol || role?.nombre || "Rol",
+    value: role?.idRol ?? role?.id,
+  };
 }
 
 function isPemPublicKey(pem) {
   return typeof pem === "string" && pem.includes("BEGIN PUBLIC KEY");
 }
 
-function readAuthSession() {
-  try {
-    const raw = sessionStorage.getItem("auth_session");
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
+function slug(value) {
+  return safeTrim(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-const normalizeRoleOption = (role) => ({
-  label: role?.nombreRol || role?.nombre || "Rol",
-  value: role?.idRol ?? role?.id,
-});
+function roleCode(roleLabel) {
+  const role = slug(roleLabel);
+  if (!role) return "";
 
-export default function AjustesUsuariosCrear({
-  visible,
-  onHide,
-  onCreated,
-  empresaId,
-}) {
+  const aliases = [
+    ["administrador", "admin"],
+    ["cajero", "caja"],
+    ["vendedor", "ventas"],
+    ["supervisor", "super"],
+    ["encargado", "enc"],
+    ["gerente", "ger"],
+    ["invitado", "inv"],
+  ];
+
+  const hit = aliases.find(([needle]) => role.includes(needle));
+  return hit ? hit[1] : role.split(" ")[0].slice(0, 8);
+}
+
+function suggestLogin(nombreUsuario, roleLabel) {
+  const nameParts = slug(nombreUsuario).split(" ").filter(Boolean);
+  const role = roleCode(roleLabel);
+  const first = nameParts[0] || "";
+  const last = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
+  const identity = last ? `${first[0] || ""}${last}` : first;
+
+  if (!identity || !role) return "";
+  return `${identity}-${role}`;
+}
+
+function generateTemporaryPassword() {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = new Uint32Array(4);
+
+  if (window.crypto?.getRandomValues) {
+    window.crypto.getRandomValues(bytes);
+  } else {
+    for (let index = 0; index < bytes.length; index += 1) {
+      bytes[index] = Math.floor(Math.random() * alphabet.length);
+    }
+  }
+
+  const token = Array.from(bytes)
+    .map((value) => alphabet[value % alphabet.length])
+    .join("");
+
+  return `Galtek-${token}`;
+}
+
+export default function AjustesUsuariosCrear({ visible, onHide, onCreated }) {
   const toast = useRef(null);
-  const authSession = readAuthSession();
-  const token = authSession?.token;
-  const sessionEmpresaId = empresaId ?? authSession?.idEmpresa;
+  const session = readAuthSession();
 
-  const [nombre, setNombre] = useState("");
-  const [usuario, setUsuario] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [password, setPassword] = useState("");
-  const [rol, setRol] = useState(null);
-
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const [fotoPreview, setFotoPreview] = useState(null); // blob url
-  const [fotoFile, setFotoFile] = useState(null);
-
+  const [form, setForm] = useState({
+    nombreUsuario: "",
+    usuario: "",
+    correo: "",
+    telefono: "",
+    idRol: null,
+  });
   const [roles, setRoles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [rolesLoading, setRolesLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [fotoFile, setFotoFile] = useState(null);
+  const [fotoPreview, setFotoPreview] = useState(null);
+  const [usuarioTouched, setUsuarioTouched] = useState(false);
+  const [temporaryPassword, setTemporaryPassword] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [createdId, setCreatedId] = useState(null);
+  const created = Boolean(createdId);
 
-  const showSuccess = (detail = "Usuario creado correctamente") => {
-    toast.current?.show({
-      severity: "success",
-      summary: "Éxito",
-      detail,
-      life: 2600,
-    });
-  };
+  const roleOptions = useMemo(
+    () => roles.map(normalizeRoleOption).filter((role) => role.value != null),
+    [roles]
+  );
 
-  const showError = (detail) => {
-    toast.current?.show({
-      severity: "error",
-      summary: "Error",
-      detail: detail || "Ocurrió un error",
-      life: 3200,
-    });
+  const selectedRoleLabel = useMemo(
+    () => roleOptions.find((role) => Number(role.value) === Number(form.idRol))?.label || "",
+    [form.idRol, roleOptions]
+  );
+
+  const updateForm = (patch) => {
+    setForm((prev) => ({ ...prev, ...patch }));
+    setError("");
   };
 
   const reset = () => {
-    setNombre("");
-    setUsuario("");
-    setTelefono("");
-    setPassword("");
-    setRol(null);
+    setForm({
+      nombreUsuario: "",
+      usuario: "",
+      correo: "",
+      telefono: "",
+      idRol: null,
+    });
     setError("");
+    setCopied(false);
+    setCreatedId(null);
+    setUsuarioTouched(false);
+    setTemporaryPassword(generateTemporaryPassword());
     setFotoFile(null);
-
     setFotoPreview((prev) => {
       if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
       return null;
@@ -110,68 +149,84 @@ export default function AjustesUsuariosCrear({
   };
 
   useEffect(() => {
-    // Al abrir, resetea (para que siempre sea un modal “nuevo”)
-    if (visible) reset();
+    if (!visible) return;
+    reset();
+    let active = true;
+
+    async function loadRoles() {
+      setRolesLoading(true);
+      try {
+        const response = await api.fetchApi({}, "GET", undefined, endpoints.roles);
+        const payload = await readPayload(response, "No se pudo cargar roles.");
+        if (active) setRoles(Array.isArray(payload) ? payload : []);
+      } catch (err) {
+        console.error("Error cargando roles:", err);
+        if (active) {
+          setRoles([]);
+          setError("No se pudieron cargar los roles.");
+        }
+      } finally {
+        if (active) setRolesLoading(false);
+      }
+    }
+
+    loadRoles();
+    return () => {
+      active = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   useEffect(() => {
-    if (!visible) return;
-    let activo = true;
-
-    async function cargarRoles() {
-      try {
-        const res = await api.fetchApi({}, "GET", undefined, endpoints.roles);
-        if (!res?.ok) {
-          if (activo) setRoles([]);
-          return;
-        }
-        const payload = await res.json();
-        const options = (Array.isArray(payload?.data) ? payload.data : [])
-          .map(normalizeRoleOption)
-          .filter((item) => item.value != null);
-        if (activo) setRoles(options);
-      } catch (error) {
-        console.error("Error cargando roles:", error);
-        if (activo) setRoles([]);
-      }
-    }
-
-    cargarRoles();
-    return () => {
-      activo = false;
-    };
-  }, [visible]);
+    if (!visible || usuarioTouched || created) return;
+    const suggested = suggestLogin(form.nombreUsuario, selectedRoleLabel);
+    setForm((prev) => (prev.usuario === suggested ? prev : { ...prev, usuario: suggested }));
+  }, [created, form.nombreUsuario, selectedRoleLabel, usuarioTouched, visible]);
 
   useEffect(() => {
     return () => {
-      // cleanup blob
       if (fotoPreview?.startsWith("blob:")) URL.revokeObjectURL(fotoPreview);
     };
   }, [fotoPreview]);
 
-  const onSelectFoto = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const showToast = (severity, summary, detail) => {
+    toast.current?.show({ severity, summary, detail, life: 2800 });
+  };
 
-    // Validación ligera
-    const isImg = file.type?.startsWith("image/");
-    if (!isImg) {
-      const msg = "Selecciona un archivo de imagen (PNG/JPG).";
-      setError(msg);
-      showError(msg);
+  const copyPassword = async () => {
+    if (!temporaryPassword || !navigator.clipboard) {
+      setError("No se pudo copiar la password temporal.");
       return;
     }
-    if (file.size > 2_500_000) {
-      const msg = "La imagen es muy pesada (máx 2.5 MB).";
-      setError(msg);
-      showError(msg);
+
+    try {
+      await navigator.clipboard.writeText(temporaryPassword);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setError("No se pudo copiar la password temporal.");
+    }
+  };
+
+  const regeneratePassword = () => {
+    if (created || loading) return;
+    setTemporaryPassword(generateTemporaryPassword());
+    setCopied(false);
+  };
+
+  const onSelectFoto = (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || created) return;
+
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      setError(validationError);
+      showToast("warn", "Imagen", validationError);
       return;
     }
 
     setFotoFile(file);
-
-    // preview
     const url = URL.createObjectURL(file);
     setFotoPreview((prev) => {
       if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
@@ -180,387 +235,236 @@ export default function AjustesUsuariosCrear({
   };
 
   const validate = () => {
-    const n = nombre.trim().replace(/\s+/g, " ");
-    const u = usuario.trim().replace(/\s+/g, "");
-    const t = telefono.trim();
+    const nombreUsuario = safeTrim(form.nombreUsuario).replace(/\s+/g, " ");
+    const usuario = safeTrim(form.usuario).replace(/\s+/g, "");
+    const correo = safeTrim(form.correo);
+    const telefono = safeTrim(form.telefono);
 
-    if (!n || n.length < 3) return "Completa el nombre (mínimo 3 caracteres).";
-    if (!password || password.length < 6)
-      return "La contraseña debe tener al menos 6 caracteres.";
-    if (!rol) return "Selecciona un rol.";
-    // usuario es opcional (si viene vacío se deriva), pero si lo ponen que sea decente:
-    if (u && u.length < 3)
-      return "El usuario (login) debe tener al menos 3 caracteres.";
+    if (nombreUsuario.length < 3) return "El nombre debe tener al menos 3 caracteres.";
+    if (!form.idRol) return "Selecciona un rol.";
+    if (usuario.length < 3) return "El usuario debe tener al menos 3 caracteres.";
+    if (!temporaryPassword || temporaryPassword.length < 6)
+      return "Genera una password temporal valida.";
+    if (!isValidEmail(correo)) return "Revisa el correo capturado.";
+    if (!isValidPhone(telefono)) return "Revisa el telefono capturado.";
 
-    // teléfono opcional, pero si viene que sea “razonable”
-    if (t && t.length < 7) return "El teléfono parece muy corto.";
-
-    return null;
-  };
-
-  const uploadImagenIfAny = async (idUsuario) => {
-    if (!fotoFile || !idUsuario) return;
-
-    try {
-      const url = resolveUsuarioImagenURL(idUsuario);
-      const fd = new FormData();
-      fd.append("imagen", fotoFile);
-
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          user: authSession?.usuario || "",
-          Authorization: `Bearer ${token}`,
-        },
-        body: fd,
-      });
-
-      // Si el endpoint no existe, no rompas la creación del usuario
-      if (!res.ok) {
-        // opcional: muestra warning suave
-        toast.current?.show({
-          severity: "warn",
-          summary: "Imagen",
-          detail: "El usuario se creó, pero no se pudo subir la imagen.",
-          life: 2500,
-        });
-      }
-    } catch {
-      toast.current?.show({
-        severity: "warn",
-        summary: "Imagen",
-        detail: "El usuario se creó, pero no se pudo subir la imagen.",
-        life: 2500,
-      });
-    }
+    return { nombreUsuario, usuario, correo, telefono };
   };
 
   const crearUsuario = async () => {
     setError("");
 
-    const msg = validate();
-    if (msg) {
-      setError(msg);
-      showError(msg);
+    const valid = validate();
+    if (typeof valid === "string") {
+      setError(valid);
+      showToast("warn", "Usuarios", valid);
       return;
     }
 
-    if (!token || !sessionEmpresaId) {
-      const m = "Tu sesión no es válida o expiró. Inicia sesión nuevamente.";
-      setError(m);
-      showError(m);
+    if (!session?.token || session?.idEmpresa == null) {
+      const message = "Tu sesion no es valida. Inicia sesion nuevamente.";
+      setError(message);
+      showToast("error", "Sesion", message);
       return;
     }
-
-    const n = nombre.trim().replace(/\s+/g, " ");
-    const u = usuario.trim().replace(/\s+/g, "");
-    const t = telefono.trim();
-
-    // Deriva usuario si no se puso
-    const usuarioDerivado = u || (n.split(/\s+/)[0] || "").toLowerCase();
 
     setLoading(true);
     try {
-      // 1) Llave pública
-      const resKey = await api.fetchApi(
-        { "Content-Type": "application/json" },
-        "GET",
-        undefined,
-        endpoints.authPublicKey
-      );
-
-      if (!resKey) {
-        const m =
-          "No se pudo contactar al servidor para obtener la llave pública.";
-        setError(m);
-        showError(m);
-        return;
+      const avatarUrl = fotoFile ? await fileToDataUrl(fotoFile) : null;
+      const keyResponse = await api.fetchApi({}, "GET", undefined, endpoints.authPublicKey);
+      const publicKey = await readPayload(keyResponse, "No se pudo obtener la llave publica.");
+      if (!isPemPublicKey(publicKey)) {
+        throw new Error("Formato de llave publica inesperado.");
       }
 
-      if (!resKey.ok) {
-        const ttt = await resKey.text().catch(() => "");
-        const m = `No se pudo obtener la llave pública: ${resKey.status} ${ttt}`;
-        setError(m);
-        showError(m);
-        return;
-      }
-
-      const keyPayload = await resKey.json().catch(() => null);
-      const pemPublic = keyPayload?.data;
-
-      if (!isPemPublicKey(pemPublic)) {
-        const m = "Formato de llave pública inesperado.";
-        setError(m);
-        showError(m);
-        return;
-      }
-
-      // 2) Cifrar contraseña
-      const encryptedPassword = await encryptRSAOAEPToBase64(
-        pemPublic,
-        password
-      );
-
-      // 3) Payload (mantengo tu estructura)
+      const encryptedPassword = await encryptRSAOAEPToBase64(publicKey, temporaryPassword);
       const body = {
-        nombreUsuario: n,
-        estatus: true,
-        activo: 1,
+        nombreUsuario: valid.nombreUsuario,
+        usuario: valid.usuario,
+        correo: valid.correo,
+        telefono: valid.telefono,
         password: encryptedPassword,
-        empresa: { idEmpresa: Number(sessionEmpresaId) },
-        rol: { idRol: Number(rol) },
-        telefono: t || "5555555555",
-        usuario: usuarioDerivado,
+        activo: 1,
+        estatus: true,
+        rol: { idRol: Number(form.idRol) },
       };
 
-      // 4) POST /usuarios
-      const usuariosURL = resolveUsuariosURL();
-
-      const res = await api.fetchApi(
-        {},
-        "POST",
-        body,
-        usuariosURL
-      );
-
-      if (!res) {
-        const m = "No se pudo conectar con el servidor.";
-        setError(m);
-        showError(m);
-        return;
+      if (avatarUrl) {
+        body.avatarUrl = avatarUrl;
       }
 
-      if (res.status === 401) {
-        const m = "Tu sesión expiró o no es válida. Inicia sesión nuevamente.";
-        setError(m);
-        showError(m);
-        return;
-      }
+      const response = await api.fetchApi({}, "POST", body, resolveUsuariosURL());
+      const created = await readPayload(response, "No se pudo crear el usuario.");
+      const nextCreatedId = created?.idUsuario ?? created?.id ?? null;
 
-      // ✅ Prioriza el 500 con mensaje fijo (tu regla)
-      if (res.status === 500) {
-        const m = "Categoria no encontrada";
-        setError(m);
-        showError(m);
-        return;
-      }
-
-      if (!res.ok) {
-        let detalle = "";
-        try {
-          const ct = res.headers.get("content-type") || "";
-          if (ct.includes("application/json")) {
-            const j = await res.json();
-            detalle = j?.message || j?.error || j?.detail || "";
-          } else {
-            detalle = await res.text();
-          }
-        } catch {}
-        const m = `Error ${res.status}: ${detalle || "Solicitud rechazada."}`;
-        setError(m);
-        showError(m);
-        return;
-      }
-
-      // 5) leer respuesta (para idUsuario, si viene)
-      let createdId = null;
-      try {
-        const json = await res.json();
-        createdId = json?.data?.idUsuario ?? json?.data?.id ?? null;
-      } catch {}
-
-      // 6) subir imagen si hay (NO bloquea)
-      if (createdId) await uploadImagenIfAny(createdId);
-
-      showSuccess();
-
-      // callback para refrescar lista desde AjustesUsuarios
-      onCreated?.({ idUsuario: createdId });
-
-      // cerrar “bonito”
-      window.setTimeout(() => onHide?.(), 450);
-    } catch (e) {
-      console.error(e);
-      const m = "Ocurrió un error inesperado.";
-      setError(m);
-      showError(m);
+      setCreatedId(nextCreatedId || true);
+      showToast("success", "Usuarios", "Usuario creado con password temporal.");
+      onCreated?.({ idUsuario: nextCreatedId });
+    } catch (err) {
+      console.error("Error creando usuario:", err);
+      const message = err?.message || "No se pudo crear el usuario.";
+      setError(message);
+      showToast("error", "Usuarios", message);
     } finally {
       setLoading(false);
     }
   };
 
-  const headerTemplate = (
-    <div className="spm-header">
-      <div className="spm-titleWrap">
-        <div className="spm-title">Crear usuario</div>
-        <div className="spm-sub">Alta rápida con rol. La foto es opcional.</div>
+  const header = (
+    <div className="au-modal-header">
+      <div>
+        <span>Nuevo usuario</span>
+        <strong>Agregar usuario</strong>
       </div>
-
-      <button
-        className="spm-close"
-        aria-label="Cerrar"
-        onClick={onHide}
-        type="button"
-      >
+      <button className="au-modal-close" type="button" onClick={onHide} aria-label="Cerrar">
         <i className="pi pi-times" />
       </button>
     </div>
   );
 
+  const footer = (
+    <div className="au-dialog-footer">
+      {created ? null : (
+        <Button label="Cancelar" className="au-text-btn" onClick={onHide} disabled={loading} />
+      )}
+      {created ? (
+        <Button label="Listo" icon="pi pi-check" className="au-primary-btn" onClick={onHide} />
+      ) : (
+        <Button
+          label={loading ? "Creando..." : "Crear usuario"}
+          icon={loading ? "pi pi-spin pi-spinner" : "pi pi-user-plus"}
+          className="au-primary-btn"
+          onClick={crearUsuario}
+          disabled={loading || rolesLoading}
+        />
+      )}
+    </div>
+  );
+
   return (
     <Dialog
-      header={headerTemplate}
+      header={header}
       visible={visible}
       onHide={onHide}
       modal
       closable={false}
-      blockScroll
-      position="center"
       draggable={false}
-      resizable={false}
-      maximizable={false}
-      appendTo={document.body}
-      style={{ width: "560px", minHeight: "690px" }}
-      contentClassName="spm-content"
+      dismissableMask={!loading}
+      className="au-dialog au-create-dialog"
+      style={{ width: "52rem", maxWidth: "94vw" }}
+      footer={footer}
     >
       <Toast ref={toast} />
 
-      <div className="login-box-modal">
-        {/* Avatar + upload */}
-        <div className="avatar-row">
-          <div className="avatar-right">
-            <label
-              htmlFor="input-foto"
-              className="avatar-upload"
-              title="Subir imagen"
-            >
-              <Avatar
-                image={fotoPreview || undefined}
-                icon={!fotoPreview ? "pi pi-user" : undefined}
-                shape="circle"
-                className="crear-avatar"
-              />
-              <span className="avatar-hover">
-                <i className="pi pi-upload" />
-              </span>
-            </label>
-
+      <div className="au-create-body">
+        <section className="au-create-avatar-card">
+          <label className="au-create-avatar">
             <input
-              id="input-foto"
               type="file"
-              accept="image/*"
-              onChange={onSelectFoto}
+              accept="image/png,image/jpeg,image/webp"
               hidden
+              onChange={onSelectFoto}
+              disabled={created}
             />
+            <span className="au-avatar-large">
+              {fotoPreview ? <img src={fotoPreview} alt="Preview" /> : <i className="pi pi-user" />}
+            </span>
+          </label>
+          <div>
+            <strong>Perfil inicial</strong>
+            <span>El avatar es opcional y puede cambiarse despues desde editar usuario.</span>
           </div>
+          {created ? <span className="au-status-tag is-on">Creado</span> : null}
+        </section>
+
+        <div className="au-create-grid">
+          <label className="au-field">
+            <span>Nombre completo</span>
+            <InputText
+              value={form.nombreUsuario}
+              onChange={(event) => updateForm({ nombreUsuario: event.target.value })}
+              disabled={loading || created}
+              autoFocus
+            />
+          </label>
+
+          <label className="au-field">
+            <span>Rol</span>
+            <Dropdown
+              value={form.idRol}
+              options={roleOptions}
+              onChange={(event) => updateForm({ idRol: event.value })}
+              placeholder={rolesLoading ? "Cargando roles" : "Selecciona rol"}
+              loading={rolesLoading}
+              disabled={loading || rolesLoading || created}
+              panelClassName="au-select-panel"
+            />
+          </label>
+
+          <label className="au-field is-wide">
+            <span>Usuario / login sugerido</span>
+            <InputText
+              value={form.usuario}
+              onChange={(event) => {
+                setUsuarioTouched(true);
+                updateForm({ usuario: event.target.value });
+              }}
+              disabled={loading || created}
+              placeholder="Se genera con nombre y rol"
+            />
+            <small>
+              Se sugiere con el nombre y rol inicial. Si lo ajustas manualmente, ya no se actualiza solo.
+            </small>
+          </label>
+
+          <label className="au-field">
+            <span>Correo</span>
+            <InputText
+              value={form.correo}
+              onChange={(event) => updateForm({ correo: event.target.value })}
+              disabled={loading || created}
+              placeholder="correo@dominio.com"
+            />
+          </label>
+
+          <label className="au-field">
+            <span>Telefono</span>
+            <InputText
+              value={form.telefono}
+              onChange={(event) => updateForm({ telefono: event.target.value })}
+              disabled={loading || created}
+              placeholder="5551234567"
+            />
+          </label>
+
+          <section className="au-create-temp-card is-wide">
+            <div>
+              <strong>Password temporal</strong>
+              <span>Copiala y entregala al usuario. Al iniciar sesion se le pedira cambiarla.</span>
+            </div>
+            <div className="au-temp-password-box">
+              <InputText value={temporaryPassword} readOnly className="au-temp-password-input" />
+              <Button
+                icon={copied ? "pi pi-check" : "pi pi-copy"}
+                label={copied ? "Copiado" : "Copiar"}
+                className="au-soft-btn"
+                onClick={copyPassword}
+                disabled={!temporaryPassword}
+                type="button"
+              />
+              <Button
+                icon="pi pi-refresh"
+                className="au-icon-btn"
+                onClick={regeneratePassword}
+                disabled={loading || created}
+                type="button"
+                aria-label="Generar otra password temporal"
+              />
+            </div>
+          </section>
         </div>
 
-        {/* Campos */}
-        <InputText
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-          placeholder="Nombre completo*"
-          className="w-full p-inputtext-sm"
-          style={{ width: "86%", height: "2.65rem" }}
-          disabled={loading}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") crearUsuario();
-          }}
-        />
-
-        <InputText
-          value={usuario}
-          onChange={(e) => setUsuario(e.target.value)}
-          placeholder="Usuario (login) (opcional)"
-          className="w-full p-inputtext-sm"
-          style={{ width: "86%", height: "2.65rem", marginTop: ".6rem" }}
-          disabled={loading}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") crearUsuario();
-          }}
-        />
-
-        <InputText
-          value={telefono}
-          onChange={(e) => setTelefono(e.target.value)}
-          placeholder="Teléfono (opcional)"
-          className="w-full p-inputtext-sm"
-          style={{ width: "86%", height: "2.65rem", marginTop: ".6rem" }}
-          disabled={loading}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") crearUsuario();
-          }}
-        />
-
-        <Password
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Contraseña*"
-          toggleMask
-          feedback={false}
-          className="w-full p-inputtext-sm"
-          style={{ width: "86%", height: "2.65rem", marginTop: ".6rem" }}
-          disabled={loading}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") crearUsuario();
-          }}
-        />
-
-        <Dropdown
-          value={rol}
-          onChange={(e) => setRol(e.value)}
-          options={roles}
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Seleccionar rol*"
-          className="dropdown-crear"
-          style={{ width: "86%", marginTop: ".6rem" }}
-          disabled={loading}
-        />
-
-        {/* Acciones */}
-        <div
-          style={{ width: "86%", display: "flex", gap: 10, marginTop: ".9rem" }}
-        >
-          <Button
-            label="Cancelar"
-            icon="pi pi-times"
-            className="w-full uxi-btn uxi-btn--ghost"
-            onClick={onHide}
-            disabled={loading}
-            type="button"
-            style={{ height: "3rem" }}
-          />
-          <Button
-            label={loading ? "Creando..." : "Crear usuario"}
-            icon={loading ? "pi pi-spin pi-spinner" : "pi pi-user-plus"}
-            className="w-full boton-verde"
-            onClick={crearUsuario}
-            disabled={loading}
-            type="button"
-            style={{ height: "3rem" }}
-          />
-        </div>
-
-        {error ? (
-          <small
-            className="p-error text-center"
-            style={{ display: "block", marginTop: ".7rem" }}
-          >
-            {error}
-          </small>
-        ) : (
-          <small
-            style={{
-              display: "block",
-              marginTop: ".7rem",
-              opacity: 0.72,
-              textAlign: "center",
-            }}
-          >
-            * Campos obligatorios
-          </small>
-        )}
+        {error ? <div className="au-form-error">{error}</div> : null}
       </div>
     </Dialog>
   );

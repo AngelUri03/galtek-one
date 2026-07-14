@@ -18,11 +18,20 @@ const api = new APIfetchApi();
  */
 export async function imprimirTicket({
   carrito = [],
+  subtotal = null,
+  descuento = 0,
+  impuesto = 0,
   total = 0,
   recibido = 0,
   cambio = 0,
   metodoPago = "EFECTIVO",
   folio = null,
+  fecha = null,
+  caja = "Caja principal",
+  cajero: cajeroParam = "",
+  clienteNombre = "",
+  clienteTelefono = "",
+  printerName = "",
 }) {
   // Obtener datos de sesión para el cajero
   let cajero = "Caja";
@@ -31,6 +40,7 @@ export async function imprimirTicket({
     const session = raw ? JSON.parse(raw) : null;
     if (session?.usuario) cajero = session.usuario;
   } catch (_) {}
+  if (cajeroParam) cajero = cajeroParam;
 
   // Armar el folio automático si no viene
   const folioFinal =
@@ -44,21 +54,26 @@ export async function imprimirTicket({
     total: (Number(p.precio) || 0) * (Number(p.cantidad) || 1),
   }));
 
-  const payload = {
+  const requestPayload = {
     folio: folioFinal,
     cajero,
+    caja,
+    fecha,
     metodoPago,
+    printerName,
+    clienteNombre,
+    clienteTelefono,
     items,
-    subtotal: total,
-    descuento: 0,
-    impuesto: 0,
+    subtotal: subtotal == null ? total : subtotal,
+    descuento,
+    impuesto,
     total,
     recibido,
     cambio,
   };
 
   try {
-    const res = await api.fetchApi({}, "POST", payload, endpoints.ticket, {
+    const res = await api.fetchApi({}, "POST", requestPayload, endpoints.ticket, {
       logoutOnUnauthorized: false,
     });
 
@@ -68,13 +83,21 @@ export async function imprimirTicket({
     }
 
     if (!res.ok) {
-      const txt = await res.text();
+      const errorPayload = await res.json().catch(() => null);
+      const txt = errorPayload?.message || `Error HTTP ${res.status}`;
       console.error("❌ Error al imprimir ticket:", txt);
-      return { ok: false, mensaje: `Error ${res.status}: ${txt}` };
+      return { ok: false, mensaje: txt };
     }
 
+    const responsePayload = await res.json().catch(() => null);
     console.log("✅ Ticket enviado a la impresora.");
-    return { ok: true, mensaje: "Ticket impreso correctamente." };
+    return {
+      ok: true,
+      mensaje:
+        responsePayload?.data?.mensaje ||
+        responsePayload?.message ||
+        "Ticket impreso correctamente.",
+    };
   } catch (err) {
     console.error("❌ Error inesperado en imprimirTicket:", err);
     return { ok: false, mensaje: err.message };

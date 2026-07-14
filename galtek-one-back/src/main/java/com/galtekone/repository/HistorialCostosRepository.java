@@ -1,6 +1,7 @@
 package com.galtekone.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,5 +21,8 @@ public interface HistorialCostosRepository
     // Obtener el costo más reciente de un producto antes de una fecha dada
     Optional<HistorialCostosEntity> findTopByProducto_IdProductoAndEmpresa_IdEmpresaAndFechaCreacionLessThanEqualOrderByFechaCreacionDesc(
             Integer idProducto, Integer idEmpresa, LocalDateTime fecha);
+
+    List<HistorialCostosEntity> findByProveedor_IdProveedorAndProducto_IdProductoAndEmpresa_IdEmpresaOrderByFechaCreacionDesc(
+            Integer idProveedor, Integer idProducto, Integer idEmpresa);
 }
 
