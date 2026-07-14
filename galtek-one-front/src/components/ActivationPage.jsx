@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Toast } from "primereact/toast";
 import { useDevice } from "../auth/DeviceContext";
 import { useNavigate } from "react-router-dom";
@@ -6,11 +6,17 @@ import "../style/components/Login/Login.css";
 import "../style/components/Login/ActivationPage.css";
 
 const ActivationPage = () => {
-  const { machineCodeBase64, lockReason, activateDevice, deviceError } = useDevice();
+  const { isActivated, machineCodeBase64, lockReason, activateDevice, deviceError } = useDevice();
   const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
   const toast = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isActivated) {
+      navigate("/login", { replace: true });
+    }
+  }, [isActivated, navigate]);
 
   const showToast = (severity, summary, detail, life = 4000) => {
     toast.current?.show({ severity, summary, detail, life });
@@ -67,6 +73,14 @@ const ActivationPage = () => {
               </div>
               <h3 className="error-title">Servicio No Disponible</h3>
               <p className="error-desc">No se puede conectar con el backend de validacion local. Verifique que el servicio este corriendo.</p>
+              <button 
+                type="button" 
+                className="activate-submit-btn" 
+                onClick={() => window.location.reload()}
+                style={{ marginTop: '1rem', width: 'auto', padding: '10px 20px', background: '#3b82f6', border: 'none' }}
+              >
+                <i className="pi pi-refresh" style={{ marginRight: '8px' }}></i> Reintentar
+              </button>
             </div>
           ) : isFatalError ? (
             <div className="activation-error-state">
