@@ -36,6 +36,9 @@ import Ajustes from "../components/Configuracion/Ajustes";
 import ConfiguracionExportaciones from "../components/Configuracion/ConfiguracionExportaciones";
 
 
+import RequireActivation from "./guards/RequireActivation";
+import ActivationPage from "../components/ActivationPage";
+
 function RootRedirect() {
   const { isAuthenticated } = useAuth();
   return <Navigate to={isAuthenticated ? "/ventas" : "/login"} replace />;
@@ -44,51 +47,58 @@ function RootRedirect() {
 export default function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<RootRedirect />} />
+      {/* RUTA DE ACTIVACION: Fuera del wrapper para evitar redireccion infinita */}
+      <Route path="/activar" element={<ActivationPage />} />
 
-      {/* RUTAS PÚBLICAS (LOGIN) */}
-      <Route element={<RequireGuest />}>
-        <Route path="/login" element={<Login />}>
-          <Route index element={<LoginForm />} />
-          <Route path="registro" element={<LoginRegister />} />
-          <Route path="recuperar-usuario" element={<LoginRecuperar />} />
-          <Route path="recuperar-password" element={<LoginRecuperarPass />} />
+      {/* TODAS LAS DEMAS RUTAS PROTEGIDAS POR ACTIVACION DE HARDWARE */}
+      <Route element={<RequireActivation />}>
+        <Route path="/" element={<RootRedirect />} />
+
+        {/* RUTAS PÚBLICAS (LOGIN) */}
+        <Route element={<RequireGuest />}>
+          <Route path="/login" element={<Login />}>
+            <Route index element={<LoginForm />} />
+            <Route path="registro" element={<LoginRegister />} />
+            <Route path="recuperar-usuario" element={<LoginRecuperar />} />
+            <Route path="recuperar-password" element={<LoginRecuperarPass />} />
+          </Route>
+          <Route path="/terminos" element={<Terminos />} />
+          <Route path="/privacidad" element={<Privacidad />} />
         </Route>
-        <Route path="/terminos" element={<Terminos />} />
-        <Route path="/privacidad" element={<Privacidad />} />
+
+        {/* RUTAS PROTEGIDAS (APP) */}
+        <Route element={<RequireAuth />}>
+          <Route path="ventas" element={<Ventas />} />
+          <Route path="inventario" element={<Inventario />} />
+          <Route path="compras" element={<Compras />} />
+          <Route path="proveedores" element={<Proveedores />} />
+          
+          {/* Sub-rutas Compras */}
+          <Route path="/compras/producto" element={<ComprasProducto />} />
+          <Route path="/compras/ticket" element={<ComprasTicket />} />
+          <Route path="/compras/proveedor" element={<ComprasProveedor />} />
+
+          {/* Clientes */}
+          <Route path="clientes" element={<Clientes />} />
+          <Route path="clientes/:id" element={<ClienteSeleccionado />} />
+          <Route path="clientes/crear" element={<CrearClientes />} />
+          <Route path="clientes/:id/editar" element={<EditarCliente />} />
+
+          {/* Configuración */}
+          <Route path="ajustes" element={<Ajustes />} />
+          <Route path="configuracion-exportaciones" element={<ConfiguracionExportaciones />} />
+
+          {/* 🔥 REPORTES */}
+          <Route path="reporte-compras" element={<ReporteCompras />} />
+          <Route path="reporte-ventas" element={<ReporteVentas />} />
+          <Route path="reporte-balance" element={<ReporteBalance />} /> 
+        </Route>
+
+        {/* ERRORES */}
+        <Route path="/404" element={<NotFound />} />
+        <Route path="*" element={<RootRedirect />} />
       </Route>
 
-      {/* RUTAS PROTEGIDAS (APP) */}
-      <Route element={<RequireAuth />}>
-        <Route path="ventas" element={<Ventas />} />
-        <Route path="inventario" element={<Inventario />} />
-        <Route path="compras" element={<Compras />} />
-        <Route path="proveedores" element={<Proveedores />} />
-        
-        {/* Sub-rutas Compras */}
-        <Route path="/compras/producto" element={<ComprasProducto />} />
-        <Route path="/compras/ticket" element={<ComprasTicket />} />
-        <Route path="/compras/proveedor" element={<ComprasProveedor />} />
-
-        {/* Clientes */}
-        <Route path="clientes" element={<Clientes />} />
-        <Route path="clientes/:id" element={<ClienteSeleccionado />} />
-        <Route path="clientes/crear" element={<CrearClientes />} />
-        <Route path="clientes/:id/editar" element={<EditarCliente />} />
-
-        {/* Configuración */}
-        <Route path="ajustes" element={<Ajustes />} />
-        <Route path="configuracion-exportaciones" element={<ConfiguracionExportaciones />} />
-
-        {/* 🔥 REPORTES */}
-        <Route path="reporte-compras" element={<ReporteCompras />} />
-        <Route path="reporte-ventas" element={<ReporteVentas />} />
-        <Route path="reporte-balance" element={<ReporteBalance />} /> 
-      </Route>
-
-      {/* ERRORES */}
-      <Route path="/404" element={<NotFound />} />
-      <Route path="*" element={<RootRedirect />} />
     </Routes>
   );
 }

@@ -5,6 +5,9 @@ export const endpoints = {
   authLogin: `${API_BASE_URL}/auth/login`,
   authLogout: `${API_BASE_URL}/auth/logout`,
 
+  deviceIdentity: `${API_BASE_URL}/device/identity`,
+  deviceActivate: `${API_BASE_URL}/device/activate`,
+
   ventasProductos: `${API_BASE_URL}/productos`,
   ventasCategorias: `${API_BASE_URL}/productos/categoria`,
   categorias: `${API_BASE_URL}/categorias`,
