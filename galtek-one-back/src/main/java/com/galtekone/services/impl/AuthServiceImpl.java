@@ -44,6 +44,10 @@ public class AuthServiceImpl implements AuthService {
 		UsuariosEntity user = usuariosRepository.findByUsuario(req.getUsuario())
 				.orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
+		if (!isActiveUser(user)) {
+			throw new BadCredentialsException("Usuario inactivo");
+		}
+
 		final String raw;
 		try {
 			raw = rsaCryptoService.decryptBase64(req.getPassword());
@@ -74,8 +78,17 @@ public class AuthServiceImpl implements AuthService {
 			    rol,
 			    user.getAvatarUrl(),
 			    user.getEmpresa().getIdEmpresa(),
-			    user.getEmpresa().getNombreEmpresa()
+			    user.getEmpresa().getNombreEmpresa(),
+			    user.getIdUsuario(),
+			    Boolean.TRUE.equals(user.getRequiereCambioPassword())
 			);
+	}
+
+	private boolean isActiveUser(UsuariosEntity user) {
+		return user != null
+				&& user.getActivo() != null
+				&& user.getActivo().intValue() != 0
+				&& !Boolean.FALSE.equals(user.getEstatus());
 	}
 
 	@Override

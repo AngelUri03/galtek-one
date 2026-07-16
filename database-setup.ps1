@@ -1,7 +1,8 @@
 param(
   [string]$DatabasePath = "$env:APPDATA\GaltekOne\galtek-one.db",
   [string]$SchemaPath = "$PSScriptRoot\galtek-one-schema.sql",
-  [string]$SeedPath = "$PSScriptRoot\galtek-one-seed.sql"
+  [string]$SeedPath = "$PSScriptRoot\galtek-one-seed.sql",
+  [switch]$Seed
 )
 
 $ErrorActionPreference = "Stop"
@@ -10,13 +11,19 @@ if (-not (Test-Path -LiteralPath $SchemaPath)) {
   throw "No se encontro el schema: $SchemaPath"
 }
 
-if (-not (Test-Path -LiteralPath $SeedPath)) {
-  throw "No se encontro el seed: $SeedPath"
-}
-
 $dbDirectory = Split-Path -Parent $DatabasePath
 if ($dbDirectory) {
   New-Item -ItemType Directory -Force -Path $dbDirectory | Out-Null
+}
+
+$databaseExists = Test-Path -LiteralPath $DatabasePath
+if ($databaseExists) {
+  $databaseExists = (Get-Item -LiteralPath $DatabasePath).Length -gt 0
+}
+
+$shouldSeed = $Seed.IsPresent -or -not $databaseExists
+if ($shouldSeed -and -not (Test-Path -LiteralPath $SeedPath)) {
+  throw "No se encontro el seed: $SeedPath"
 }
 
 $sqliteJar = Get-ChildItem -Path "$env:USERPROFILE\.m2\repository\org\xerial\sqlite-jdbc" -Recurse -Filter "sqlite-jdbc-*.jar" -ErrorAction SilentlyContinue |
@@ -77,9 +84,23 @@ public class GaltekOneSqlRunner {
     for (String command : splitSql(sql)) {
       String trimmed = command.trim();
       if (!trimmed.isEmpty()) {
-        statement.execute(trimmed);
+        try {
+          statement.execute(trimmed);
+        } catch (Exception ex) {
+          if (!isIgnorableMigrationError(trimmed, ex)) {
+            throw ex;
+          }
+        }
       }
     }
+  }
+
+  private static boolean isIgnorableMigrationError(String sql, Exception ex) {
+    String normalizedSql = sql == null ? "" : sql.trim().toUpperCase();
+    String message = ex.getMessage() == null ? "" : ex.getMessage().toLowerCase();
+    return normalizedSql.startsWith("ALTER TABLE")
+        && normalizedSql.contains(" ADD COLUMN ")
+        && message.contains("duplicate column name");
   }
 
   private static List<String> splitSql(String sql) {
@@ -164,10 +185,20 @@ if ($LASTEXITCODE -ne 0) {
   throw "No se pudo compilar el runner SQL."
 }
 
-java -cp $classpath GaltekOneSqlRunner $DatabasePath $SchemaPath $SeedPath
+$sqlFiles = @($SchemaPath)
+if ($shouldSeed) {
+  $sqlFiles += $SeedPath
+}
+
+java -cp $classpath GaltekOneSqlRunner $DatabasePath $sqlFiles
 if ($LASTEXITCODE -ne 0) {
   throw "No se pudo aplicar schema/seed."
 }
 
 Write-Host "Base lista: $DatabasePath"
-Write-Host "Aplicados: $SchemaPath, $SeedPath"
+if ($shouldSeed) {
+  Write-Host "Aplicados: $SchemaPath, $SeedPath"
+} else {
+  Write-Host "Aplicado: $SchemaPath"
+  Write-Host "Seed omitido: la base ya existe. Usa -Seed solo si quieres refrescar datos demo."
+}

@@ -86,7 +86,7 @@ public class ReporteFinancieroServiceImpl implements ReporteFinancieroService {
 
             BigDecimal costoUnitario = BigDecimal.ZERO;
             if (historial.isPresent()) {
-                costoUnitario = BigDecimal.valueOf(historial.get().getPrecioCompra());
+                costoUnitario = historial.get().getPrecioCompra();
             }
 
             BigDecimal costoLinea = costoUnitario.multiply(detalle.getCantidad());

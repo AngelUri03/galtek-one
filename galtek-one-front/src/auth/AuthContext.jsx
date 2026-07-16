@@ -9,7 +9,10 @@ import React, {
 } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
+import { InputText } from "primereact/inputtext";
 import { endpoints } from "../API/api";
+import { encryptRSAOAEPToBase64 } from "../utils/rsa";
+import "../style/components/common/AuthPasswordReset.css";
 
 const AuthContext = createContext(null);
 
@@ -68,6 +71,10 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(() => readSession());
   const [showWarning, setShowWarning] = useState(false);
   const [remainingMs, setRemainingMs] = useState(WARNING_BEFORE_MS);
+  const [requiredPassword, setRequiredPassword] = useState("");
+  const [requiredConfirm, setRequiredConfirm] = useState("");
+  const [requiredError, setRequiredError] = useState("");
+  const [requiredSaving, setRequiredSaving] = useState(false);
 
   const sessionRef = useRef(session);
   const timerRef = useRef(null);
@@ -75,6 +82,7 @@ export function AuthProvider({ children }) {
   const loggingOutRef = useRef(false);
 
   const isAuthenticated = Boolean(session?.token);
+  const mustChangePassword = Boolean(session?.requiereCambioPassword);
 
   useEffect(() => {
     sessionRef.current = session;
@@ -112,6 +120,89 @@ export function AuthProvider({ children }) {
     setShowWarning(false);
     setRemainingMs(WARNING_BEFORE_MS);
   }, []);
+
+  const updateSession = useCallback((patchOrUpdater) => {
+    const current = sessionRef.current;
+    if (!current?.token) return null;
+
+    const patch =
+      typeof patchOrUpdater === "function" ? patchOrUpdater(current) : patchOrUpdater;
+    if (!patch || typeof patch !== "object") return current;
+
+    const updated = { ...current, ...patch };
+    writeSession(updated);
+    sessionRef.current = updated;
+    setSession(updated);
+    return updated;
+  }, []);
+
+  useEffect(() => {
+    if (mustChangePassword) return;
+    setRequiredPassword("");
+    setRequiredConfirm("");
+    setRequiredError("");
+    setRequiredSaving(false);
+  }, [mustChangePassword]);
+
+  const submitRequiredPassword = useCallback(async () => {
+    const current = sessionRef.current;
+    const nextPassword = requiredPassword.trim();
+    const nextConfirm = requiredConfirm.trim();
+
+    if (!current?.token || requiredSaving) return;
+    if (nextPassword.length < 8) {
+      setRequiredError("La nueva password debe tener al menos 8 caracteres.");
+      return;
+    }
+    if (nextPassword !== nextConfirm) {
+      setRequiredError("La confirmacion no coincide.");
+      return;
+    }
+
+    setRequiredSaving(true);
+    setRequiredError("");
+
+    try {
+      const keyResponse = await fetch(endpoints.authPublicKey, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const keyPayload = await keyResponse.json().catch(() => null);
+      const pemPublic = keyPayload?.data;
+
+      if (!keyResponse.ok || !pemPublic) {
+        throw new Error(keyPayload?.message || "No se pudo obtener la llave publica.");
+      }
+
+      const encryptedPassword = await encryptRSAOAEPToBase64(pemPublic, nextPassword);
+      const response = await fetch(`${endpoints.usuarios.replace(/\/+$/, "")}/me/password`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${current.token}`,
+          user: current.usuario,
+          idEmpresa: String(current.idEmpresa),
+        },
+        body: JSON.stringify({ password: encryptedPassword }),
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(payload?.message || "No se pudo cambiar la password.");
+      }
+
+      const updated = { ...current, requiereCambioPassword: false };
+      writeSession(updated);
+      sessionRef.current = updated;
+      setSession(updated);
+      setRequiredPassword("");
+      setRequiredConfirm("");
+    } catch (error) {
+      setRequiredError(error?.message || "No se pudo cambiar la password.");
+    } finally {
+      setRequiredSaving(false);
+    }
+  }, [requiredConfirm, requiredPassword, requiredSaving]);
 
   const logout = useCallback(async ({ silent = false } = {}) => {
     if (loggingOutRef.current) return;
@@ -226,15 +317,16 @@ export function AuthProvider({ children }) {
       remember: false,
       login,
       logout,
+      updateSession,
       markActivity: () => markActivity({ force: true }),
     };
-  }, [session, isAuthenticated, login, logout, markActivity]);
+  }, [session, isAuthenticated, login, logout, markActivity, updateSession]);
 
   return (
     <AuthContext.Provider value={value}>
       {children}
       <Dialog
-        visible={showWarning && isAuthenticated}
+        visible={showWarning && isAuthenticated && !mustChangePassword}
         header="Sesion por inactividad"
         modal
         closable={false}
@@ -261,6 +353,69 @@ export function AuthProvider({ children }) {
             onClick={() => markActivity({ force: true })}
             autoFocus
           />
+        </div>
+      </Dialog>
+
+      <Dialog
+        visible={isAuthenticated && mustChangePassword}
+        header="Cambio de password requerido"
+        modal
+        closable={false}
+        draggable={false}
+        className="auth-password-dialog"
+        style={{ width: "min(440px, 92vw)" }}
+      >
+        <div className="auth-password-reset">
+          <div className="auth-password-reset__notice">
+            <i className="pi pi-key" />
+            <div>
+              <strong>Password temporal detectada</strong>
+              <span>Captura una password personal para continuar operando Galtek One.</span>
+            </div>
+          </div>
+
+          <label>
+            <span>Nueva password</span>
+            <InputText
+              type="password"
+              value={requiredPassword}
+              onChange={(event) => {
+                setRequiredPassword(event.target.value);
+                setRequiredError("");
+              }}
+              autoComplete="new-password"
+              autoFocus
+              disabled={requiredSaving}
+            />
+          </label>
+
+          <label>
+            <span>Confirmar password</span>
+            <InputText
+              type="password"
+              value={requiredConfirm}
+              onChange={(event) => {
+                setRequiredConfirm(event.target.value);
+                setRequiredError("");
+              }}
+              autoComplete="new-password"
+              disabled={requiredSaving}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") submitRequiredPassword();
+              }}
+            />
+          </label>
+
+          {requiredError ? <div className="auth-password-reset__error">{requiredError}</div> : null}
+
+          <div className="auth-password-reset__footer">
+            <Button
+              label={requiredSaving ? "Guardando..." : "Cambiar password"}
+              icon={requiredSaving ? "pi pi-spin pi-spinner" : "pi pi-check"}
+              onClick={submitRequiredPassword}
+              disabled={requiredSaving}
+            />
+          </div>
         </div>
       </Dialog>
     </AuthContext.Provider>
