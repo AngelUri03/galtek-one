@@ -12,6 +12,8 @@ import "@fontsource/kodchasan/600.css";
 import "@fontsource/kodchasan/700.css";
 import "./index.css";
 
+import { DeviceProvider } from "./auth/DeviceContext";
+
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <PrimeReactProvider
@@ -19,11 +21,13 @@ createRoot(document.getElementById("root")).render(
         hideOverlaysOnDocumentScrolling: true,
       }}
     >
-      <AuthProvider>
-        <HashRouter>
-          <AppRouter />
-        </HashRouter>
-      </AuthProvider>
+      <DeviceProvider>
+        <AuthProvider>
+          <HashRouter>
+            <AppRouter />
+          </HashRouter>
+        </AuthProvider>
+      </DeviceProvider>
     </PrimeReactProvider>
   </React.StrictMode>
 );

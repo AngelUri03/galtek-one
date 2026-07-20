@@ -1,0 +1,37 @@
+{
+  "name": "galtek-one",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scripts raiz para levantar Galtek One completo.",
+  "scripts": {
+    "setup": "npm run front:deps && npm run db:setup && npm run back:build",
+    "predev": "npm run front:deps && npm run db:setup",
+    "dev": "concurrently --kill-others-on-fail -n BACK,FRONT -c green,blue \"npm run back:dev\" \"npm run front:dev\"",
+    "prestart": "npm run front:deps && npm run db:setup",
+    "start": "concurrently --kill-others-on-fail -n BACK,FRONT -c green,blue \"npm run back:dev\" \"npm run front:dev\"",
+    "web": "npm run dev",
+    "db": "npm run db:setup",
+    "db:setup": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\database-setup.ps1",
+    "db:seed": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\database-setup.ps1 -Seed",
+    "front": "npm run front:dev",
+    "front:deps": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\ensure-frontend-deps.ps1",
+    "front:dev": "npm --prefix galtek-one-front start",
+    "front:build": "npm --prefix galtek-one-front run build",
+    "back": "npm run back:dev",
+    "back:dev": "cd galtek-one-back && .\\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=desktop",
+    "back:build": "cd galtek-one-back && .\\mvnw.cmd -DskipTests package",
+    "back:start": "java -jar galtek-one-back\\target\\galtek-one-back-0.0.1.jar --spring.profiles.active=desktop",
+    "prebuild": "npm run front:deps",
+    "build": "npm run front:build && npm run back:build",
+    "desktop:prepare": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\build-desktop.ps1 -SkipTauriBuild",
+    "desktop:dev": "npm run desktop:prepare && npm --prefix galtek-one-front run desktop:dev",
+    "desktop:build": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\build-desktop.ps1",
+    "exe:build": "npm run desktop:build",
+    "exe:run": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\run-desktop.ps1",
+    "exe:build-run": "npm run exe:build && npm run exe:run",
+    "installer:build": "npm run desktop:build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

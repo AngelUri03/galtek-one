@@ -63,7 +63,7 @@ public class HistorialCostosServiceImpl implements HistorialCostosService {
         Specification<HistorialCostosEntity> filtroEmpresa = (root, query, cb) ->
                 cb.equal(root.get("empresa").get("idEmpresa"), empresaId);
 
-        Specification<HistorialCostosEntity> finalSpec = Specification.where(specs).and(filtroEmpresa);
+        Specification<HistorialCostosEntity> finalSpec = Specification.where(filtroEmpresa).and(specs);
 
         return historialCostosRepository.findAll(finalSpec);
     }

@@ -1,0 +1,1699 @@
+.tda-page,
+.tda-page .p-button,
+.tda-page .p-inputtext,
+.tda-page .p-inputtextarea,
+.tda-page .p-dropdown,
+.tda-page .p-calendar,
+.tda-page .p-checkbox {
+  font-family: "Kodchasan", sans-serif !important;
+}
+
+.tda-page {
+  --tda-brand: #0a7463;
+  --tda-brand-hover: #085f52;
+  --tda-control-height: 40px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  color: #142521;
+}
+
+.tda-page--ready {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.tda-panel,
+.tda-side-card,
+.tda-footer,
+.tda-error {
+  border: 1px solid rgba(10, 116, 99, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.56);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 10px 26px rgba(20, 38, 34, 0.045);
+}
+
+.tda-file-input {
+  display: none;
+}
+
+.tda-form-shell {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tda-workspace {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.95fr) minmax(360px, 1.05fr) minmax(280px, 0.72fr);
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "identity address address"
+    "schedule logo regional";
+  gap: 12px;
+  min-height: 0;
+  overflow: hidden auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(10, 116, 99, 0.28) transparent;
+}
+
+.tda-workspace::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tda-workspace::-webkit-scrollbar-thumb {
+  border-radius: 99px;
+  background: rgba(10, 116, 99, 0.25);
+}
+
+.tda-panel,
+.tda-side-card,
+.tda-section-card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.tda-section-card,
+.tda-main-panel,
+.tda-side-card {
+  padding: 10px;
+}
+
+.tda-identity-card {
+  grid-area: identity;
+}
+
+.tda-address-card {
+  grid-area: address;
+}
+
+.tda-schedule-summary-card {
+  grid-area: schedule;
+}
+
+.tda-logo-card {
+  grid-area: logo;
+}
+
+.tda-regional-card {
+  grid-area: regional;
+}
+
+.tda-main-panel {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  align-content: start;
+  overflow: hidden auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(10, 116, 99, 0.28) transparent;
+}
+
+.tda-main-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tda-main-panel::-webkit-scrollbar-thumb {
+  border-radius: 99px;
+  background: rgba(10, 116, 99, 0.25);
+}
+
+.tda-panel-head,
+.tda-side-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 36px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid rgba(21, 43, 38, 0.08);
+  margin-bottom: 8px;
+}
+
+.tda-identity-card .tda-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tda-identity-card .tda-field.span-2 {
+  grid-column: span 1;
+}
+
+.tda-step,
+.tda-block-title > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  color: #0a7463;
+  background: rgba(10, 116, 99, 0.12);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.tda-panel-head h4,
+.tda-side-head h4 {
+  margin: 0;
+  color: #142521;
+  font-size: 0.86rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.tda-panel-head p,
+.tda-side-head p {
+  margin: 0.12rem 0 0;
+  color: #66746f;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.tda-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.tda-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.tda-field.span-2 {
+  grid-column: span 2;
+}
+
+.tda-field.span-4 {
+  grid-column: span 4;
+}
+
+.tda-field > span {
+  color: #53615d;
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.tda-field-error {
+  color: #b42318;
+  font-size: 0.64rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.tda-page .p-inputtext,
+.tda-page .p-inputtextarea,
+.tda-page .p-dropdown,
+.tda-page .p-calendar {
+  width: 100%;
+  border: 1px solid rgba(21, 43, 38, 0.13) !important;
+  border-radius: 10px !important;
+  background: linear-gradient(180deg, #ffffff, #f8faf9) !important;
+  color: #142521 !important;
+  box-shadow: none !important;
+  font-size: 0.8rem !important;
+  font-weight: 750 !important;
+}
+
+.tda-page .p-inputtext,
+.tda-page .p-dropdown,
+.tda-page .p-calendar {
+  height: var(--tda-control-height) !important;
+  min-height: var(--tda-control-height) !important;
+  max-height: var(--tda-control-height) !important;
+}
+
+.tda-page .p-inputtext {
+  padding: 0 0.62rem !important;
+}
+
+.tda-page .p-inputtextarea {
+  height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
+  padding: 0.46rem 0.62rem !important;
+  resize: none;
+}
+
+.tda-page .p-dropdown,
+.tda-page .p-calendar {
+  display: inline-flex !important;
+  align-items: center !important;
+  overflow: hidden !important;
+  box-sizing: border-box;
+}
+
+.tda-page .p-dropdown .p-dropdown-label,
+.tda-page .p-dropdown .p-dropdown-label.p-inputtext,
+.tda-page .p-dropdown .p-inputtext,
+.tda-page .p-calendar .p-inputtext {
+  display: flex !important;
+  align-items: center !important;
+  flex: 1 1 auto !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  width: 1% !important;
+  padding: 0 0.62rem !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #142521 !important;
+  font-size: 0.8rem !important;
+  font-weight: 750 !important;
+  line-height: 1.2 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tda-page .p-dropdown > .p-inputtext,
+.tda-page .p-dropdown > .p-dropdown-label,
+.tda-page .p-dropdown > .p-dropdown-label.p-inputtext {
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.tda-page .p-dropdown .p-dropdown-trigger,
+.tda-page .p-calendar .p-datepicker-trigger {
+  flex: 0 0 2.35rem !important;
+  width: 2.35rem !important;
+  border: none !important;
+  border-left: 0 !important;
+  background: transparent !important;
+  color: var(--tda-brand) !important;
+  box-shadow: none !important;
+}
+
+.tda-page .p-inputtext:enabled:focus,
+.tda-page .p-inputtextarea:enabled:focus,
+.tda-page .p-dropdown:not(.p-disabled).p-focus,
+.tda-page .p-calendar.p-inputwrapper-focus,
+.tda-page .p-calendar.p-focus {
+  border-color: var(--tda-brand) !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.tda-page .p-inputtext.p-invalid,
+.tda-page .p-inputtextarea.p-invalid,
+.tda-page .p-dropdown.p-invalid,
+.tda-page .p-calendar.p-invalid {
+  border-color: rgba(160, 66, 66, 0.5) !important;
+}
+
+.tda-block-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 38px;
+  margin: 10px 0 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(21, 43, 38, 0.08);
+}
+
+.tda-block-title div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tda-block-title strong {
+  color: #142521;
+  font-size: 0.86rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.tda-block-title small {
+  overflow: hidden;
+  color: #66746f;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tda-address-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-content: start;
+  gap: 6px;
+}
+
+.tda-address-grid .tda-field.span-2 {
+  grid-column: span 2;
+}
+
+.tda-address-grid .tda-field.span-4 {
+  grid-column: 1 / -1;
+}
+
+.tda-reference-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0.46rem 0.58rem;
+  border: 1px solid rgba(10, 116, 99, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.5);
+  box-sizing: border-box;
+}
+
+.tda-reference-row div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tda-reference-row span {
+  color: #53615d;
+  font-size: 0.66rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.tda-reference-row strong {
+  overflow: hidden;
+  color: #142521;
+  font-size: 0.74rem;
+  font-weight: 850;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tda-reference-btn.p-button,
+.p-button.tda-reference-btn {
+  min-height: 32px !important;
+  padding: 0 0.72rem !important;
+  font-size: 0.76rem !important;
+}
+
+.tda-operational-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.78fr);
+  gap: 10px;
+  min-height: 0;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(21, 43, 38, 0.08);
+  overflow: hidden;
+}
+
+.tda-flow-section {
+  display: grid;
+  grid-template-rows: auto auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tda-operational-grid .tda-block-title {
+  min-height: 34px;
+  margin: 0 0 7px;
+  padding-top: 0;
+  border-top: none;
+}
+
+.tda-side-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tda-logo-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+}
+
+.tda-logo-large {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 66px;
+  height: 66px;
+  border: 1px solid rgba(10, 116, 99, 0.14);
+  border-radius: 16px;
+  color: #0a7463;
+  background: rgba(10, 116, 99, 0.12);
+}
+
+.tda-logo-large span {
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.tda-logo-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tda-logo-actions,
+.tda-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tda-logo-actions .p-button {
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+}
+
+.tda-logo-actions .tda-secondary-btn.p-button,
+.tda-logo-actions .p-button.tda-secondary-btn {
+  padding: 0 0.9rem !important;
+}
+
+.tda-logo-actions .tda-icon-btn.p-button,
+.tda-logo-actions .p-button.tda-icon-btn {
+  flex: 0 0 40px;
+  width: 40px !important;
+  padding: 0 !important;
+}
+
+.tda-logo-panel small {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  color: #66746f;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tda-logo-preview-card {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 122px;
+  padding: 0.7rem;
+  border: 1px solid rgba(10, 116, 99, 0.12);
+  border-radius: 12px;
+  background: rgba(10, 116, 99, 0.06);
+  cursor: pointer;
+  font-family: "Kodchasan", sans-serif;
+  text-align: left;
+}
+
+.tda-logo-preview-card:hover {
+  border-color: rgba(10, 116, 99, 0.28);
+  background: rgba(10, 116, 99, 0.09);
+}
+
+.tda-logo-preview-image {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 104px;
+  height: 104px;
+  border: 1px solid rgba(10, 116, 99, 0.13);
+  border-radius: 14px;
+  color: #0a7463;
+  background: rgba(255, 255, 255, 0.74);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.tda-logo-preview-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.tda-logo-preview-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.tda-logo-preview-copy small {
+  color: #53615d;
+  font-size: 0.68rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.tda-logo-preview-copy strong {
+  overflow: hidden;
+  color: #142521;
+  font-size: 0.86rem;
+  font-weight: 900;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tda-logo-preview-copy em {
+  overflow: hidden;
+  color: #66746f;
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tda-side-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  min-height: 0;
+}
+
+.tda-schedule-card {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+  padding: 9px;
+  border: 1px solid rgba(10, 116, 99, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.36);
+}
+
+.tda-schedule-overview-card {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid rgba(10, 116, 99, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.tda-overview-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0.38rem 0.48rem;
+  border: 1px solid rgba(10, 116, 99, 0.1);
+  border-radius: 10px;
+  background: rgba(10, 116, 99, 0.06);
+}
+
+.tda-overview-row i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: #0a7463;
+  background: rgba(10, 116, 99, 0.1);
+}
+
+.tda-overview-row div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tda-overview-row span {
+  color: #53615d;
+  font-size: 0.66rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.tda-overview-row strong {
+  overflow: hidden;
+  color: #142521;
+  font-size: 0.76rem;
+  font-weight: 900;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tda-schedule-config-btn.p-button,
+.p-button.tda-schedule-config-btn {
+  width: 100%;
+  justify-content: center;
+  min-height: 36px !important;
+}
+
+.tda-flow-section--schedule .tda-schedule-card {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(10, 116, 99, 0.28) transparent;
+}
+
+.tda-flow-section--schedule .tda-schedule-card::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tda-flow-section--schedule .tda-schedule-card::-webkit-scrollbar-thumb {
+  border-radius: 99px;
+  background: rgba(10, 116, 99, 0.25);
+}
+
+.tda-schedule-toolbar {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.34fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tda-flow-section--schedule .tda-schedule-toolbar {
+  grid-template-columns: minmax(196px, 0.85fr) minmax(0, 1fr);
+  gap: 6px;
+}
+
+.tda-rule-grid,
+.tda-custom-days {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.tda-flow-section--schedule .tda-rule-grid,
+.tda-flow-section--schedule .tda-custom-days {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  align-content: start;
+  min-height: 0;
+}
+
+.tda-rule-grid.is-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.tda-flow-section--schedule .tda-rule-grid.is-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.tda-rule-card {
+  display: grid;
+  grid-template-columns: minmax(116px, 0.6fr) minmax(142px, 0.72fr) minmax(210px, 1.1fr);
+  align-items: start;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid rgba(21, 43, 38, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.tda-flow-section--schedule .tda-rule-card,
+.tda-flow-section--schedule .tda-rule-card.is-static {
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 0.8fr);
+  gap: 6px;
+  padding: 7px;
+}
+
+.tda-rule-card.is-static {
+  grid-template-columns: minmax(116px, 0.6fr) minmax(142px, 0.72fr) minmax(120px, 1fr);
+}
+
+.tda-rule-name {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding-top: 3px;
+}
+
+.tda-flow-section--schedule .tda-rule-name {
+  padding-top: 0;
+}
+
+.tda-flow-section--schedule .tda-rule-name span {
+  display: none;
+}
+
+.tda-rule-name strong {
+  overflow: hidden;
+  color: #142521;
+  font-size: 0.76rem;
+  font-weight: 900;
+  line-height: 1.12;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tda-rule-name span,
+.tda-rule-static {
+  color: #53615d;
+  font-size: 0.68rem;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.tda-rule-static {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tda-control-height);
+  padding: 0 0.72rem;
+  border: 1px solid rgba(10, 116, 99, 0.1);
+  border-radius: 10px;
+  color: var(--tda-brand);
+  background: rgba(10, 116, 99, 0.08);
+}
+
+.tda-rule-status.p-dropdown {
+  min-width: 0;
+}
+
+.tda-flow-section--schedule .tda-rule-status.p-dropdown {
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+}
+
+.tda-time-range {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.tda-flow-section--schedule .tda-time-range {
+  grid-column: 1 / -1;
+  gap: 6px;
+}
+
+.tda-flow-section--schedule .tda-time-calendar.p-calendar {
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+}
+
+.tda-flow-section--schedule .tda-time-field > span {
+  display: none;
+}
+
+.tda-time-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.tda-time-field > span {
+  color: #53615d;
+  font-size: 0.66rem;
+  font-weight: 850;
+}
+
+.tda-time-calendar.p-calendar .p-datepicker-trigger {
+  flex: 0 0 2.45rem;
+  width: 2.45rem !important;
+  background: var(--tda-brand) !important;
+  color: #ffffff !important;
+}
+
+.tda-time-calendar.p-calendar .p-datepicker-trigger:not(.p-disabled):hover {
+  background: var(--tda-brand-hover) !important;
+}
+
+.tda-exception-flow {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tda-day-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tda-day-chip {
+  min-width: 42px;
+  min-height: 28px;
+  border: 1px solid rgba(10, 116, 99, 0.16);
+  border-radius: 10px;
+  color: #53615d;
+  background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.tda-day-chip.is-active,
+.tda-day-chip:hover {
+  border-color: rgba(10, 116, 99, 0.4);
+  color: var(--tda-brand);
+  background: rgba(10, 116, 99, 0.1);
+}
+
+.tda-schedule-state-card {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 10px;
+  border: 1px solid rgba(10, 116, 99, 0.14);
+  border-radius: 12px;
+  color: var(--tda-brand);
+  background: rgba(10, 116, 99, 0.08);
+}
+
+.tda-schedule-state-card.is-closed {
+  border-color: rgba(117, 82, 10, 0.16);
+  color: #76520a;
+  background: rgba(255, 230, 168, 0.3);
+}
+
+.tda-schedule-state-card i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.tda-schedule-state-card strong,
+.tda-schedule-state-card span {
+  display: block;
+  line-height: 1.2;
+}
+
+.tda-schedule-state-card strong {
+  color: #142521;
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
+.tda-schedule-state-card span {
+  color: #53615d;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.tda-schedule-notes .p-inputtextarea {
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+}
+
+.tda-schedule-preview {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0.44rem 0.56rem;
+  border: 1px solid rgba(10, 116, 99, 0.14);
+  border-radius: 10px;
+  color: #0a7463;
+  background: rgba(10, 116, 99, 0.08);
+}
+
+.tda-flow-section--schedule .tda-schedule-preview {
+  min-height: 34px;
+  padding: 0.3rem 0.48rem;
+}
+
+.tda-schedule-preview i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: rgba(10, 116, 99, 0.1);
+}
+
+.tda-schedule-preview span {
+  overflow: hidden;
+  color: #53615d;
+  font-size: 0.7rem;
+  font-weight: 850;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tda-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 46px;
+  padding: 6px 9px;
+}
+
+.tda-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-width: 0;
+}
+
+.tda-meta span,
+.tda-sync-state {
+  min-height: 24px;
+  padding: 0.3rem 0.54rem;
+  border-radius: 8px;
+  color: #53615d;
+  background: rgba(255, 255, 255, 0.66);
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.tda-sync-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(10, 116, 99, 0.14);
+  color: #0a7463 !important;
+  background: rgba(10, 116, 99, 0.08) !important;
+  font-weight: 900 !important;
+  white-space: nowrap;
+}
+
+.tda-sync-state.is-dirty {
+  color: #76520a !important;
+  border-color: rgba(160, 121, 26, 0.22);
+  background: rgba(255, 230, 168, 0.32) !important;
+}
+
+.tda-primary-btn.p-button,
+.p-button.tda-primary-btn {
+  min-height: 38px;
+  border: none !important;
+  border-radius: 10px !important;
+  background: #0a7463 !important;
+  color: #ffffff !important;
+  font-weight: 850 !important;
+  box-shadow: 0 7px 16px rgba(10, 116, 99, 0.18) !important;
+}
+
+.tda-primary-btn.p-button:not(.p-disabled):hover,
+.p-button.tda-primary-btn:not(.p-disabled):hover {
+  background: #085f52 !important;
+}
+
+.tda-secondary-btn.p-button,
+.p-button.tda-secondary-btn,
+.tda-text-btn.p-button,
+.p-button.tda-text-btn,
+.tda-icon-btn.p-button,
+.p-button.tda-icon-btn {
+  min-height: 36px;
+  border: 1px solid rgba(10, 116, 99, 0.14) !important;
+  border-radius: 10px !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  color: #0a7463 !important;
+  font-weight: 850 !important;
+  box-shadow: none !important;
+}
+
+.tda-icon-btn.p-button,
+.p-button.tda-icon-btn {
+  width: 36px;
+  padding: 0 !important;
+}
+
+.tda-danger-btn.p-button,
+.p-button.tda-danger-btn {
+  min-height: 38px;
+  border: none !important;
+  border-radius: 10px !important;
+  background: #9f2f45 !important;
+  color: #ffffff !important;
+  font-weight: 850 !important;
+  box-shadow: none !important;
+}
+
+.tda-error {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 96px;
+  padding: 16px;
+}
+
+.tda-error-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  color: #0a7463;
+  background: rgba(10, 116, 99, 0.12);
+  font-size: 1.05rem;
+}
+
+.tda-error strong {
+  color: #142521;
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.tda-error p {
+  margin: 0.25rem 0 0;
+  color: #66746f;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.tda-reference-dialog,
+.tda-schedule-dialog,
+.tda-logo-dialog,
+.tda-reference-dialog .p-dialog-header,
+.tda-schedule-dialog .p-dialog-header,
+.tda-logo-dialog .p-dialog-header,
+.tda-reference-dialog .p-dialog-content,
+.tda-schedule-dialog .p-dialog-content,
+.tda-logo-dialog .p-dialog-content,
+.tda-reference-dialog .p-dialog-footer,
+.tda-schedule-dialog .p-dialog-footer,
+.tda-reference-dialog .p-inputtextarea {
+  font-family: "Kodchasan", sans-serif !important;
+}
+
+.tda-reference-dialog.p-dialog,
+.p-dialog.tda-reference-dialog,
+.tda-schedule-dialog.p-dialog,
+.p-dialog.tda-schedule-dialog,
+.tda-logo-dialog.p-dialog,
+.p-dialog.tda-logo-dialog {
+  --tda-brand: #0a7463;
+  --tda-brand-hover: #085f52;
+  --tda-control-height: 40px;
+  width: min(560px, calc(100vw - 32px));
+  border: 1px solid rgba(10, 116, 99, 0.12) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  overflow: hidden;
+  box-shadow: 0 22px 58px rgba(20, 38, 34, 0.18) !important;
+}
+
+.tda-schedule-dialog.p-dialog,
+.p-dialog.tda-schedule-dialog {
+  width: min(980px, calc(100vw - 34px));
+}
+
+.tda-logo-dialog.p-dialog,
+.p-dialog.tda-logo-dialog {
+  width: min(760px, calc(100vw - 32px));
+}
+
+.tda-reference-dialog .p-dialog-header,
+.tda-schedule-dialog .p-dialog-header,
+.tda-logo-dialog .p-dialog-header,
+.tda-reference-dialog .p-dialog-content,
+.tda-schedule-dialog .p-dialog-content,
+.tda-logo-dialog .p-dialog-content,
+.tda-reference-dialog .p-dialog-footer {
+  background: transparent !important;
+}
+
+.tda-schedule-dialog .p-dialog-footer {
+  background: transparent !important;
+}
+
+.tda-reference-dialog .p-dialog-header,
+.tda-schedule-dialog .p-dialog-header,
+.tda-logo-dialog .p-dialog-header {
+  padding: 0.9rem 1rem 0.55rem !important;
+}
+
+.tda-reference-dialog .p-dialog-title,
+.tda-schedule-dialog .p-dialog-title,
+.tda-logo-dialog .p-dialog-title {
+  color: #142521;
+  font-size: 0.98rem;
+  font-weight: 900;
+}
+
+.tda-reference-dialog .p-dialog-content {
+  padding: 0 1rem 0.8rem !important;
+}
+
+.tda-logo-dialog .p-dialog-content {
+  padding: 0 1rem 1rem !important;
+}
+
+.tda-schedule-dialog .p-dialog-content {
+  max-height: min(72vh, 680px);
+  padding: 0 1rem 0.8rem !important;
+  overflow: hidden auto;
+}
+
+.tda-reference-dialog .p-dialog-footer,
+.tda-schedule-dialog .p-dialog-footer {
+  padding: 0.72rem 1rem 1rem !important;
+}
+
+.tda-reference-modal-field .p-inputtextarea {
+  width: 100%;
+  min-height: 154px !important;
+  max-height: 280px !important;
+  padding: 0.72rem !important;
+  border: 1px solid rgba(21, 43, 38, 0.13) !important;
+  border-radius: 10px !important;
+  background: linear-gradient(180deg, #ffffff, #f8faf9) !important;
+  color: #142521 !important;
+  font-size: 0.82rem !important;
+  font-weight: 750 !important;
+  line-height: 1.4 !important;
+  resize: vertical;
+  box-shadow: none !important;
+}
+
+.tda-reference-modal-field .p-inputtextarea:enabled:focus {
+  border-color: #0a7463 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.tda-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.tda-logo-preview-modal {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  min-height: 310px;
+  padding: 16px;
+  border: 1px solid rgba(10, 116, 99, 0.1);
+  border-radius: 12px;
+  background: rgba(10, 116, 99, 0.06);
+}
+
+.tda-logo-preview-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 280px;
+  height: 280px;
+  border: 1px solid rgba(10, 116, 99, 0.14);
+  border-radius: 20px;
+  color: #0a7463;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.tda-logo-preview-mark span {
+  font-size: 2.2rem;
+  font-weight: 900;
+}
+
+.tda-logo-preview-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.tda-logo-preview-modal div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.tda-logo-preview-modal strong {
+  overflow: hidden;
+  color: #142521;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tda-logo-preview-modal span {
+  overflow: hidden;
+  color: #53615d;
+  font-size: 0.76rem;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tda-schedule-modal {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tda-schedule-dialog .p-dropdown,
+.tda-schedule-dialog .p-calendar,
+.tda-schedule-dialog .p-inputtextarea {
+  display: inline-flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  height: var(--tda-control-height) !important;
+  min-height: var(--tda-control-height) !important;
+  max-height: var(--tda-control-height) !important;
+  border: 1px solid rgba(21, 43, 38, 0.14) !important;
+  border-radius: 10px !important;
+  background: linear-gradient(180deg, #ffffff, #f8faf9) !important;
+  color: #142521 !important;
+  overflow: hidden !important;
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.48),
+    0 1px 2px rgba(20, 38, 34, 0.03) !important;
+}
+
+.tda-schedule-dialog .p-inputtextarea {
+  display: block !important;
+  height: auto !important;
+  min-height: 52px !important;
+  max-height: 110px !important;
+  padding: 0.62rem 0.72rem !important;
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+  line-height: 1.35 !important;
+  resize: vertical;
+}
+
+.tda-schedule-dialog .p-dropdown .p-dropdown-label,
+.tda-schedule-dialog .p-dropdown .p-dropdown-label.p-inputtext,
+.tda-schedule-dialog .p-calendar .p-inputtext {
+  display: flex !important;
+  align-items: center !important;
+  flex: 1 1 auto !important;
+  width: 1% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  padding: 0 0.72rem !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #142521 !important;
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-shadow: none !important;
+}
+
+.tda-schedule-dialog .p-dropdown .p-dropdown-trigger,
+.tda-schedule-dialog .p-calendar .p-datepicker-trigger {
+  flex: 0 0 2.45rem !important;
+  width: 2.45rem !important;
+  border: none !important;
+  border-left: 0 !important;
+  background: transparent !important;
+  color: var(--tda-brand) !important;
+  box-shadow: none !important;
+}
+
+.tda-schedule-dialog .p-dropdown:not(.p-disabled):hover,
+.tda-schedule-dialog .p-calendar:not(.p-disabled):hover,
+.tda-schedule-dialog .p-inputtextarea:enabled:hover {
+  border-color: rgba(10, 116, 99, 0.26) !important;
+}
+
+.tda-schedule-dialog .p-dropdown.p-focus,
+.tda-schedule-dialog .p-calendar.p-inputwrapper-focus,
+.tda-schedule-dialog .p-calendar.p-focus,
+.tda-schedule-dialog .p-inputtextarea:enabled:focus {
+  border-color: var(--tda-brand) !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.tda-schedule-dialog .tda-time-calendar.p-calendar .p-datepicker-trigger {
+  background: var(--tda-brand) !important;
+  color: #ffffff !important;
+}
+
+.tda-schedule-dialog .tda-time-calendar.p-calendar .p-datepicker-trigger:not(.p-disabled):hover,
+.tda-schedule-dialog .tda-time-calendar.p-calendar.p-inputwrapper-focus .p-datepicker-trigger {
+  background: var(--tda-brand-hover) !important;
+}
+
+.tda-schedule-dialog .p-dropdown *:focus,
+.tda-schedule-dialog .p-calendar *:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.tda-schedule-modal .tda-schedule-toolbar {
+  grid-template-columns: minmax(260px, 0.42fr) minmax(0, 1fr);
+  align-items: end;
+}
+
+.tda-schedule-modal .tda-rule-grid,
+.tda-schedule-modal .tda-custom-days {
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: 10px;
+}
+
+.tda-schedule-modal .tda-rule-card,
+.tda-schedule-modal .tda-rule-card.is-static {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  min-height: 0;
+  padding: 10px;
+}
+
+.tda-schedule-modal .tda-rule-name {
+  padding-top: 0;
+}
+
+.tda-schedule-modal .tda-rule-name span {
+  display: block;
+}
+
+.tda-schedule-modal .tda-rule-status.p-dropdown,
+.tda-schedule-modal .tda-time-calendar.p-calendar {
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+}
+
+.tda-schedule-modal .tda-time-range {
+  grid-column: auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tda-schedule-modal .tda-time-field > span {
+  display: block;
+  min-height: 13px;
+}
+
+.tda-schedule-modal .tda-rule-static {
+  min-height: 38px;
+}
+
+.tda-schedule-modal .tda-schedule-notes .p-inputtextarea {
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 90px !important;
+}
+
+.tda-time-calendar.p-calendar .p-datepicker-trigger:focus,
+.tda-time-calendar.p-calendar .p-datepicker-trigger:enabled:focus,
+.tda-time-calendar.p-calendar.p-inputwrapper-focus .p-datepicker-trigger {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.tda-confirm-dialog,
+.tda-confirm-dialog .p-dialog-header,
+.tda-confirm-dialog .p-dialog-content,
+.tda-confirm-dialog .p-dialog-footer,
+.tda-select-panel,
+.tda-select-panel .p-dropdown-items,
+.tda-select-panel .p-dropdown-item,
+.tda-select-panel .p-dropdown-filter,
+.tda-time-panel {
+  font-family: "Kodchasan", sans-serif !important;
+}
+
+.tda-confirm-dialog.p-dialog,
+.p-dialog.tda-confirm-dialog {
+  width: min(440px, calc(100vw - 32px));
+  border: 1px solid rgba(10, 116, 99, 0.12) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  overflow: hidden;
+  box-shadow: 0 22px 58px rgba(20, 38, 34, 0.18) !important;
+}
+
+.tda-confirm-dialog .p-dialog-header,
+.tda-confirm-dialog .p-dialog-content,
+.tda-confirm-dialog .p-dialog-footer {
+  background: transparent !important;
+}
+
+.tda-confirm-dialog .p-dialog-header {
+  padding: 0.9rem 1rem 0.55rem !important;
+  border-bottom: 1px solid rgba(21, 43, 38, 0.08);
+}
+
+.tda-confirm-dialog .p-dialog-title {
+  color: #142521;
+  font-size: 0.98rem;
+  font-weight: 900;
+}
+
+.tda-confirm-dialog .p-dialog-content {
+  align-items: flex-start !important;
+  gap: 10px;
+  padding: 0.9rem 1rem 0.65rem !important;
+  color: #53615d;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.tda-confirm-dialog .p-confirm-dialog-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  margin: 0 !important;
+  border-radius: 10px;
+  color: #76520a !important;
+  background: rgba(255, 230, 168, 0.36);
+  font-size: 1rem !important;
+}
+
+.tda-confirm-dialog .p-confirm-dialog-message {
+  margin: 0 !important;
+}
+
+.tda-confirm-dialog .p-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0.72rem 1rem 1rem !important;
+  border-top: none !important;
+}
+
+.tda-confirm-dialog .tda-text-btn.p-button,
+.tda-confirm-dialog .p-button.tda-text-btn {
+  min-height: 38px;
+  background: transparent !important;
+}
+
+.tda-confirm-dialog .tda-danger-btn.p-button,
+.tda-confirm-dialog .p-button.tda-danger-btn {
+  min-height: 38px;
+  background: #9f2f45 !important;
+}
+
+.tda-confirm-dialog .tda-danger-btn.p-button:not(.p-disabled):hover,
+.tda-confirm-dialog .p-button.tda-danger-btn:not(.p-disabled):hover {
+  background: #84263a !important;
+}
+
+.tda-select-panel.p-dropdown-panel,
+.p-dropdown-panel.tda-select-panel,
+.tda-time-panel.p-datepicker,
+.p-datepicker.tda-time-panel {
+  border: 1px solid rgba(255, 255, 255, 0.62) !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.14) !important;
+  overflow: hidden;
+}
+
+.tda-select-panel .p-dropdown-header {
+  min-height: 40px;
+  padding: 6px 8px !important;
+  border-bottom: 1px solid rgba(10, 116, 99, 0.1) !important;
+  background: rgba(10, 116, 99, 0.05) !important;
+}
+
+.tda-select-panel .p-dropdown-filter {
+  height: 34px !important;
+  min-height: 34px !important;
+  border-color: rgba(21, 43, 38, 0.13) !important;
+  border-radius: 10px !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.tda-select-panel .p-dropdown-item {
+  min-height: 34px;
+  padding: 0.42rem 0.72rem !important;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.tda-select-panel .p-dropdown-item.p-highlight,
+.tda-select-panel .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover {
+  color: #0a7463 !important;
+  background: rgba(10, 116, 99, 0.1) !important;
+}
+
+.tda-time-panel .p-timepicker {
+  padding: 0.65rem !important;
+}
+
+.tda-time-panel .p-hour-picker span,
+.tda-time-panel .p-minute-picker span {
+  color: #142521;
+  font-weight: 850;
+}
+
+@media (max-width: 1366px) {
+  .tda-workspace {
+    grid-template-columns: minmax(320px, 0.95fr) minmax(320px, 1.05fr) minmax(250px, 0.72fr);
+    grid-template-areas:
+      "identity address address"
+      "schedule logo regional";
+  }
+
+  .tda-main-panel,
+  .tda-side-card {
+    padding: 9px;
+  }
+
+  .tda-grid {
+    gap: 6px;
+  }
+
+  .tda-page .p-inputtext,
+  .tda-page .p-dropdown,
+  .tda-page .p-calendar {
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+  }
+
+  .tda-page .p-inputtextarea {
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+  }
+
+  .tda-schedule-card {
+    gap: 7px;
+    padding: 8px;
+  }
+
+  .tda-rule-card {
+    grid-template-columns: minmax(96px, 0.48fr) minmax(126px, 0.62fr) minmax(190px, 1fr);
+    gap: 7px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .tda-workspace {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "identity address"
+      "schedule logo"
+      "regional regional";
+  }
+
+  .tda-address-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tda-address-grid .tda-field.span-2 {
+    grid-column: 1 / -1;
+  }
+
+  .tda-address-grid .tda-field.span-4,
+  .tda-reference-row {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .tda-grid,
+  .tda-address-grid,
+  .tda-schedule-modal .tda-rule-grid,
+  .tda-schedule-modal .tda-custom-days,
+  .tda-schedule-modal .tda-schedule-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tda-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "identity"
+      "address"
+      "schedule"
+      "logo"
+      "regional";
+  }
+
+  .tda-field.span-2,
+  .tda-field.span-4,
+  .tda-address-grid .tda-field.span-2 {
+    grid-column: 1 / -1;
+  }
+
+  .tda-schedule-modal .tda-rule-card,
+  .tda-schedule-modal .tda-rule-card.is-static {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tda-logo-preview-modal {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tda-logo-preview-mark {
+    width: 100%;
+    height: min(280px, 64vw);
+  }
+
+  .tda-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .tda-actions {
+    justify-content: flex-end;
+  }
+}

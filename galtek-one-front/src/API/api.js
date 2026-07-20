@@ -5,6 +5,9 @@ export const endpoints = {
   authLogin: `${API_BASE_URL}/auth/login`,
   authLogout: `${API_BASE_URL}/auth/logout`,
 
+  deviceIdentity: `${API_BASE_URL}/device/identity`,
+  deviceActivate: `${API_BASE_URL}/device/activate`,
+
   ventasProductos: `${API_BASE_URL}/productos`,
   ventasCategorias: `${API_BASE_URL}/productos/categoria`,
   categorias: `${API_BASE_URL}/categorias`,
@@ -13,15 +16,21 @@ export const endpoints = {
   compraDetalle: `${API_BASE_URL}/compraDetalle`,
   reporteGanancias: `${API_BASE_URL}/reportes-financieros/ganancias`,
   ticket: `${API_BASE_URL}/ticket/imprimir`,
+  ticketPrinters: `${API_BASE_URL}/ticket/impresoras`,
+  ticketConfig: `${API_BASE_URL}/configuracion/ticket`,
+  ticketConfigRestore: `${API_BASE_URL}/configuracion/ticket/restaurar-base`,
   clientes: `${API_BASE_URL}/clientes`,
   metodoPago: `${API_BASE_URL}/metodoPago`,
 
   usuarios: `${API_BASE_URL}/usuarios`,
+  usuariosOverrides: `${API_BASE_URL}/usuarios/overrides`,
   usuariosPorRol: `${API_BASE_URL}/usuarios/rol`,
   usuariosPermisos: `${API_BASE_URL}/usuarioPermisos`,
   roles: `${API_BASE_URL}/roles`,
   rolesPermisos: `${API_BASE_URL}/roles/permisos`,
   permisos: `${API_BASE_URL}/permisos`,
+  empresas: `${API_BASE_URL}/empresas`,
+  empresaActual: `${API_BASE_URL}/empresas/actual`,
 
   inventario: `${API_BASE_URL}/inventario`,
   proveedores: `${API_BASE_URL}/proveedores`,

@@ -19,9 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.galtekone.dto.cliente.ClienteConPedidosDTO;
-//import com.one.shop.entity.AlmacenEntity;
 import com.galtekone.entity.ClientesEntity;
-//import com.one.shop.entity.ProductosEntity;
 import com.galtekone.services.ClientesService;
 import com.galtekone.utils.ApiResponseBuilder;
 import com.galtekone.utils.DynamicSpecification;
@@ -32,96 +30,156 @@ import jakarta.persistence.EntityNotFoundException;
 @RequestMapping(path = "clientes")
 public class ClientesController {
 
-	@Autowired
-	DynamicSpecification dynamicSpecification;
-	
-	@Autowired
-	private ClientesService clientesService;
-	
-	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> getClientes(@RequestHeader(name = "user", required = true) String user,
-			@RequestParam Map<String, String> filters) {
+    @Autowired
+    DynamicSpecification dynamicSpecification;
 
-		long startTime = System.currentTimeMillis();
+    @Autowired
+    private ClientesService clientesService;
 
-		try {
-			Specification<ClientesEntity> specs = dynamicSpecification.buildSpecification(filters, ClientesEntity.class);
-			Object resp = clientesService.read(specs);
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getClientes(
+            @RequestHeader(name = "user", required = true) String user,
+            @RequestParam Map<String, String> filters) {
 
-			return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Clientes obtenido con Ã©xito");
-		} catch (Exception e) {
-			return ApiResponseBuilder.buildErrorResponse(user, startTime,
-					"Error al obtener los Clientes: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-	
-	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> postClientes(@RequestHeader(name = "user", required = true) String user,
-			@RequestBody ClientesEntity entity) {
-		long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
 
-		try {
-			Object resp = clientesService.create(entity, user);
+        try {
+            Specification<ClientesEntity> specs = dynamicSpecification.buildSpecification(filters, ClientesEntity.class);
+            Object resp = clientesService.read(specs);
 
-			return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Cliente creado con Ã©xito");
-		} catch (Exception e) {
-			return ApiResponseBuilder.buildErrorResponse(user, startTime,
-					"Error al crear el Cliente: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-	
-	@PutMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> putClientes(@RequestHeader(name = "user", required = true) String user,
-			@PathVariable Integer id,
-			@RequestBody ClientesEntity entity) {
-		long startTime = System.currentTimeMillis();
+            return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Clientes obtenidos con exito");
+        } catch (Exception e) {
+            return handleError(user, startTime, "Error al obtener los clientes: " + e.getMessage(), e);
+        }
+    }
 
-		try {
-			entity.setIdCliente(id);
-			Object resp = clientesService.update(entity, user);
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> postClientes(
+            @RequestHeader(name = "user", required = true) String user,
+            @RequestBody ClientesEntity entity) {
+        long startTime = System.currentTimeMillis();
 
-			return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Cliente actualizado con Ã©xito");
-		} catch (Exception e) {
-			return ApiResponseBuilder.buildErrorResponse(user, startTime,
-					"Error al actualizar el cliente: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-	
-	@DeleteMapping(path="/{id}",  produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> deleteClientes(@RequestHeader(name = "user", required = true) String user,
-			@PathVariable Integer id) {
-		long startTime = System.currentTimeMillis();
+        try {
+            Object resp = clientesService.create(entity, user);
 
-		try {
-			Object resp = clientesService.delete(id, user);
+            return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Cliente creado con exito");
+        } catch (Exception e) {
+            return handleError(user, startTime, "Error al crear el cliente: " + e.getMessage(), e);
+        }
+    }
 
-			return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Cliente eliminado con Ã©xito");
+    @PutMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> putClientes(
+            @RequestHeader(name = "user", required = true) String user,
+            @PathVariable Integer id,
+            @RequestBody ClientesEntity entity) {
+        long startTime = System.currentTimeMillis();
 
-		} catch (Exception e) {
-			return ApiResponseBuilder.buildErrorResponse(user, startTime,
-					"Error al actualizar el cliente: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-	
-	@GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> getClienteById(
-	        @RequestHeader(name = "user", required = true) String user,
-	        @PathVariable Integer id) {
+        try {
+            entity.setIdCliente(id);
+            Object resp = clientesService.update(entity, user);
 
-	    long startTime = System.currentTimeMillis();
+            return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Cliente actualizado con exito");
+        } catch (Exception e) {
+            return handleError(user, startTime, "Error al actualizar el cliente: " + e.getMessage(), e);
+        }
+    }
 
-	    try {
-	        ClienteConPedidosDTO resp = clientesService.readById(id);
-	        return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Cliente obtenido con Ã©xito");
+    @PutMapping(path = "/{id}/desactivar", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> desactivarCliente(
+            @RequestHeader(name = "user", required = true) String user,
+            @PathVariable Integer id,
+            @RequestBody(required = false) Map<String, Object> request) {
+        return changeEstado(user, id, "INACTIVO", extractMotivo(request), "Cliente desactivado con exito");
+    }
 
-	    } catch (EntityNotFoundException e) {
-	        return ApiResponseBuilder.buildErrorResponse(
-	                user, startTime, e.getMessage(), HttpStatus.NOT_FOUND);
+    @PutMapping(path = "/{id}/archivar", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> archivarCliente(
+            @RequestHeader(name = "user", required = true) String user,
+            @PathVariable Integer id,
+            @RequestBody(required = false) Map<String, Object> request) {
+        return changeEstado(user, id, "ARCHIVADO", extractMotivo(request), "Cliente archivado con exito");
+    }
 
-	    } catch (Exception e) {
-	        return ApiResponseBuilder.buildErrorResponse(
-	                user, startTime, "Error al obtener el cliente: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-	    }
-	}
+    @PutMapping(path = "/{id}/reactivar", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> reactivarCliente(
+            @RequestHeader(name = "user", required = true) String user,
+            @PathVariable Integer id,
+            @RequestBody(required = false) Map<String, Object> request) {
+        return changeEstado(user, id, "ACTIVO", extractMotivo(request), "Cliente reactivado con exito");
+    }
 
+    @GetMapping(path = "/{id}/eliminacion-segura", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> revisarEliminacionCliente(
+            @RequestHeader(name = "user", required = true) String user,
+            @PathVariable Integer id) {
+        long startTime = System.currentTimeMillis();
+
+        try {
+            Object resp = clientesService.deletePolicy(id);
+            return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Revision de eliminacion obtenida con exito");
+        } catch (Exception e) {
+            return handleError(user, startTime, "Error al revisar eliminacion del cliente: " + e.getMessage(), e);
+        }
+    }
+
+    @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> deleteClientes(
+            @RequestHeader(name = "user", required = true) String user,
+            @PathVariable Integer id,
+            @RequestBody(required = false) Map<String, Object> request) {
+        long startTime = System.currentTimeMillis();
+
+        try {
+            Object resp = clientesService.delete(id, extractMotivo(request), user);
+
+            return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Cliente eliminado con exito");
+        } catch (Exception e) {
+            return handleError(user, startTime, "Error al eliminar el cliente: " + e.getMessage(), e);
+        }
+    }
+
+    @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getClienteById(
+            @RequestHeader(name = "user", required = true) String user,
+            @PathVariable Integer id) {
+
+        long startTime = System.currentTimeMillis();
+
+        try {
+            ClienteConPedidosDTO resp = clientesService.readById(id);
+            return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Cliente obtenido con exito");
+        } catch (Exception e) {
+            return handleError(user, startTime, "Error al obtener el cliente: " + e.getMessage(), e);
+        }
+    }
+
+    private ResponseEntity<Object> changeEstado(String user, Integer id, String estado, String motivo, String message) {
+        long startTime = System.currentTimeMillis();
+
+        try {
+            Object resp = clientesService.changeEstado(id, estado, motivo, user);
+            return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, message);
+        } catch (Exception e) {
+            return handleError(user, startTime, "Error al cambiar estado del cliente: " + e.getMessage(), e);
+        }
+    }
+
+    private String extractMotivo(Map<String, Object> request) {
+        Object value = request == null ? null : request.get("motivo");
+        return value == null ? null : String.valueOf(value);
+    }
+
+    private ResponseEntity<Object> handleError(String user, long startTime, String message, Exception e) {
+        if (e instanceof IllegalArgumentException) {
+            return ApiResponseBuilder.buildErrorResponse(user, startTime, e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        if (e instanceof EntityNotFoundException) {
+            return ApiResponseBuilder.buildErrorResponse(user, startTime, e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+        if (e instanceof IllegalStateException) {
+            return ApiResponseBuilder.buildErrorResponse(user, startTime, e.getMessage(), HttpStatus.CONFLICT);
+        }
+        return ApiResponseBuilder.buildErrorResponse(user, startTime, message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

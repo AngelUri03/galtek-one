@@ -35,24 +35,16 @@ Despues de instalar Rust o Build Tools, cerrar y abrir de nuevo la terminal para
 Desde la raiz del repo:
 
 ```powershell
-cd galtek-one-front
-npm ci
-Copy-Item .env.example .env
+npm install
+npm run setup
 ```
 
-Compilar el backend una primera vez:
+`npm run setup` hace lo necesario para dejar el proyecto listo:
 
-```powershell
-cd ..\galtek-one-back
-.\mvnw.cmd -DskipTests package
-```
-
-Crear o actualizar la base SQLite local:
-
-```powershell
-cd ..
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\database-setup.ps1
-```
+- Instala dependencias del frontend si faltan.
+- Crea `galtek-one-front\.env` desde `.env.example` si no existe.
+- Crea o actualiza la base SQLite local. Si la base no existe, tambien carga datos demo iniciales.
+- Compila el backend.
 
 La base queda por defecto en:
 
@@ -60,35 +52,63 @@ La base queda por defecto en:
 %APPDATA%\GaltekOne\galtek-one.db
 ```
 
-## Desarrollo local
+## Desarrollo local desde la raiz
 
-Levantar backend:
+Levantar todo para verlo en la web:
 
 ```powershell
-cd galtek-one-back
-.\mvnw.cmd -DskipTests package
-java -Dspring.profiles.active=desktop -jar target\galtek-one-back-0.0.1.jar
+npm run dev
 ```
 
-En otra terminal, levantar frontend:
+Tambien puedes usar:
 
 ```powershell
-cd galtek-one-front
 npm start
 ```
 
-El backend escucha en:
+Ambos comandos preparan `.env`, preparan la base y dejan corriendo backend + frontend en la misma terminal.
+Si la base ya existe, estos comandos no vuelven a cargar el seed demo para no pisar datos capturados durante desarrollo.
+
+URLs locales:
 
 ```text
-http://127.0.0.1:18080/GaltekOne
+Frontend web: http://localhost:3000
+Backend API:  http://127.0.0.1:18080/GaltekOne
 ```
+
+Levantar piezas por separado, usando terminales separadas para backend y frontend:
+
+```powershell
+npm run db
+npm run back
+npm run front
+```
+
+Para recargar datos demo de forma intencional:
+
+```powershell
+npm run db:seed
+```
+
+Ese comando puede reemplazar datos demo con IDs fijos; usalo solo cuando quieras refrescar la base de pruebas.
+
+Comandos utiles:
+
+```powershell
+npm run front:build
+npm run back:build
+npm run back:start
+npm run build
+```
+
+`npm run back:start` ejecuta el JAR ya compilado; si no existe, corre primero `npm run back:build`.
 
 ## Build desktop independiente
 
 Desde la raiz:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\build-desktop.ps1
+npm run desktop:build
 ```
 
 El script hace lo siguiente:
@@ -105,6 +125,18 @@ Entregables principales:
 galtek-one-front\src-tauri\target\release\galtek-one.exe
 galtek-one-front\src-tauri\target\release\bundle\nsis\Galtek One_0.1.0_x64-setup.exe
 ```
+
+Comandos relacionados:
+
+```powershell
+npm run exe:build
+npm run exe:run
+npm run exe:build-run
+npm run installer:build
+npm run desktop:dev
+```
+
+`npm run exe:run` abre el ejecutable generado mas reciente que encuentre. `npm run exe:build-run` compila y despues lo abre.
 
 Si se crea una carpeta portable, el `.exe` debe viajar junto con su carpeta `resources`; para usuarios finales se recomienda usar el instalador.
 

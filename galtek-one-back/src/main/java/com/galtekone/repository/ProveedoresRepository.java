@@ -14,4 +14,6 @@ public interface ProveedoresRepository extends JpaRepository<ProveedoresEntity, 
     //encontrar por idProveedor y idEmpresa
     Optional<ProveedoresEntity> findByIdProveedorAndEmpresa_IdEmpresa(Integer idProveedor, Integer idEmpresa);
 
+    boolean existsByIdProveedorAndEmpresa_IdEmpresa(Integer idProveedor, Integer idEmpresa);
+
 }
