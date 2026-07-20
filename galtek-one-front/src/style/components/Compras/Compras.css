@@ -45,41 +45,64 @@ p, span, label, button, input, select {
    TABS: ESTILO BARRA FLOTANTE (TIPO INVENTARIO)
    ========================================================================== */
 .compras-tabs-container .p-tabview-nav {
-  background: #ffffff !important; 
+  /* Fondo semitransparente tipo cristal */
+  background: rgba(255, 255, 255, 0.45) !important; 
+  /* Efecto de desenfoque del fondo (Blur) */
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  /* Borde delgado semitransparente */
+  border: 1px solid rgba(255, 255, 255, 0.6) !important; 
+  
   border-radius: 12px !important; 
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03) !important; 
-  border: none !important; 
   padding: 0.5rem 1rem !important; 
   margin-bottom: 1.5rem !important; 
   display: flex;
   gap: 0.5rem; 
+  box-shadow: none !important; /* Quitamos la sombra sólida para que luzca limpio como Inventario */
 }
 
-/* Estilo de cada botón (pestaña) inactivo */
+/* ==========================================================================
+   ESTILOS DE CADA PESTAÑA (INACTIVA Y ACTIVA)
+   ========================================================================== */
 .compras-tabs-container .p-tabview-nav li .p-tabview-nav-link {
-  color: #0a7463 !important; /* <-- Verde oscuro tipo Inventario */
+  color: #0a7463 !important; 
   padding: 0.75rem 1.25rem;
   border-radius: 8px !important; 
   transition: all 0.2s ease-in-out;
   background: transparent !important;
-  border: 0 none !important; /* <-- Elimina bordes ocultos */
+  border: 0 none !important; 
   outline: none !important;
   box-shadow: none !important;
-  font-weight: 600;
+}
+
+/* 1. ATACAR DIRECTAMENTE AL TEXTO PARA FORZAR EL GROSOR Y TAMAÑO CORRECTO */
+.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link .p-tabview-title {
+  font-weight: 800 !important; 
+  text-transform: uppercase !important; 
+  letter-spacing: 0.5px !important; 
+  /* Redujimos el tamaño para igualar la proporción de Inventario */
+  font-size: 0.95rem !important; 
+}
+
+/* 2. ATACAR DIRECTAMENTE AL ÍCONO PARA IGUALAR TAMAÑO Y PESO */
+.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link .p-tabview-left-icon,
+.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link .pi {
+  /* Redujimos el ícono para que haga match perfecto con el nuevo texto */
+  font-size: 1.1rem !important; 
+  font-weight: 800 !important; 
+  margin-right: 0.6rem !important; /* Un poco menos de separación */
 }
 
 /* Efecto Hover para pestañas inactivas */
 .compras-tabs-container .p-tabview-nav li .p-tabview-nav-link:not(.p-disabled):hover {
   background: rgba(10, 116, 99, 0.08) !important; 
-  color: #0a7463 !important;
 }
 
 /* Estilo de la pestaña ACTIVA */
 .compras-tabs-container .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-  color: #00A38B !important;
-  background: rgba(0, 163, 139, 0.1) !important; 
-  font-weight: 700;
-  border: 0 none !important; /* <-- Elimina recuadro fantasma */
+  color: #0a7463 !important; 
+  background: rgba(10, 116, 99, 0.15) !important; 
+  border: 0 none !important; 
   outline: none !important;
   box-shadow: none !important;
 }
@@ -109,25 +132,28 @@ p, span, label, button, input, select {
 
 /* TARJETAS PRINCIPALES: Eliminamos el borde blanco molesto y mantenemos el volumen 
 */
+/* TARJETAS PRINCIPALES: Aplicamos el mismo efecto cristal (Liquid Glass) de la barra */
 .compras-workspace-wrapper .nc-card {
-  background: linear-gradient(145deg, #ffffff 0%, #f4f9fa 100%) !important;
-  border: none !important; 
+  /* Fondo semitransparente tipo cristal */
+  background: rgba(255, 255, 255, 0.45) !important; 
+  /* Efecto de desenfoque del fondo (Blur) */
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  /* Borde delgado semitransparente */
+  border: 1px solid rgba(255, 255, 255, 0.6) !important; 
+  
   outline: none !important;
   border-radius: 1.25rem !important; 
-  box-shadow: 
-    inset 0 2px 4px rgba(255, 255, 255, 1), 
-    inset 0 -3px 10px rgba(220, 230, 240, 0.5), 
-    0 8px 24px rgba(0, 0, 0, 0.04) !important;
+  /* Sombra suave para que flote sutilmente */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03) !important; 
   transition: all 0.3s ease;
   overflow: hidden; 
 }
 
+/* Efecto hover ligero para mantener la fluidez */
 .compras-workspace-wrapper .nc-card:hover {
   transform: translateY(-2px);
-  box-shadow: 
-    inset 0 2px 4px rgba(255, 255, 255, 1), 
-    inset 0 -3px 10px rgba(220, 230, 240, 0.5), 
-    0 12px 28px rgba(0, 163, 139, 0.08) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06) !important;
 }
 
 /* Contenedores provisionales (Placeholders) */
