@@ -7,6 +7,16 @@ CREATE TABLE IF NOT EXISTS Almacen (id_almacen integer, estatus boolean, fecha_c
 
 CREATE TABLE IF NOT EXISTS Cajas (id_caja integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), nombre varchar(255), tipo varchar(255) not null, id_empresa integer not null, primary key (id_caja));
 
+CREATE TABLE IF NOT EXISTS CajaSesion (id_caja_sesion integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), id_local_device varchar(36), id_caja integer, id_usuario_abre integer not null, id_usuario_cierra integer, opened_at timestamp not null, last_activity_at timestamp not null, closed_at timestamp, opening_amount numeric(12,2) not null, expected_cash_amount numeric(12,2) not null, closing_expected_cash_amount numeric(12,2), counted_cash_amount numeric(12,2), difference_amount numeric(12,2), status varchar(32) not null, closing_reason varchar(80), closing_notes varchar(500), opening_idempotency_key varchar(120) not null, closing_idempotency_key varchar(120), expected_balance_viewed_before_count boolean, expected_balance_viewed_at timestamp, expected_balance_viewed_by integer, active_cash_register_key varchar(80), active_installation_key varchar(120), active_user_key varchar(80), version bigint, id_empresa integer not null, primary key (id_caja_sesion));
+
+CREATE TABLE IF NOT EXISTS SaldoEfectivo (id_saldo_efectivo integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), id_local_device varchar(36) not null, current_balance_snapshot numeric(12,2) not null, initialized boolean not null, initialized_at timestamp, initialized_by integer, initialization_category varchar(80), initialization_reason varchar(500), initialization_idempotency_key varchar(120), last_movement_at timestamp, version bigint, id_empresa integer not null, primary key (id_saldo_efectivo));
+
+CREATE TABLE IF NOT EXISTS ConfiguracionCaja (id_configuracion_caja integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), handoff_policy varchar(32) not null, require_incoming_count_on_user_change boolean not null, require_outgoing_count boolean not null, allow_continue_with_pending_incident boolean not null, blind_count_enabled boolean not null, expected_balance_visibility_mode varchar(40) not null, version bigint, id_empresa integer not null, primary key (id_configuracion_caja));
+
+CREATE TABLE IF NOT EXISTS CajaIncidencia (id_caja_incidencia integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), tipo varchar(40) not null, status varchar(32) not null, id_local_device varchar(36) not null, id_caja_sesion integer, id_movimiento_caja integer, expected_amount numeric(12,2), outgoing_declared_amount numeric(12,2), incoming_declared_amount numeric(12,2), joint_recount_amount numeric(12,2), accepted_amount numeric(12,2), difference_amount numeric(12,2), outgoing_note varchar(500), incoming_note varchar(500), policy_snapshot varchar(40), resolved_at timestamp, resolved_by integer, resolution_category varchar(80), resolution_notes varchar(700), resolution_cash_effect varchar(60), resolution_amount numeric(12,2), resolution_reference varchar(160), id_resolution_movement integer, version bigint, id_empresa integer not null, primary key (id_caja_incidencia));
+
+CREATE TABLE IF NOT EXISTS CajaRelevo (id_caja_relevo integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), id_local_device varchar(36) not null, id_outgoing_session integer, id_incoming_session integer, id_outgoing_user integer, id_incoming_user integer, handoff_type varchar(24) not null, status varchar(40) not null, policy_snapshot varchar(40), expected_cash_snapshot numeric(12,2), outgoing_declared_amount numeric(12,2), outgoing_counted_at timestamp, incoming_declared_amount numeric(12,2), incoming_counted_at timestamp, joint_recount_amount numeric(12,2), joint_recount_at timestamp, accepted_amount numeric(12,2), accepted_at timestamp, outgoing_note varchar(500), incoming_note varchar(500), outgoing_confirmed boolean, incoming_confirmed boolean, outgoing_confirmation_at timestamp, incoming_confirmation_at timestamp, difference_outgoing_vs_expected numeric(12,2), difference_incoming_vs_outgoing numeric(12,2), difference_accepted_vs_expected numeric(12,2), id_incident integer, version bigint, id_empresa integer not null, primary key (id_caja_relevo));
+
 CREATE TABLE IF NOT EXISTS Categorias (id_categoria integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), nombre varchar(255), id_empresa integer not null, primary key (id_categoria));
 
 CREATE TABLE IF NOT EXISTS Clientes (id_cliente integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), avatar varchar(255), direccion varchar(255), email varchar(255), nombre varchar(255) not null, telefono varchar(255), alias varchar(255), tipo_cliente varchar(255), estado_cliente varchar(255), estado_cliente_anterior varchar(255), ultima_accion_estado varchar(255), motivo_cambio_estado varchar(500), usuario_cambio_estado varchar(255), fecha_cambio_estado timestamp, whatsapp varchar(255), direccion_calle varchar(255), direccion_numero_exterior varchar(255), direccion_numero_interior varchar(255), direccion_colonia varchar(255), direccion_municipio varchar(255), direccion_estado varchar(255), direccion_codigo_postal varchar(255), direccion_referencia varchar(1000), notas_internas varchar(2000), rfc varchar(255), razon_social varchar(255), codigo_postal_fiscal varchar(255), correo_fiscal varchar(255), regimen_fiscal varchar(255), uso_cfdi varchar(255), id_empresa integer, primary key (id_cliente));
@@ -88,7 +98,7 @@ CREATE TABLE IF NOT EXISTS Lote (id_lote integer, estatus boolean, fecha_creacio
 
 CREATE TABLE IF NOT EXISTS MetodoPago (id_metodo_pago integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), nombre varchar(255), id_empresa integer not null, primary key (id_metodo_pago));
 
-CREATE TABLE IF NOT EXISTS MovimientoCaja (id_movimiento_caja integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), fecha timestamp not null, monto numeric(12,2) not null, motivo varchar(255) not null, tipo varchar(10) not null, id_caja integer not null, id_empresa integer not null, id_usuario integer not null, primary key (id_movimiento_caja));
+CREATE TABLE IF NOT EXISTS MovimientoCaja (id_movimiento_caja integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), fecha timestamp not null, monto numeric(12,2) not null, motivo varchar(500) not null, tipo varchar(30) not null, category varchar(80), financial_direction varchar(20), reference_type varchar(60), reference_id varchar(80), idempotency_key varchar(120), balance_before numeric(12,2), balance_after numeric(12,2), id_caja integer, id_caja_sesion integer, id_local_device varchar(36), id_empresa integer not null, id_usuario integer not null, primary key (id_movimiento_caja));
 
 CREATE TABLE IF NOT EXISTS Permisos (id_permiso integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), accion varchar(40), clave varchar(80) not null, descripcion varchar(255), modulo varchar(60) not null, nombre varchar(120) not null, primary key (id_permiso));
 
@@ -155,13 +165,57 @@ CREATE TABLE IF NOT EXISTS VentaDetalle (id_venta_detalle integer, estatus boole
 
 
 
-CREATE TABLE IF NOT EXISTS Ventas (id_venta integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), estado varchar(255) not null, total float not null, id_caja integer not null, id_cliente integer, id_empresa integer not null, id_metodo_pago integer not null, id_usuario integer not null, primary key (id_venta));
+CREATE TABLE IF NOT EXISTS Ventas (id_venta integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), estado varchar(255) not null, total float not null, id_caja integer, id_caja_sesion integer, id_cliente integer, id_empresa integer not null, id_metodo_pago integer not null, id_usuario integer not null, primary key (id_venta));
 
 CREATE INDEX IF NOT EXISTS idx_mov_caja_caja_empresa on MovimientoCaja (id_caja, id_empresa);
 
 CREATE INDEX IF NOT EXISTS idx_mov_caja_empresa_fecha on MovimientoCaja (id_empresa, fecha);
 
-CREATE TABLE IF NOT EXISTS LocalDevice (installation_id varchar(36) not null, cash_register_id integer, cpu_hash varchar(64), motherboard_hash varchar(64), mac_hash varchar(64), disk_hash varchar(255), license_token varchar(2500), created_at timestamp, primary key (installation_id));
+CREATE INDEX IF NOT EXISTS idx_mov_caja_sesion on MovimientoCaja (id_caja_sesion);
+
+CREATE INDEX IF NOT EXISTS idx_mov_caja_device_empresa on MovimientoCaja (id_local_device, id_empresa);
+
+CREATE INDEX IF NOT EXISTS idx_mov_caja_idempotency on MovimientoCaja (id_empresa, idempotency_key);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uk_saldo_efectivo_empresa_device on SaldoEfectivo (id_empresa, id_local_device);
+
+CREATE INDEX IF NOT EXISTS idx_saldo_efectivo_empresa_device on SaldoEfectivo (id_empresa, id_local_device);
+
+CREATE INDEX IF NOT EXISTS idx_saldo_efectivo_empresa_initialized on SaldoEfectivo (id_empresa, initialized);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uk_configuracion_caja_empresa on ConfiguracionCaja (id_empresa);
+
+CREATE INDEX IF NOT EXISTS idx_caja_incidencia_empresa_estado on CajaIncidencia (id_empresa, status);
+
+CREATE INDEX IF NOT EXISTS idx_caja_incidencia_device_estado on CajaIncidencia (id_local_device, status);
+
+CREATE INDEX IF NOT EXISTS idx_caja_incidencia_sesion on CajaIncidencia (id_caja_sesion);
+
+CREATE INDEX IF NOT EXISTS idx_caja_relevo_empresa_device_estado on CajaRelevo (id_empresa, id_local_device, status);
+
+CREATE INDEX IF NOT EXISTS idx_caja_relevo_outgoing_session on CajaRelevo (id_outgoing_session);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uk_caja_sesion_idempotency on CajaSesion (id_empresa, opening_idempotency_key);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uk_caja_sesion_closing_idempotency on CajaSesion (id_empresa, closing_idempotency_key);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uk_caja_sesion_active_installation on CajaSesion (active_installation_key);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uk_caja_sesion_active_user on CajaSesion (active_user_key);
+
+CREATE INDEX IF NOT EXISTS idx_caja_sesion_empresa_installation_estado on CajaSesion (id_empresa, id_local_device, status);
+
+CREATE INDEX IF NOT EXISTS idx_caja_sesion_empresa_caja_estado on CajaSesion (id_empresa, id_caja, status);
+
+CREATE INDEX IF NOT EXISTS idx_caja_sesion_empresa_usuario_estado on CajaSesion (id_empresa, id_usuario_abre, status);
+
+CREATE INDEX IF NOT EXISTS idx_caja_sesion_empresa_abierta on CajaSesion (id_empresa, opened_at);
+
+CREATE INDEX IF NOT EXISTS idx_ventas_caja_sesion on Ventas (id_caja_sesion);
+
+CREATE INDEX IF NOT EXISTS idx_ventas_caja_empresa on Ventas (id_caja, id_empresa);
+
+CREATE TABLE IF NOT EXISTS LocalDevice (installation_id varchar(36) not null, display_name varchar(120), cash_register_id integer, cpu_hash varchar(64), motherboard_hash varchar(64), mac_hash varchar(64), disk_hash varchar(255), license_token varchar(2500), created_at timestamp, updated_at timestamp, id_empresa integer, primary key (installation_id));
 
 UPDATE Empresas SET fecha_inicio = SUBSTR(fecha_inicio, 1, 10) WHERE fecha_inicio IS NOT NULL AND LENGTH(fecha_inicio) > 10;
 UPDATE Empresas SET fecha_fin = SUBSTR(fecha_fin, 1, 10) WHERE fecha_fin IS NOT NULL AND LENGTH(fecha_fin) > 10;

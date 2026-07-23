@@ -8,10 +8,13 @@ import "primeicons/primeicons.css";
 import "../../style/components/common/NavBar.css";
 import NotificationBell from "./NotificationBell";
 import UserProfileMenu from "./UserProfileMenu";
+import { useCashSession } from "../../cash/CashSessionContext";
 
 const NavBar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { capabilities } = useCashSession();
+  const canOpenCashControl = Boolean(capabilities?.canOpenCashControl);
 
   const go = (path) => navigate(path, { replace: false });
   const isActive = (...paths) =>
@@ -32,6 +35,14 @@ const NavBar = () => {
       className: itemClass("/ventas"),
       command: () => go("/ventas") 
     },
+    ...(canOpenCashControl
+      ? [{
+          label: "Caja",
+          icon: "pi pi-wallet",
+          className: itemClass("/control-caja"),
+          command: () => go("/control-caja"),
+        }]
+      : []),
     {
       label: "Inventario",
       icon: "pi pi-box",

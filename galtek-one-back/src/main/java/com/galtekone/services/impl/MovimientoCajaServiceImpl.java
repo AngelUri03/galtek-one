@@ -7,22 +7,29 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.galtekone.config.EmpresaContextHolder;
+import com.galtekone.dto.caja.CajaEstadoActualDTO;
 import com.galtekone.dto.movimientoCaja.BalanceCajaDTO;
 import com.galtekone.dto.movimientoCaja.MovimientoCajaDTO;
+import com.galtekone.entity.CajaSesionEntity;
 import com.galtekone.entity.CajasEntity;
-import com.galtekone.entity.EmpresasEntity;
 import com.galtekone.entity.MovimientoCajaEntity;
+import com.galtekone.entity.MovimientoCajaTipo;
+import com.galtekone.entity.UsuariosEntity;
 import com.galtekone.entity.VentasEntity;
 import com.galtekone.repository.CajasRepository;
 import com.galtekone.repository.DevolucionesRepository;
 import com.galtekone.repository.MovimientoCajaRepository;
-import com.galtekone.repository.VentasRepository;
-import com.galtekone.services.MovimientoCajaService;
 import com.galtekone.repository.UsuariosRepository;
+import com.galtekone.repository.VentasRepository;
+import com.galtekone.services.CajaSaldoService;
+import com.galtekone.services.CajaSesionService;
+import com.galtekone.services.MovimientoCajaService;
 import com.galtekone.utils.EmpresaValidator;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -49,41 +56,49 @@ public class MovimientoCajaServiceImpl implements MovimientoCajaService {
     @Autowired
     private UsuariosRepository usuariosRepository;
 
+    @Autowired
+    private CajaSesionService cajaSesionService;
+
+    @Autowired
+    private CajaSaldoService cajaSaldoService;
+
     @Override
     @Transactional
     public MovimientoCajaEntity create(MovimientoCajaEntity obj, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
+        Integer legacyCajaId = obj.getCaja() != null ? obj.getCaja().getIdCaja() : null;
+        CajaSesionEntity session = cajaSesionService.requireOpenSessionForCurrentInstallation(user, legacyCajaId);
 
-        CajasEntity caja = empresaValidator.validarEntidadPorEmpresa(
-                obj.getCaja().getIdCaja(), empresaId, "Caja",
-                cajasRepository::findByIdCajaAndEmpresa_IdEmpresa);
-
-        obj.setCaja(caja);
-        EmpresaValidator.asignarEmpresa(obj);
-
-        // Buscar y asignar el usuario real que realiza la acción
         com.galtekone.entity.UsuariosEntity usuario = usuariosRepository
                 .findByUsuarioAndEmpresa_IdEmpresa(user, empresaId)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
-        obj.setUsuario(usuario);
 
-        if (obj.getFecha() == null) {
-            obj.setFecha(LocalDateTime.now());
-        }
+        MovimientoCajaTipo type = MovimientoCajaTipo.valueOf(normalizeManualMovementType(obj.getTipo()));
+        String direction = type == MovimientoCajaTipo.MANUAL_ENTRY ? "IN" : "OUT";
+        String fallbackCategory = type == MovimientoCajaTipo.MANUAL_ENTRY ? "OTHER_ENTRY" : "OTHER_WITHDRAWAL";
 
-        obj.setUsuarioCreacion(user);
-        return movimientoCajaRepository.save(obj);
+        return cajaSaldoService.registrarMovimientoContinuo(
+                session.getLocalDevice(),
+                session,
+                usuario,
+                type,
+                direction,
+                obj.getMonto(),
+                obj.getCategory() != null ? obj.getCategory() : fallbackCategory,
+                obj.getMotivo(),
+                obj.getReferenceType(),
+                obj.getReferenceId(),
+                obj.getIdempotencyKey(),
+                user);
     }
 
     @Override
     public List<MovimientoCajaEntity> read(Specification<MovimientoCajaEntity> specs) {
-        Integer empresaId = EmpresaContextHolder.getEmpresaId();
-        Specification<MovimientoCajaEntity> filtroEmpresa = (root, query, cb) -> cb
-                .equal(root.get("empresa").get("idEmpresa"), empresaId);
-        return movimientoCajaRepository.findAll(Specification.where(specs).and(filtroEmpresa));
+        return movimientoCajaRepository.findAll(baseSpec(specs));
     }
 
     @Override
+    @Transactional
     public List<MovimientoCajaDTO> readDTO(Specification<MovimientoCajaEntity> specs) {
         List<MovimientoCajaEntity> entities = this.read(specs);
         return entities.stream().map(this::toDTO).collect(Collectors.toList());
@@ -91,69 +106,46 @@ public class MovimientoCajaServiceImpl implements MovimientoCajaService {
 
     @Override
     @Transactional
+    public Page<MovimientoCajaDTO> readDTOPage(Specification<MovimientoCajaEntity> specs, Pageable pageable) {
+        return movimientoCajaRepository.findAll(baseSpec(specs), pageable).map(this::toDTO);
+    }
+
+    @Override
+    @Transactional
     public MovimientoCajaEntity update(MovimientoCajaEntity obj, String user) {
-        Integer empresaId = EmpresaContextHolder.getEmpresaId();
-
-        MovimientoCajaEntity entity = movimientoCajaRepository
-                .findByIdMovimientoCajaAndEmpresa_IdEmpresa(obj.getIdMovimientoCaja(), empresaId)
-                .orElseThrow(() -> new EntityNotFoundException("Movimiento no encontrado"));
-
-        if (obj.getTipo() != null)
-            entity.setTipo(obj.getTipo());
-        if (obj.getMonto() != null)
-            entity.setMonto(obj.getMonto());
-        if (obj.getMotivo() != null)
-            entity.setMotivo(obj.getMotivo());
-        if (obj.getFecha() != null)
-            entity.setFecha(obj.getFecha());
-
-        if (obj.getCaja() != null) {
-            CajasEntity caja = empresaValidator.validarEntidadPorEmpresa(
-                    obj.getCaja().getIdCaja(), empresaId, "Caja",
-                    cajasRepository::findByIdCajaAndEmpresa_IdEmpresa);
-            entity.setCaja(caja);
-        }
-
-        entity.setUsuarioModificacion(user);
-        return movimientoCajaRepository.save(entity);
+        throw new IllegalStateException("Los movimientos de caja son historicos e inmutables.");
     }
 
     @Override
     public MovimientoCajaEntity delete(Integer id, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
-        MovimientoCajaEntity entity = movimientoCajaRepository
+        movimientoCajaRepository
                 .findByIdMovimientoCajaAndEmpresa_IdEmpresa(id, empresaId)
                 .orElseThrow(() -> new EntityNotFoundException("Movimiento no encontrado"));
-
-        movimientoCajaRepository.delete(entity);
-        return entity;
+        throw new IllegalStateException("Los movimientos de caja no se eliminan fisicamente.");
     }
 
     @Override
     public BalanceCajaDTO getBalanceCaja(Integer idCaja, LocalDateTime desde, LocalDateTime hasta) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
 
-        // Validar caja pertenece a empresa
         CajasEntity caja = empresaValidator.validarEntidadPorEmpresa(
                 idCaja, empresaId, "Caja",
                 cajasRepository::findByIdCajaAndEmpresa_IdEmpresa);
 
-        // 1. Movimientos manuales del rango
         List<MovimientoCajaEntity> movimientos = movimientoCajaRepository
                 .findByCaja_IdCajaAndEmpresa_IdEmpresaAndFechaBetween(idCaja, empresaId, desde, hasta);
 
         BigDecimal totalIngresos = movimientos.stream()
-                .filter(m -> "INGRESO".equalsIgnoreCase(m.getTipo()))
+                .filter(m -> movementIncreasesCash(m))
                 .map(MovimientoCajaEntity::getMonto)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal totalEgresos = movimientos.stream()
-                .filter(m -> "EGRESO".equalsIgnoreCase(m.getTipo()))
+                .filter(m -> movementDecreasesCash(m))
                 .map(MovimientoCajaEntity::getMonto)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // 2. Ventas en efectivo del rango (filtrando por caja y método de pago
-        // "Efectivo")
         Specification<VentasEntity> ventasSpec = (root, query, cb) -> cb.and(
                 cb.equal(root.get("empresa").get("idEmpresa"), empresaId),
                 cb.equal(root.get("caja").get("idCaja"), idCaja),
@@ -164,7 +156,6 @@ public class MovimientoCajaServiceImpl implements MovimientoCajaService {
                 .map(v -> BigDecimal.valueOf(v.getTotal()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // 3. Devoluciones del rango
         BigDecimal totalDevoluciones = BigDecimal.ZERO;
         try {
             Specification<com.galtekone.entity.DevolucionesEntity> devSpec = (root, query, cb) -> cb.and(
@@ -175,10 +166,9 @@ public class MovimientoCajaServiceImpl implements MovimientoCajaService {
                     .map(com.galtekone.entity.DevolucionesEntity::getTotalDevolucion)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         } catch (Exception e) {
-            // Si no hay devoluciones, se mantiene en 0
+            totalDevoluciones = BigDecimal.ZERO;
         }
 
-        // 4. Calcular saldo final
         BigDecimal saldoFinal = totalIngresos
                 .add(totalVentasEfectivo)
                 .subtract(totalEgresos)
@@ -208,11 +198,73 @@ public class MovimientoCajaServiceImpl implements MovimientoCajaService {
         if (entity.getUsuario() != null) {
             dto.setIdUsuario(entity.getUsuario().getIdUsuario());
         }
+        if (entity.getCajaSesion() != null) {
+            CajaSesionEntity session = entity.getCajaSesion();
+            dto.setIdCajaSesion(session.getIdCajaSesion());
+            dto.setSessionOpenedAt(session.getOpenedAt());
+            dto.setSessionClosedAt(session.getClosedAt());
+            dto.setSessionResponsibleUser(toUserInfo(session.getOpenedByUser()));
+        }
         dto.setTipo(entity.getTipo());
         dto.setMonto(entity.getMonto());
         dto.setMotivo(entity.getMotivo());
+        dto.setCategory(entity.getCategory());
+        dto.setFinancialDirection(entity.getFinancialDirection());
+        dto.setReferenceType(entity.getReferenceType());
+        dto.setReferenceId(entity.getReferenceId());
+        dto.setIdempotencyKey(entity.getIdempotencyKey());
+        dto.setBalanceBefore(entity.getBalanceBefore());
+        dto.setBalanceAfter(entity.getBalanceAfter());
         dto.setFecha(entity.getFecha());
         return dto;
     }
-}
 
+    private CajaEstadoActualDTO.UserInfo toUserInfo(UsuariosEntity user) {
+        if (user == null) {
+            return null;
+        }
+        CajaEstadoActualDTO.UserInfo info = new CajaEstadoActualDTO.UserInfo();
+        info.setId(user.getIdUsuario());
+        info.setUsername(user.getUsuario());
+        info.setName(user.getNombreUsuario());
+        info.setRole(user.getRol() != null ? user.getRol().getNombreRol() : null);
+        info.setAvatarUrl(user.getAvatarUrl());
+        return info;
+    }
+
+    private String normalizeManualMovementType(String type) {
+        String normalized = type == null ? "" : type.trim().toUpperCase();
+        return switch (normalized) {
+            case "INGRESO", "MANUAL_ENTRY" -> MovimientoCajaTipo.MANUAL_ENTRY.name();
+            case "EGRESO", "MANUAL_WITHDRAWAL" -> MovimientoCajaTipo.MANUAL_WITHDRAWAL.name();
+            default -> throw new IllegalArgumentException(
+                    "Solo se permiten entradas y retiros manuales desde este endpoint.");
+        };
+    }
+
+    private boolean movementIncreasesCash(MovimientoCajaEntity movement) {
+        if ("IN".equalsIgnoreCase(movement.getFinancialDirection())) {
+            return true;
+        }
+        return movement.getFinancialDirection() == null && MovimientoCajaTipo.increasesCash(movement.getTipo());
+    }
+
+    private boolean movementDecreasesCash(MovimientoCajaEntity movement) {
+        if ("OUT".equalsIgnoreCase(movement.getFinancialDirection())) {
+            return true;
+        }
+        return movement.getFinancialDirection() == null && MovimientoCajaTipo.decreasesCash(movement.getTipo());
+    }
+
+    private Specification<MovimientoCajaEntity> baseSpec(Specification<MovimientoCajaEntity> specs) {
+        Integer empresaId = EmpresaContextHolder.getEmpresaId();
+        Specification<MovimientoCajaEntity> filtroEmpresa = (root, query, cb) -> cb
+                .equal(root.get("empresa").get("idEmpresa"), empresaId);
+        Specification<MovimientoCajaEntity> activos = (root, query, cb) -> cb
+                .isTrue(root.get("estatus"));
+        Specification<MovimientoCajaEntity> historialVisible = (root, query, cb) -> cb.not(cb.and(
+                root.get("tipo").in(MovimientoCajaTipo.OPENING.name(), MovimientoCajaTipo.INITIAL_BALANCE.name()),
+                cb.equal(root.get("monto"), BigDecimal.ZERO)));
+        return Specification.where(specs).and(filtroEmpresa).and(activos).and(historialVisible);
+    }
+}

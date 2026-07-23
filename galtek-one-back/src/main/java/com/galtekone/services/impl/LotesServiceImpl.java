@@ -1,7 +1,9 @@
 package com.galtekone.services.impl;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.galtekone.dto.lote.LoteResponseDTO;
@@ -198,10 +200,14 @@ public class LotesServiceImpl implements LotesService {
         if (cantidadSolicitada.compareTo(BigDecimal.ZERO) <= 0)
             return;
 
-        // 2. Obtener lotes disponibles con bloqueo pesimista
-        List<LotesEntity> lotes = lotesRepository.findDisponiblesParaVenta(idProducto, idAlmacen, empresaId);
+        // 2. Obtener lotes disponibles con bloqueo pesimista. En POS el almacen
+        // puede omitirse: se consume del inventario real del producto.
+        List<LotesEntity> lotes = idAlmacen == null
+                ? lotesRepository.findDisponiblesParaVentaEnEmpresa(idProducto, empresaId)
+                : lotesRepository.findDisponiblesParaVenta(idProducto, idAlmacen, empresaId);
 
         BigDecimal cantidadRestante = cantidadSolicitada;
+        Map<Integer, BigDecimal> consumoPorAlmacen = new LinkedHashMap<>();
 
         // 3. Iterar FIFO
         for (LotesEntity lote : lotes) {
@@ -225,6 +231,9 @@ public class LotesServiceImpl implements LotesService {
 
             lote.setUsuarioModificacion(user);
             lotesRepository.save(lote);
+
+            Integer almacenConsumido = lote.getAlmacen().getIdAlmacen();
+            consumoPorAlmacen.merge(almacenConsumido, aDescontar, BigDecimal::add);
         }
 
         // 4. Validar si se cubrió la demanda
@@ -232,25 +241,25 @@ public class LotesServiceImpl implements LotesService {
             throw new RuntimeException("Stock insuficiente en lotes. Faltan: " + cantidadRestante);
         }
 
-        // 5. Sincronizar Inventario Físico (Estrategia A)
-        InventarioEntity inventario = inventarioRepository
-                .findByProducto_IdProductoAndAlmacen_IdAlmacenAndEmpresa_IdEmpresa(idProducto, idAlmacen, empresaId)
-                .orElseThrow(() -> new RuntimeException(
-                        "Inventario inconsistente: No existe registro de inventario para este producto"));
+        // 5. Sincronizar Inventario Fisico por almacen consumido.
+        for (Map.Entry<Integer, BigDecimal> consumo : consumoPorAlmacen.entrySet()) {
+            InventarioEntity inventario = inventarioRepository
+                    .findByProducto_IdProductoAndAlmacen_IdAlmacenAndEmpresa_IdEmpresa(
+                            idProducto,
+                            consumo.getKey(),
+                            empresaId)
+                    .orElseThrow(() -> new RuntimeException(
+                            "Inventario inconsistente: No existe registro de inventario para este producto"));
 
-        // Restamos del inventario global
-        BigDecimal nuevaExistencia = inventario.getExistencia().subtract(cantidadSolicitada);
-        if (nuevaExistencia.compareTo(BigDecimal.ZERO) < 0) {
-            // Esto no debería pasar si los lotes estaban bien, pero por seguridad:
-            // Puede pasar si el inventario estaba desfasado de los lotes.
-            // Permitimos que baje (o lanzamos error).
-            // Dado que los lotes mandan:
-            throw new RuntimeException("Inconsistencia crítica: Inventario global menor que la suma de lotes.");
+            BigDecimal nuevaExistencia = inventario.getExistencia().subtract(consumo.getValue());
+            if (nuevaExistencia.compareTo(BigDecimal.ZERO) < 0) {
+                throw new RuntimeException("Inconsistencia critica: Inventario global menor que la suma de lotes.");
+            }
+
+            inventario.setExistencia(nuevaExistencia);
+            inventario.setUsuarioModificacion(user);
+            inventarioRepository.save(inventario);
         }
-
-        inventario.setExistencia(nuevaExistencia);
-        inventario.setUsuarioModificacion(user);
-        inventarioRepository.save(inventario);
     }
 
     @Override

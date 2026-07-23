@@ -22,12 +22,21 @@ const normalizePaymentCode = (value) =>
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
 
-const PagoGenerico = ({ metodo, total, onCancelar, onPaymentSuccess }) => {
+const PagoGenerico = ({
+  metodoPago,
+  total,
+  onCancelar,
+  onPaymentSuccess,
+  processing = false,
+}) => {
   const [referencia, setReferencia] = useState("");
 
   const confirmarPago = () => {
+    if (processing) return;
     onPaymentSuccess?.({
-      metodo,
+      metodo: metodoPago?.code,
+      metodoNombre: metodoPago?.label,
+      metodoPagoId: metodoPago?.id,
       referencia,
       total,
     });
@@ -51,17 +60,19 @@ const PagoGenerico = ({ metodo, total, onCancelar, onPaymentSuccess }) => {
             value={referencia}
             onChange={(e) => setReferencia(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && confirmarPago()}
+            disabled={processing}
             autoFocus
           />
         </div>
       </div>
       <div className="pago-acciones">
-        <Button label="Cancelar" className="p-button-text" onClick={onCancelar} />
+        <Button label="Cancelar" className="p-button-text" onClick={onCancelar} disabled={processing} />
         <Button
-          label="Confirmar pago"
-          icon="pi pi-check"
+          label={processing ? "Registrando..." : "Confirmar pago"}
+          icon={processing ? "pi pi-spin pi-spinner" : "pi pi-check"}
           className="p-button-success"
           onClick={confirmarPago}
+          disabled={processing}
         />
       </div>
     </div>
@@ -75,6 +86,8 @@ const ConfirmarPagoModal = ({
   carrito = [],
   metodosPago = [],
   onPaymentSuccess,
+  processing = false,
+  error = "",
 }) => {
   const [metodo, setMetodo] = useState(null);
   const paymentOptions = metodosPago.map((m) => {
@@ -83,8 +96,9 @@ const ConfirmarPagoModal = ({
     return {
       id: m.idMetodoPago || m.id || codigo,
       label: nombre,
-      value: codigo,
+      code: codigo,
       icon: PAYMENT_ICONS[codigo] || "pi pi-wallet",
+      raw: m,
     };
   });
 
@@ -97,8 +111,12 @@ const ConfirmarPagoModal = ({
 
   const resetAndClose = () => {
     setMetodo(null);
-    onHide();
+    if (!processing) {
+      onHide();
+    }
   };
+
+  const metodoCode = metodo?.code;
 
   return (
     <Dialog
@@ -126,7 +144,8 @@ const ConfirmarPagoModal = ({
                   label={option.label}
                   icon={option.icon}
                   className="pago-btn"
-                  onClick={() => setMetodo(option.value)}
+                  onClick={() => setMetodo(option)}
+                  disabled={processing}
                 />
               ))
             ) : (
@@ -136,43 +155,57 @@ const ConfirmarPagoModal = ({
         </div>
       )}
 
+      {error ? (
+        <div className="confirmar-pago-error" role="alert">
+          <i className="pi pi-exclamation-triangle" />
+          <span>{error}</span>
+        </div>
+      ) : null}
+
       {/* ===============================
           CONTENIDO SEGÚN MÉTODO
          =============================== */}
-      {metodo === "EFECTIVO" && (
+      {metodoCode === "EFECTIVO" && (
         <PagoEfectivo
           total={total}
           carrito={carrito}
+          metodoPago={metodo}
           onCancelar={resetAndClose}
           onPaymentSuccess={onPaymentSuccess}
+          processing={processing}
         />
       )}
 
-      {metodo === "TARJETA" && (
+      {metodoCode === "TARJETA" && (
         <PagoTarjeta
           total={total}
           carrito={carrito}
+          metodoPago={metodo}
           onCancelar={resetAndClose}
           onPaymentSuccess={onPaymentSuccess}
+          processing={processing}
         />
       )}
 
-      {metodo === "TRANSFERENCIA" && (
+      {metodoCode === "TRANSFERENCIA" && (
         <PagoTransferencia
           total={total}
           carrito={carrito}
+          metodoPago={metodo}
           onCancelar={resetAndClose}
           onPaymentSuccess={onPaymentSuccess}
+          processing={processing}
         />
       )}
 
-      {metodo &&
-        !["EFECTIVO", "TARJETA", "TRANSFERENCIA"].includes(metodo) && (
+      {metodoCode &&
+        !["EFECTIVO", "TARJETA", "TRANSFERENCIA"].includes(metodoCode) && (
           <PagoGenerico
-            metodo={metodo}
+            metodoPago={metodo}
             total={total}
             onCancelar={resetAndClose}
             onPaymentSuccess={onPaymentSuccess}
+            processing={processing}
           />
         )}
     </Dialog>

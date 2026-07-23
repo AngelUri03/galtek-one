@@ -1,0 +1,10 @@
+package com.galtekone.entity;
+
+public enum CajaIncidenciaTipo {
+    CLOSING_DIFFERENCE,
+    DIRECT_HANDOFF_MISMATCH,
+    DEFERRED_HANDOFF_MISMATCH,
+    BALANCE_MIGRATION_REVIEW,
+    UNRECORDED_MOVEMENT,
+    OTHER_CASH_DISCREPANCY
+}

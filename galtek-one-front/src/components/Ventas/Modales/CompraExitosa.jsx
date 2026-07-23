@@ -1,7 +1,16 @@
 import React from "react";
 
 const CompraExitosa = ({ venta, onClose }) => {
-  const { items, total, pago, fecha } = venta;
+  const {
+    items = [],
+    total = 0,
+    pago = {},
+    fecha,
+    folio,
+    ticket = {},
+  } = venta || {};
+  const fechaTicket = fecha instanceof Date ? fecha : new Date(fecha || Date.now());
+  const metodo = pago.metodo || pago.metodoPago || ticket.metodoPago || "";
 
   const handlePrint = () => {
     window.print();
@@ -15,20 +24,21 @@ const CompraExitosa = ({ venta, onClose }) => {
           <div className="ticket-header">
             <h3>Galtek One</h3>
             <p>Ticket de Venta</p>
-            <p>{fecha.toLocaleString()}</p>
+            {folio || ticket.folio ? <p>{folio || ticket.folio}</p> : null}
+            <p>{fechaTicket.toLocaleString("es-MX")}</p>
           </div>
 
           <hr className="ticket-divider" />
 
           {/* LISTA DE ITEMS */}
           <div className="ticket-items">
-            {items.map((item) => (
-              <div key={item.id} className="ticket-item-row">
+            {items.map((item, idx) => (
+              <div key={item.id ?? idx} className="ticket-item-row">
                 <div className="ticket-item-name">
                   {item.cantidad} x {item.nombre}
                 </div>
                 <div className="ticket-item-price">
-                  ${(item.precio * item.cantidad).toFixed(2)}
+                  ${Number((item.precio || 0) * (item.cantidad || 0)).toFixed(2)}
                 </div>
               </div>
             ))}
@@ -40,35 +50,35 @@ const CompraExitosa = ({ venta, onClose }) => {
           <div className="ticket-totals">
             <div className="ticket-line">
               <strong>TOTAL</strong>
-              <strong>${total.toFixed(2)}</strong>
+              <strong>${Number(total || 0).toFixed(2)}</strong>
             </div>
 
             <div className="ticket-line">
               <span>Método:</span>
-              <span>{pago.metodo}</span>
+              <span>{pago.metodoNombre || ticket.metodoPago || metodo}</span>
             </div>
 
-            {pago.metodo === "EFECTIVO" && (
+            {metodo === "EFECTIVO" && (
               <>
                 <div className="ticket-line">
                   <span>Recibido:</span>
-                  <span>${pago.recibido?.toFixed(2)}</span>
+                  <span>${Number(pago.recibido || 0).toFixed(2)}</span>
                 </div>
                 <div className="ticket-line">
                   <span>Cambio:</span>
-                  <span>${pago.cambio?.toFixed(2)}</span>
+                  <span>${Number(pago.cambio || 0).toFixed(2)}</span>
                 </div>
               </>
             )}
 
-            {pago.metodo === "TARJETA" && (
+            {metodo === "TARJETA" && (
               <div className="ticket-line">
                 <span>Ref:</span>
                 <span>{pago.referencia}</span>
               </div>
             )}
 
-            {pago.metodo === "TRANSFERENCIA" && (
+            {metodo === "TRANSFERENCIA" && (
               <div className="ticket-line">
                 <span>Folio:</span>
                 <span>{pago.folio}</span>

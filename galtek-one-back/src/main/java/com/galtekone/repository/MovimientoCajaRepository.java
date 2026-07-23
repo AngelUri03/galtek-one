@@ -17,8 +17,17 @@ public interface MovimientoCajaRepository
         Optional<MovimientoCajaEntity> findByIdMovimientoCajaAndEmpresa_IdEmpresa(Integer idMovimientoCaja,
                         Integer idEmpresa);
 
+        Optional<MovimientoCajaEntity> findByIdempotencyKeyAndEmpresa_IdEmpresaAndEstatusTrue(
+                        String idempotencyKey, Integer idEmpresa);
+
         List<MovimientoCajaEntity> findByCaja_IdCajaAndEmpresa_IdEmpresaAndFechaBetween(
                         Integer idCaja, Integer idEmpresa, LocalDateTime desde, LocalDateTime hasta);
+
+        List<MovimientoCajaEntity> findByCajaSesion_IdCajaSesionAndEmpresa_IdEmpresa(
+                        Integer idCajaSesion, Integer idEmpresa);
+
+        List<MovimientoCajaEntity> findByLocalDevice_InstallationIdAndEmpresa_IdEmpresa(
+                        String installationId, Integer idEmpresa);
 
         List<MovimientoCajaEntity> findByEmpresa_IdEmpresaAndFechaBetween(
                         Integer idEmpresa, LocalDateTime desde, LocalDateTime hasta);

@@ -791,3 +791,24 @@ Su valor no esta en capturar mucha informacion, sino en guardar la informacion c
 El modulo debe permitir reconocer clientes utiles, consultar que compraron recientemente, conservar trazabilidad y proteger historial comercial. Al mismo tiempo, debe respetar que muchas ventas seguiran siendo anonimas o de publico general.
 
 La regla final es simple: Clientes debe hacer mas humana y ordenada la venta recurrente, no hacer mas lenta la venta normal.
+
+### 38. CONTEXTO IA RELACIONADO - 2026-07-20
+Este documento se conserva como base tecnica condicional del modulo Clientes. Leerlo solo para Clientes o integraciones que afecten Clientes.
+
+Cuando aplique, leer junto con el contexto nucleo definido en `README_CONTEXT.md`:
+
+- `README_CONTEXT.md`
+- `AI_CONTEXT.md`
+- `DEVELOPMENT_RULES.md`
+- `CODEX_WORKFLOW.md`
+- La seccion relevante de `MODULES_STATUS.md`
+
+Leer `PROJECT_HISTORY.md` solo si se necesitan cambios anteriores, decisiones historicas, commits o actualizar documentacion.
+
+Todo cambio visual o de interaccion en este modulo debe respetar el estandar visual, de navegacion por teclado y velocidad operativa definido en `AI_CONTEXT.md` y `DEVELOPMENT_RULES.md`.
+
+Regla de lectura: si el codigo actual contradice este documento, priorizar el codigo y marcar la diferencia como `pendiente de alinear`.
+
+Nota historica: logs locales de 2026-07-09 mostraron errores de parsing de fechas SQLite en flujos de clientes/proveedores. El commit posterior de clientes agrego `LocalDateStringConverter.java`; queda `pendiente de confirmar` que todos los flujos de fechas esten cubiertos en QA final.
+
+Nota de actualizacion documental 2026-07-20: los cambios recientes se concentraron en Caja/Ventas/Configuracion. No se detecto cambio funcional nuevo en Clientes durante esta actualizacion; mantener el modulo como `Parcial funcional` hasta QA visual, teclado y runtime especifico.

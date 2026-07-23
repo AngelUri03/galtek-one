@@ -59,17 +59,17 @@ public class LocalDeviceController {
             }
             if (req.getName() == null || req.getName().trim().isEmpty()) {
                 return ApiResponseBuilder.buildErrorResponse(user, startTime, 
-                    "El nombre de la caja es requerido", HttpStatus.BAD_REQUEST);
+                    "El nombre de la estacion es requerido", HttpStatus.BAD_REQUEST);
             }
             
             localDeviceIdentityService.registerDevice(req.getName(), user);
             
-            return ApiResponseBuilder.buildSuccessResponse(null, user, startTime, "Caja registrada con exito");
+            return ApiResponseBuilder.buildSuccessResponse(null, user, startTime, "Estacion registrada con exito");
         } catch (IllegalStateException e) {
             return ApiResponseBuilder.buildErrorResponse(user, startTime, e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return ApiResponseBuilder.buildErrorResponse(user, startTime, 
-                "Error al registrar la caja: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+                "Error al registrar la estacion: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

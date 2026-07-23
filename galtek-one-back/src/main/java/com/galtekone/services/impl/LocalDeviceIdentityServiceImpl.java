@@ -2,6 +2,7 @@ package com.galtekone.services.impl;
 
 import java.io.File;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,10 +16,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.galtekone.config.EmpresaContextHolder;
 import com.galtekone.dto.device.DeviceIdentityDTO;
-import com.galtekone.entity.CajasEntity;
 import com.galtekone.entity.EmpresasEntity;
 import com.galtekone.entity.LocalDeviceEntity;
-import com.galtekone.repository.CajasRepository;
 import com.galtekone.repository.EmpresasRepository;
 import com.galtekone.repository.LocalDeviceRepository;
 import com.galtekone.crypto.LicenseVerificationService;
@@ -34,9 +33,6 @@ public class LocalDeviceIdentityServiceImpl implements LocalDeviceIdentityServic
 
     @Autowired
     private LocalDeviceRepository localDeviceRepository;
-
-    @Autowired
-    private CajasRepository cajasRepository;
 
     @Autowired
     private EmpresasRepository empresasRepository;
@@ -138,8 +134,8 @@ public class LocalDeviceIdentityServiceImpl implements LocalDeviceIdentityServic
             }
 
             if (fileData == null || !dbEntity.getInstallationId().equals(fileData.getInstallationId())
-                    || (dbEntity.getCashRegisterId() != null
-                            && !dbEntity.getCashRegisterId().equals(fileData.getCashRegisterId()))) {
+                    || !Objects.equals(dbEntity.getDisplayName(), fileData.getDisplayName())
+                    || !Objects.equals(dbEntity.getCashRegisterId(), fileData.getCashRegisterId())) {
                 syncToFile(dbEntity, file);
             }
         } else {
@@ -147,6 +143,7 @@ public class LocalDeviceIdentityServiceImpl implements LocalDeviceIdentityServic
                 // Restore from File to DB
                 LocalDeviceEntity newEntity = new LocalDeviceEntity();
                 newEntity.setInstallationId(fileData.getInstallationId());
+                newEntity.setDisplayName(fileData.getDisplayName());
                 newEntity.setCashRegisterId(fileData.getCashRegisterId());
                 // Asegurarse de restaurar hashes si existen, sino usar actuales
                 newEntity.setCpuHash(fileData.getCpuHash() != null ? fileData.getCpuHash() : currentHardware.cpuHash());
@@ -218,6 +215,7 @@ public class LocalDeviceIdentityServiceImpl implements LocalDeviceIdentityServic
         try {
             DeviceIdentityDTO dto = new DeviceIdentityDTO(
                     entity.getInstallationId(),
+                    entity.getDisplayName(),
                     entity.getCashRegisterId(),
                     entity.getCpuHash(),
                     entity.getMotherboardHash(),
@@ -240,6 +238,7 @@ public class LocalDeviceIdentityServiceImpl implements LocalDeviceIdentityServic
             LocalDeviceEntity entity = dbEntityOpt.get();
             DeviceIdentityDTO dto = new DeviceIdentityDTO(
                     entity.getInstallationId(),
+                    entity.getDisplayName(),
                     entity.getCashRegisterId(),
                     entity.getCpuHash(),
                     entity.getMotherboardHash(),
@@ -272,10 +271,6 @@ public class LocalDeviceIdentityServiceImpl implements LocalDeviceIdentityServic
         }
 
         LocalDeviceEntity localDevice = dbEntityOpt.get();
-        if (localDevice.getCashRegisterId() != null) {
-            throw new IllegalStateException("Este dispositivo ya esta registrado como una caja.");
-        }
-
         Integer idEmpresa = EmpresaContextHolder.getEmpresaId();
         if (idEmpresa == null) {
             throw new IllegalStateException("No se encontro un idEmpresa en el contexto.");
@@ -284,15 +279,8 @@ public class LocalDeviceIdentityServiceImpl implements LocalDeviceIdentityServic
         EmpresasEntity empresa = empresasRepository.findById(idEmpresa)
                 .orElseThrow(() -> new IllegalStateException("Empresa no encontrada"));
 
-        CajasEntity caja = new CajasEntity();
-        caja.setNombreCaja(name);
-        caja.setTipo("Monocaja");
-        caja.setEmpresa(empresa);
-        caja.setUsuarioCreacion(user);
-
-        caja = cajasRepository.save(caja);
-
-        localDevice.setCashRegisterId(caja.getIdCaja());
+        localDevice.setDisplayName(normalizeStationName(name));
+        localDevice.setEmpresa(empresa);
         localDeviceRepository.save(localDevice);
 
         syncToFile(localDevice, getIdentityFile());
@@ -324,7 +312,9 @@ public class LocalDeviceIdentityServiceImpl implements LocalDeviceIdentityServic
                 throw new IllegalArgumentException("Token invalido: El hardware no corresponde a la licencia original.");
             }
 
-            Integer savedCashRegisterId = dbEntity.getCashRegisterId();
+            Integer legacyCashRegisterId = dbEntity.getCashRegisterId();
+            String savedDisplayName = dbEntity.getDisplayName();
+            EmpresasEntity savedEmpresa = dbEntity.getEmpresa();
             
             // Recrear entidad para actualizar UUID
             localDeviceRepository.deleteAll();
@@ -332,7 +322,9 @@ public class LocalDeviceIdentityServiceImpl implements LocalDeviceIdentityServic
             
             LocalDeviceEntity newEntity = new LocalDeviceEntity();
             newEntity.setInstallationId(claims.getSubject());
-            newEntity.setCashRegisterId(savedCashRegisterId);
+            newEntity.setDisplayName(savedDisplayName);
+            newEntity.setCashRegisterId(legacyCashRegisterId);
+            newEntity.setEmpresa(savedEmpresa);
             
             newEntity.setCpuHash(claims.get("cpuHash", String.class));
             newEntity.setMotherboardHash(claims.get("motherboardHash", String.class));
@@ -350,5 +342,10 @@ public class LocalDeviceIdentityServiceImpl implements LocalDeviceIdentityServic
         } else {
             throw new IllegalStateException("No hay un dispositivo local inicializado para activar.");
         }
+    }
+
+    private String normalizeStationName(String name) {
+        String normalized = name == null ? "" : name.trim();
+        return normalized.isEmpty() ? "Punto de venta" : normalized;
     }
 }

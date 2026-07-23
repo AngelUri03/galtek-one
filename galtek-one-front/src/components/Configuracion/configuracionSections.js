@@ -42,6 +42,14 @@ export const CONFIG_SECTION_GROUPS = [
         refreshable: true,
       },
       {
+        key: "caja",
+        label: "Caja y turnos",
+        icon: "pi pi-wallet",
+        desc: "Saldo continuo, corte, relevo y conteo esperado.",
+        status: "functional",
+        refreshable: true,
+      },
+      {
         key: "promociones",
         label: "Promociones",
         icon: "pi pi-tags",
@@ -164,6 +172,13 @@ export const QUICK_ACTIONS = [
     label: "Roles",
     icon: "pi pi-sitemap",
     target: "roles",
+    status: "functional",
+  },
+  {
+    key: "caja",
+    label: "Caja",
+    icon: "pi pi-wallet",
+    target: "caja",
     status: "functional",
   },
   {

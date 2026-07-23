@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { InputText } from "primereact/inputtext";
+import CashStatusIndicator from "../Caja/CashStatusIndicator";
 import "../../style/components/Ventas/VentasHeader.css";
 
 const VentasHeader = ({
@@ -11,6 +12,9 @@ const VentasHeader = ({
   loadingCategorias = false,
   ventasDelDia = 0,
   onVerHistorial,
+  onCajaClick,
+  cashIndicatorRef,
+  searchInputRef,
 }) => {
   const scrollRef = useRef(null);
 
@@ -40,6 +44,7 @@ const VentasHeader = ({
         <span className="p-input-search ventas-search">
           <i className="pi pi-search" />
           <InputText
+            ref={searchInputRef}
             value={terminoBusqueda}
             onChange={(e) => onBusquedaChange?.(e.target.value)}
             placeholder="Buscar producto por nombre…"
@@ -47,11 +52,18 @@ const VentasHeader = ({
           />
         </span>
 
-        <div className="ventas-counter-chip" onClick={onVerHistorial}>
+        <CashStatusIndicator ref={cashIndicatorRef} onClick={onCajaClick} />
+
+        <button
+          type="button"
+          className="ventas-counter-chip"
+          onClick={onVerHistorial}
+          title={`${ventasDelDia} venta${ventasDelDia === 1 ? "" : "s"} registrada${ventasDelDia === 1 ? "" : "s"} hoy`}
+          aria-label={`Abrir ventas de hoy. ${ventasDelDia} venta${ventasDelDia === 1 ? "" : "s"} registrada${ventasDelDia === 1 ? "" : "s"}`}
+        >
           <i className="pi pi-chart-bar ventas-counter-icon" />
-          <span className="ventas-counter-label">Ventas hoy</span>
-          <span className="ventas-counter-value">{ventasDelDia}</span>
-        </div>
+          <span className="ventas-counter-label">Ventas de hoy</span>
+        </button>
       </div>
 
       {/* CATEGORÍAS */}

@@ -867,3 +867,26 @@ Su valor no esta en guardar nombres, sino en conservar contexto operativo: quien
 
 La informacion historica debe conservarse. La operacion debe ser rapida. La interfaz debe ser limpia. La logica debe impedir que un usuario destruya evidencias, historiales o relaciones comerciales por error.
 
+### 38. CONTEXTO IA RELACIONADO - 2026-07-20
+Este documento se conserva como base tecnica condicional del modulo Proveedores. Leerlo solo para Proveedores, abastecimiento o relaciones directamente vinculadas.
+
+Cuando aplique, leer junto con el contexto nucleo definido en `README_CONTEXT.md`:
+
+- `README_CONTEXT.md`
+- `AI_CONTEXT.md`
+- `DEVELOPMENT_RULES.md`
+- `CODEX_WORKFLOW.md`
+- La seccion relevante de `MODULES_STATUS.md`
+
+Leer `PROJECT_HISTORY.md` solo si se necesitan cambios anteriores, decisiones historicas, commits o actualizar documentacion.
+
+Todo cambio visual o de interaccion en este modulo debe respetar el estandar visual, de navegacion por teclado y velocidad operativa definido en `AI_CONTEXT.md` y `DEVELOPMENT_RULES.md`.
+
+Regla de lectura: si el codigo actual contradice este documento, priorizar el codigo y marcar la diferencia como `pendiente de alinear`.
+
+Notas de alineacion:
+
+- Proveedores sigue siendo uno de los modulos mas avanzados del sistema, pero debe mantenerse como `Parcial funcional` hasta QA final.
+- Las estructuras de acuerdos/proveedor detectadas en backend deben tratarse con cuidado. No promover acuerdos como seccion visual principal sin especificacion nueva y revision del frontend actual.
+- Conservar eliminacion segura, historial, documentos versionados y trazabilidad como reglas de no regresion.
+- Actualizacion documental 2026-07-20: los cambios recientes se concentraron en Caja/Ventas/Configuracion. No se detecto cambio funcional nuevo en Proveedores durante esta actualizacion; conservar este documento como contexto condicional vigente.

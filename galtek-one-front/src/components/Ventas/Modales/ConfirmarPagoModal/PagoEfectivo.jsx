@@ -1,26 +1,43 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import TecladoNumerico from "./TecladoNumerico";
 import TicketPreview from "./TicketPreview";
 
-import { imprimirTicket } from "../../../../utils/ticketService";
-
 const MONTOS_RAPIDOS = [50, 100, 200];
 
-const PagoEfectivo = ({ total, carrito = [], onCancelar, onPaymentSuccess }) => {
+const PagoEfectivo = ({
+  total,
+  carrito = [],
+  metodoPago,
+  onCancelar,
+  onPaymentSuccess,
+  processing = false,
+}) => {
   const [recibido, setRecibido]     = useState("");
-  const [imprimiendo, setImprimiendo] = useState(false);
-  const [errorImpresion, setErrorImpresion] = useState(null);
 
   const recibidoNum = parseFloat(recibido || 0);
   const cambio      = Math.max(recibidoNum - total, 0);
   const puedePagar  = recibidoNum >= total && recibidoNum > 0;
+
+  const confirmarPago = useCallback(() => {
+    if (!puedePagar || processing) return;
+
+    onPaymentSuccess?.({
+      metodo: metodoPago?.code || "EFECTIVO",
+      metodoNombre: metodoPago?.label || "Efectivo",
+      metodoPagoId: metodoPago?.id,
+      recibido: recibidoNum,
+      cambio,
+      total,
+    });
+  }, [cambio, metodoPago, onPaymentSuccess, processing, puedePagar, recibidoNum, total]);
 
   // ===============================
   // TECLADO FÍSICO
   // ===============================
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (processing) return;
       const { key } = e;
 
       if (key >= "0" && key <= "9") {
@@ -49,53 +66,25 @@ const PagoEfectivo = ({ total, carrito = [], onCancelar, onPaymentSuccess }) => 
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  });
+  }, [confirmarPago, onCancelar, processing]);
 
   // ===============================
   // TECLADO VISUAL
   // ===============================
 
   const handleInput  = (value) => {
+    if (processing) return;
     if (value === "." && recibido.includes(".")) return;
     setRecibido((prev) => prev + value);
   };
-  const handleDelete = () => setRecibido((prev) => prev.slice(0, -1));
+  const handleDelete = () => {
+    if (processing) return;
+    setRecibido((prev) => prev.slice(0, -1));
+  };
 
-  const agregarMontoRapido = (monto) => setRecibido(String(monto));
-
-  // ===============================
-  // CONFIRMAR PAGO + IMPRIMIR
-  // ===============================
-  const confirmarPago = async () => {
-    if (!puedePagar) return;
-
-    setImprimiendo(true);
-    setErrorImpresion(null);
-
-    // Intentar imprimir (no bloquea el flujo si falla)
-    const resultado = await imprimirTicket({
-      carrito,
-      total,
-      recibido: recibidoNum,
-      cambio,
-      metodoPago: "EFECTIVO",
-    });
-
-    if (!resultado.ok) {
-      setErrorImpresion("⚠️ No se pudo imprimir el ticket: " + resultado.mensaje);
-    }
-
-    setImprimiendo(false);
-
-    // Siempre continúa el flujo de venta, con o sin impresión
-    if (onPaymentSuccess) {
-      onPaymentSuccess({
-        metodo:   "EFECTIVO",
-        recibido: recibidoNum,
-        cambio,
-        total,
-      });
-    }
+  const agregarMontoRapido = (monto) => {
+    if (processing) return;
+    setRecibido(String(monto));
   };
 
   return (
@@ -112,6 +101,7 @@ const PagoEfectivo = ({ total, carrito = [], onCancelar, onPaymentSuccess }) => 
                 label={`$${monto}`}
                 className="monto-rapido-btn"
                 onClick={() => agregarMontoRapido(monto)}
+                disabled={processing}
               />
             ))}
           </div>
@@ -132,13 +122,8 @@ const PagoEfectivo = ({ total, carrito = [], onCancelar, onPaymentSuccess }) => 
             total={total}
             recibido={recibidoNum}
             cambio={cambio}
-            metodoPago="EFECTIVO"
+            metodoPago={metodoPago?.label || "EFECTIVO"}
           />
-
-          {/* Aviso de error de impresión */}
-          {errorImpresion && (
-            <p className="ticket-error-msg">{errorImpresion}</p>
-          )}
 
           {/* ACCIONES */}
           <div className="pago-acciones" style={{ marginTop: "auto" }}>
@@ -146,14 +131,13 @@ const PagoEfectivo = ({ total, carrito = [], onCancelar, onPaymentSuccess }) => 
               label="Cancelar"
               className="p-button-text"
               onClick={onCancelar}
-
-              disabled={imprimiendo}
+              disabled={processing}
             />
             <Button
-              label={imprimiendo ? "Imprimiendo…" : "Confirmar"}
-              icon={imprimiendo ? "pi pi-spin pi-spinner" : "pi pi-check"}
+              label={processing ? "Registrando..." : "Confirmar"}
+              icon={processing ? "pi pi-spin pi-spinner" : "pi pi-check"}
               className="p-button-success"
-              disabled={!puedePagar || imprimiendo}
+              disabled={!puedePagar || processing}
               onClick={confirmarPago}
             />
           </div>

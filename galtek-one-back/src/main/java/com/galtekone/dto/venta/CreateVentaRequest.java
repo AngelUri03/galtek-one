@@ -9,6 +9,7 @@ public class CreateVentaRequest {
 
     private Integer clienteId;
     private Integer metodoPagoId;
+    @Deprecated
     private Integer cajaId;
     private Integer almacenId;
     private List<ItemVentaRequest> productos;

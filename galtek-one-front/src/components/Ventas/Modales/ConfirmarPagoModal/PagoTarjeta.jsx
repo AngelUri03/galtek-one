@@ -3,24 +3,32 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import TecladoNumerico from "./TecladoNumerico";
 
-const PagoTarjeta = ({ total, onCancelar, onPaymentSuccess }) => {
+const PagoTarjeta = ({
+  total,
+  metodoPago,
+  onCancelar,
+  onPaymentSuccess,
+  processing = false,
+}) => {
   const [referencia, setReferencia] = useState("");
 
   const handleInput = (value) => {
+    if (processing) return;
     setReferencia((prev) => prev + value);
   };
 
   const handleDelete = () => {
+    if (processing) return;
     setReferencia((prev) => prev.slice(0, -1));
   };
 
   const confirmarPago = () => {
-    if (!referencia) return;
-    // Aquí iría la lógica real de confirmación
-    console.log("Pago con tarjeta confirmado", { referencia });
+    if (!referencia || processing) return;
     if (onPaymentSuccess) {
       onPaymentSuccess({
-        metodo: "TARJETA",
+        metodo: metodoPago?.code || "TARJETA",
+        metodoNombre: metodoPago?.label || "Tarjeta",
+        metodoPagoId: metodoPago?.id,
         referencia: referencia,
         total: total,
       });
@@ -49,6 +57,7 @@ const PagoTarjeta = ({ total, onCancelar, onPaymentSuccess }) => {
             onChange={(e) => setReferencia(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && confirmarPago()}
             className="p-inputtext-lg"
+            disabled={processing}
             autoFocus
           />
         </div>
@@ -66,13 +75,14 @@ const PagoTarjeta = ({ total, onCancelar, onPaymentSuccess }) => {
           label="Cancelar"
           className="p-button-text"
           onClick={onCancelar}
+          disabled={processing}
         />
 
         <Button
-          label="Confirmar pago"
-          icon="pi pi-check"
+          label={processing ? "Registrando..." : "Confirmar pago"}
+          icon={processing ? "pi pi-spin pi-spinner" : "pi pi-check"}
           className="p-button-success"
-          disabled={!referencia}
+          disabled={!referencia || processing}
           onClick={confirmarPago}
         />
       </div>

@@ -46,9 +46,14 @@ public class VentasEntity extends CommonEntity implements BaseEmpresa {
     @JoinColumn(name = "id_metodo_pago", nullable = false)
     private MetodoPagoEntity metodoPago;
     
+    @Deprecated
     @ManyToOne
-    @JoinColumn(name = "id_caja", nullable = false)
+    @JoinColumn(name = "id_caja")
     private CajasEntity caja;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_caja_sesion")
+    private CajaSesionEntity cajaSesion;
     
     @Column(name = "estado", nullable = false)
     private String estado;

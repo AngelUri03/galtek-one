@@ -2,8 +2,10 @@ package com.galtekone.services.impl;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import com.galtekone.dto.cliente.ClienteDTO;
@@ -13,6 +15,8 @@ import com.galtekone.dto.venta.ItemVentaRequest;
 import com.galtekone.dto.venta.TicketVentaResponse;
 import com.galtekone.entity.*;
 import com.galtekone.repository.*;
+import com.galtekone.services.CajaOperacionGuard;
+import com.galtekone.services.CajaSaldoService;
 import com.galtekone.services.LotesService;
 import com.galtekone.services.VentaDetalleService;
 import com.galtekone.utils.EmpresaValidator;
@@ -50,6 +54,14 @@ public class VentasServiceImpl implements VentasService {
     private LotesService lotesService; // Injected
     @Autowired
     private ProductosRepository productosRepository;
+    @Autowired
+    private CajaOperacionGuard cajaOperacionGuard;
+    @Autowired
+    private MovimientoCajaRepository movimientoCajaRepository;
+    @Autowired
+    private CajaSesionRepository cajaSesionRepository;
+    @Autowired
+    private CajaSaldoService cajaSaldoService;
 
     private static final BigDecimal TAX_RATE = new BigDecimal("0.16");
 
@@ -143,6 +155,7 @@ public class VentasServiceImpl implements VentasService {
     public TicketVentaResponse generarVenta(CreateVentaRequest request, String user) {
 
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
+        CajaSesionEntity cajaSesion = cajaOperacionGuard.requireOpenSessionForSale(user, request.getCajaId());
 
         ClientesEntity cliente = null;
         if (request.getClienteId() != null) {
@@ -158,12 +171,6 @@ public class VentasServiceImpl implements VentasService {
                 empresaId,
                 "Método de Pago",
                 metodosPagoRepository::findByIdMetodoPagoAndEmpresa_IdEmpresa);
-
-        CajasEntity caja = empresaValidator.validarEntidadPorEmpresa(
-                request.getCajaId(),
-                empresaId,
-                "Caja",
-                cajasRepository::findByIdCajaAndEmpresa_IdEmpresa);
 
         UsuariosEntity usuario = usuariosRepository
                 .findByUsuarioAndEmpresa_IdEmpresa(user, empresaId)
@@ -208,7 +215,7 @@ public class VentasServiceImpl implements VentasService {
         VentasEntity venta = new VentasEntity();
         venta.setCliente(cliente);
         venta.setMetodoPago(metodoPago);
-        venta.setCaja(caja);
+        venta.setCajaSesion(cajaSesion);
         venta.setEstado("COMPLETADA");
         venta.setTotal(total.floatValue());
         venta.setUsuario(usuario);
@@ -251,6 +258,8 @@ public class VentasServiceImpl implements VentasService {
             }
         }
 
+        registerCashImpactIfNeeded(cajaSesion, ventaGuardada, metodoPago, usuario, total, user);
+
         TicketVentaResponse ticket = new TicketVentaResponse();
         ticket.setIdVenta(ventaGuardada.getIdVenta());
         ticket.setFolio("F-" + ventaGuardada.getIdVenta());
@@ -288,6 +297,39 @@ public class VentasServiceImpl implements VentasService {
             }
         }
         return cantidad;
+    }
+
+    private void registerCashImpactIfNeeded(CajaSesionEntity cajaSesion, VentasEntity venta,
+            MetodoPagoEntity metodoPago, UsuariosEntity usuario, BigDecimal total, String user) {
+        LocalDateTime now = LocalDateTime.now();
+        EmpresasEntity empresa = venta.getEmpresa();
+
+        if (isCashPayment(metodoPago)) {
+            cajaSaldoService.registrarMovimientoContinuo(
+                    cajaSesion.getLocalDevice(),
+                    cajaSesion,
+                    usuario,
+                    MovimientoCajaTipo.CASH_SALE,
+                    "IN",
+                    total.setScale(2, RoundingMode.HALF_UP),
+                    "SALE_CASH",
+                    "Venta en efectivo",
+                    "SALE",
+                    String.valueOf(venta.getIdVenta()),
+                    "cash-sale-" + venta.getIdVenta(),
+                    user);
+        }
+
+        cajaSesion.setLastActivityAt(now);
+        cajaSesion.setUsuarioModificacion(user);
+        cajaSesionRepository.save(cajaSesion);
+    }
+
+    private boolean isCashPayment(MetodoPagoEntity metodoPago) {
+        String name = metodoPago == null || metodoPago.getNombreMetodoPago() == null
+                ? ""
+                : metodoPago.getNombreMetodoPago().trim().toLowerCase(Locale.ROOT);
+        return name.contains("efectivo");
     }
 
 }
