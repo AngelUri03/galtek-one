@@ -1,494 +1,224 @@
 /* ==========================================================================
-   INVENTARIO - ESTILO LIQUID GLASS (APPLE STYLE)
+   EXTENSIONES DE INVENTARIO - INTEGRACIÓN LIQUID GLASS
    ========================================================================== */
 
-:root {
-  /* Variables Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.45);
-  --glass-border: 1px solid rgba(255, 255, 255, 0.6);
-  --glass-blur: blur(16px);
-  --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.05);
-  --inv-brand: #0a7463;
-}
-/* ======================== */
-/* PÁGINA (Layout Fijo)     */
-/* ======================== */
-.inv-page {
-    display: flex;
-    flex-direction: column;
-    width: calc(100% - 3rem);
-    height: 100vh;
-    margin: 0 1.5rem;
-    overflow: hidden; /* Congela el scroll general */
-    animation: fadeIn 0.4s ease-in-out;
+/* Ajuste de miniatura/thumbnail para la columna de imagen de referencia */
+.inv-thumb {
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  object-fit: cover;
+  border: 1px solid rgba(10, 116, 99, 0.14);
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(20, 38, 34, 0.04);
+  transition: transform 0.2s ease;
 }
 
-/* Efecto luces desenfocadas atrás del cristal */
-.inv-page::before,
-.inv-page::after {
-  content: ''; position: absolute; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.6; pointer-events: none;
-}
-.inv-page::before { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #bae6fd; }
-.inv-page::after { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #bbf7d0; }
-
-.inv-header-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1.5rem; /* Ajustado para que sea delgado */
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    border: var(--glass-border);
-    border-radius: 12px;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+.inv-thumb:hover {
+  transform: scale(1.08);
 }
 
-.inv-table {
-    background: rgba(255, 255, 255, 0.2) !important;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    border-radius: 12px;
+/* Contenedor alternativo si la celda no tiene imagen cargada */
+.prov-table td .pi-image {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  background: rgba(24, 44, 40, 0.05);
+  color: #65736f;
+  border: 1px dashed rgba(21, 43, 38, 0.15);
 }
 
-.inv-table .p-datatable-thead > tr > th,
-.inv-table .p-datatable-tbody > tr {
-    background: transparent !important;
+/* Mapeos específicos para las clases de Tag de PrimeReact según el stock */
+.prov-state-tag.p-tag-danger {
+  border-color: rgba(159, 63, 63, 0.18) !important;
+  background: rgba(159, 63, 63, 0.12) !important;
+  color: #9f3f3f !important;
 }
 
-.text-truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 150px;
-    display: block;
+.prov-state-tag.p-tag-warning {
+  border-color: rgba(217, 119, 6, 0.18) !important;
+  background: rgba(217, 119, 6, 0.1) !important;
+  color: #b45309 !important;
 }
 
-/* Forzar transparencia de celdas */
-.p-datatable .p-datatable-wrapper, 
-.p-datatable .p-datatable-table {
-    background: transparent !important;
-}
-/* Efecto luces desenfocadas atrás del cristal */
-.inv-page::before,
-.inv-page::after {
-  content: ''; position: absolute; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.6; pointer-events: none;
-}
-.inv-page::before { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #bae6fd; }
-.inv-page::after { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #bbf7d0; }
-
-/* ========================================== */
-/* HEADER PRINCIPAL                         */
-/* ========================================== */
-.inv-header-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1.5rem;
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    border: var(--glass-border);
-    border-radius: 12px;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.inv-header-title { 
-  font-size: 1.15rem; 
-  font-weight: 800; 
-  color: var(--inv-brand); 
-  display: flex; 
-  align-items: center; 
-  gap: 0.8rem; 
-  text-transform: uppercase; 
-}
-
-.inv-header-title i { 
-  font-size: 1.3rem; 
-}
-
-/* ========================================== */
-/* TOOLBAR Y BUSCADOR (LIQUID GLASS)        */
-/* ========================================== */
-.inv-toolbar-glass {
-  display: flex; 
-  gap: 15px; 
-  align-items: center; 
-  justify-content: space-between;
-  background: var(--glass-bg); 
-  backdrop-filter: var(--glass-blur); 
-  border: var(--glass-border); 
-  box-shadow: var(--glass-shadow);
-  padding: 16px 24px; 
-  border-radius: 20px; 
-  margin-bottom: 20px;
-}
-
-.inv-search-wrapper {
-    position: relative;
-    flex: 1;
-    max-width: 1900px;
-    display: flex;       /* Agregamos esto */
-    align-items: center; /* Alineación vertical perfecta */
-}
-
-.inv-search-wrapper .pi-search {
-    position: absolute;
-    left: 1.2rem;
-    /* Quitamos el top y transform y dejamos que el flex del wrapper lo alinee */
-    pointer-events: none; 
-    color: var(--inv-brand);
-}
-
-.inv-search-input {
-    width: 100% !important; 
-    height: 46px !important; 
-    border-radius: 14px !important;
-    padding-left: 3.2rem !important;
-    /* Aseguramos que el contenido interno también esté centrado */
-    display: flex;
-    align-items: center;
-}
-
-.inv-search-input:focus {
-  background: #ffffff !important; 
-  border-color: var(--inv-brand) !important;
-  box-shadow: 0 0 0 3px rgba(10, 116, 99, 0.15) !important;
-}
-
-.inv-toolbar-actions { 
-  display: flex; 
-  gap: 12px; 
-  align-items: center; 
-}
-
-.inv-btn { 
-  height: 46px !important; 
-  border-radius: 14px !important; 
-  font-family: "Kodchasan", sans-serif !important; 
-  font-weight: 700 !important; 
-  font-size: 0.9rem !important; 
-  border: none !important; 
-  transition: all 0.2s ease; 
-}
-
-.inv-btn--primary { 
-  background: var(--inv-brand) !important; 
-  color: #fff !important; 
-  box-shadow: 0 4px 12px rgba(10, 116, 99, 0.25) !important; 
-}
-
-.inv-btn--primary:hover { 
-  transform: translateY(-2px); 
-  box-shadow: 0 6px 15px rgba(10, 116, 99, 0.35) !important; 
-}
-
-.inv-btn--ghost { 
-  background: rgba(255,255,255,0.6) !important; 
-  color: var(--inv-brand) !important; 
-  border: var(--glass-border) !important; 
-}
-
-.inv-btn--ghost:hover { 
-  background: #fff !important; 
-  transform: translateY(-2px); 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; 
-}
-
-.inv-icon-btn { 
-  width: 46px !important; 
-  padding: 0 !important; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-}
-
-@media (max-width: 768px) {
-  .inv-toolbar-glass { flex-direction: column; align-items: stretch; }
-  .inv-search-wrapper { max-width: 100%; }
-  .inv-toolbar-actions { justify-content: flex-end; flex-wrap: wrap; }
-}
-
-/* ========================================== */
-/* CONTROLES GLOBALES (Inputs, Dropdowns)     */
-/* ========================================== */
-
-.inv-page .p-inputtext, 
-.inv-page .p-dropdown, 
-.inv-page .p-multiselect, 
-.inv-page .p-calendar {
-  background: rgba(255, 255, 255, 0.75) !important; 
-  color: #334155 !important;
-  border: 1px solid rgba(255, 255, 255, 0.9) !important;
-  box-shadow: inset 0 2px 4px rgba(255,255,255,0.5) !important; 
-  border-radius: 10px !important;
-  font-family: "Kodchasan", sans-serif !important;
-  transition: all 0.2s ease;
-}
-
-.inv-page .p-inputtext:enabled:hover, 
-.inv-page .p-dropdown:not(.p-disabled):hover, 
-.inv-page .p-multiselect:not(.p-disabled):hover { 
-  background: rgba(255, 255, 255, 0.9) !important; 
-  border-color: #fff !important; 
-}
-
-.inv-page .p-inputtext:enabled:focus, 
-.inv-page .p-dropdown:not(.p-disabled).p-focus, 
-.inv-page .p-multiselect:not(.p-disabled).p-focus { 
-  border-color: var(--inv-brand) !important; 
-  background: #ffffff !important; 
-  box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.2) !important; 
-}
-
-/* ========================================== */
-/* PANELES DESPLEGABLES (Dropdown/Modals)     */
-/* ========================================== */
-
-.p-dropdown-panel, .p-multiselect-panel, .p-datepicker { 
-  border-radius: 12px !important; 
-  background: rgba(255, 255, 255, 0.85) !important; 
-  backdrop-filter: var(--glass-blur); 
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--glass-border) !important; 
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important; 
-  font-family: "Kodchasan", sans-serif !important; 
-  overflow: hidden; 
-}
-
-.p-dropdown-item, .p-multiselect-item { 
-  font-size: 0.85rem !important; 
-  padding: 0.5rem 1rem !important; 
-  color: #334155 !important; 
-  background: transparent !important;
-}
-
-.p-dropdown-item.p-highlight, 
-.p-multiselect-item.p-highlight, 
-.p-dropdown-item:not(.p-highlight):not(.p-disabled):hover, 
-.p-multiselect-item:not(.p-highlight):not(.p-disabled):hover { 
-  background: rgba(10, 116, 99, 0.12) !important; 
-  color: var(--inv-brand) !important; 
-}
-
-/* Modales / Dialogs Globales */
-.p-dialog {
-  background: rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: var(--glass-border);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.6) !important;
-  border-radius: 20px !important;
-  overflow: hidden;
+/* Estilo destacado para precios dentro de la tabla */
+.prov-table strong {
   font-family: "Kodchasan", sans-serif;
-}
-.p-dialog .p-dialog-header {
-  background: transparent !important;
-  border-bottom: 1px solid rgba(255,255,255,0.5);
-}
-.p-dialog .p-dialog-content {
-  background: transparent !important;
-  padding: 1.5rem;
-}
-.p-dialog-mask.p-component-overlay {
-  background: rgba(15, 23, 42, 0.2) !important;
-  backdrop-filter: blur(4px) !important;
-  -webkit-backdrop-filter: blur(4px) !important;
+  letter-spacing: -0.3px;
 }
 
-/* =========================== */
-/* TABLA INVENTARIO            */
-/* =========================== */
-.inv-table {
-    background: rgba(255, 255, 255, 0.2) !important;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+/* Alineación vertical adaptada para celdas combinadas (Nombre + SKU) */
+.prov-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-/* Forzar transparencia total en capas internas */
-.p-datatable .p-datatable-wrapper, 
-.p-datatable .p-datatable-table,
-.inv-table .p-datatable-thead > tr > th,
-.inv-table .p-datatable-tbody > tr {
-    background: transparent !important;
+.prov-name-cell strong {
+  color: #172723;
+  font-size: 0.88rem;
+  font-weight: 700;
 }
 
-.text-truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 150px;
-    display: block;
+.prov-name-cell span {
+  color: #65736f;
+  font-size: 0.74rem;
+  font-weight: 500;
 }
 
-
-/* Ajuste para que las filas tengan un ligero fondo al pasar el mouse */
-.inv-table .p-datatable-tbody > tr:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
+/* Asegurar consistencia en el comportamiento del grid de métricas superiores */
+.prov-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 12px;
 }
 
-/* Asegurar que el paginador también sea transparente */
-.inv-table .p-paginator {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+/* Ajustes de responsividad específicos para la vista de inventario */
+@media (max-width: 1200px) {
+  .prov-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  
+  .prov-controls {
+    grid-template-columns: 1fr !important;
+  }
 }
 
-.inv-table .p-datatable-wrapper {
-  border-radius: 12px;
-  overflow: hidden;
+/* ==========================================================================
+   AJUSTES DE HEADER Y DESPLEGABLE DE LOTES PARA INVENTARIO
+   ========================================================================== */
+
+/* Header con la misma altura y escala de Proveedores */
+.prov-header {
+  min-height: 64px !important;
+  padding: 0.55rem 1.5rem !important;
 }
 
-.inv-table .p-datatable-thead > tr > th {
-  background: rgba(255, 255, 255, 0.4) !important;
-  color: #334155 !important;
-  font-weight: 800;
-  font-size: 0.9rem;
-  padding: 12px 16px !important;
-  border: none !important;
-  border-bottom: 1px solid rgba(255,255,255,0.6) !important;
+.prov-header-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: var(--prov-brand, #0a7463);
+  font-size: 1.15rem;
+  font-weight: 900;
 }
 
-/* Esto fuerza que todo el contenido de las celdas esté alineado al centro verticalmente */
-.inv-table .p-datatable-tbody > tr > td {
-    vertical-align: middle !important;
-    padding: 0.5rem 1rem !important; /* Ajusta este padding si quieres que se vea más delgado */
-    display: table-cell;
-}                                   
-
-.inv-table .p-datatable-tbody > tr:hover > td {
-  background: rgba(255, 255, 255, 0.3) !important;
+.prov-header-title i {
+  font-size: 1.3rem;
 }
 
-.inv-table .p-datatable-thead .p-sortable-column .p-sortable-column-icon,
-.inv-table .p-datatable-thead .p-sortable-column .pi {
-  color: #334155 !important;
+.prov-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border: 1px solid rgba(10, 116, 99, 0.18);
+  border-radius: 8px;
+  color: #0a7463;
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.prov-header h1 {
+  margin: 2px 0 0 0 !important;
+  font-size: 1.55rem !important;
+  font-weight: 800 !important;
+  color: #142521 !important;
+  line-height: 1.1 !important;
+}
+
+/* Thumbnail de la imagen de producto */
+.inv-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid rgba(10, 116, 99, 0.14);
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(20, 38, 34, 0.05);
+}
+
+/* Estilo para la tabla de Lotes desplegada */
+.inv-lotes-container {
+  background: rgba(10, 116, 99, 0.03);
+  border-radius: 10px;
+  border: 1px solid rgba(10, 116, 99, 0.1);
+  margin: 4px 10px;
+}
+
+.inv-lotes-table.p-datatable .p-datatable-thead > tr > th {
+  background: rgba(10, 116, 99, 0.08) !important;
+  color: #0a7463 !important;
+  font-size: 0.72rem !important;
+}
+
+.inv-lotes-table.p-datatable .p-datatable-tbody > tr > td {
+  font-size: 0.78rem !important;
+  padding: 0.4rem 0.6rem !important;
+}
+/* ==========================================================================
+   LIMPIEZA DE FOCOS MORADOS Y BORDES DE NAVEGACIÓN (TAB)
+   ========================================================================== */
+
+/* Quitar resplandor y borde morado global en cualquier input, botón o celda */
+.proveedores-page *:focus,
+.proveedores-page *:focus-visible,
+.prov-editor-sidebar *:focus,
+.prov-editor-sidebar *:focus-visible,
+.p-dialog *:focus,
+.p-dialog *:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.3) !important;
+  border-color: #0a7463 !important;
+}
+
+/* Fila seleccionada en la tabla */
+.prov-table.p-datatable .p-datatable-tbody > tr.p-highlight {
+  background: rgba(10, 116, 99, 0.12) !important;
+  color: #0a7463 !important;
+}
+
+.prov-table.p-datatable .p-datatable-tbody > tr:focus,
+.prov-table.p-datatable .p-datatable-tbody > tr.p-focus {
+  outline: 2px solid #0a7463 !important;
+  background: rgba(10, 116, 99, 0.08) !important;
   box-shadow: none !important;
 }
 
-.inv-table .p-datatable-thead .p-sortable-column.p-highlight {
-  background: rgba(255, 255, 255, 0.6) !important;
-  color: var(--inv-brand) !important;
+/* Botones de PrimeReact por defecto (Ajuste de Stock, etc.) que se ponen morados */
+.p-button {
+  background-color: #0a7463 !important;
+  border-color: #0a7463 !important;
 }
 
-.inv-table .p-datatable-thead .p-sortable-column.p-highlight .p-sortable-column-icon {
-  color: var(--inv-brand) !important;
+.p-button:hover {
+  background-color: #085f52 !important;
+  border-color: #085f52 !important;
 }
 
-/* ========================== */
-/* TABLA INTERNA (LOTES)      */
-/* ========================== */
-.inv-lotes-table {
-  background: rgba(255,255,255,0.3) !important;
-  border-radius: 10px;
-  overflow: hidden;
+.p-button.p-button-secondary,
+.p-button.p-button-outlined {
+  background-color: transparent !important;
+  color: #0a7463 !important;
+  border-color: rgba(10, 116, 99, 0.3) !important;
 }
 
-.inv-lotes-table .p-datatable-thead > tr > th {
-  background: rgba(10, 116, 99, 0.1) !important;
-  color: var(--inv-brand) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.5) !important;
+.p-button.p-button-secondary:hover {
+  background-color: rgba(10, 116, 99, 0.08) !important;
 }
 
-.inv-lotes-table .p-datatable-tbody > tr > td {
-  background: transparent !important;
-  border-bottom: 1px solid rgba(255,255,255,0.3) !important;
-}
-
-/* ======================================= */
-/* PAGINACIÓN PREMIUM                      */
-/* ======================================= */
-
-.inv-table .p-paginator {
-  background: transparent !important;
-  border: none !important;
-  padding: 1rem 0.5rem 0.5rem !important;
-  font-family: "Kodchasan", sans-serif !important;
-}
-
-.inv-table .p-paginator-current {
-  color: #475569 !important;
-  font-weight: 600;
-}
-
-.inv-table .p-paginator .p-paginator-element {
-  color: #475569 !important;
-  background: transparent !important;
-  border-radius: 10px;
-  transition: all 0.2s ease !important;
-}
-
-.inv-table .p-paginator .p-paginator-element:not(.p-disabled):hover {
-  background: rgba(255, 255, 255, 0.6) !important;
-  transform: translateY(-2px);
-}
-
-.inv-table .p-paginator .p-highlight {
-  background: var(--inv-brand) !important;
+/* Botones de incremento/decremento de InputNumber en modales */
+.p-inputnumber-button {
+  background: #0a7463 !important;
+  border-color: #0a7463 !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 10px rgba(10, 116, 99, 0.3) !important;
 }
 
-/* Imagen */
-.inv-thumb {
-  width: 56px;
-  height: 56px;
-  border-radius: 8px;
-  object-fit: cover;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-/* Acciones */
-.table-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* ========================== */
-/* BOTONES DE ACCIÓN          */
-/* ========================== */
-.inv-action-btn {
-    background: rgba(255, 255, 255, 0.4) !important;
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-    width: 34px; height: 34px; border-radius: 10px;
-    color: var(--inv-brand) !important;
-}
-.inv-action-btn:hover {
-  background: #fff !important;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
-}
-
-.inv-action-btn.danger { color: #ef4444 !important; }
-.inv-action-btn.danger:hover { background: #fee2e2 !important; color: #dc2626 !important; }
-
-/* ========================= */
-/* TOAST INV                 */
-/* ========================= */
-
-.inv-toast { font-family: "Kodchasan", sans-serif !important; }
-.inv-toast .p-toast-message {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: var(--glass-border);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15) !important;
-  border-radius: 14px;
-}
-/* ========================== */
-/* AJUSTES GLOBALES           */
-/* ========================== */
-.layout-sidebar {
-    display: none !important;
-}
-
-.layout-main-container {
-    margin-left: 0 !important;
+.p-inputnumber-button:hover {
+  background: #085f52 !important;
 }
