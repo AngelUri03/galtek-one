@@ -1,9 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { FaPen } from "react-icons/fa";
+import { Box, Minus, PackageSearch, Pencil, Plus, Scale } from "lucide-react";
 import VentasProductoModal from "./VentasProductoModal";
 import "../../style/components/Ventas/VentasProductos.css";
+
+const formatCantidad = (value) => {
+  const n = Number(value || 0);
+  if (!Number.isFinite(n)) return "0";
+  return Number.isInteger(n) ? String(n) : n.toFixed(3);
+};
 
 const VentasProductos = ({
   productos = [],
@@ -17,11 +22,9 @@ const VentasProductos = ({
   const [focusPesajeId, setFocusPesajeId] = useState(null);
   const pesajeInputRefs = useRef({});
 
-  // 🔹 Modal
   const [productoModal, setProductoModal] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // 🔹 Animación al agregar
   const [animandoId, setAnimandoId] = useState(null);
   const animTimerRef = useRef({});
 
@@ -51,25 +54,25 @@ const VentasProductos = ({
   }, [carrito, focusPesajeId]);
 
   const handleAgregar = (producto) => {
-    onAgregarProducto && onAgregarProducto(producto);
+    onAgregarProducto?.(producto);
 
-    // Disparar animación en la card
     const id = producto.idProducto ?? producto.id;
     setAnimandoId(id);
     if (animTimerRef.current[id]) clearTimeout(animTimerRef.current[id]);
     animTimerRef.current[id] = setTimeout(() => {
       setAnimandoId(null);
-    }, 420);
+    }, 360);
   };
 
   const handleDisminuir = (producto) => {
-    onDisminuirProducto && onDisminuirProducto(producto);
+    onDisminuirProducto?.(producto);
   };
 
   const handleChangePesaje = (id, valor) => {
+    const limpio = (valor ?? "").replace(/[^\d.,]/g, "");
     setPesajeEnEdicion((prev) => ({
       ...prev,
-      [id]: valor,
+      [id]: limpio,
     }));
   };
 
@@ -112,7 +115,7 @@ const VentasProductos = ({
 
     const cantidad = parseFloat(raw.replace(",", "."));
 
-    if (isNaN(cantidad) || cantidad <= 0) {
+    if (Number.isNaN(cantidad) || cantidad <= 0) {
       onConfirmPesaje({ ...productoBase, cantidad: 0, modoPesaje: true });
       return;
     }
@@ -124,7 +127,9 @@ const VentasProductos = ({
     return (
       <section className="v-products">
         <div className="ventas-productos-empty">
-          No hay productos para mostrar.
+          <PackageSearch size={30} aria-hidden="true" />
+          <strong>Sin productos disponibles</strong>
+          <span>No hay coincidencias en la venta actual.</span>
         </div>
       </section>
     );
@@ -132,23 +137,34 @@ const VentasProductos = ({
 
   return (
     <>
-      <section className="v-products">
+      <section className="v-products" aria-label="Productos disponibles">
+        <div className="ventas-productos-toolbar">
+          <div>
+            <span>Productos</span>
+            <strong>{productos.length} disponibles</strong>
+          </div>
+        </div>
+
         <div className="ventas-productos-grid">
           {productos.map((producto) => {
             const id = producto.idProducto ?? producto.id;
             const nombre =
               producto.nombreProducto ?? producto.nombre ?? "Producto sin nombre";
-            const precio = producto.precioVenta ?? producto.precio ?? 0;
+            const precio = Number(producto.precioVenta ?? producto.precio ?? 0);
             const unidad =
               producto.unidad?.nombreUnidad ??
               producto.unidadMedida ??
               producto.unidad ??
               "unidad";
             const imgSrc = producto.img ?? producto.imagenUrl ?? null;
+            const categoria = producto.categoriaNombre || producto.raw?.categoriaNombre || "";
+            const sku = producto.sku || producto.raw?.sku || "";
+            const codigoBarras =
+              producto.codigoBarras || producto.raw?.codigoBarras || "";
 
             const cantidadEnCarrito = obtenerCantidadEnCarrito?.(id) ?? 0;
             const tieneCantidad = cantidadEnCarrito > 0;
-            const esPesaje = producto.esPesaje === true;
+            const esPesaje = producto.esPesaje === true || unidad === "kg";
 
             const productoBase = {
               ...producto,
@@ -158,6 +174,9 @@ const VentasProductos = ({
               unidad,
               img: imgSrc,
               esPesaje,
+              categoriaNombre: categoria,
+              sku,
+              codigoBarras,
               descripcion:
                 producto.descripcion ||
                 producto.raw?.descripcion ||
@@ -171,37 +190,53 @@ const VentasProductos = ({
             return (
               <article
                 key={id}
-                className={`ventas-producto-card${animandoId === id ? " ventas-producto-card--agregar" : ""}`}
-                onClick={() => {
-                  setProductoModal(productoBase);
-                  setModalVisible(true);
-                }}
+                className={`ventas-producto-card${animandoId === id ? " ventas-producto-card--agregar" : ""}${tieneCantidad ? " ventas-producto-card--selected" : ""}${!imgSrc ? " ventas-producto-card--no-media" : ""}`}
               >
-                <div className="ventas-producto-media">
-                  {imgSrc ? (
-                    <img
-                      src={imgSrc}
-                      alt={nombre}
-                      className="ventas-producto-img"
-                    />
-                  ) : (
-                    <div className="ventas-producto-placeholder">
-                      <span className="pi pi-shopping-bag" />
-                    </div>
-                  )}
-                </div>
-
-                <h4 className="ventas-producto-nombre">{nombre}</h4>
-
-                <p className="ventas-producto-precio">
-                  ${precio.toFixed(2)}
-                  <span className="ventas-producto-unidad"> / {unidad}</span>
-                </p>
-
-                <div
-                  className="ventas-producto-actions"
-                  onClick={(e) => e.stopPropagation()}
+                <button
+                  type="button"
+                  className="ventas-producto-hit"
+                  onClick={() => {
+                    setProductoModal(productoBase);
+                    setModalVisible(true);
+                  }}
+                  aria-label={`Ver informacion de ${nombre}`}
                 >
+                  <span className="ventas-producto-media">
+                    {imgSrc ? (
+                      <img
+                        src={imgSrc}
+                        alt={nombre}
+                        className="ventas-producto-img"
+                      />
+                    ) : (
+                      <span className="ventas-producto-placeholder">
+                        <Box size={22} aria-hidden="true" />
+                      </span>
+                    )}
+                  </span>
+
+                  <span className="ventas-producto-info">
+                    {categoria && (
+                      <span className="ventas-producto-categoria">
+                        {categoria}
+                      </span>
+                    )}
+                    <strong className="ventas-producto-nombre">{nombre}</strong>
+                    <span className="ventas-producto-meta-row">
+                      <span className="ventas-producto-precio">
+                        ${precio.toFixed(2)}
+                        <small>/ {unidad}</small>
+                      </span>
+                      {tieneCantidad && (
+                        <span className="ventas-producto-badge">
+                          {formatCantidad(cantidadEnCarrito)}
+                        </span>
+                      )}
+                    </span>
+                  </span>
+                </button>
+
+                <div className="ventas-producto-actions">
                   {esPesaje ? (
                     <div
                       className="ventas-pesaje-inline"
@@ -212,47 +247,56 @@ const VentasProductos = ({
                         el?.select?.();
                       }}
                     >
-                      <FaPen className="ventas-pesaje-icon" />
+                      <Scale size={15} className="ventas-pesaje-icon" aria-hidden="true" />
                       <InputText
                         ref={(el) => {
                           if (el) pesajeInputRefs.current[String(id)] = el;
                         }}
                         value={valorPesajeVisible}
-                        onChange={(e) =>
-                          handleChangePesaje(id, e.target.value)
-                        }
-                        onKeyDown={(e) =>
-                          handleKeyDownPesaje(e, productoBase, id)
-                        }
-                        onBlur={() => handleConfirmPesaje(productoBase, id)}
+                        onFocus={() => setFocusPesajeId(String(id))}
+                        onChange={(e) => handleChangePesaje(id, e.target.value)}
+                        onKeyDown={(e) => handleKeyDownPesaje(e, productoBase, id)}
+                        onBlur={() => {
+                          setFocusPesajeId(null);
+                          handleConfirmPesaje(productoBase, id);
+                        }}
                         className="ventas-pesaje-input"
-                        placeholder="Editar"
+                        placeholder="kg"
                         inputMode="decimal"
                       />
+                      <Pencil size={13} className="ventas-pesaje-pencil" aria-hidden="true" />
                     </div>
                   ) : !tieneCantidad ? (
-                    <Button
+                    <button
                       type="button"
-                      label="Agregar"
-                      icon="pi pi-plus"
                       className="ventas-btn-agregar"
                       onClick={() => handleAgregar(productoBase)}
-                    />
+                      title={`Agregar ${nombre}`}
+                      aria-label={`Agregar ${nombre}`}
+                    >
+                      <Plus size={18} aria-hidden="true" />
+                    </button>
                   ) : (
                     <div className="ventas-producto-qty">
-                      <Button
-                        icon="pi pi-minus"
+                      <button
+                        type="button"
                         className="ventas-btn-cantidad"
                         onClick={() => handleDisminuir(productoBase)}
-                      />
+                        aria-label={`Quitar ${nombre}`}
+                      >
+                        <Minus size={15} aria-hidden="true" />
+                      </button>
                       <span className="ventas-cantidad-display">
-                        {cantidadEnCarrito}
+                        {formatCantidad(cantidadEnCarrito)}
                       </span>
-                      <Button
-                        icon="pi pi-plus"
+                      <button
+                        type="button"
                         className="ventas-btn-cantidad"
                         onClick={() => handleAgregar(productoBase)}
-                      />
+                        aria-label={`Agregar ${nombre}`}
+                      >
+                        <Plus size={15} aria-hidden="true" />
+                      </button>
                     </div>
                   )}
                 </div>
@@ -262,17 +306,15 @@ const VentasProductos = ({
         </div>
       </section>
 
-      {/* 🔹 MODAL */}
       <VentasProductoModal
         visible={modalVisible}
         onHide={() => setModalVisible(false)}
         producto={productoModal}
         onAgregarProducto={onAgregarProducto}
         onDisminuirProducto={onDisminuirProducto}
+        onConfirmPesaje={onConfirmPesaje}
         cantidadEnCarrito={
-          productoModal
-            ? obtenerCantidadEnCarrito(productoModal.id)
-            : 0
+          productoModal ? obtenerCantidadEnCarrito(productoModal.id) : 0
         }
       />
     </>

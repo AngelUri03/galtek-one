@@ -1,95 +1,84 @@
-/* ══════════════════════════════════════════════════════
-   TicketPreview.css
-   Simula exactamente el papel térmico de 58mm (164pt)
-   ══════════════════════════════════════════════════════ */
-
-/* Contenedor centrado con scroll si hay muchos items */
 .ticket-wrap {
+  width: 100%;
+  max-height: 330px;
   display: flex;
   justify-content: center;
-  width: 100%;
-  max-height: 340px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 4px 0;
+  padding: 0.1rem 0;
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-color: rgba(10, 116, 99, 0.28) transparent;
 }
 
 .ticket-wrap::-webkit-scrollbar {
-  width: 4px;
-}
-.ticket-wrap::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  width: 5px;
 }
 
-/* ── El "papel" físico del ticket ── */
+.ticket-wrap::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(10, 116, 99, 0.28);
+}
+
 .ticket-paper {
-  width: 164px;          /* 58mm × 2.8346pt/mm = 164.4pt → 219px en 96dpi */
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  width: 174px;
+  flex: 0 0 auto;
+  padding: 9px 7px 12px;
+  border: 1px solid #d8e0dd;
   border-radius: 4px;
-  padding: 8px 6px 12px;
+  background: #ffffff;
+  color: #1e293b;
+  box-shadow:
+    0 8px 18px rgba(20, 37, 33, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.8);
   font-family: "Courier New", Courier, monospace;
   font-size: 8px;
-  line-height: 1.5;
-  color: #1e293b;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1),
-              0 0 0 1px rgba(0, 0, 0, 0.04);
-  flex-shrink: 0;
+  line-height: 1.48;
 }
 
-/* ── Encabezado ── */
-.ticket-header {
-  text-align: center;
+.ticket-preview-header {
   margin-bottom: 2px;
+  text-align: center;
 }
 
 .ticket-negocio {
+  margin: 0 0 1px;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.5px;
-  margin: 0 0 1px;
+  letter-spacing: 0;
 }
 
 .ticket-sub {
-  font-size: 7px;
-  color: #64748b;
   margin: 0;
+  color: #64748b;
+  font-size: 7px;
 }
 
-/* ── Separadores ── */
-.ticket-sep {
+.ticket-sep,
+.ticket-sep-light {
+  overflow: hidden;
+  margin: 3px 0;
   color: #94a3b8;
   font-size: 7px;
-  letter-spacing: -1px;
-  margin: 3px 0;
-  overflow: hidden;
+  letter-spacing: 0;
   white-space: nowrap;
 }
 
 .ticket-sep-light {
   color: #cbd5e1;
-  font-size: 7px;
-  letter-spacing: -1px;
   margin: 2px 0;
-  overflow: hidden;
-  white-space: nowrap;
 }
 
-/* ── Filas de datos ── */
 .ticket-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   gap: 4px;
   margin-bottom: 1px;
 }
 
 .ticket-label {
-  color: #475569;
   flex-shrink: 0;
+  color: #475569;
 }
 
 .ticket-value {
@@ -98,83 +87,83 @@
 }
 
 .ticket-badge {
-  background: #0a7463;
-  color: #fff;
   padding: 0 4px;
   border-radius: 2px;
+  background: #0a7463;
+  color: #ffffff;
   font-size: 7px;
   font-weight: 700;
-  letter-spacing: 0.3px;
+  letter-spacing: 0;
 }
 
-/* ── Encabezado columnas de productos ── */
-.ticket-col-header {
-  display: grid;
-  grid-template-columns: 1fr 24px 44px;
-  gap: 2px;
-  font-weight: 700;
-  font-size: 7px;
-  color: #334155;
-  margin-bottom: 1px;
-}
-
-.ticket-col-desc  { text-align: left; }
-.ticket-col-qty   { text-align: center; }
-.ticket-col-price { text-align: right; }
-
-/* ── Filas de productos ── */
+.ticket-col-header,
 .ticket-item {
   display: grid;
   grid-template-columns: 1fr 24px 44px;
   gap: 2px;
+}
+
+.ticket-col-header {
+  margin-bottom: 1px;
+  color: #334155;
+  font-size: 7px;
+  font-weight: 700;
+}
+
+.ticket-col-desc {
+  text-align: left;
+}
+
+.ticket-col-qty {
+  text-align: center;
+}
+
+.ticket-col-price {
+  text-align: right;
+}
+
+.ticket-item {
   margin-bottom: 1px;
 }
 
 .ticket-item-name {
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
   font-size: 7.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ticket-item-qty {
-  text-align: center;
   color: #64748b;
   font-size: 7px;
+  text-align: center;
 }
 
 .ticket-item-total {
-  text-align: right;
   font-weight: 600;
+  text-align: right;
 }
 
 .ticket-empty {
-  text-align: center;
+  margin: 4px 0;
   color: #94a3b8;
   font-style: italic;
-  margin: 4px 0;
+  text-align: center;
 }
 
-/* ── Fila de TOTAL ── */
 .ticket-total-row {
   margin-top: 2px;
   padding-top: 2px;
   border-top: 1px solid #e2e8f0;
 }
 
-.ticket-label-bold {
-  font-weight: 700;
-  font-size: 9px;
-  color: #0f172a;
-}
-
+.ticket-label-bold,
 .ticket-value-bold {
-  font-weight: 700;
-  font-size: 9px;
   color: #0f172a;
+  font-size: 9px;
+  font-weight: 700;
 }
 
-/* ── Fila de CAMBIO ── */
 .ticket-cambio-row {
   margin-top: 1px;
 }
@@ -183,23 +172,21 @@
   color: #0a7463 !important;
 }
 
-/* ── Pie del ticket ── */
-.ticket-footer {
-  text-align: center;
+.ticket-preview-footer {
+  margin: 4px 0 0;
+  color: #334155;
   font-size: 7.5px;
   font-weight: 700;
-  color: #334155;
-  margin: 4px 0 0;
-  letter-spacing: 0.2px;
+  letter-spacing: 0;
+  text-align: center;
 }
 
-/* ── Mensaje de error de impresión ── */
 .ticket-error-msg {
-  font-size: 0.75rem;
-  color: #dc2626;
-  background: #fef2f2;
+  margin: 0;
+  padding: 0.4rem 0.6rem;
   border: 1px solid #fecaca;
   border-radius: 6px;
-  padding: 0.4rem 0.6rem;
-  margin: 0;
+  background: #fef2f2;
+  color: #dc2626;
+  font-size: 0.75rem;
 }

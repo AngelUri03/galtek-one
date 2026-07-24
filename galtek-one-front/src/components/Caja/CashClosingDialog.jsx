@@ -307,7 +307,7 @@ export default function CashClosingDialog({ visible, onHide, onClosed, onNotify,
               <PreviewMetric label="Efectivo esperado" value={formatMXN(preview.expectedCashAmount)} />
               <PreviewMetric label="Saldo al iniciar" value={formatMXN(preview.openingBalanceSnapshot)} />
               <PreviewMetric label="Ventas efectivo" value={formatMXN(preview.cashSalesAmount)} />
-              <PreviewMetric label="Ventas tarjeta" value={formatMXN(preview.cardSalesAmount)} />
+              <PreviewMetric label="Ventas electronicas" value={formatMXN(preview.cardSalesAmount)} />
               <PreviewMetric label="Entradas" value={formatMXN(preview.manualEntriesAmount)} />
               <PreviewMetric label="Retiros" value={formatMXN(preview.manualWithdrawalsAmount)} />
             </div>

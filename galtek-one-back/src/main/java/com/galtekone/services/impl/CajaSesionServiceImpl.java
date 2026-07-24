@@ -482,7 +482,9 @@ public class CajaSesionServiceImpl implements CajaSesionService {
         BigDecimal withdrawals = sumMovements(movimientos, MovimientoCajaTipo.MANUAL_WITHDRAWAL.name());
         BigDecimal refunds = sumMovements(movimientos, MovimientoCajaTipo.CASH_REFUND.name());
         BigDecimal cardSales = sumSalesByMethod(ventas, PaymentFamily.CARD);
-        BigDecimal cardEntries = cardSales.add(sumMovements(movimientos, MovimientoCajaTipo.CARD_ENTRY.name()));
+        BigDecimal transferSales = sumSalesByMethod(ventas, PaymentFamily.TRANSFER);
+        BigDecimal electronicEntries = sumMovements(movimientos, MovimientoCajaTipo.CARD_ENTRY.name())
+                .add(sumElectronicSalesWithoutMovement(ventas, movimientos));
         BigDecimal cardWithdrawals = sumMovements(movimientos, MovimientoCajaTipo.CARD_WITHDRAWAL.name());
         BigDecimal expectedCash = scale(opening.add(sumCashImpact(movimientos)));
 
@@ -494,12 +496,12 @@ public class CajaSesionServiceImpl implements CajaSesionService {
         dto.setOpeningAmount(includeExpected ? scale(opening) : null);
         dto.setCashSalesAmount(includeSalesSummary || includeExpected ? scale(cashSales) : null);
         dto.setCardSalesAmount(includeSalesSummary ? scale(cardSales) : null);
-        dto.setTransferSalesAmount(includeSalesSummary ? scale(sumSalesByMethod(ventas, PaymentFamily.TRANSFER)) : null);
+        dto.setTransferSalesAmount(includeSalesSummary ? scale(transferSales) : null);
         dto.setTotalSalesAmount(includeSalesSummary ? scale(sumSalesByMethod(ventas, PaymentFamily.ANY)) : null);
-        dto.setExpectedCardAmount(includeSalesSummary ? scale(cardEntries.subtract(cardWithdrawals)) : null);
+        dto.setExpectedCardAmount(includeSalesSummary ? scale(electronicEntries.subtract(cardWithdrawals)) : null);
         dto.setCashEntriesAmount(includeExpected ? scale(sumMovementsByDirection(movimientos, "IN")) : null);
         dto.setCashOutflowsAmount(includeExpected ? scale(sumMovementsByDirection(movimientos, "OUT")) : null);
-        dto.setCardEntriesAmount(includeSalesSummary ? scale(cardEntries) : null);
+        dto.setCardEntriesAmount(includeSalesSummary ? scale(electronicEntries) : null);
         dto.setCardWithdrawalsAmount(includeSalesSummary ? scale(cardWithdrawals) : null);
         dto.setManualEntriesAmount(includeExpected ? scale(manualEntries) : null);
         dto.setManualWithdrawalsAmount(includeExpected ? scale(withdrawals) : null);
@@ -1076,7 +1078,8 @@ public class CajaSesionServiceImpl implements CajaSesionService {
         dto.setResponsibleUser(toUserInfo(session.getOpenedByUser()));
         dto.setOpeningBalanceSnapshot(scale(session.getOpeningBalanceSnapshot()));
         dto.setCashSalesAmount(scale(sumMovements(movimientos, MovimientoCajaTipo.CASH_SALE.name())));
-        dto.setCardSalesAmount(scale(sumSalesByMethod(ventas, PaymentFamily.CARD)));
+        dto.setCardSalesAmount(scale(sumSalesByMethod(ventas, PaymentFamily.CARD)
+                .add(sumSalesByMethod(ventas, PaymentFamily.TRANSFER))));
         dto.setManualEntriesAmount(scale(sumMovements(movimientos, MovimientoCajaTipo.MANUAL_ENTRY.name())));
         dto.setManualWithdrawalsAmount(scale(sumMovements(movimientos, MovimientoCajaTipo.MANUAL_WITHDRAWAL.name())));
         dto.setCashRefundsAmount(scale(sumMovements(movimientos, MovimientoCajaTipo.CASH_REFUND.name())));
@@ -1126,6 +1129,23 @@ public class CajaSesionServiceImpl implements CajaSesionService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    private BigDecimal sumElectronicSalesWithoutMovement(List<VentasEntity> ventas,
+            List<MovimientoCajaEntity> movimientos) {
+        Set<String> coveredSaleIds = movimientos.stream()
+                .filter(movement -> MovimientoCajaTipo.CARD_ENTRY.name().equalsIgnoreCase(movement.getTipo()))
+                .filter(movement -> "SALE".equalsIgnoreCase(movement.getReferenceType()))
+                .map(MovimientoCajaEntity::getReferenceId)
+                .filter(value -> value != null && !value.isBlank())
+                .collect(java.util.stream.Collectors.toSet());
+
+        return ventas.stream()
+                .filter(venta -> PaymentFamily.CARD.matches(venta.getMetodoPago().getNombreMetodoPago())
+                        || PaymentFamily.TRANSFER.matches(venta.getMetodoPago().getNombreMetodoPago()))
+                .filter(venta -> !coveredSaleIds.contains(String.valueOf(venta.getIdVenta())))
+                .map(venta -> BigDecimal.valueOf(venta.getTotal()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     private BigDecimal scale(BigDecimal value) {
         return (value == null ? BigDecimal.ZERO : value).setScale(2, RoundingMode.HALF_UP);
     }
@@ -1155,7 +1175,8 @@ public class CajaSesionServiceImpl implements CajaSesionService {
             boolean matches(String methodName) {
                 String normalized = normalizePayment(methodName);
                 return normalized.contains("tarjeta") || normalized.contains("credito")
-                        || normalized.contains("debito");
+                        || normalized.contains("debito") || normalized.contains("terminal")
+                        || normalized.contains("mercado pago");
             }
         },
         TRANSFER {

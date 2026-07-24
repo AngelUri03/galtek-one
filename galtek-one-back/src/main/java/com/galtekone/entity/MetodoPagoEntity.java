@@ -25,6 +25,24 @@ public class MetodoPagoEntity extends CommonEntity{
 	
 	@Column(name = "nombre")
 	private String nombreMetodoPago;
+
+	@Column(name = "codigo", length = 40)
+	private String codigo;
+
+	@Column(name = "tipo", length = 40)
+	private String tipo;
+
+	@Column(name = "orden")
+	private Integer orden;
+
+	@Column(name = "visible_pos")
+	private Boolean visiblePos = true;
+
+	@Column(name = "requiere_referencia")
+	private Boolean requiereReferencia = false;
+
+	@Column(name = "requiere_verificacion")
+	private Boolean requiereVerificacion = false;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "id_empresa", nullable = false)

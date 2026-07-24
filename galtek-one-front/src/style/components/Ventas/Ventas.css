@@ -1,212 +1,226 @@
-html,
-body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-size: 16px;
-  overflow: hidden;
+.dashboard-ventas,
+.dashboard-ventas * {
+  box-sizing: border-box;
 }
 
 .dashboard-ventas {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  margin-top: 4rem;
-  /* background para efecto glass */
-  background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 100%);
+  --ventas-brand: #0a7463;
+  --ventas-brand-dark: #075f53;
+  --ventas-ink: #142521;
+  --ventas-muted: #65736f;
+  --ventas-soft: rgba(10, 116, 99, 0.08);
+  --ventas-panel: rgba(255, 255, 255, 0.78);
+  --ventas-panel-strong: rgba(255, 255, 255, 0.94);
+  --ventas-border: 1px solid rgba(20, 37, 33, 0.11);
+  --ventas-shadow: 0 18px 38px -30px rgba(20, 37, 33, 0.55);
+  --ventas-inner-shadow: 0 6px 16px rgba(20, 37, 33, 0.06);
   position: relative;
   z-index: 0;
-}
-
-/* Elementos decorativos de fondo (blobs) */
-.dashboard-ventas::before,
-.dashboard-ventas::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  z-index: -1;
-  opacity: 0.6;
-}
-
-.dashboard-ventas::before {
-  top: -10%;
-  left: -10%;
-  width: 50vw;
-  height: 50vw;
-  background: #bae6fd;
-}
-
-.dashboard-ventas::after {
-  bottom: -10%;
-  right: -10%;
-  width: 50vw;
-  height: 50vw;
-  background: #bbf7d0;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 4rem);
+  margin-top: 4rem;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, #f8fcfa 0%, #edf7f2 52%, #fbfaf4 100%),
+    #f6fbf8;
+  color: var(--ventas-ink);
+  font-family: "Kodchasan", sans-serif;
 }
 
 .ventas-container {
-  display: flex;
-  height: calc(100vh - 4rem);
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(400px, 430px);
+  gap: 0.72rem;
+  align-items: stretch;
+  height: 100%;
+  padding: 0.72rem 0.9rem 0.85rem;
   overflow: hidden;
-  position: relative;
-  z-index: 1;
 }
 
-/* Columna genérica */
 .ventas-col {
+  min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  min-height: 0;
 }
 
-/* Columna izquierda: header + productos */
 .ventas-col--left {
-  flex: 2;
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-right: 1px solid rgba(255, 255, 255, 0.5);
-  padding: 1.25rem;
+  gap: 0.58rem;
   overflow: hidden;
 }
 
-/* Columna derecha: carrito */
+.ventas-work-area {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 176px minmax(0, 1fr);
+  gap: 0.58rem;
+  overflow: hidden;
+}
+
+.ventas-category-rail {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.34rem;
+  padding: 0.5rem;
+  border: 1px solid rgba(20, 37, 33, 0.1);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 251, 250, 0.9)),
+    #ffffff;
+  box-shadow:
+    0 16px 34px -30px rgba(20, 37, 33, 0.58),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(10, 116, 99, 0.26) transparent;
+}
+
+.ventas-category-rail::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ventas-category-rail::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(10, 116, 99, 0.26);
+}
+
+.ventas-rail-item {
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0.38rem 0.72rem;
+  border: 1px solid rgba(20, 37, 33, 0.09);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.74);
+  color: #263834;
+  cursor: pointer;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1.28;
+  text-align: left;
+  transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease, transform 0.12s ease;
+}
+
+.ventas-rail-item span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.ventas-rail-item:hover {
+  border-color: rgba(10, 116, 99, 0.24);
+  background: #ffffff;
+  color: var(--ventas-brand);
+  transform: translateX(1px);
+}
+
+.ventas-rail-item--active,
+.ventas-rail-item--active:hover {
+  border-color: rgba(10, 116, 99, 0.4);
+  background: var(--ventas-brand);
+  color: #ffffff;
+}
+
+.ventas-rail-item:focus {
+  outline: 0;
+}
+
+.ventas-rail-item:focus-visible {
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 4px rgba(10, 116, 99, 0.18);
+}
+
+.ventas-rail-loading {
+  display: block;
+  padding: 0.55rem;
+  color: var(--ventas-muted);
+  font-size: 0.72rem;
+  font-weight: 820;
+}
+
 .ventas-col--right {
-  flex: 0 0 25rem;
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-left: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.02);
+  position: relative;
   overflow: hidden;
+  border: var(--ventas-border);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 252, 249, 0.9)),
+    var(--ventas-panel-strong);
+  box-shadow:
+    var(--ventas-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86);
 }
 
-/* Overlay de carga global en Ventas */
 .ventas-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.12);
-  backdrop-filter: blur(3px);
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  background: rgba(15, 23, 42, 0.14);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .ventas-overlay-card {
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 18px;
-  padding: 1.5rem 2rem;
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
+  min-width: 240px;
+  display: grid;
+  justify-items: center;
+  gap: 0.78rem;
+  padding: 1.25rem 1.45rem;
+  border: var(--ventas-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 24px 52px rgba(20, 37, 33, 0.18);
   font-family: "Kodchasan", sans-serif;
 }
 
 .ventas-overlay-text {
-  font-size: 0.95rem;
-  color: #0f172a;
+  color: var(--ventas-ink);
+  font-size: 0.9rem;
+  font-weight: 800;
 }
 
-
-/* ===========================
- *  RESPONSIVE
- * =========================== */
-
-@media (max-width: 992px) {
-  .ventas-container {
-    flex-direction: column;
-    height: calc(100vh - 4rem);
-  }
-
-  .ventas-col--left {
-    flex: 1;
-    height: 60%;
-    padding: 1rem;
-  }
-
-  .ventas-col--right {
-    flex: 1;
-    height: 40%;
-    border-left: none;
-    border-top: 1px solid #dddddd;
-  }
-}
-
-@media (max-width: 768px) {
-  html {
-    font-size: 13px;
-  }
-
-  .dashboard-ventas {
-    margin-top: 3.5rem;
-  }
-
-  .ventas-container {
-    height: calc(100vh - 3.5rem);
-  }
-
-  .ventas-col--left {
-    height: 55%;
-    padding: 1rem;
-  }
-
-  .ventas-col--right {
-    height: 45%;
-  }
-}
-
-@media (max-width: 576px) {
-
-  .ventas-col--left,
-  .ventas-col--right {
-    padding: 0.75rem 1rem;
-  }
-}
-
-@media (min-width: 1600px) {
-  html {
-    font-size: 18px;
-  }
-}
-
-@media (min-width: 2000px) {
-  html {
-    font-size: 20px;
-  }
-}
-
-/* ===========================
- *  MODAL COMPRA EXITOSA (TICKET)
- * =========================== */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10000;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .modal-box {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  padding: 2rem;
-  border-radius: 20px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
-  animation: fadeIn 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: var(--ventas-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 24px 58px rgba(20, 37, 33, 0.22);
+  padding: 1.5rem;
+  animation: ventasFadeIn 0.18s ease;
 }
 
-@keyframes fadeIn {
+@keyframes ventasFadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
 
   to {
@@ -220,105 +234,146 @@ body {
   max-width: 90vw;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.15rem;
 }
 
 .ticket-container {
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  font-size: 0.9rem;
   color: #000;
+  font-family: Consolas, Monaco, "Courier New", monospace;
+  font-size: 0.9rem;
 }
 
 .ticket-header {
-  text-align: center;
   margin-bottom: 1rem;
+  text-align: center;
 }
 
 .ticket-header h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.25rem;
+  margin: 0 0 0.5rem;
+  font-size: 1.18rem;
   text-transform: uppercase;
 }
 
 .ticket-header p {
   margin: 0;
-  font-size: 0.85rem;
   color: #555;
+  font-size: 0.85rem;
 }
 
 .ticket-divider {
-  border: none;
-  border-top: 1px dashed #aaa;
   margin: 0.75rem 0;
+  border: 0;
+  border-top: 1px dashed #aaa;
 }
 
-.ticket-items {
+.ticket-items,
+.ticket-totals,
+.ticket-actions {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.ticket-item-row {
+.ticket-item-row,
+.ticket-line {
   display: flex;
   justify-content: space-between;
+  gap: 1rem;
 }
 
 .ticket-item-name {
   flex: 1;
-  padding-right: 1rem;
-}
-
-.ticket-totals {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.ticket-line {
-  display: flex;
-  justify-content: space-between;
 }
 
 .ticket-footer {
-  text-align: center;
   margin-top: 1rem;
-  font-style: italic;
   font-size: 0.85rem;
-}
-
-.ticket-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  font-style: italic;
+  text-align: center;
 }
 
 .ticket-actions button {
   width: 100%;
-  padding: 0.75rem;
-  border-radius: 6px;
-  font-weight: 600;
+  min-height: 42px;
+  border: 0;
+  border-radius: 8px;
   cursor: pointer;
-  border: none;
-  transition: opacity 0.2s;
+  font-weight: 800;
+  transition: opacity 0.16s ease, transform 0.14s ease;
 }
 
 .ticket-actions .pago-btn {
-  background: #0a7463;
-  color: white;
+  background: var(--ventas-brand);
+  color: #ffffff;
 }
 
 .ticket-actions .cancel-btn {
-  background: #f1f5f9;
-  color: #64748b;
+  background: #eef2f1;
+  color: #64706d;
 }
 
 .ticket-actions button:hover {
-  opacity: 0.9;
+  opacity: 0.92;
+  transform: translateY(-1px);
 }
 
-/* ===========================
- *  IMPRESIÓN
- * =========================== */
+@media (max-width: 1180px) {
+  .ventas-container {
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 390px);
+    padding-inline: 0.85rem;
+  }
+}
+
+@media (max-width: 1100px) {
+  .ventas-work-area {
+    grid-template-columns: 1fr;
+  }
+
+  .ventas-category-rail {
+    min-height: 46px;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .ventas-rail-item {
+    width: auto;
+    min-width: max-content;
+  }
+}
+
+@media (max-width: 980px) {
+  .dashboard-ventas {
+    height: calc(100vh - 4rem);
+    overflow: auto;
+  }
+
+  .ventas-container {
+    height: auto;
+    min-height: calc(100vh - 4rem);
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(620px, 1fr) minmax(430px, 48vh);
+    overflow: visible;
+  }
+
+  .ventas-col--left,
+  .ventas-col--right {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .ventas-container {
+    gap: 0.65rem;
+    padding: 0.65rem;
+    grid-template-rows: auto minmax(390px, 48vh);
+  }
+
+  .modal-box {
+    padding: 1rem;
+  }
+}
+
 @media print {
   body * {
     visibility: hidden;
@@ -333,19 +388,19 @@ body {
     position: absolute;
     left: 0;
     top: 0;
-    background: none;
     width: 100%;
     height: auto;
     display: block;
+    background: none;
   }
 
   .modal-box {
-    box-shadow: none;
-    padding: 0;
-    width: 100%;
     position: absolute;
     left: 0;
     top: 0;
+    width: 100%;
+    padding: 0;
+    box-shadow: none;
   }
 
   .ticket-actions,
@@ -354,8 +409,7 @@ body {
   }
 
   .ticket-container {
-    font-size: 12px;
-    /* Ajuste para impresora térmica */
     width: 100%;
+    font-size: 12px;
   }
 }

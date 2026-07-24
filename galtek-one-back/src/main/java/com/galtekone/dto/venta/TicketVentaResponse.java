@@ -17,6 +17,16 @@ public class TicketVentaResponse {
     private BigDecimal subtotal;
     private BigDecimal IVA;
     private BigDecimal total;
+    private BigDecimal totalOriginal;
+    private BigDecimal totalCobrado;
+    private BigDecimal redondeoAplicado;
+    private BigDecimal comisionMonto;
+    private BigDecimal comisionPorcentaje;
+    private BigDecimal recibido;
+    private BigDecimal cambio;
+    private String referencia;
+    private String folioPago;
+    private Boolean pagoVerificado;
     private String metodoPago;
     private String usuarioAtendio;
     private String mensaje;

@@ -117,8 +117,8 @@ const movementTypeLabels = {
   INITIAL_BALANCE: "Saldo inicial",
   CASH_SALE: "Venta en efectivo",
   CASH_REFUND: "Devolucion",
-  CARD_ENTRY: "Entrada tarjeta",
-  CARD_WITHDRAWAL: "Retiro tarjeta",
+  CARD_ENTRY: "Entrada electronica",
+  CARD_WITHDRAWAL: "Retiro electronico",
   MANUAL_ENTRY: "Entrada manual",
   MANUAL_WITHDRAWAL: "Retiro manual",
   CLOSING_RECONCILIATION: "Conciliacion",
@@ -977,9 +977,9 @@ export default function CashControlPage() {
               />
               <SummaryCard
                 icon={<CreditCard size={18} aria-hidden="true" />}
-                label="Tarjeta esperada"
+                label="Electronico esperado"
                 value={expectedCardLabel}
-                detail={salesSummaryVisible ? "Cobros tarjeta del turno" : "Vista restringida"}
+                detail={salesSummaryVisible ? "Cobros electronicos del turno" : "Vista restringida"}
                 tone="is-card is-featured"
               />
               <SummaryCard
@@ -998,14 +998,14 @@ export default function CashControlPage() {
               />
               <SummaryCard
                 icon={<ReceiptText size={18} aria-hidden="true" />}
-                label="Ingresos tarjeta"
+                label="Ingresos electronicos"
                 value={cardEntriesLabel}
                 detail={`${summary?.salesCount ?? 0} venta(s) en turno`}
                 tone="is-card"
               />
               <SummaryCard
                 icon={<ArrowDownCircle size={18} aria-hidden="true" />}
-                label="Retiros tarjeta"
+                label="Retiros electronicos"
                 value={cardOutflowsLabel}
                 detail={salesSummaryVisible ? "Devoluciones electronicas" : "Vista restringida"}
                 tone="is-card-out"
@@ -1292,8 +1292,8 @@ export default function CashControlPage() {
                 <div className="cash-history-totals">
                   <MiniMetric label="Ingresos efectivo" value={formatMXN(historyTotals.cashIn)} tone="is-in" />
                   <MiniMetric label="Retiros efectivo" value={formatMXN(historyTotals.cashOut)} tone="is-out" />
-                  <MiniMetric label="Ingresos tarjeta" value={formatMXN(historyTotals.cardIn)} tone="is-in" />
-                  <MiniMetric label="Retiros tarjeta" value={formatMXN(historyTotals.cardOut)} tone="is-out" />
+                  <MiniMetric label="Ingresos electronicos" value={formatMXN(historyTotals.cardIn)} tone="is-in" />
+                  <MiniMetric label="Retiros electronicos" value={formatMXN(historyTotals.cardOut)} tone="is-out" />
                 </div>
 
                 {activityError ? (

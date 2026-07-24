@@ -1,308 +1,338 @@
-/* ========================= */
-/*          HEADER           */
-/* ========================= */
-
 .ventas-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.ventas-header-search {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.ventas-header .p-input-search {
-  flex: 1 1 18rem;
-  min-width: 12rem;
-}
-
-.ventas-header .p-input-search {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  height: 44px;
-  padding: 0 16px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
-  -webkit-font-smoothing: antialiased;
-  width: 100%;
-}
-
-.ventas-header .p-input-search>i {
-  font-size: 1rem;
-  color: #64748b;
-  transition: color 0.22s ease, opacity 0.22s ease;
-  opacity: 0.8;
-}
-
-.ventas-header .p-input-search .p-inputtext {
-  font-family: "Kodchasan", sans-serif !important;
-  width: 100%;
-  max-width: 100%;
-  height: 100%;
-  padding-left: 0.8rem;
-  border: 0 !important;
-  outline: 0 !important;
-  box-shadow: none !important;
-  background: transparent !important;
-  color: #0f172a;
-  font-size: 1rem;
-  caret-color: #0a7463;
-  transition: color 0.22s ease;
-}
-
-.ventas-header .p-input-search .p-inputtext::placeholder {
-  color: #94a3b8;
-  font-weight: 500;
-  transition: color 0.22s ease, opacity 0.22s ease;
-}
-
-.ventas-header .p-input-search:hover {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
-  transform: translateY(-1px);
-}
-
-.ventas-header .p-input-search:hover>i {
-  color: #0a7463;
-  opacity: 0.95;
-}
-
-.ventas-header .p-input-search:focus-within {
-  border-color: #0a7463;
-  background: #ffffff;
-}
-
-.ventas-header .p-input-search:focus-within>i {
-  color: #0a7463;
-}
-
-.ventas-header .p-input-search:focus-within .p-inputtext {
-  color: #0a5045;
-}
-
-.ventas-header .p-input-search:focus-within .p-inputtext::placeholder {
-  color: #91b9b1;
-}
-
-/* ---------- CONTADOR DE VENTAS ---------- */
-
-.ventas-counter-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.55rem;
-  flex-shrink: 0;
-  flex: 0 0 11.25rem;
-  width: 11.25rem;
-  min-width: 11.25rem;
-  max-width: 11.25rem;
-  height: 44px;
-  padding: 0 0.75rem;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(20, 37, 33, 0.1);
-  box-shadow: none;
-  font-family: "Kodchasan", sans-serif;
-  white-space: nowrap;
-  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
-  cursor: pointer;
-  user-select: none;
-  appearance: none;
-  overflow: hidden;
-}
-
-.ventas-counter-chip:hover {
-  background: rgba(235, 248, 242, 0.92);
-  border-color: rgba(10, 116, 99, 0.32);
-  transform: translateY(-1px);
-}
-
-.ventas-counter-chip:focus-visible {
-  outline: 2px solid rgba(10, 116, 99, 0.24);
-  outline-offset: 2px;
-}
-
-.ventas-header .cash-status-chip {
-  flex: 0 0 11.25rem;
-  width: 11.25rem;
-  min-width: 11.25rem;
-  max-width: 11.25rem;
-}
-
-.ventas-counter-icon {
-  font-size: 0.9rem;
-  color: #0a7463;
-}
-
-.ventas-counter-label {
+  flex: 0 0 auto;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.76rem;
-  font-weight: 800;
-  color: #263c36;
-}
-
-/* ---------- CATEGORÍAS ---------- */
-
-.ventas-header-categorias {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  height: 44px;
-  position: relative;
-}
-
-.ventas-categorias-label {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.ventas-categorias-title {
-  font-family: "Kodchasan", sans-serif;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #111827;
-}
-
-.ventas-categorias-divider {
-  font-size: 1rem;
-  color: #9ca3af;
-  padding-inline: 0.4rem;
-}
-
-.ventas-categorias-scroll {
-  display: flex;
-  height: 4rem;
+  display: grid;
   gap: 0.45rem;
-  align-items: center;
-  overflow-x: auto;
-  white-space: nowrap;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  width: 100%;
+  padding: 0.55rem 0.62rem;
+  border: 1px solid rgba(20, 37, 33, 0.1);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 251, 250, 0.92)),
+    #ffffff;
+  box-shadow:
+    0 16px 34px -30px rgba(20, 37, 33, 0.58),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
-/* ---------- Botones ---------- */
+.ventas-command-bar {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: max-content minmax(420px, 1fr) max-content;
+  align-items: center;
+  gap: 0.62rem;
+}
 
-/* ---------- Botones ---------- */
+.ventas-title-block {
+  min-width: 0;
+}
 
-.ventas-categoria-pill {
-  height: 2.2rem;
-  font-family: "Kodchasan", sans-serif;
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  color: #334155;
-  padding: 0 1rem;
-  border-radius: 999px;
-  cursor: pointer;
+.ventas-title-block h1 {
   margin: 0;
-  font-size: 0.9rem;
-  font-weight: 500;
+  color: var(--ventas-ink);
+  font-size: clamp(1.18rem, 1.35vw, 1.42rem);
+  font-weight: 940;
+  letter-spacing: 0;
+  line-height: 1;
   white-space: nowrap;
-  flex-shrink: 0;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.ventas-search-shell {
+  min-width: 0;
+  height: 44px;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.58rem;
+  padding: 0 0.7rem;
+  border: 1px solid rgba(10, 116, 99, 0.22);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, #ffffff, #fbfdfc),
+    #ffffff;
+  box-shadow:
+    0 10px 24px -22px rgba(20, 37, 33, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.98);
+  transition: border-color 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
+}
+
+.ventas-search-shell > svg {
+  color: var(--ventas-brand);
+}
+
+.ventas-search-shell input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ventas-ink);
+  caret-color: var(--ventas-brand);
+  font-family: "Kodchasan", sans-serif;
+  font-size: 0.98rem;
+  font-weight: 900;
+  line-height: normal;
+}
+
+.ventas-search-shell input::placeholder {
+  color: #778782;
+  font-weight: 850;
+  opacity: 1;
+}
+
+.ventas-search-shell:hover {
+  border-color: rgba(10, 116, 99, 0.34);
+}
+
+.ventas-search-shell:focus-within {
+  border-color: rgba(10, 116, 99, 0.68);
+  background: #ffffff;
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 4px rgba(10, 116, 99, 0.13),
+    0 18px 32px -24px rgba(20, 37, 33, 0.7);
+}
+
+.ventas-search-clear,
+.ventas-counter-chip,
+.ventas-scan-status,
+.ventas-categoria-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 34px;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.ventas-search-clear {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(20, 37, 33, 0.06);
+  color: #65736f;
+  cursor: pointer;
+  transition: background 0.14s ease, color 0.14s ease, transform 0.12s ease;
+}
+
+.ventas-search-clear:hover {
+  background: rgba(10, 116, 99, 0.1);
+  color: var(--ventas-brand);
+}
+
+.ventas-header-actions {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.42rem;
+}
+
+.ventas-header .cash-status-chip {
+  flex: 0 0 11.2rem;
+  width: 11.2rem;
+  min-width: 11.2rem;
+  height: 38px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: none;
+}
+
+.ventas-counter-chip {
+  flex: 0 0 8.8rem;
+  width: 8.8rem;
+  min-width: 8.8rem;
+  height: 38px;
+  justify-content: flex-start;
+  gap: 0.42rem;
+  padding: 0 0.52rem;
+  border: 1px solid rgba(20, 37, 33, 0.1);
+  border-radius: 8px;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--ventas-ink);
+  cursor: pointer;
+  overflow: hidden;
+  transition: background 0.14s ease, border-color 0.14s ease, transform 0.12s ease;
+}
+
+.ventas-counter-chip svg {
+  flex: 0 0 auto;
+  color: var(--ventas-brand);
+}
+
+.ventas-counter-chip span {
+  min-width: 0;
+  overflow: hidden;
+  color: #31423e;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ventas-counter-chip strong {
+  flex: 0 0 auto;
+  min-width: 1.35rem;
+  min-height: 1.35rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(10, 116, 99, 0.09);
+  color: var(--ventas-brand);
+  font-size: 0.7rem;
+  font-weight: 940;
+}
+
+.ventas-counter-chip:hover {
+  border-color: rgba(10, 116, 99, 0.28);
+  background: rgba(238, 249, 244, 0.96);
+  transform: translateY(-1px);
+}
+
+.ventas-scan-status {
+  flex: 0 0 7.75rem;
+  width: 7.75rem;
+  height: 38px;
+  gap: 0.36rem;
+  padding: 0 0.55rem;
+  border: 1px solid rgba(10, 116, 99, 0.13);
+  border-radius: 8px;
+  background: rgba(10, 116, 99, 0.065);
+  color: var(--ventas-brand);
+}
+
+.ventas-scan-status span {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.68rem;
+  font-weight: 930;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ventas-header-categorias {
+  min-width: 0;
+  height: 32px;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  gap: 0.42rem;
+}
+
+.ventas-categorias-label {
+  min-width: 0;
+}
+
+.ventas-categorias-title {
+  color: #334541;
+  font-size: 0.7rem;
+  font-weight: 940;
+}
+
+.ventas-categorias-scroll {
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.32rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.ventas-categorias-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.ventas-categoria-pill {
+  flex: 0 0 auto;
+  min-width: 0;
+  height: 28px;
+  padding: 0 0.68rem;
+  border: 1px solid rgba(20, 37, 33, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #40514d;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 900;
   line-height: 1;
-  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  white-space: nowrap;
+  transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease, transform 0.12s ease;
 }
 
 .ventas-categoria-pill:hover {
-  background: rgba(255, 255, 255, 0.8);
-  color: #0f172a;
-  border-color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
-  transform: translateY(-2px);
+  border-color: rgba(10, 116, 99, 0.25);
+  background: #ffffff;
+  color: var(--ventas-ink);
+  transform: translateY(-1px);
 }
 
-.ventas-categoria-pill--active {
-  background: rgba(10, 116, 99, 0.85);
-  /* Verde con opacidad */
-  backdrop-filter: blur(8px);
-  color: #ffffff;
-  border-color: rgba(10, 116, 99, 0.4);
-  box-shadow: 0 4px 14px rgba(10, 116, 99, 0.25);
-}
-
+.ventas-categoria-pill--active,
 .ventas-categoria-pill--active:hover {
-  background: rgba(10, 116, 99, 0.95);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(10, 116, 99, 0.35);
+  border-color: rgba(10, 116, 99, 0.38);
+  background: var(--ventas-brand);
+  color: #ffffff;
 }
 
-.ventas-categoria-pill:active {
-  transform: scale(0.93);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+.ventas-search-clear:focus,
+.ventas-counter-chip:focus,
+.ventas-categoria-pill:focus,
+.ventas-header .cash-status-chip:focus {
+  outline: 0;
 }
 
-.ventas-categoria-pill--active:active {
-  transform: scale(0.93);
-  box-shadow: 0 2px 10px rgba(10, 116, 99, 0.5);
+.ventas-search-clear:focus-visible,
+.ventas-counter-chip:focus-visible,
+.ventas-categoria-pill:focus-visible,
+.ventas-header .cash-status-chip:focus-visible {
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 4px rgba(10, 116, 99, 0.18) !important;
+}
+
+.ventas-categoria-pill:active,
+.ventas-search-clear:active {
+  transform: scale(0.97);
 }
 
 .ventas-categorias-loading {
-  font-size: 0.8rem;
-  color: #6b7280;
-  font-family: "Kodchasan", sans-serif;
-  padding-left: 0.25rem;
+  color: var(--ventas-muted);
+  font-size: 0.72rem;
+  font-weight: 820;
+  white-space: nowrap;
 }
 
-/* ---------- Responsivo ---------- */
-
-@media (max-width: 768px) {
-  .ventas-header {
-    gap: 0.6rem;
+@media (max-width: 1320px) {
+  .ventas-command-bar {
+    grid-template-columns: max-content minmax(300px, 1fr);
   }
 
-  .ventas-header-search {
-    flex-wrap: wrap;
-  }
-
-  .ventas-header .p-input-search,
-  .ventas-header .cash-status-chip {
-    flex-basis: 100%;
-    max-width: none;
+  .ventas-header-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
   }
 
   .ventas-header .cash-status-chip,
-  .ventas-counter-chip {
-    flex: 1 1 calc(50% - 0.4rem);
+  .ventas-counter-chip,
+  .ventas-scan-status {
+    flex: 1 1 0;
     width: auto;
     min-width: 0;
-    max-width: none;
   }
+}
 
+@media (max-width: 760px) {
+  .ventas-command-bar,
   .ventas-header-categorias {
-    height: auto;
+    grid-template-columns: 1fr;
   }
 
-  .ventas-categorias-title {
-    font-size: 0.85rem;
-  }
-
-  .ventas-categoria-pill {
-    font-size: 0.8rem;
-    padding: 0.4rem 0.7rem;
+  .ventas-header-actions {
+    flex-wrap: wrap;
   }
 }

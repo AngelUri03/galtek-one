@@ -210,11 +210,17 @@ VALUES
 (2, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'PERMITIR', 'Supervisor autorizado para devoluciones', 3, 4);
 
 INSERT OR REPLACE INTO MetodoPago
-(id_metodo_pago, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, nombre, id_empresa)
+(id_metodo_pago, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, nombre, codigo, tipo, orden, visible_pos, requiere_referencia, requiere_verificacion, id_empresa)
 VALUES
-(1, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'EFECTIVO', 1),
-(2, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'TARJETA', 1),
-(3, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'TRANSFERENCIA', 1);
+(1, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'Efectivo', 'EFECTIVO', 'CASH', 2, 1, 0, 0, 1),
+(2, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'Terminal', 'TERMINAL', 'TERMINAL', 1, 1, 1, 1, 1),
+(3, 0, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'Tarjeta', 'TARJETA', 'CARD', 3, 1, 1, 1, 1),
+(4, 0, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'Vales', 'VALES', 'VOUCHER', 4, 1, 1, 1, 1);
+
+INSERT OR REPLACE INTO ConfiguracionPagos
+(id_configuracion_pagos, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, terminal_enabled, terminal_provider, terminal_name, terminal_identifier, terminal_serial, terminal_store_id, terminal_account, terminales_json, terminal_priority, terminal_commission_enabled, terminal_commission_percent, terminal_require_reference, cash_rounding_default_enabled, card_bank_name, card_holder_name, card_number, card_account, card_instructions, voucher_issuer, voucher_instructions, voucher_require_folio, voucher_require_authorization, transfer_bank_name, transfer_account_name, transfer_clabe, version, id_empresa)
+VALUES
+(1, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 1, 'MERCADO_PAGO', 'Mercado Pago', NULL, NULL, NULL, NULL, '[{"key":"terminal_1","nombre":"Mercado Pago","provider":"MERCADO_PAGO","enabled":true,"commissionEnabled":true,"commissionPercent":0}]', 1, 1, 0, 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, NULL, NULL, NULL, 0, 1);
 
 INSERT OR REPLACE INTO Unidades
 (id_unidad, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, nombre)

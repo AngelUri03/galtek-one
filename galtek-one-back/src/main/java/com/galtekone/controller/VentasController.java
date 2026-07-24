@@ -88,6 +88,10 @@ public class VentasController {
             return ApiResponseBuilder.buildErrorResponse(user, startTime,
                     e.getCode() + ": " + e.getMessage(),
                     e.getStatus());
+        } catch (IllegalArgumentException e) {
+            return ApiResponseBuilder.buildErrorResponse(user, startTime,
+                    e.getMessage(),
+                    HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return ApiResponseBuilder.buildErrorResponse(user, startTime,
                     "Error al crear la venta: " + e.getMessage(),

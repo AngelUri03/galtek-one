@@ -13,6 +13,19 @@ CREATE TABLE IF NOT EXISTS SaldoEfectivo (id_saldo_efectivo integer, estatus boo
 
 CREATE TABLE IF NOT EXISTS ConfiguracionCaja (id_configuracion_caja integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), handoff_policy varchar(32) not null, require_incoming_count_on_user_change boolean not null, require_outgoing_count boolean not null, allow_continue_with_pending_incident boolean not null, blind_count_enabled boolean not null, expected_balance_visibility_mode varchar(40) not null, version bigint, id_empresa integer not null, primary key (id_configuracion_caja));
 
+CREATE TABLE IF NOT EXISTS ConfiguracionPagos (id_configuracion_pagos integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), terminal_enabled boolean not null, terminal_provider varchar(60) not null, terminal_name varchar(120), terminal_identifier varchar(120), terminal_serial varchar(120), terminal_store_id varchar(120), terminal_account varchar(160), terminales_json text, terminal_priority integer not null, terminal_commission_enabled boolean not null, terminal_commission_percent numeric(7,4) not null, terminal_require_reference boolean not null, cash_rounding_default_enabled boolean not null, card_bank_name varchar(120), card_holder_name varchar(160), card_number varchar(40), card_account varchar(60), card_instructions varchar(220), voucher_issuer varchar(120), voucher_instructions varchar(220), voucher_require_folio boolean not null, voucher_require_authorization boolean not null, transfer_bank_name varchar(120), transfer_account_name varchar(160), transfer_clabe varchar(32), version bigint, id_empresa integer not null, primary key (id_configuracion_pagos));
+ALTER TABLE ConfiguracionPagos ADD COLUMN terminales_json text;
+ALTER TABLE ConfiguracionPagos ADD COLUMN cash_rounding_default_enabled boolean;
+ALTER TABLE ConfiguracionPagos ADD COLUMN card_bank_name varchar(120);
+ALTER TABLE ConfiguracionPagos ADD COLUMN card_holder_name varchar(160);
+ALTER TABLE ConfiguracionPagos ADD COLUMN card_number varchar(40);
+ALTER TABLE ConfiguracionPagos ADD COLUMN card_account varchar(60);
+ALTER TABLE ConfiguracionPagos ADD COLUMN card_instructions varchar(220);
+ALTER TABLE ConfiguracionPagos ADD COLUMN voucher_issuer varchar(120);
+ALTER TABLE ConfiguracionPagos ADD COLUMN voucher_instructions varchar(220);
+ALTER TABLE ConfiguracionPagos ADD COLUMN voucher_require_folio boolean;
+ALTER TABLE ConfiguracionPagos ADD COLUMN voucher_require_authorization boolean;
+
 CREATE TABLE IF NOT EXISTS CajaIncidencia (id_caja_incidencia integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), tipo varchar(40) not null, status varchar(32) not null, id_local_device varchar(36) not null, id_caja_sesion integer, id_movimiento_caja integer, expected_amount numeric(12,2), outgoing_declared_amount numeric(12,2), incoming_declared_amount numeric(12,2), joint_recount_amount numeric(12,2), accepted_amount numeric(12,2), difference_amount numeric(12,2), outgoing_note varchar(500), incoming_note varchar(500), policy_snapshot varchar(40), resolved_at timestamp, resolved_by integer, resolution_category varchar(80), resolution_notes varchar(700), resolution_cash_effect varchar(60), resolution_amount numeric(12,2), resolution_reference varchar(160), id_resolution_movement integer, version bigint, id_empresa integer not null, primary key (id_caja_incidencia));
 
 CREATE TABLE IF NOT EXISTS CajaRelevo (id_caja_relevo integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), id_local_device varchar(36) not null, id_outgoing_session integer, id_incoming_session integer, id_outgoing_user integer, id_incoming_user integer, handoff_type varchar(24) not null, status varchar(40) not null, policy_snapshot varchar(40), expected_cash_snapshot numeric(12,2), outgoing_declared_amount numeric(12,2), outgoing_counted_at timestamp, incoming_declared_amount numeric(12,2), incoming_counted_at timestamp, joint_recount_amount numeric(12,2), joint_recount_at timestamp, accepted_amount numeric(12,2), accepted_at timestamp, outgoing_note varchar(500), incoming_note varchar(500), outgoing_confirmed boolean, incoming_confirmed boolean, outgoing_confirmation_at timestamp, incoming_confirmation_at timestamp, difference_outgoing_vs_expected numeric(12,2), difference_incoming_vs_outgoing numeric(12,2), difference_accepted_vs_expected numeric(12,2), id_incident integer, version bigint, id_empresa integer not null, primary key (id_caja_relevo));
@@ -96,7 +109,13 @@ CREATE TABLE IF NOT EXISTS Inventario (id_inventario integer, estatus boolean, f
 
 CREATE TABLE IF NOT EXISTS Lote (id_lote integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), cantidad numeric(38,2) not null, fecha_caducidad date, id_almacen integer not null, id_empresa integer not null, id_producto integer not null, primary key (id_lote));
 
-CREATE TABLE IF NOT EXISTS MetodoPago (id_metodo_pago integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), nombre varchar(255), id_empresa integer not null, primary key (id_metodo_pago));
+CREATE TABLE IF NOT EXISTS MetodoPago (id_metodo_pago integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), nombre varchar(255), codigo varchar(40), tipo varchar(40), orden integer, visible_pos boolean, requiere_referencia boolean, requiere_verificacion boolean, id_empresa integer not null, primary key (id_metodo_pago));
+ALTER TABLE MetodoPago ADD COLUMN codigo varchar(40);
+ALTER TABLE MetodoPago ADD COLUMN tipo varchar(40);
+ALTER TABLE MetodoPago ADD COLUMN orden integer;
+ALTER TABLE MetodoPago ADD COLUMN visible_pos boolean;
+ALTER TABLE MetodoPago ADD COLUMN requiere_referencia boolean;
+ALTER TABLE MetodoPago ADD COLUMN requiere_verificacion boolean;
 
 CREATE TABLE IF NOT EXISTS MovimientoCaja (id_movimiento_caja integer, estatus boolean, fecha_creacion timestamp, fecha_modificacion timestamp, usuario_creacion varchar(255), usuario_modificacion varchar(255), fecha timestamp not null, monto numeric(12,2) not null, motivo varchar(500) not null, tipo varchar(30) not null, category varchar(80), financial_direction varchar(20), reference_type varchar(60), reference_id varchar(80), idempotency_key varchar(120), balance_before numeric(12,2), balance_after numeric(12,2), id_caja integer, id_caja_sesion integer, id_local_device varchar(36), id_empresa integer not null, id_usuario integer not null, primary key (id_movimiento_caja));
 
@@ -184,6 +203,10 @@ CREATE INDEX IF NOT EXISTS idx_saldo_efectivo_empresa_device on SaldoEfectivo (i
 CREATE INDEX IF NOT EXISTS idx_saldo_efectivo_empresa_initialized on SaldoEfectivo (id_empresa, initialized);
 
 CREATE UNIQUE INDEX IF NOT EXISTS uk_configuracion_caja_empresa on ConfiguracionCaja (id_empresa);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uk_configuracion_pagos_empresa on ConfiguracionPagos (id_empresa);
+
+CREATE INDEX IF NOT EXISTS idx_metodo_pago_empresa_codigo on MetodoPago (id_empresa, codigo);
 
 CREATE INDEX IF NOT EXISTS idx_caja_incidencia_empresa_estado on CajaIncidencia (id_empresa, status);
 

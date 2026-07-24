@@ -9,6 +9,7 @@ import Promociones from "./Promociones";
 import AjustesRoles from "./AjustesRoles";
 import AjustesOverrides from "./AjustesOverrides";
 import AjustesCaja from "./AjustesCaja";
+import AjustesPagos from "./AjustesPagos";
 import ConfiguracionPlaceholder from "./ConfiguracionPlaceholder";
 import ConfiguracionQuickActions from "./ConfiguracionQuickActions";
 import ConfiguracionSearch from "./ConfiguracionSearch";
@@ -115,6 +116,7 @@ export default function Ajustes() {
   const tiendaRef = useRef(null);
   const ticketRef = useRef(null);
   const cajaRef = useRef(null);
+  const pagosRef = useRef(null);
   const usuariosRef = useRef(null);
   const rolesRef = useRef(null);
   const overridesRef = useRef(null);
@@ -218,6 +220,9 @@ export default function Ajustes() {
       case "caja":
         return renderRealSection(<AjustesCaja ref={cajaRef} helpStep={helpOpen ? activeHelpStep?.target : ""} />);
 
+      case "pagos":
+        return renderRealSection(<AjustesPagos ref={pagosRef} />);
+
       case "promociones":
         return renderRealSection(<Promociones />);
 
@@ -254,6 +259,7 @@ export default function Ajustes() {
       tienda: tiendaRef,
       ticket: ticketRef,
       caja: cajaRef,
+      pagos: pagosRef,
       usuarios: usuariosRef,
       roles: rolesRef,
       overrides: overridesRef,
@@ -324,6 +330,7 @@ export default function Ajustes() {
                 active === "tienda" ? "is-tienda" : "",
                 active === "ticket" ? "is-ticket" : "",
                 active === "caja" ? "is-caja" : "",
+                active === "pagos" ? "is-pagos" : "",
                 active === "usuarios" ? "is-usuarios" : "",
                 active === "roles" ? "is-roles" : "",
                 active === "overrides" ? "is-overrides" : "",

@@ -8,23 +8,13 @@ const money = (value) =>
     maximumFractionDigits: 2,
   });
 
-const readDestination = (metodoPago, paymentConfig) => {
-  const raw = metodoPago?.raw || {};
-  return (
-    paymentConfig?.transferBankName ||
-    paymentConfig?.transferClabe ||
-    paymentConfig?.transferAccountName ||
-    raw.cuentaDestino ||
-    raw.cuenta_destino ||
-    raw.clabe ||
-    raw.cuenta ||
-    raw.banco ||
-    raw.nombreBanco ||
-    ""
-  );
+const visibleCardNumber = (value) => {
+  const raw = String(value || "").trim();
+  if (!raw) return "Sin numero configurado";
+  return raw.replace(/\s+/g, " ").replace(/(.{4})/g, "$1 ").trim();
 };
 
-const PagoTransferencia = ({
+const PagoTarjetaCliente = ({
   total,
   metodoPago,
   onCancelar,
@@ -32,27 +22,34 @@ const PagoTransferencia = ({
   processing = false,
   paymentConfig = null,
 }) => {
-  const [folio, setFolio] = useState("");
+  const [referencia, setReferencia] = useState("");
   const [verificado, setVerificado] = useState(false);
 
-  const totalOriginal = Number(total) || 0;
-  const totalCobro = Number(totalOriginal.toFixed(2));
-  const folioLimpio = folio.trim();
-  const destino = useMemo(() => readDestination(metodoPago, paymentConfig), [metodoPago, paymentConfig]);
-  const puedePagar = verificado && folioLimpio.length >= 4;
+  const totalCobro = Number((Number(total) || 0).toFixed(2));
+  const referenciaLimpia = referencia.trim();
+  const puedePagar = referenciaLimpia.length >= 3 && verificado;
+  const datos = useMemo(
+    () => [
+      ["Banco", paymentConfig?.cardBankName || "Sin banco"],
+      ["Titular", paymentConfig?.cardHolderName || "Sin titular"],
+      ["Tarjeta", visibleCardNumber(paymentConfig?.cardNumber)],
+      ["Cuenta", paymentConfig?.cardAccount || "Sin cuenta"],
+    ],
+    [paymentConfig]
+  );
 
   const confirmarPago = () => {
     if (!puedePagar || processing) return;
 
     onPaymentSuccess?.({
-      metodo: metodoPago?.code || "TRANSFERENCIA",
-      metodoNombre: metodoPago?.label || "Transferencia",
-      metodoTipo: metodoPago?.type || "TRANSFER",
+      metodo: metodoPago?.code || "TARJETA",
+      metodoNombre: metodoPago?.label || "Tarjeta",
+      metodoTipo: metodoPago?.type || "CARD",
       metodoPagoId: metodoPago?.id,
-      folio: folioLimpio,
-      referencia: folioLimpio,
+      referencia: referenciaLimpia,
+      folio: referenciaLimpia,
       total: totalCobro,
-      totalOriginal,
+      totalOriginal: totalCobro,
       totalCobrado: totalCobro,
       verificadoManual: true,
     });
@@ -62,33 +59,34 @@ const PagoTransferencia = ({
     <div className="pago-metodo pago-screen pago-screen--transfer">
       <section className="pago-method-hero pago-method-hero--transfer">
         <div>
-          <span>Transferencia bancaria</span>
+          <span>Pago a tarjeta</span>
           <strong>{money(totalCobro)}</strong>
-          <small>Entrega solo despues de confirmar el abono.</small>
+          <small>{paymentConfig?.cardInstructions || "Comparte los datos configurados y confirma el abono."}</small>
         </div>
         <div className="pago-hero-chip">
-          <i className="pi pi-building" />
-          <span>{destino || "Cuenta configurada"}</span>
+          <i className="pi pi-credit-card" />
+          <span>{paymentConfig?.cardBankName || "Tarjeta configurada"}</span>
         </div>
       </section>
 
       <div className="pago-method-grid">
         <section className="pago-panel pago-method-form">
-          <div className="pago-risk-card is-transfer">
-            <i className="pi pi-eye" />
-            <span>
-              <strong>Verifica el movimiento en banco antes de cerrar.</strong>
-              <small>El folio por si solo no comprueba que el dinero entro.</small>
-            </span>
+          <div className="pago-card-data-grid">
+            {datos.map(([label, value]) => (
+              <article key={label}>
+                <span>{label}</span>
+                <strong>{value}</strong>
+              </article>
+            ))}
           </div>
 
           <label className="pago-field">
-            <span>Folio, clave de rastreo o referencia</span>
+            <span>Referencia, folio o ultimos 4 digitos</span>
             <input
-              value={folio}
-              onChange={(e) => setFolio(e.target.value)}
+              value={referencia}
+              onChange={(e) => setReferencia(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && confirmarPago()}
-              placeholder="Ej. SPEI-538271"
+              placeholder="Ej. 8291 o FOL-2940"
               disabled={processing}
               autoFocus
             />
@@ -105,39 +103,35 @@ const PagoTransferencia = ({
               <i className={verificado ? "pi pi-check" : "pi pi-circle"} />
             </span>
             <span>
-              <strong>Abono visto en cuenta</strong>
-              <small>El importe recibido coincide con el total de la venta.</small>
+              <strong>Pago confirmado</strong>
+              <small>El importe coincide con la venta antes de entregar.</small>
             </span>
           </button>
         </section>
 
         <aside className="pago-panel pago-method-summary">
           <div className={`pago-status-card ${verificado ? "is-ready" : "is-pending"}`}>
-            <span>{verificado ? "Transferencia validada" : "Pendiente de validar"}</span>
+            <span>{verificado ? "Tarjeta validada" : "Pendiente de validar"}</span>
             <strong>{money(totalCobro)}</strong>
-            <small>
-              {verificado
-                ? "Ya puedes registrar el pago."
-                : "No cierres la venta hasta confirmar el abono."}
-            </small>
+            <small>{referenciaLimpia || "Captura una referencia para cerrar."}</small>
           </div>
 
           <div className="pago-breakdown">
             <div>
-              <span>Monto esperado</span>
+              <span>Monto</span>
               <strong>{money(totalCobro)}</strong>
             </div>
             <div>
-              <span>Destino</span>
-              <strong>{destino || "Sin dato"}</strong>
+              <span>Banco</span>
+              <strong>{paymentConfig?.cardBankName || "Sin dato"}</strong>
             </div>
             <div>
-              <span>Folio</span>
-              <strong>{folioLimpio || "Pendiente"}</strong>
+              <span>Tarjeta</span>
+              <strong>{visibleCardNumber(paymentConfig?.cardNumber)}</strong>
             </div>
             <div>
-              <span>Estado</span>
-              <strong>{verificado ? "Validado" : "Sin validar"}</strong>
+              <span>Referencia</span>
+              <strong>{referenciaLimpia || "Pendiente"}</strong>
             </div>
           </div>
 
@@ -156,7 +150,7 @@ const PagoTransferencia = ({
               onClick={confirmarPago}
               disabled={!puedePagar || processing}
             >
-              {processing ? "Registrando..." : "Confirmar transferencia"}
+              {processing ? "Registrando..." : "Confirmar tarjeta"}
             </button>
           </div>
         </aside>
@@ -165,4 +159,4 @@ const PagoTransferencia = ({
   );
 };
 
-export default PagoTransferencia;
+export default PagoTarjetaCliente;

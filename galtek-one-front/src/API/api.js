@@ -36,6 +36,7 @@ export const endpoints = {
   cashIncidents: `${API_BASE_URL}/caja/incidencias`,
   cashMovements: `${API_BASE_URL}/movimiento-caja`,
   cashPolicy: `${API_BASE_URL}/configuracion/caja`,
+  paymentConfig: `${API_BASE_URL}/configuracion/pagos`,
 
   usuarios: `${API_BASE_URL}/usuarios`,
   usuariosOverrides: `${API_BASE_URL}/usuarios/overrides`,

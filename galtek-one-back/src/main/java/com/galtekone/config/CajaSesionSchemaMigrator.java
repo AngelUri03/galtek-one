@@ -101,6 +101,16 @@ public class CajaSesionSchemaMigrator {
     private void migrateVentas(Connection connection) throws Exception {
         Set<String> columns = readColumns(connection, "Ventas");
         addColumn(connection, columns, "Ventas", "id_caja_sesion", "integer");
+        addColumn(connection, columns, "Ventas", "total_original", "numeric(12,2)");
+        addColumn(connection, columns, "Ventas", "total_cobrado", "numeric(12,2)");
+        addColumn(connection, columns, "Ventas", "redondeo_aplicado", "numeric(12,2)");
+        addColumn(connection, columns, "Ventas", "comision_pago", "numeric(12,2)");
+        addColumn(connection, columns, "Ventas", "comision_porcentaje", "numeric(7,4)");
+        addColumn(connection, columns, "Ventas", "recibido", "numeric(12,2)");
+        addColumn(connection, columns, "Ventas", "cambio", "numeric(12,2)");
+        addColumn(connection, columns, "Ventas", "referencia_pago", "varchar(120)");
+        addColumn(connection, columns, "Ventas", "folio_pago", "varchar(120)");
+        addColumn(connection, columns, "Ventas", "pago_verificado", "boolean");
 
         migrateLegacyVentasSesion(connection);
 
@@ -319,8 +329,10 @@ public class CajaSesionSchemaMigrator {
     private void rebuildVentas(Connection connection) throws Exception {
         rebuildTable(connection, "Ventas", ventasCreateSql(), """
                 id_venta, estatus, fecha_creacion, fecha_modificacion, usuario_creacion,
-                usuario_modificacion, estado, total, id_caja, id_caja_sesion, id_cliente,
-                id_empresa, id_metodo_pago, id_usuario
+                usuario_modificacion, estado, total, total_original, total_cobrado,
+                redondeo_aplicado, comision_pago, comision_porcentaje, recibido, cambio,
+                referencia_pago, folio_pago, pago_verificado, id_caja, id_caja_sesion,
+                id_cliente, id_empresa, id_metodo_pago, id_usuario
                 """);
     }
 
@@ -546,6 +558,16 @@ public class CajaSesionSchemaMigrator {
                     usuario_modificacion varchar(255),
                     estado varchar(255) not null,
                     total float not null,
+                    total_original numeric(12,2),
+                    total_cobrado numeric(12,2),
+                    redondeo_aplicado numeric(12,2),
+                    comision_pago numeric(12,2),
+                    comision_porcentaje numeric(7,4),
+                    recibido numeric(12,2),
+                    cambio numeric(12,2),
+                    referencia_pago varchar(120),
+                    folio_pago varchar(120),
+                    pago_verificado boolean,
                     id_caja integer,
                     id_caja_sesion integer,
                     id_cliente integer,
