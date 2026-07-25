@@ -1,8 +1,52 @@
 /* ==========================================================================
-   EXTENSIONES DE INVENTARIO - INTEGRACIÓN LIQUID GLASS
+   INVENTARIO GLOBAL - ESTILOS CONSOLIDADOS (LIQUID GLASS)
    ========================================================================== */
 
-/* Ajuste de miniatura/thumbnail para la columna de imagen de referencia */
+/* --------------------------------------------------------------------------
+   1. HEADER Y BARRA PRINCIPAL
+   -------------------------------------------------------------------------- */
+.prov-header {
+  min-height: 60px !important;
+  padding: 0.5rem 1.25rem !important;
+}
+
+.prov-header-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.prov-header-title i {
+  font-size: 1.3rem !important;
+  color: #0a7463 !important;
+}
+
+.prov-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  border: 1px solid rgba(10, 116, 99, 0.18);
+  border-radius: 6px;
+  color: #0a7463 !important;
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  font-family: "Kodchasan", sans-serif !important;
+}
+
+.prov-header h1 {
+  margin: 2px 0 0 0 !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #0a7463 !important;
+  font-family: "Kodchasan", sans-serif !important;
+  line-height: 1.1 !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. ELEMENTOS DE TABLA E IMÁGENES
+   -------------------------------------------------------------------------- */
 .inv-thumb {
   display: block;
   width: 40px;
@@ -19,7 +63,6 @@
   transform: scale(1.08);
 }
 
-/* Contenedor alternativo si la celda no tiene imagen cargada */
 .prov-table td .pi-image {
   display: inline-flex;
   align-items: center;
@@ -32,118 +75,7 @@
   border: 1px dashed rgba(21, 43, 38, 0.15);
 }
 
-/* Mapeos específicos para las clases de Tag de PrimeReact según el stock */
-.prov-state-tag.p-tag-danger {
-  border-color: rgba(159, 63, 63, 0.18) !important;
-  background: rgba(159, 63, 63, 0.12) !important;
-  color: #9f3f3f !important;
-}
-
-.prov-state-tag.p-tag-warning {
-  border-color: rgba(217, 119, 6, 0.18) !important;
-  background: rgba(217, 119, 6, 0.1) !important;
-  color: #b45309 !important;
-}
-
-/* Estilo destacado para precios dentro de la tabla */
-.prov-table strong {
-  font-family: "Kodchasan", sans-serif;
-  letter-spacing: -0.3px;
-}
-
-/* Alineación vertical adaptada para celdas combinadas (Nombre + SKU) */
-.prov-name-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.prov-name-cell strong {
-  color: #172723;
-  font-size: 0.88rem;
-  font-weight: 700;
-}
-
-.prov-name-cell span {
-  color: #65736f;
-  font-size: 0.74rem;
-  font-weight: 500;
-}
-
-/* Asegurar consistencia en el comportamiento del grid de métricas superiores */
-.prov-summary {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 12px;
-}
-
-/* Ajustes de responsividad específicos para la vista de inventario */
-@media (max-width: 1200px) {
-  .prov-summary {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-  
-  .prov-controls {
-    grid-template-columns: 1fr !important;
-  }
-}
-
-/* ==========================================================================
-   AJUSTES DE HEADER Y DESPLEGABLE DE LOTES PARA INVENTARIO
-   ========================================================================== */
-
-/* Header con la misma altura y escala de Proveedores */
-.prov-header {
-  min-height: 64px !important;
-  padding: 0.55rem 1.5rem !important;
-}
-
-.prov-header-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.8rem;
-  color: var(--prov-brand, #0a7463);
-  font-size: 1.15rem;
-  font-weight: 900;
-}
-
-.prov-header-title i {
-  font-size: 1.3rem;
-}
-
-.prov-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  min-height: 22px;
-  padding: 0 8px;
-  border: 1px solid rgba(10, 116, 99, 0.18);
-  border-radius: 8px;
-  color: #0a7463;
-  background: rgba(255, 255, 255, 0.72);
-  font-size: 0.76rem;
-  font-weight: 700;
-}
-
-.prov-header h1 {
-  margin: 2px 0 0 0 !important;
-  font-size: 1.55rem !important;
-  font-weight: 800 !important;
-  color: #142521 !important;
-  line-height: 1.1 !important;
-}
-
-/* Thumbnail de la imagen de producto */
-.inv-thumb {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  object-fit: cover;
-  border: 1px solid rgba(10, 116, 99, 0.14);
-  background: #ffffff;
-  box-shadow: 0 2px 6px rgba(20, 38, 34, 0.05);
-}
-
-/* Estilo para la tabla de Lotes desplegada */
+/* Sub-tabla desplegable de Lotes */
 .inv-lotes-container {
   background: rgba(10, 116, 99, 0.03);
   border-radius: 10px;
@@ -161,58 +93,75 @@
   font-size: 0.78rem !important;
   padding: 0.4rem 0.6rem !important;
 }
-/* ==========================================================================
-   LIMPIEZA DE FOCOS MORADOS Y BORDES DE NAVEGACIÓN (TAB)
-   ========================================================================== */
 
-/* Quitar resplandor y borde morado global en cualquier input, botón o celda */
+/* --------------------------------------------------------------------------
+   3. ETIQUETAS DE ESTADO (TAGS)
+   -------------------------------------------------------------------------- */
+.prov-state-tag.p-tag-danger {
+  border-color: rgba(159, 63, 63, 0.18) !important;
+  background: rgba(159, 63, 63, 0.12) !important;
+  color: #9f3f3f !important;
+}
+
+.prov-state-tag.p-tag-warning {
+  border-color: rgba(217, 119, 6, 0.18) !important;
+  background: rgba(217, 119, 6, 0.1) !important;
+  color: #b45309 !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. SOBREESCRITURA DE FOCOS Y COLORES MORADOS (NAVEGACIÓN TAB Y SELECCIÓN)
+   -------------------------------------------------------------------------- */
+*:focus,
+*:focus-visible,
+.p-component:focus,
+.p-component:focus-visible,
 .proveedores-page *:focus,
-.proveedores-page *:focus-visible,
 .prov-editor-sidebar *:focus,
-.prov-editor-sidebar *:focus-visible,
-.p-dialog *:focus,
-.p-dialog *:focus-visible {
+.p-dialog *:focus {
   outline: none !important;
-  box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.3) !important;
+  box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.22) !important;
   border-color: #0a7463 !important;
 }
 
-/* Fila seleccionada en la tabla */
+/* Filas de tabla seleccionadas */
 .prov-table.p-datatable .p-datatable-tbody > tr.p-highlight {
-  background: rgba(10, 116, 99, 0.12) !important;
+  background: rgba(10, 116, 99, 0.1) !important;
   color: #0a7463 !important;
 }
 
 .prov-table.p-datatable .p-datatable-tbody > tr:focus,
 .prov-table.p-datatable .p-datatable-tbody > tr.p-focus {
-  outline: 2px solid #0a7463 !important;
-  background: rgba(10, 116, 99, 0.08) !important;
+  outline: 1px solid #0a7463 !important;
+  background: rgba(10, 116, 99, 0.06) !important;
   box-shadow: none !important;
 }
 
-/* Botones de PrimeReact por defecto (Ajuste de Stock, etc.) que se ponen morados */
-.p-button {
+/* Botones genéricos de PrimeReact */
+.p-button,
+.p-button:enabled:hover,
+.p-button:enabled:focus {
   background-color: #0a7463 !important;
   border-color: #0a7463 !important;
 }
 
-.p-button:hover {
-  background-color: #085f52 !important;
-  border-color: #085f52 !important;
-}
-
 .p-button.p-button-secondary,
-.p-button.p-button-outlined {
-  background-color: transparent !important;
+.p-button.p-button-text,
+.p-button.p-button-outlined,
+.prov-soft-btn {
+  background: rgba(255, 255, 255, 0.6) !important;
   color: #0a7463 !important;
-  border-color: rgba(10, 116, 99, 0.3) !important;
+  border: 1px solid rgba(10, 116, 99, 0.2) !important;
+  box-shadow: none !important;
 }
 
-.p-button.p-button-secondary:hover {
-  background-color: rgba(10, 116, 99, 0.08) !important;
+.p-button.p-button-secondary:hover,
+.prov-soft-btn:hover {
+  background: #ffffff !important;
+  border-color: #0a7463 !important;
+  color: #085f52 !important;
 }
 
-/* Botones de incremento/decremento de InputNumber en modales */
 .p-inputnumber-button {
   background: #0a7463 !important;
   border-color: #0a7463 !important;
@@ -221,4 +170,23 @@
 
 .p-inputnumber-button:hover {
   background: #085f52 !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. ESTRUCTURA Y RESPONSIVIDAD DE CONTENEDORES
+   -------------------------------------------------------------------------- */
+.prov-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 12px;
+}
+
+@media (max-width: 1200px) {
+  .prov-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  
+  .prov-controls {
+    grid-template-columns: 1fr !important;
+  }
 }
