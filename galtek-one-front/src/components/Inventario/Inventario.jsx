@@ -137,11 +137,11 @@ export default function Inventario() {
       ]);
       if (res[0].status === "fulfilled") {
         const js = await res[0].value.json();
-        setCategoriasOptions((js.data || []).map(c => ({ label: c.nombreCategoria, value: c.idCategoria })));
+        setCategoriasOptions((js.data || []).map(c => ({ label: c.nombreCategoria || c.nombre, value: c.idCategoria })));
       }
       if (res[1].status === "fulfilled") {
         const js = await res[1].value.json();
-        setProveedoresOptions((js.data || []).map(p => ({ label: p.nombreProveedor, value: p.idProveedor })));
+        setProveedoresOptions((js.data || []).map(p => ({ label: p.nombreProveedor || p.nombreEmpresa, value: p.idProveedor })));
       }
       if (res[2].status === "fulfilled") {
         const js = await res[2].value.json();
@@ -166,6 +166,70 @@ export default function Inventario() {
   };
 
   useEffect(() => { loadCatalogs(); fetchProductos(); }, []);
+
+  const handleCreateProducto = async (nuevo) => {
+    try {
+      setLoading(true);
+      const prodRes = await api.fetchApi({ "Content-Type": "application/json" }, "POST", {
+        nombreProducto: nuevo.nombreProducto,
+        codigoBarras: nuevo.codigoBarras,
+        descripcion: nuevo.descripcion || nuevo.nombreProducto,
+        esPesaje: nuevo.esPesaje || false,
+        precioVenta: nuevo.precioVenta,
+        categoria: { idCategoria: nuevo.categoria },
+        unidad: { idUnidad: nuevo.unidad },
+        direccion: nuevo.direccion || "ND",
+        imagen: nuevo.imagen || null,
+        estatus: nuevo.estatus !== false,
+      }, endpoints.ventasProductos);
+
+      if (!prodRes) throw new Error("Fallo al crear producto");
+      const prodJson = await prodRes.json();
+      const idProducto = prodJson.data?.idProducto;
+      if (!idProducto) throw new Error("No se obtuvo el ID del producto creado.");
+
+      if (nuevo.proveedor && nuevo.precioCompra !== undefined) {
+        await api.fetchApi({ "Content-Type": "application/json" }, "POST", {
+          producto: { idProducto },
+          proveedor: { idProveedor: nuevo.proveedor },
+          precioCompra: nuevo.precioCompra
+        }, endpoints.proveedorProducto);
+      }
+
+      await api.fetchApi({ "Content-Type": "application/json" }, "POST", {
+        idProducto: idProducto,
+        critico: nuevo.umbrales?.critico ?? 5,
+        bajo: nuevo.umbrales?.bajo ?? 12
+      }, endpoints.configurarUmbrales);
+
+      if (nuevo.lotes && nuevo.lotes.length > 0 && nuevo.almacen) {
+        for (const lote of nuevo.lotes) {
+          await api.fetchApi({ "Content-Type": "application/json" }, "POST", {
+            producto: { idProducto },
+            almacen: { idAlmacen: nuevo.almacen },
+            cantidad: lote.cantidad,
+            fechaCaducidad: lote.fechaExp ? (lote.fechaExp instanceof Date ? lote.fechaExp.toISOString().slice(0, 10) : String(lote.fechaExp).slice(0, 10)) : null,
+          }, endpoints.lotes);
+        }
+      } else if (nuevo.almacen) {
+        await api.fetchApi({ "Content-Type": "application/json" }, "POST", {
+          producto: { idProducto },
+          almacen: { idAlmacen: nuevo.almacen },
+          existencia: 0,
+          fechaUltimaCompra: new Date().toISOString()
+        }, endpoints.inventario);
+      }
+
+      toast.current?.show({ severity: "success", summary: "Éxito", detail: "Producto creado correctamente", life: 2000 });
+      setModalAgregar(false);
+      fetchProductos();
+    } catch (e) {
+      console.error("Error en creación:", e);
+      toast.current?.show({ severity: "error", summary: "Error", detail: e.message || "Error al crear producto", life: 3000 });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const data = useMemo(() => {
     let result = applySearch(rows, debouncedSearch);
@@ -205,7 +269,6 @@ export default function Inventario() {
     </div>
   );
 
-  // Plantilla para la fila desplegada con los Lotes
   const rowExpansionTemplate = (data) => (
     <div className="p-3 inv-lotes-container">
       <DataTable value={data.lotes} size="small" className="prov-table inv-lotes-table" responsive>
@@ -230,22 +293,19 @@ export default function Inventario() {
       <ConfirmDialog />
 
       <main className="proveedores-page">
-        {/* HEADER IGUAL AL DE PROVEEDORES */}
-     {/* PROV HEADER BAR */}
-      <section className="prov-header">
-        <div className="prov-header-title">
-          <i className="pi pi-box" style={{ color: "#0a7463", fontSize: "1.5rem" }} />
-          <h1 style={{ color: "#0a7463", margin: 0, fontSize: "1.6rem", fontWeight: "800", textTransform: "none" }}>
-            Inventario
-          </h1>
-        </div>
-        <Button
-          label="Nuevo Producto"
-          icon="pi pi-plus"
-          className="prov-primary-btn"
-          onClick={() => setModalAgregar(true)}
-        />
-      </section>
+        {/* HEADER BAR SIMPLIFICADO */}
+        <section className="prov-header">
+          <div className="prov-header-title">
+            <i className="pi pi-box" />
+            <h1>Inventario</h1>
+          </div>
+          <Button
+            label="Nuevo Producto"
+            icon="pi pi-plus"
+            className="prov-primary-btn"
+            onClick={() => setModalAgregar(true)}
+          />
+        </section>
 
         {/* SUMMARY CARDS */}
         <section className="prov-summary">
@@ -279,7 +339,7 @@ export default function Inventario() {
           </div>
         </section>
 
-        {/* BUSCADOR Y FILTROS */}
+        {/* CONTROLES */}
         <section className="prov-controls">
           <div className="prov-search-wrap">
             <i className="pi pi-search" />
@@ -323,7 +383,7 @@ export default function Inventario() {
           </div>
         </section>
 
-        {/* TABLA PRINCIPAL CON EXPANSOR DE FILAS (LOTES) */}
+        {/* TABLA PRINCIPAL */}
         <section className="prov-table-shell">
           <div className="prov-table-head">
             <div>
@@ -332,71 +392,78 @@ export default function Inventario() {
             </div>
           </div>
 
-<DataTable
-  value={data}
-  selectionMode="single"
-  selection={selected}
-  onSelectionChange={(e) => setSelected(e.value)}
-  dataKey="id"
-  paginator
-  rows={10}
-  expandedRows={expandedRows}
-  onRowToggle={(e) => setExpandedRows(e.data)}
-  rowExpansionTemplate={rowExpansionTemplate}
-  className="prov-table p-datatable-sm"
-  scrollable
-  scrollHeight="calc(100vh - 390px)"
-  emptyMessage="No se encontraron productos."
->
-  <Column expander style={{ width: '3em' }} />
-  <Column header="Ref" body={imagenBody} style={{ width: '60px' }} />
-  
-  {/* COLUMNA NOMBRE */}
-  <Column 
-    field="nombre" 
-    header="Nombre" 
-    sortable 
-    body={(row) => <strong style={{ color: '#172723', fontSize: '0.88rem' }}>{row.nombre}</strong>} 
-  />
-  
-  {/* COLUMNA SKU SEPARADA */}
-  <Column 
-    field="sku" 
-    header="SKU" 
-    sortable 
-    body={(row) => <span className="prov-muted-pill">{row.sku || '—'}</span>} 
-  />
-  
-  <Column field="categoria" header="Categoría" sortable body={(row) => <span className="prov-muted-text">{row.categoria}</span>} />
-  <Column field="proveedor" header="Proveedor" sortable body={(row) => <span className="prov-muted-text">{row.proveedor}</span>} />
-  <Column field="stock" header="Existencia" sortable body={(row) => <strong style={{ color: '#142521' }}>{row.stock}</strong>} />
-  
-  <Column 
-    field="estadoStock" 
-    header="Estado" 
-    sortable 
-    body={(row) => {
-      const est = getStockEstado(row);
-      let sev = "prov-state-tag p-tag-secondary";
-      if (est === "OPTIMO") sev = "prov-state-tag p-tag-success";
-      if (est === "BAJO" || est === "CRITICO") sev = "prov-state-tag p-tag-warning";
-      if (est === "AGOTADO") sev = "prov-state-tag p-tag-danger";
-      return <Tag value={est} className={sev} />;
-    }}
-  />
-  
-  <Column field="precioVenta" header="P. Venta" sortable body={(row) => <strong>${Number(row.precioVenta || 0).toFixed(2)}</strong>} />
-  <Column header="Acciones" body={accionesBody} frozen alignFrozen="right" style={{ width: '180px' }} />
-</DataTable>
+          <DataTable
+            value={data}
+            selectionMode="single"
+            selection={selected}
+            onSelectionChange={(e) => setSelected(e.value)}
+            dataKey="id"
+            paginator
+            rows={10}
+            expandedRows={expandedRows}
+            onRowToggle={(e) => setExpandedRows(e.data)}
+            rowExpansionTemplate={rowExpansionTemplate}
+            className="prov-table p-datatable-sm"
+            scrollable
+            scrollHeight="calc(100vh - 390px)"
+            emptyMessage="No se encontraron productos."
+          >
+            <Column expander style={{ width: '3em' }} />
+            <Column header="Ref" body={imagenBody} style={{ width: '60px' }} />
+            
+            <Column 
+              field="nombre" 
+              header="Nombre" 
+              sortable 
+              body={(row) => <strong>{row.nombre}</strong>} 
+            />
+            
+            <Column 
+              field="sku" 
+              header="SKU" 
+              sortable 
+              body={(row) => <span className="prov-muted-pill">{row.sku || '—'}</span>} 
+            />
+
+            <Column field="categoria" header="Categoría" sortable body={(row) => <span className="prov-muted-text">{row.categoria}</span>} />
+            <Column field="proveedor" header="Proveedor" sortable body={(row) => <span className="prov-muted-text">{row.proveedor}</span>} />
+            <Column field="stock" header="Existencia" sortable body={(row) => <strong>{row.stock}</strong>} />
+            
+            <Column 
+              field="estadoStock" 
+              header="Estado" 
+              sortable 
+              body={(row) => {
+                const est = getStockEstado(row);
+                let sev = "prov-state-tag p-tag-secondary";
+                if (est === "OPTIMO") sev = "prov-state-tag p-tag-success";
+                if (est === "BAJO" || est === "CRITICO") sev = "prov-state-tag p-tag-warning";
+                if (est === "AGOTADO") sev = "prov-state-tag p-tag-danger";
+                return <Tag value={est} className={sev} />;
+              }}
+            />
+            
+            <Column field="precioVenta" header="P. Venta" sortable body={(row) => <strong>${Number(row.precioVenta || 0).toFixed(2)}</strong>} />
+            <Column header="Acciones" body={accionesBody} frozen alignFrozen="right" style={{ width: '180px' }} />
+          </DataTable>
         </section>
 
-        {/* MODALES */}
+        {/* MODALES Y SIDEBAR */}
         <ModalInformacion open={modalInfo.open} producto={modalInfo.producto} onHide={() => setModalInfo({ open: false, producto: null })} onEdit={(p) => setModalEditar({ open: true, producto: p })} onAlertas={(p) => setModalAlertas({ open: true, producto: p })} onAjuste={(p) => setModalAjuste({ open: true, producto: p })} />
         <ModalEditarProducto open={modalEditar.open} producto={modalEditar.producto} onHide={() => setModalEditar({ open: false, producto: null })} onSave={() => { fetchProductos(); setModalEditar({ open: false, producto: null }); }} categoriasOptions={categoriasOptions} proveedoresOptions={proveedoresOptions} unidadesOptions={unidadesOptions} almacenesOptions={almacenesOptions} />
         <ModalAjusteStock open={modalAjuste.open} producto={modalAjuste.producto} onHide={() => setModalAjuste({ open: false, producto: null })} onApply={() => { fetchProductos(); setModalAjuste({ open: false, producto: null }); }} almacenesOptions={almacenesOptions} />
         <ModalAlertasStock open={modalAlertas.open} producto={modalAlertas.producto} onHide={() => setModalAlertas({ open: false, producto: null })} onSave={() => { fetchProductos(); setModalAlertas({ open: false, producto: null }); }} />
         <ModalEliminarProducto open={modalEliminar.open} producto={modalEliminar.producto} onHide={() => setModalEliminar({ open: false, producto: null })} onConfirm={() => { fetchProductos(); setModalEliminar({ open: false, producto: null }); }} />
-        <ModalAgregarProducto open={modalAgregar} onHide={() => setModalAgregar(false)} onCreate={fetchProductos} categoriasOptions={categoriasOptions} proveedoresOptions={proveedoresOptions} almacenesOptions={almacenesOptions} unidadesOptions={unidadesOptions} />
+        
+        <ModalAgregarProducto 
+          open={modalAgregar} 
+          onHide={() => setModalAgregar(false)} 
+          onCreate={handleCreateProducto} 
+          categoriasOptions={categoriasOptions} 
+          proveedoresOptions={proveedoresOptions} 
+          almacenesOptions={almacenesOptions} 
+          unidadesOptions={unidadesOptions} 
+        />
       </main>
     </Shell>
   );
