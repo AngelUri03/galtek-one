@@ -293,11 +293,11 @@ export default function Inventario() {
       <ConfirmDialog />
 
       <main className="proveedores-page">
-        {/* HEADER BAR SIMPLIFICADO */}
+        {/* HEADER EXTACTO AL DE PROVEEDORES */}
         <section className="prov-header">
           <div className="prov-header-title">
             <i className="pi pi-box" />
-            <h1>Inventario</h1>
+            <span>INVENTARIO</span>
           </div>
           <Button
             label="Nuevo Producto"
@@ -339,7 +339,7 @@ export default function Inventario() {
           </div>
         </section>
 
-        {/* CONTROLES */}
+        {/* CONTROLES CON BUSCADOR UNIFICADO */}
         <section className="prov-controls">
           <div className="prov-search-wrap">
             <i className="pi pi-search" />
@@ -383,7 +383,7 @@ export default function Inventario() {
           </div>
         </section>
 
-        {/* TABLA PRINCIPAL */}
+        {/* TABLA CON SKU NEUTRAL */}
         <section className="prov-table-shell">
           <div className="prov-table-head">
             <div>
@@ -418,12 +418,13 @@ export default function Inventario() {
               body={(row) => <strong>{row.nombre}</strong>} 
             />
             
-            <Column 
-              field="sku" 
-              header="SKU" 
-              sortable 
-              body={(row) => <span className="prov-muted-pill">{row.sku || '—'}</span>} 
-            />
+          {/* COLUMNA SKU CON TEXTO GRIS NEUTRO */}
+<Column 
+  field="sku" 
+  header="SKU" 
+  sortable 
+  body={(row) => <span className="inv-sku-text">{row.sku || '—'}</span>} 
+/>
 
             <Column field="categoria" header="Categoría" sortable body={(row) => <span className="prov-muted-text">{row.categoria}</span>} />
             <Column field="proveedor" header="Proveedor" sortable body={(row) => <span className="prov-muted-text">{row.proveedor}</span>} />
@@ -448,8 +449,8 @@ export default function Inventario() {
           </DataTable>
         </section>
 
-        {/* MODALES Y SIDEBAR */}
-        <ModalInformacion open={modalInfo.open} producto={modalInfo.producto} onHide={() => setModalInfo({ open: false, producto: null })} onEdit={(p) => setModalEditar({ open: true, producto: p })} onAlertas={(p) => setModalAlertas({ open: true, producto: p })} onAjuste={(p) => setModalAjuste({ open: true, producto: p })} />
+        {/* MODALES Y SIDEBARS */}
+        <ModalInformacion open={modalInfo.open} producto={modalInfo.producto} onHide={() => setModalInfo({ open: false, producto: null })} />
         <ModalEditarProducto open={modalEditar.open} producto={modalEditar.producto} onHide={() => setModalEditar({ open: false, producto: null })} onSave={() => { fetchProductos(); setModalEditar({ open: false, producto: null }); }} categoriasOptions={categoriasOptions} proveedoresOptions={proveedoresOptions} unidadesOptions={unidadesOptions} almacenesOptions={almacenesOptions} />
         <ModalAjusteStock open={modalAjuste.open} producto={modalAjuste.producto} onHide={() => setModalAjuste({ open: false, producto: null })} onApply={() => { fetchProductos(); setModalAjuste({ open: false, producto: null }); }} almacenesOptions={almacenesOptions} />
         <ModalAlertasStock open={modalAlertas.open} producto={modalAlertas.producto} onHide={() => setModalAlertas({ open: false, producto: null })} onSave={() => { fetchProductos(); setModalAlertas({ open: false, producto: null }); }} />
