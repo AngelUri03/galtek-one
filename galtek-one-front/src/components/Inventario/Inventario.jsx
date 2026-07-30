@@ -405,7 +405,7 @@ export default function Inventario() {
             rowExpansionTemplate={rowExpansionTemplate}
             className="prov-table p-datatable-sm"
             scrollable
-            scrollHeight="calc(100vh - 390px)"
+            scrollHeight="calc(100vh - 380px)"
             emptyMessage="No se encontraron productos."
           >
             <Column expander style={{ width: '3em' }} />
@@ -415,17 +415,18 @@ export default function Inventario() {
               field="nombre" 
               header="Nombre" 
               sortable 
-              body={(row) => <strong>{row.nombre}</strong>} 
+              body={(row) => (
+                <strong className="inv-table-text-dark">{row.nombre}</strong>
+              )} 
             />
-            
-          {/* COLUMNA SKU CON TEXTO GRIS NEUTRO */}
-<Column 
-  field="sku" 
-  header="SKU" 
-  sortable 
-  body={(row) => <span className="inv-sku-text">{row.sku || '—'}</span>} 
-/>
 
+            {/* COLUMNA SKU - NEUTRO GRIS */}
+            <Column 
+              field="sku" 
+              header="SKU" 
+              sortable 
+              body={(row) => <span className="inv-sku-text">{row.sku || '—'}</span>} 
+            />
             <Column field="categoria" header="Categoría" sortable body={(row) => <span className="prov-muted-text">{row.categoria}</span>} />
             <Column field="proveedor" header="Proveedor" sortable body={(row) => <span className="prov-muted-text">{row.proveedor}</span>} />
             <Column field="stock" header="Existencia" sortable body={(row) => <strong>{row.stock}</strong>} />
@@ -444,7 +445,16 @@ export default function Inventario() {
               }}
             />
             
-            <Column field="precioVenta" header="P. Venta" sortable body={(row) => <strong>${Number(row.precioVenta || 0).toFixed(2)}</strong>} />
+                            <Column 
+                  field="precioVenta" 
+                  header="P. Venta" 
+                  sortable 
+                  body={(row) => (
+                    <strong className="inv-table-text-dark">
+                      ${Number(row.precioVenta || 0).toFixed(2)}
+                    </strong>
+                  )} 
+                />
             <Column header="Acciones" body={accionesBody} frozen alignFrozen="right" style={{ width: '180px' }} />
           </DataTable>
         </section>
