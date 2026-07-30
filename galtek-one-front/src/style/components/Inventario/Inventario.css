@@ -1,19 +1,19 @@
 /* ==========================================================================
-   INVENTARIO GLOBAL - ESTILOS CONSOLIDADOS (LIQUID GLASS)
+   INVENTARIO GLOBAL - CORRECCIONES ESTÉTICAS FINALES
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   1. HEADER Y BARRA PRINCIPAL
+   1. HEADER IDÉNTICO A PROVEEDORES (TEXTO DELGADO Y EN MAYÚSCULAS)
    -------------------------------------------------------------------------- */
-.prov-header {
-  min-height: 60px !important;
-  padding: 0.5rem 1.25rem !important;
-}
-
 .prov-header-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.8rem !important;
+  color: #0a7463 !important;
+  font-size: 1.15rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+  text-transform: uppercase !important;
 }
 
 .prov-header-title i {
@@ -21,31 +21,113 @@
   color: #0a7463 !important;
 }
 
-.prov-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  height: 20px;
-  padding: 0 8px;
-  border: 1px solid rgba(10, 116, 99, 0.18);
-  border-radius: 6px;
-  color: #0a7463 !important;
-  background: rgba(255, 255, 255, 0.72);
-  font-size: 0.7rem !important;
-  font-weight: 600 !important;
+.prov-header-title span {
   font-family: "Kodchasan", sans-serif !important;
-}
-
-.prov-header h1 {
-  margin: 2px 0 0 0 !important;
-  font-size: 1.5rem !important;
-  font-weight: 700 !important;
   color: #0a7463 !important;
-  font-family: "Kodchasan", sans-serif !important;
-  line-height: 1.1 !important;
+  font-size: 1.15rem !important;
+  font-weight: 900 !important;
 }
 
 /* --------------------------------------------------------------------------
-   2. ELEMENTOS DE TABLA E IMÁGENES
+   2. BUSCADOR INTEGRADO (ELIMINA EL CORTE PREVIO A LA LUPA)
+   -------------------------------------------------------------------------- */
+/* ==========================================================================
+   SOLUCIÓN AL BUSCADOR CORTADO (ELIMINA LA CAJA DOBLE INTERNA)
+   ========================================================================== */
+
+/* ==========================================================================
+   SOLUCIÓN AL BUSCADOR CORTADO (ELIMINA LA CAJA DOBLE INTERNA)
+   ========================================================================== */
+
+/* Contenedor principal de la barra de búsqueda */
+.prov-search-wrap {
+  display: flex !important;
+  align-items: center !important;
+  height: 46px !important;
+  border: 1px solid rgba(21, 43, 38, 0.14) !important;
+  border-radius: 14px !important;
+  background: linear-gradient(180deg, #ffffff, #f7f7f7) !important;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5) !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+/* Ícono de la lupa */
+.prov-search-wrap > i {
+  flex: 0 0 42px !important;
+  color: #0a7463 !important;
+  font-size: 1rem !important;
+  text-align: center !important;
+  pointer-events: none;
+}
+
+/* INPUT INTERNO: Se fuerzan bordes/fondos transparentes para eliminar la división */
+.prov-search-wrap .p-inputtext,
+.prov-search-wrap input {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: #1b2b27 !important;
+  font-size: 0.88rem !important;
+  font-family: "Kodchasan", sans-serif !important;
+  padding: 0 12px 0 0 !important; /* Espaciado limpio sin margin interno */
+}
+
+/* Quitar resplandor extra al hacer foco en la barra */
+.prov-search-wrap:focus-within {
+  border-color: #0a7463 !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.18) !important;
+}
+/* --------------------------------------------------------------------------
+   3. CORRECCIÓN DE INPUTNUMBER (UNIFICA RECTÁNGULOS Y FLECHAS)
+   -------------------------------------------------------------------------- */
+.p-inputnumber {
+  display: flex !important;
+  align-items: stretch !important;
+  border: 1px solid rgba(21, 43, 38, 0.14) !important;
+  border-radius: 10px !important;
+  background: linear-gradient(180deg, #ffffff, #f7f7f7) !important;
+  overflow: hidden !important;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5) !important;
+}
+
+.p-inputnumber .p-inputnumber-input,
+.p-inputnumber input {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  height: 100% !important;
+  flex: 1 1 auto !important;
+}
+
+.p-inputnumber-button-group {
+  display: flex !important;
+  flex-direction: column !important;
+  border-radius: 0 !important;
+  border: none !important;
+}
+
+.p-inputnumber-button {
+  border-radius: 0 !important;
+  border: none !important;
+  background: #0a7463 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.p-inputnumber-button:hover {
+  background: #085f52 !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. ELEMENTOS DE TABLA E IMÁGENES
    -------------------------------------------------------------------------- */
 .inv-thumb {
   display: block;
@@ -56,26 +138,8 @@
   border: 1px solid rgba(10, 116, 99, 0.14);
   background: #ffffff;
   box-shadow: 0 2px 8px rgba(20, 38, 34, 0.04);
-  transition: transform 0.2s ease;
 }
 
-.inv-thumb:hover {
-  transform: scale(1.08);
-}
-
-.prov-table td .pi-image {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 9px;
-  background: rgba(24, 44, 40, 0.05);
-  color: #65736f;
-  border: 1px dashed rgba(21, 43, 38, 0.15);
-}
-
-/* Sub-tabla desplegable de Lotes */
 .inv-lotes-container {
   background: rgba(10, 116, 99, 0.03);
   border-radius: 10px;
@@ -83,110 +147,28 @@
   margin: 4px 10px;
 }
 
-.inv-lotes-table.p-datatable .p-datatable-thead > tr > th {
-  background: rgba(10, 116, 99, 0.08) !important;
-  color: #0a7463 !important;
-  font-size: 0.72rem !important;
-}
-
-.inv-lotes-table.p-datatable .p-datatable-tbody > tr > td {
-  font-size: 0.78rem !important;
-  padding: 0.4rem 0.6rem !important;
-}
-
 /* --------------------------------------------------------------------------
-   3. ETIQUETAS DE ESTADO (TAGS)
-   -------------------------------------------------------------------------- */
-.prov-state-tag.p-tag-danger {
-  border-color: rgba(159, 63, 63, 0.18) !important;
-  background: rgba(159, 63, 63, 0.12) !important;
-  color: #9f3f3f !important;
-}
-
-.prov-state-tag.p-tag-warning {
-  border-color: rgba(217, 119, 6, 0.18) !important;
-  background: rgba(217, 119, 6, 0.1) !important;
-  color: #b45309 !important;
-}
-
-/* --------------------------------------------------------------------------
-   4. SOBREESCRITURA DE FOCOS Y COLORES MORADOS (NAVEGACIÓN TAB Y SELECCIÓN)
+   5. NAVEGACIÓN Y FOCOS VERDES (SIN TONOS MORADOS)
    -------------------------------------------------------------------------- */
 *:focus,
 *:focus-visible,
 .p-component:focus,
-.p-component:focus-visible,
-.proveedores-page *:focus,
-.prov-editor-sidebar *:focus,
-.p-dialog *:focus {
+.p-component:focus-visible {
   outline: none !important;
   box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.22) !important;
   border-color: #0a7463 !important;
 }
 
-/* Filas de tabla seleccionadas */
 .prov-table.p-datatable .p-datatable-tbody > tr.p-highlight {
   background: rgba(10, 116, 99, 0.1) !important;
   color: #0a7463 !important;
 }
 
-.prov-table.p-datatable .p-datatable-tbody > tr:focus,
-.prov-table.p-datatable .p-datatable-tbody > tr.p-focus {
-  outline: 1px solid #0a7463 !important;
-  background: rgba(10, 116, 99, 0.06) !important;
-  box-shadow: none !important;
-}
-
-/* Botones genéricos de PrimeReact */
-.p-button,
-.p-button:enabled:hover,
-.p-button:enabled:focus {
-  background-color: #0a7463 !important;
-  border-color: #0a7463 !important;
-}
-
-.p-button.p-button-secondary,
-.p-button.p-button-text,
-.p-button.p-button-outlined,
-.prov-soft-btn {
-  background: rgba(255, 255, 255, 0.6) !important;
-  color: #0a7463 !important;
-  border: 1px solid rgba(10, 116, 99, 0.2) !important;
-  box-shadow: none !important;
-}
-
-.p-button.p-button-secondary:hover,
-.prov-soft-btn:hover {
-  background: #ffffff !important;
-  border-color: #0a7463 !important;
-  color: #085f52 !important;
-}
-
-.p-inputnumber-button {
-  background: #0a7463 !important;
-  border-color: #0a7463 !important;
-  color: #ffffff !important;
-}
-
-.p-inputnumber-button:hover {
-  background: #085f52 !important;
-}
-
-/* --------------------------------------------------------------------------
-   5. ESTRUCTURA Y RESPONSIVIDAD DE CONTENEDORES
-   -------------------------------------------------------------------------- */
-.prov-summary {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 12px;
-}
-
-@media (max-width: 1200px) {
-  .prov-summary {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-  
-  .prov-controls {
-    grid-template-columns: 1fr !important;
-  }
+/* SKU estilo texto limpio y neutral */
+.inv-sku-text {
+  color: #52615d !important; /* Gris oscuro neutro */
+  font-weight: 600 !important;
+  font-size: 0.82rem !important;
+  letter-spacing: 0.3px;
+  font-family: "Kodchasan", sans-serif !important;
 }
