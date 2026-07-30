@@ -1,5 +1,10 @@
 package com.galtekone.entity;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+import com.galtekone.utils.BaseEmpresa;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,7 +21,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "ProveedorProducto")
-public class ProveedorProductoEntity extends CommonEntity {
+public class ProveedorProductoEntity extends CommonEntity implements BaseEmpresa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,8 +36,29 @@ public class ProveedorProductoEntity extends CommonEntity {
     @JoinColumn(name = "id_producto", nullable = false)
     private ProductosEntity producto;
 
-    @Column(name = "precio_compra", nullable = false)
+    @Column(name = "precio_compra")
     private Float precioCompra;
+
+    @Column(name = "sku_proveedor")
+    private String skuProveedor;
+
+    @Column(name = "ultimo_costo", precision = 12, scale = 2)
+    private BigDecimal ultimoCosto;
+
+    @Column(name = "fecha_ultimo_costo")
+    private LocalDateTime fechaUltimoCosto;
+
+    @Column(name = "presentacion_compra")
+    private String presentacionCompra;
+
+    @Column(name = "cantidad_minima", precision = 12, scale = 3)
+    private BigDecimal cantidadMinima;
+
+    @Column(name = "proveedor_preferido")
+    private Boolean proveedorPreferido = false;
+
+    @Column(name = "estado_relacion")
+    private String estadoRelacion = "ACTIVA";
     
     @ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "id_empresa", nullable = false)

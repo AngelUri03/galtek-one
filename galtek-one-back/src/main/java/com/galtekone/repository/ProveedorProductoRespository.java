@@ -18,4 +18,14 @@ public interface ProveedorProductoRespository extends JpaRepository<ProveedorPro
     );
 
     List<ProveedorProductoEntity> findByProducto_IdProducto(Integer idProducto);
+
+    List<ProveedorProductoEntity> findByProveedor_IdProveedorAndEmpresa_IdEmpresa(Integer idProveedor, Integer idEmpresa);
+
+    Optional<ProveedorProductoEntity> findByIdProveedorProductoAndProveedor_IdProveedorAndEmpresa_IdEmpresa(
+            Integer idProveedorProducto,
+            Integer idProveedor,
+            Integer idEmpresa
+    );
+
+    long countByProveedor_IdProveedorAndEmpresa_IdEmpresa(Integer idProveedor, Integer idEmpresa);
 }

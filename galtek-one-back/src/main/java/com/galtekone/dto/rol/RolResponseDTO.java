@@ -8,6 +8,7 @@ public class RolResponseDTO {
 	private Integer idRol;
 	private String nombreRol;
 	private Boolean estatus;
+	private Boolean protegido;
 	private Integer idEmpresa;
 	private List<PermisoDTO> permisos;
 

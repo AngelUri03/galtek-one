@@ -16,6 +16,8 @@ public class LoginResponseDTO {
 	private String avatarUrl;
 	private Integer idEmpresa;
 	private String nombreEmpresa;
+	private Integer idUsuario;
+	private Boolean requiereCambioPassword;
 
 
 }

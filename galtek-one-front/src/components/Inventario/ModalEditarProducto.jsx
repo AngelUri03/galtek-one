@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Dialog } from "primereact/dialog";
+import { Sidebar } from "primereact/sidebar";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
@@ -27,32 +27,24 @@ export default function ModalEditarProducto({
   producto,
   onHide,
   onSave,
-  categoriasOptions = [], // [{label,value}]
-  proveedoresOptions = [], // [{label,value}]
-  unidadesOptions = [], // [{label,value}]
-  almacenesOptions = [], // [{label,value}]
+  categoriasOptions = [],
+  proveedoresOptions = [],
+  unidadesOptions = [],
+  almacenesOptions = [],
 }) {
   const toast = useRef(null);
-
   const [form, setForm] = useState(null);
   const [dirty, setDirty] = useState(false);
-
-  // Lote editor (panel interno)
-  const [editingLote, setEditingLote] = useState(null);
 
   useEffect(() => {
     if (!open) return;
     const cloned = deepClone(producto);
     setForm(cloned);
-    setEditingLote(null);
     setDirty(false);
   }, [open, producto]);
 
   const update = (patch) => {
-    setForm((f) => {
-      const next = { ...f, ...patch };
-      return next;
-    });
+    setForm((f) => ({ ...f, ...patch }));
     setDirty(true);
   };
 
@@ -70,26 +62,26 @@ export default function ModalEditarProducto({
     const nombre = (form?.nombre || "").trim();
 
     if (!sku) {
-      showToast("warn", "Validación", "SKU es requerido.");
+      showToast("warn", "Validación", "El SKU es requerido.");
       return false;
     }
     if (!nombre) {
-      showToast("warn", "Validación", "Nombre es requerido.");
+      showToast("warn", "Validación", "El nombre es requerido.");
       return false;
     }
 
     const pc = Number(form?.precioCompra);
     const pv = Number(form?.precioVenta);
     if (!Number.isFinite(pc) || pc < 0) {
-      showToast("warn", "Validación", "Precio compra inválido.");
+      showToast("warn", "Validación", "Precio de compra inválido.");
       return false;
     }
-    if (!Number.isFinite(pv) || pv < 0) {
-      showToast("warn", "Validación", "Precio venta inválido.");
+    if (!Number.isFinite(pv) || pv <= 0) {
+      showToast("warn", "Validación", "El precio de venta debe ser mayor a 0.");
       return false;
     }
-    if (Number.isFinite(pc) && Number.isFinite(pv) && pv < pc) {
-      showToast("warn", "Validación", "Precio venta no debería ser menor a compra.");
+    if (pv < pc) {
+      showToast("warn", "Validación", "El precio de venta no debe ser menor al de compra.");
       return false;
     }
 
@@ -97,8 +89,7 @@ export default function ModalEditarProducto({
   };
 
   const handleSave = () => {
-    if (!form) return;
-    if (!validate()) return;
+    if (!form || !validate()) return;
 
     const lotes = Array.isArray(form.lotes) ? form.lotes : [];
     const stock = stockFromLotes(lotes);
@@ -118,227 +109,186 @@ export default function ModalEditarProducto({
     setDirty(false);
   };
 
-  const header = (
-    <div className="medp-header">
-      <div className="medp-header-left">
-        <div className="medp-title">Editar producto</div>
-        <div className="medp-subtitle" title={form?.nombre || ""}>
-          {form?.nombre || "—"}
-        </div>
-      </div>
-
-      <div className="medp-header-right">
-        <span className="medp-chip medp-chip--soft">
-          Stock: <b className="tabular">{Number(stockTotal) || 0}</b>
-        </span>
-        <span className={`medp-chip ${form?.activo ? "medp-chip--activo" : "medp-chip--inactivo"}`}>
-          {form?.activo ? "Activo" : "Descontinuado"}
-        </span>
-        {dirty ? <span className="medp-chip medp-chip--dirty">Cambios sin guardar</span> : null}
-      </div>
+  const customHeader = (
+    <div className="prov-editor-header">
+      <span>EDICIÓN DE PRODUCTO</span>
+      <strong>{form?.nombre || "Cargando..."}</strong>
     </div>
   );
-
-  const footer = (
-    <div className="medp-footer">
-      <Button className="medp-btn medp-btn--cancel" label="Cerrar" onClick={onHide} />
-      <div className="grow" />
-      <Button
-        className="medp-btn medp-btn--ghost"
-        icon="pi pi-undo"
-        label="Revertir"
-        disabled={!dirty}
-        onClick={() => {
-          setForm(deepClone(producto));
-          setEditingLote(null);
-          setDirty(false);
-          showToast("info", "Edición", "Cambios revertidos.");
-        }}
-      />
-      <Button
-        className="medp-btn medp-btn--apply"
-        icon="pi pi-save"
-        label="Guardar"
-        disabled={!form}
-        onClick={handleSave}
-      />
-    </div>
-  );
-
-  if (!open) return null;
 
   return (
     <>
       <Toast ref={toast} />
 
-      <Dialog
-        header={header}
+      <Sidebar
         visible={open}
-        onHide={onHide}
-        modal
-        closable
-        draggable={false}
-        className="medp-dialog"
-        footer={footer}
+        position="right"
+        onHide={() => onHide?.()}
+        header={customHeader}
+        className="prov-editor-sidebar p-sidebar-md"
+        dismissable={false}
       >
         {!form ? (
-          <div className="medp-loading">Cargando…</div>
+          <div className="prov-editor-loading">Cargando producto…</div>
         ) : (
-          <div className="medp-wrap">
-            {/* TOP GRID */}
-            <div className="medp-grid">
-              {/* Card: Identidad */}
-              <div className="medp-card medp-card--identity">
-                <div className="medp-cardTitle">
-                  Identidad
-                  <span className="medp-cardHint">Datos base del producto</span>
+          <div className="prov-editor">
+            <div className="prov-editor-body">
+              {/* STATUS BAR */}
+              <div className="prov-chip-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+                <span className="prov-muted-pill">Stock: <b>{stockTotal}</b></span>
+                <span className={form.activo ? "prov-asset-status is-active" : "prov-asset-status is-inactive"}>
+                  {form.activo ? "Activo" : "Descontinuado"}
+                </span>
+                {dirty && <span className="prov-asset-status is-warning">Con Cambios</span>}
+              </div>
+
+              {/* SECCIÓN 1: IDENTIDAD */}
+              <div className="prov-editor-section">
+                <div className="prov-editor-section-head">
+                  <span>1</span>
+                  <h3>Identidad del Producto</h3>
                 </div>
 
-                <div className="medp-formGrid">
-                  <div className="medp-field">
-                    <label>SKU</label>
+                <div className="prov-form-grid">
+                  <div className="prov-field">
+                    <span>SKU / Código *</span>
                     <InputText
-                      className="medp-control medp-it"
                       value={form.sku || ""}
                       onChange={(e) => update({ sku: e.target.value })}
-                      placeholder="Ej: SKU-001"
+                      placeholder="SKU-001"
                     />
                   </div>
 
-                  <div className="medp-field medp-field--wide">
-                    <label>Nombre</label>
+                  <div className="prov-field">
+                    <span>Nombre *</span>
                     <InputText
-                      className="medp-control medp-it"
                       value={form.nombre || ""}
                       onChange={(e) => update({ nombre: e.target.value })}
                       placeholder="Nombre del producto"
                     />
                   </div>
 
-                  <div className="medp-field">
-                    <label>Categoría</label>
+                  <div className="prov-field">
+                    <span>Categoría</span>
                     <Dropdown
-                      className="medp-control medp-dd"
                       value={form.categoriaId ?? null}
                       onChange={(e) => update({ categoriaId: e.value })}
                       options={categoriasOptions}
-                      placeholder="Selecciona categoría"
-                      panelClassName="medp-dd-panel"
-                      emptyMessage="No hay categorías disponibles"
+                      placeholder="Seleccionar"
                     />
                   </div>
 
-                  <div className="medp-field">
-                    <label>Proveedor</label>
+                  <div className="prov-field">
+                    <span>Proveedor</span>
                     <Dropdown
-                      className="medp-control medp-dd"
                       value={form.proveedorId ?? null}
                       onChange={(e) => update({ proveedorId: e.value })}
                       options={proveedoresOptions}
-                      placeholder="Selecciona proveedor"
-                      panelClassName="medp-dd-panel"
+                      placeholder="Seleccionar"
                       filter
-                      emptyMessage="No hay proveedores disponibles"
                     />
                   </div>
 
-                  <div className="medp-field">
-                    <label>Unidad</label>
+                  <div className="prov-field">
+                    <span>Unidad de Medida</span>
                     <Dropdown
-                      className="medp-control medp-dd"
                       value={form.unidadId ?? null}
                       onChange={(e) => update({ unidadId: e.value })}
                       options={unidadesOptions}
-                      placeholder="Selecciona unidad"
-                      panelClassName="medp-dd-panel"
-                      emptyMessage="No hay unidades disponibles"
+                      placeholder="Seleccionar"
                     />
                   </div>
 
-                  <div className="medp-field medp-field--toggle">
-                    <label>Estado</label>
-                    <div className="medp-toggleRow">
+                  <div className="prov-field" style={{ alignSelf: "end" }}>
+                    <label className="prov-check-chip is-selected" style={{ height: "40px" }}>
                       <Checkbox
-                        inputId="medp-activo"
                         checked={!!form.activo}
                         onChange={(e) => update({ activo: e.checked })}
                       />
-                      <label htmlFor="medp-activo" className="medp-toggleLabel">
-                        {form.activo ? "Activo" : "Descontinuado"}
-                      </label>
-                    </div>
+                      <span>Estatus Activo</span>
+                    </label>
                   </div>
                 </div>
               </div>
 
-              {/* Card: Precios */}
-              <div className="medp-card medp-card--pricing">
-                <div className="medp-cardTitle">
-                  Precios
-                  <span className="medp-cardHint">Compra / Venta</span>
+              {/* SECCIÓN 2: PRECIOS */}
+              <div className="prov-editor-section">
+                <div className="prov-editor-section-head">
+                  <span>2</span>
+                  <h3>Estructura de Precios</h3>
                 </div>
 
-                <div className="medp-formGrid medp-formGrid--pricing">
-                  <div className="medp-field">
-                    <label>Precio compra</label>
+                <div className="prov-form-grid">
+                  <div className="prov-field">
+                    <span>Precio Compra ($)</span>
                     <InputNumber
-                      className="medp-control medp-num"
                       value={form.precioCompra}
                       onValueChange={(e) => update({ precioCompra: e.value ?? 0 })}
-                      mode="decimal"
+                      mode="currency"
+                      currency="MXN"
                       min={0}
-                      maxFractionDigits={2}
-                      placeholder="0.00"
-                      showButtons
                     />
                   </div>
 
-                  <div className="medp-field">
-                    <label>Precio venta</label>
+                  <div className="prov-field">
+                    <span>Precio Venta ($) *</span>
                     <InputNumber
-                      className="medp-control medp-num"
                       value={form.precioVenta}
                       onValueChange={(e) => update({ precioVenta: e.value ?? 0 })}
-                      mode="decimal"
+                      mode="currency"
+                      currency="MXN"
                       min={0}
-                      maxFractionDigits={2}
-                      placeholder="0.00"
-                      showButtons
                     />
                   </div>
+                </div>
 
-                  <div className="medp-field medp-field--wide">
-                    <div className="medp-pricePreview">
-                      <div className="medp-priceLine">
-                        <span className="medp-muted">Compra</span>
-                        <b className="tabular">{formatMoney(form.precioCompra)}</b>
-                      </div>
-                      <div className="medp-priceLine">
-                        <span className="medp-muted">Venta</span>
-                        <b className="tabular">{formatMoney(form.precioVenta)}</b>
-                      </div>
-                      <div className="medp-priceLine medp-priceLine--profit">
-                        <span className="medp-muted">Margen</span>
-                        <b className="tabular">
-                          {(() => {
-                            const pc = Number(form.precioCompra);
-                            const pv = Number(form.precioVenta);
-                            if (!Number.isFinite(pc) || !Number.isFinite(pv)) return "—";
-                            return formatMoney(pv - pc);
-                          })()}
-                        </b>
-                      </div>
+                <div className="prov-adv-form" style={{ marginTop: "12px" }}>
+                  <div className="prov-detail-info-grid is-three">
+                    <div className="prov-detail-info-item">
+                      <span>Costo Compra</span>
+                      <strong>{formatMoney(form.precioCompra)}</strong>
+                    </div>
+                    <div className="prov-detail-info-item">
+                      <span>Precio Venta</span>
+                      <strong>{formatMoney(form.precioVenta)}</strong>
+                    </div>
+                    <div className="prov-detail-info-item">
+                      <span>Margen Bruto</span>
+                      <strong style={{ color: "#0a7463" }}>
+                        {formatMoney((Number(form.precioVenta) || 0) - (Number(form.precioCompra) || 0))}
+                      </strong>
                     </div>
                   </div>
                 </div>
               </div>
-
-                {/* Glass overlay para el sheet */}
-                {editingLote ? <div className="medp-loteSheet-backdrop" onClick={() => setEditingLote(null)} /> : null}
-              </div>
             </div>
+
+            {/* FOOTER */}
+            <div className="prov-editor-footer">
+              <Button
+                type="button"
+                label="Revertir"
+                icon="pi pi-undo"
+                className="prov-soft-btn"
+                disabled={!dirty}
+                onClick={() => {
+                  setForm(deepClone(producto));
+                  setDirty(false);
+                  showToast("info", "Edición", "Cambios revertidos.");
+                }}
+              />
+              <Button type="button" label="Cancelar" className="prov-soft-btn" onClick={onHide} />
+              <Button
+                type="button"
+                label="Guardar Cambios"
+                icon="pi pi-check"
+                className="prov-primary-btn"
+                onClick={handleSave}
+              />
+            </div>
+          </div>
         )}
-      </Dialog>
+      </Sidebar>
     </>
   );
 }

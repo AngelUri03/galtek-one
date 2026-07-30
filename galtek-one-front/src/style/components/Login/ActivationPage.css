@@ -1,0 +1,231 @@
+/* Glassmorphism Card para Pantalla de Activación */
+.activation-card {
+  width: 100%;
+  max-width: 650px;
+  background: rgba(20, 20, 20, 0.75); /* Fondo oscuro para contrastar con el video */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  color: #fff;
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+
+
+@keyframes slideUpFade {
+  0% { opacity: 0; transform: translateY(40px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.activation-title {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg, #ffffff, #e2e8f0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 1px;
+}
+
+.activation-subtitle {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+/* Code Box Moderno */
+.code-box-wrapper {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  transition: border-color 0.3s ease;
+}
+
+.code-box-wrapper:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.code-text {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.85rem;
+  color: #34d399; /* Verde esmeralda tipo terminal hacker */
+  word-break: break-all;
+  max-height: 90px;
+  overflow-y: auto;
+  line-height: 1.4;
+  padding-right: 5px;
+}
+
+/* Scrollbar sutil para el código */
+.code-text::-webkit-scrollbar {
+  width: 4px;
+}
+.code-text::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.copy-btn {
+  align-self: flex-end;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+.copy-btn:active {
+  transform: translateY(0);
+}
+
+/* Input Area JWT */
+.activation-input-label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  margin-bottom: 0.7rem;
+}
+
+.jwt-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: #fff;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.85rem;
+  padding: 1rem;
+  resize: none;
+  outline: none;
+  transition: all 0.3s ease;
+  min-height: 120px;
+  box-sizing: border-box;
+}
+
+.jwt-input:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.jwt-input::placeholder {
+  color: #6b7280;
+}
+
+/* Botón Principal de Activar */
+.activate-submit-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #10b981, #059669); /* Verde esmeralda */
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: "Kodchasan", sans-serif;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.activate-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+.activate-submit-btn:disabled {
+  background: #4b5563;
+  cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: none;
+}
+
+/* ========= ESTADOS DE ERROR (HARDWARE LOCK) ========= */
+.activation-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+  animation: slideUpFade 0.6s ease forwards;
+}
+
+.error-icon-wrapper {
+  background: rgba(239, 68, 68, 0.1);
+  padding: 1.5rem;
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  animation: pulseError 2s infinite;
+}
+
+.error-icon-wrapper .pi {
+  font-size: 3.5rem;
+  color: #ef4444;
+}
+
+@keyframes pulseError {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.error-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fca5a5;
+  margin-bottom: 0.8rem;
+  font-family: "Kodchasan", sans-serif;
+  text-align: center;
+}
+
+.error-desc {
+  color: #d1d5db;
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.error-reason {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px dashed #ef4444;
+  padding: 1rem;
+  border-radius: 8px;
+  color: #fca5a5;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.85rem;
+  text-align: center;
+  width: 100%;
+}

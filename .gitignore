@@ -27,7 +27,6 @@ $RECYCLE.BIN/
 !.env.sample
 !**/.env.example
 !**/.env.sample
-*.pem
 *.key
 *.p12
 *.pfx
@@ -108,3 +107,15 @@ temp/
 
 # Accidental local files
 **/git status
+
+# =========================
+# SEGURIDAD Y LICENCIAMIENTO
+# =========================
+# Ignorar TODAS las llaves (.pem) en cualquier carpeta para que no se filtren
+*.pem
+# EXCEPCION OBLIGATORIA: Permitir la llave publica que valida licencias en el backend
+!galtek-one-back/src/main/resources/certs/license_public_key.pem
+
+# Ignorar herramientas de generacion criptografica (Previene exponer ingenieria en repo publico)
+**/LicenseKeygenCLI.java
+**/KeyGen.java

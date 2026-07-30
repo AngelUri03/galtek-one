@@ -31,6 +31,8 @@ export default function ClienteSeleccionado() {
   const [loading, setLoading] = useState(!state?.cliente);
   const [detalleVisible, setDetalleVisible] = useState(false);
   const [pedidoDetalle, setPedidoDetalle] = useState(null);
+  //Estado ddel modal de eliminación
+  const [modalEliminarVisible, setModalEliminarVisible] = useState(false);
   const money = (n) => `$${(Number(n) || 0).toFixed(2)}`;
 
   useEffect(() => {
@@ -93,8 +95,28 @@ export default function ClienteSeleccionado() {
     );
   }
 
-  const handleEliminar = (clienteId) => {
+  
+  /*const handleEliminar = (clienteId) => {
     navigate("/clientes", { state: { eliminarClienteId: clienteId } });
+  };*/
+
+  // Función para abrir el modal de confirmación de eliminación
+  const confirmarEliminacion = () => {
+    setModalEliminarVisible(true);
+  };
+
+  // Función para ejecutar la eliminación después de la confirmación
+  const ejecutarEliminacion = async () => {
+    try {
+      const response = await api.fetchApi({}, "DELETE", undefined, `${endpoints.clientes}/${cliente.id}`);
+      if (response?.ok) {
+        setModalEliminarVisible(false);
+        // Redirigimos a clientes y disparamos la actualización
+        navigate("/clientes", { state: { eliminarClienteId: cliente.id } });
+      }
+    } catch (error) {
+      console.error("Error al eliminar el cliente:", error);
+    }
   };
 
   return (
@@ -137,7 +159,7 @@ export default function ClienteSeleccionado() {
               label="Eliminar"
               icon="pi pi-trash"
               className="btn-verde"
-              onClick={() => handleEliminar(cliente.id)}
+              onClick={confirmarEliminacion}
             />
             <Button
               label="Ver Pedido"
@@ -182,6 +204,26 @@ export default function ClienteSeleccionado() {
             </div>
           </div>
         )}
+      </Dialog>
+      <Dialog
+        visible={modalEliminarVisible}
+        onHide={() => setModalEliminarVisible(false)}
+        modal
+        dismissableMask
+        showHeader={false}
+        className="dialog-eliminar"
+        style={{ width: '30vw', minWidth: '300px' }}
+      >
+        <div className="modal-eliminar-content">
+          <i className="pi pi-exclamation-triangle modal-eliminar-icon"></i>
+          <span className="modal-eliminar-text">
+            ¿Estás seguro de que deseas eliminar permanentemente a <strong>{cliente?.nombre}</strong>?
+          </span>
+          <div className="modal-eliminar-actions">
+            <Button label="Cancelar" icon="pi pi-times" className="btn-gris-cancelar" onClick={() => setModalEliminarVisible(false)} />
+            <Button label="Eliminar" icon="pi pi-check" className="btn-verde-modal" onClick={ejecutarEliminacion} />
+          </div>
+        </div>
       </Dialog>
     </Shell>
   );

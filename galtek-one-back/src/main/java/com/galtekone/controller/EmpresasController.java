@@ -21,6 +21,8 @@ import com.galtekone.entity.TipoSuscripcionEntity;
 import com.galtekone.services.EmpresasService;
 import com.galtekone.utils.ApiResponseBuilder;
 import com.galtekone.utils.DynamicSpecification;
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,6 +36,32 @@ public class EmpresasController {
 
 	@Autowired
 	private EmpresasService empresasService;
+
+	@GetMapping(path = "/actual", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> getEmpresaActual(@RequestHeader(name = "user", required = true) String user) {
+		long startTime = System.currentTimeMillis();
+
+		try {
+			Object resp = empresasService.readActual();
+			return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Empresa actual obtenida con exito");
+		} catch (Exception e) {
+			return handleError(user, startTime, "Error al obtener la empresa actual: " + e.getMessage(), e);
+		}
+	}
+
+	@PutMapping(path = "/actual", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> putEmpresaActual(
+			@RequestHeader(name = "user", required = true) String user,
+			@RequestBody EmpresasDTO dto) {
+		long startTime = System.currentTimeMillis();
+
+		try {
+			Object resp = empresasService.updateActual(dto, user);
+			return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Tienda actualizada con exito");
+		} catch (Exception e) {
+			return handleError(user, startTime, "Error al actualizar la tienda: " + e.getMessage(), e);
+		}
+	}
 
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> getEmpresas(@RequestHeader(name = "user", required = true) String user,
@@ -62,7 +90,34 @@ public class EmpresasController {
 		try {
 			EmpresasEntity entity = new EmpresasEntity();
 			entity.setNombreEmpresa(dto.getNombre());
+			entity.setRazonSocial(dto.getRazonSocial());
+			entity.setRfc(dto.getRfc());
 			entity.setDireccion(dto.getDireccion());
+			entity.setDireccionCalle(dto.getDireccionCalle());
+			entity.setDireccionNumeroExterior(dto.getDireccionNumeroExterior());
+			entity.setDireccionNumeroInterior(dto.getDireccionNumeroInterior());
+			entity.setDireccionColonia(dto.getDireccionColonia());
+			entity.setDireccionMunicipio(dto.getDireccionMunicipio());
+			entity.setDireccionEstado(dto.getDireccionEstado());
+			entity.setDireccionCodigoPostal(dto.getDireccionCodigoPostal());
+			entity.setDireccionReferencia(dto.getDireccionReferencia());
+			entity.setTelefono(dto.getTelefono());
+			entity.setWhatsapp(dto.getWhatsapp());
+			entity.setCorreo(dto.getCorreo());
+			entity.setHorarioOperacion(dto.getHorarioOperacion());
+			entity.setHorarioConfig(dto.getHorarioConfig());
+			entity.setHorarioLunesViernesApertura(dto.getHorarioLunesViernesApertura());
+			entity.setHorarioLunesViernesCierre(dto.getHorarioLunesViernesCierre());
+			entity.setHorarioSabadoDomingoApertura(dto.getHorarioSabadoDomingoApertura());
+			entity.setHorarioSabadoDomingoCierre(dto.getHorarioSabadoDomingoCierre());
+			entity.setHorarioSabadoDomingoCerrado(dto.getHorarioSabadoDomingoCerrado());
+			entity.setHorarioNotas(dto.getHorarioNotas());
+			entity.setMoneda(dto.getMoneda());
+			entity.setZonaHoraria(dto.getZonaHoraria());
+			entity.setTicketMensaje(dto.getTicketMensaje());
+			entity.setLogoNombre(dto.getLogoNombre());
+			entity.setLogoMimeType(dto.getLogoMimeType());
+			entity.setLogoBase64(dto.getLogoBase64());
 			entity.setFechaInicio(dto.getFechaInicio());
 			entity.setFechaFin(dto.getFechaFin());
 			entity.setTokenLicencia(dto.getTokenLicencia());
@@ -92,7 +147,34 @@ public class EmpresasController {
 			EmpresasEntity entity = new EmpresasEntity();
 			entity.setIdEmpresa(id);
 			entity.setNombreEmpresa(dto.getNombre());
+			entity.setRazonSocial(dto.getRazonSocial());
+			entity.setRfc(dto.getRfc());
 			entity.setDireccion(dto.getDireccion());
+			entity.setDireccionCalle(dto.getDireccionCalle());
+			entity.setDireccionNumeroExterior(dto.getDireccionNumeroExterior());
+			entity.setDireccionNumeroInterior(dto.getDireccionNumeroInterior());
+			entity.setDireccionColonia(dto.getDireccionColonia());
+			entity.setDireccionMunicipio(dto.getDireccionMunicipio());
+			entity.setDireccionEstado(dto.getDireccionEstado());
+			entity.setDireccionCodigoPostal(dto.getDireccionCodigoPostal());
+			entity.setDireccionReferencia(dto.getDireccionReferencia());
+			entity.setTelefono(dto.getTelefono());
+			entity.setWhatsapp(dto.getWhatsapp());
+			entity.setCorreo(dto.getCorreo());
+			entity.setHorarioOperacion(dto.getHorarioOperacion());
+			entity.setHorarioConfig(dto.getHorarioConfig());
+			entity.setHorarioLunesViernesApertura(dto.getHorarioLunesViernesApertura());
+			entity.setHorarioLunesViernesCierre(dto.getHorarioLunesViernesCierre());
+			entity.setHorarioSabadoDomingoApertura(dto.getHorarioSabadoDomingoApertura());
+			entity.setHorarioSabadoDomingoCierre(dto.getHorarioSabadoDomingoCierre());
+			entity.setHorarioSabadoDomingoCerrado(dto.getHorarioSabadoDomingoCerrado());
+			entity.setHorarioNotas(dto.getHorarioNotas());
+			entity.setMoneda(dto.getMoneda());
+			entity.setZonaHoraria(dto.getZonaHoraria());
+			entity.setTicketMensaje(dto.getTicketMensaje());
+			entity.setLogoNombre(dto.getLogoNombre());
+			entity.setLogoMimeType(dto.getLogoMimeType());
+			entity.setLogoBase64(dto.getLogoBase64());
 			entity.setFechaInicio(dto.getFechaInicio());
 			entity.setFechaFin(dto.getFechaFin());
 			entity.setTokenLicencia(dto.getTokenLicencia());
@@ -127,6 +209,16 @@ public class EmpresasController {
 			return ApiResponseBuilder.buildErrorResponse(user, startTime,
 					"Error al actualizar las empresas: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	private ResponseEntity<Object> handleError(String user, long startTime, String message, Exception e) {
+		if (e instanceof IllegalArgumentException) {
+			return ApiResponseBuilder.buildErrorResponse(user, startTime, e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		if (e instanceof EntityNotFoundException) {
+			return ApiResponseBuilder.buildErrorResponse(user, startTime, e.getMessage(), HttpStatus.NOT_FOUND);
+		}
+		return ApiResponseBuilder.buildErrorResponse(user, startTime, message, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 }

@@ -1,19 +1,16 @@
+/* ==========================================================================
+   CONFIGURACIÓN GLOBAL: FONDO DEGRADADO Y TARJETAS BLANCAS
+   ========================================================================== */
+
+:root {
+  --rvx-brand: #00A38B; 
+}
 
 /* Fuente general para todo el módulo Compras */
-.compras-wrapper,
-.compras-prod-wrapper,
-.compras-prov-wrapper,
-.compras-ticket-wrapper,
-.compras-content,
-.compras-table-section,
-.compras-sugerencia,
-.sugerencia-panel,
-.sugerencia-tabla,
-.p-button,
-.p-inputtext,
-.p-dialog,
-.p-datatable,
-.p-column-header-content {
+.compras-workspace-wrapper,
+.p-tabview,
+.p-tabview-nav-link,
+.p-tabview-panels {
   font-family: 'Kodchasan', sans-serif !important;
 }
 
@@ -21,65 +18,155 @@ h1, h2, h3 {
   font-weight: 700;
 }
 
-p, span, td, th, label, button, input, select {
+p, span, label, button, input, select {
   font-weight: 400;
 }
 
-.compras-wrapper {
-  padding: 1rem;
-  text-align: center;
+/* 
+  FONDO PRINCIPAL: Aquí mantenemos el gradiente azul/verde 
+*/
+.compras-workspace-wrapper {
+  padding: 0.5rem 2rem 2rem 2rem; 
+  max-width: 1500px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 100%);
 }
 
-.compras-title {
+.compras-header {
+  margin-bottom: 2rem;
+}
+
+.compras-header h1 {
   font-size: 2.2rem;
+  color: #333;
+}
+
+/* --- TABS: BLANCOS SÓLIDOS PARA QUE NO SE VEAN AZULES --- */
+.compras-tabs-container .p-tabview-nav {
+  border-bottom: 2px solid #e4e4e4;
+  background: #ffffff !important; 
+  border-radius: 0.5rem 0.5rem 0 0; /* Un pequeño redondeo para que se vea limpio */
+}
+
+.compras-tabs-container .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  color: #00A38B !important;
+  border-color: #00A38B !important;
   font-weight: 700;
-  margin-top: 3rem !important;  /* fuerza el espacio superior */
-  margin-bottom: 4rem;
+  background: #ffffff !important;
+}
+
+.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link {
+  color: #666;
+  padding: 1rem 1.5rem;
+  transition: all 0.2s ease-in-out;
+  background: #ffffff !important;
+}
+
+.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 163, 139, 0.2) !important;
+}
+
+.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link:not(.p-disabled):hover {
+  border-color: #00A38B;
+  color: #00A38B;
+}
+
+.compras-tabs-container .p-tabview-panels {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.compras-tabs-container .mr-2 {
+  margin-right: 0.5rem;
+}
+
+/* 
+  TARJETAS PRINCIPALES: Eliminamos el borde blanco molesto y mantenemos el volumen 
+*/
+.compras-workspace-wrapper .nc-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f4f9fa 100%) !important;
+  border: none !important; /* <-- Esto elimina la línea blanca de la imagen 45cfe5.png */
+  outline: none !important;
+  border-radius: 1.25rem !important; 
+  box-shadow: 
+    inset 0 2px 4px rgba(255, 255, 255, 1), 
+    inset 0 -3px 10px rgba(220, 230, 240, 0.5), 
+    0 8px 24px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.3s ease;
+  overflow: hidden; /* Asegura que nada se desborde por los bordes redondeados */
+}
+
+.compras-workspace-wrapper .nc-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    inset 0 2px 4px rgba(255, 255, 255, 1), 
+    inset 0 -3px 10px rgba(220, 230, 240, 0.5), 
+    0 12px 28px rgba(0, 163, 139, 0.08) !important;
+}
+
+/* Contenedores provisionales (Placeholders) */
+.placeholder-content {
+  padding: 4rem 2rem;
   text-align: center;
-}
-
-.compras-cards {
-  display: flex;
-  justify-content: center;
-  gap: 3rem;
-  flex-wrap: wrap;
-}
-
-.compras-card {
-  background-color: #009b85;
-  color: #fff;
-  text-decoration: none;
-  width: 20rem;
-  height: 10rem;
+  background: #ffffff;
   border-radius: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.25s ease, background-color 0.25s ease;
-  cursor: pointer;
+  margin-top: 1rem;
+  color: #666;
+  border: 2px dashed #ccc;
 }
 
-.compras-card i {
-  font-size: 2.2rem;
-  margin-bottom: 0.75rem;
+.placeholder-content h2 {
+  color: #00A38B;
+  margin-bottom: 1rem;
 }
 
-.compras-card h3 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin: 0;
-  color : white;
+/* 
+  CONTENEDORES INTERNOS: 
+  Los hacemos completamente transparentes para que hereden 
+  el degradado y el volumen de la .nc-card sin cortes ni bordes.
+*/
+.compras-workspace-wrapper .p-stepper,
+.compras-workspace-wrapper .p-stepper-panels,
+.compras-workspace-wrapper .p-stepper-panel,
+.compras-workspace-wrapper .sugerencia-panel {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important; /* Quitamos la sombra doble */
+  outline: none !important;
 }
 
-.compras-card span {
-  font-size: 0.95rem;
-  font-weight: 500;
-  margin-top: 0.5rem;
+/* Opcional: Aseguramos que los fondos de las cabeceras del stepper de PrimeReact también sean transparentes */
+.compras-workspace-wrapper .p-stepper .p-stepper-nav {
+  background: transparent !important;
+  border: none !important;
 }
 
-/* hover animación */
-.compras-card:hover {
-  background-color: #008a75;
-  transform: scale(1.05);
+/* ==========================================================================
+   CORRECCIÓN DE SCROLL HORIZONTAL EN STEPPER Y TABLAS
+   ========================================================================== */
+
+/* 1. Evitar que el panel del stepper se desborde (Scroll exterior) */
+.compras-workspace-wrapper .p-stepper-panels,
+.compras-workspace-wrapper .p-stepper-panel {
+  overflow-x: hidden !important;
+  min-width: 0 !important; /* Fix crucial para contenedores Grid/Flex */
+}
+
+/* 2. Evitar el scroll interno de la tabla y forzar ajuste (Scroll interior) */
+.compras-workspace-wrapper .p-datatable-wrapper {
+  overflow-x: hidden !important;
+  width: 100% !important;
+}
+
+/* 3. Asegurar que la tabla ocupe exactamente el espacio disponible */
+.compras-workspace-wrapper .p-datatable table {
+  width: 100% !important;
+  table-layout: auto !important;
+}
+
+/* Opcional: Permitir que el texto largo en la tabla baje de línea en lugar de empujar */
+.compras-workspace-wrapper .p-datatable .p-datatable-tbody > tr > td {
+  white-space: normal !important;
+  word-wrap: break-word !important;
 }

@@ -1,5 +1,7 @@
 package com.galtekone.entity;
 
+import java.math.BigDecimal;
+
 import com.galtekone.utils.BaseEmpresa;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,8 +34,8 @@ public class HistorialCostosEntity extends CommonEntity implements BaseEmpresa {
     @JoinColumn(name = "id_producto", nullable = false)
     private ProductosEntity producto;
 
-    @Column(name = "precio_compra", nullable = false)
-    private Integer precioCompra;
+    @Column(name = "precio_compra", nullable = false, precision = 12, scale = 2)
+    private BigDecimal precioCompra;
     
     @ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "id_empresa", nullable = false)

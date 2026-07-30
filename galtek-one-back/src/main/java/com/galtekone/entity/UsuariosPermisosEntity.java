@@ -34,7 +34,7 @@ public class UsuariosPermisosEntity extends CommonEntity {
 	@Column(name = "efecto", nullable = false, length = 10)
 	private String efecto;
 
-	@Column(name = "motivo", length = 180)
+	@Column(name = "motivo", length = 500)
 	private String motivo;
 
 }
