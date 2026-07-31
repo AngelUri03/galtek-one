@@ -18,4 +18,6 @@ public interface VentasRepository extends JpaRepository<VentasEntity, Integer>, 
     long countByCliente_IdClienteAndEmpresa_IdEmpresa(Integer idCliente, Integer idEmpresa);
 
     List<VentasEntity> findTop5ByCliente_IdClienteAndEmpresa_IdEmpresaOrderByFechaCreacionDesc(Integer idCliente, Integer idEmpresa);
+
+    List<VentasEntity> findByCajaSesion_IdCajaSesionAndEmpresa_IdEmpresa(Integer idCajaSesion, Integer idEmpresa);
 }

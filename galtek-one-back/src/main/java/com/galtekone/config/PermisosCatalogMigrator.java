@@ -40,13 +40,27 @@ public class PermisosCatalogMigrator {
         new PermissionSeed("REIMPRIMIR_TICKET", "VENTAS_REIMPRIMIR_TICKET", "Reimprimir comprobantes de venta", "VENTAS", "Reimprimir ticket"),
         new PermissionSeed("VER", "VENTAS_VER_HISTORIAL", "Consultar ventas anteriores", "VENTAS", "Ver historial de ventas"),
         new PermissionSeed("CLIENTE", "VENTAS_SELECCIONAR_CLIENTE", "Asignar cliente a una venta", "VENTAS", "Seleccionar cliente"),
-        new PermissionSeed("ABRIR", "CAJA_ABRIR", "Iniciar caja operativa", "CAJA", "Abrir caja"),
+        new PermissionSeed("ABRIR", "CAJA_ABRIR", "Iniciar turno operativo de caja", "CAJA", "Abrir turno"),
         new PermissionSeed("CERRAR", "CAJA_CERRAR_PROPIA", "Cerrar la caja del usuario actual", "CAJA", "Cerrar caja propia"),
         new PermissionSeed("CERRAR", "CAJA_CERRAR_AJENA", "Cerrar caja operada por otro usuario", "CAJA", "Cerrar caja ajena"),
         new PermissionSeed("ENTRADA", "CAJA_ENTRADA_EFECTIVO", "Registrar ingresos manuales de efectivo", "CAJA", "Entrada de efectivo"),
         new PermissionSeed("RETIRO", "CAJA_RETIRO_EFECTIVO", "Registrar retiros manuales de efectivo", "CAJA", "Retiro de efectivo"),
         new PermissionSeed("ARQUEO", "CAJA_VER_ARQUEO", "Consultar conteos y diferencias de caja", "CAJA", "Ver arqueo"),
         new PermissionSeed("AJUSTAR", "CAJA_AJUSTAR_DIFERENCIA", "Corregir diferencias de arqueo", "CAJA", "Ajustar diferencia"),
+        new PermissionSeed("OPEN", "CASH_OPEN", "Abrir turno operativo de caja", "CAJA", "Abrir turno"),
+        new PermissionSeed("CLOSE_OWN", "CASH_CLOSE_OWN", "Cerrar la sesion de caja propia", "CAJA", "Cerrar caja propia"),
+        new PermissionSeed("CLOSE_OTHERS", "CASH_CLOSE_OTHERS", "Cerrar o conciliar una sesion de otro usuario", "CAJA", "Cerrar caja de otros"),
+        new PermissionSeed("ENTRY", "CASH_MOVEMENT_ENTRY", "Registrar entradas manuales de efectivo", "CAJA", "Entrada manual"),
+        new PermissionSeed("WITHDRAWAL", "CASH_MOVEMENT_WITHDRAWAL", "Registrar retiros manuales de efectivo", "CAJA", "Retiro manual"),
+        new PermissionSeed("SUMMARY", "CASH_VIEW_SUMMARY", "Consultar resumen operativo de caja", "CAJA", "Ver resumen de caja"),
+        new PermissionSeed("HISTORY", "CASH_VIEW_HISTORY", "Consultar historial de sesiones y movimientos de caja", "CAJA", "Ver historial de caja"),
+        new PermissionSeed("SUMMARY", "CASH_VIEW_SALES_SUMMARY", "Consultar ventas y movimientos sin revelar efectivo esperado", "CAJA", "Ver resumen de ventas"),
+        new PermissionSeed("MOVEMENTS", "CASH_VIEW_MOVEMENTS", "Consultar movimientos operativos de caja", "CAJA", "Ver movimientos de caja"),
+        new PermissionSeed("EXPECTED", "CASH_VIEW_EXPECTED_BALANCE", "Consultar efectivo esperado de caja", "CAJA", "Ver efectivo esperado"),
+        new PermissionSeed("REVEAL", "CASH_REVEAL_EXPECTED_BALANCE", "Revelar efectivo esperado con auditoria", "CAJA", "Revelar efectivo esperado"),
+        new PermissionSeed("INCIDENTS", "CASH_REVIEW_INCIDENTS", "Revisar incidencias de caja pendientes", "CAJA", "Revisar incidencias"),
+        new PermissionSeed("RESOLVE", "CASH_RESOLVE_DISCREPANCY", "Resolver discrepancias e incidencias de caja", "CAJA", "Resolver discrepancias"),
+        new PermissionSeed("POLICY", "CASH_MANAGE_POLICY", "Configurar politica de caja y turnos", "CAJA", "Gestionar politica de caja"),
         new PermissionSeed("CREAR", "INVENTARIO_CREAR_PRODUCTO", "Dar de alta productos en inventario", "INVENTARIO", "Crear producto"),
         new PermissionSeed("EDITAR", "INVENTARIO_EDITAR_PRODUCTO", "Modificar datos generales de productos", "INVENTARIO", "Editar producto"),
         new PermissionSeed("PRECIO_EDITAR", "INVENTARIO_EDITAR_PRECIO", "Modificar precios de venta", "INVENTARIO", "Editar precio"),
@@ -117,6 +131,7 @@ public class PermisosCatalogMigrator {
             try {
                 insertMissingPermissions(connection);
                 ensureAdministratorHasAllPermissions(connection);
+                ensureDefaultCashRolePermissions(connection);
                 connection.commit();
             } catch (Exception ex) {
                 connection.rollback();
@@ -170,6 +185,57 @@ public class PermisosCatalogMigrator {
             """;
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.executeUpdate();
+        }
+    }
+
+    private void ensureDefaultCashRolePermissions(Connection connection) throws Exception {
+        assignPermissions(connection,
+                List.of("VENDEDOR"),
+                List.of("CASH_OPEN", "CASH_CLOSE_OWN", "CASH_VIEW_SUMMARY", "CASH_VIEW_SALES_SUMMARY"));
+
+        assignPermissions(connection,
+                List.of("CAJERO"),
+                List.of("CASH_OPEN", "CASH_CLOSE_OWN", "CASH_VIEW_SUMMARY", "CASH_VIEW_HISTORY",
+                        "CASH_VIEW_SALES_SUMMARY", "CASH_VIEW_MOVEMENTS"));
+
+        assignPermissions(connection,
+                List.of("SUPERVISOR"),
+                List.of("CASH_OPEN", "CASH_CLOSE_OWN", "CASH_CLOSE_OTHERS", "CASH_MOVEMENT_ENTRY",
+                        "CASH_MOVEMENT_WITHDRAWAL", "CASH_VIEW_SUMMARY", "CASH_VIEW_HISTORY",
+                        "CASH_VIEW_SALES_SUMMARY", "CASH_VIEW_MOVEMENTS", "CASH_VIEW_EXPECTED_BALANCE",
+                        "CASH_REVEAL_EXPECTED_BALANCE", "CASH_REVIEW_INCIDENTS", "CASH_RESOLVE_DISCREPANCY",
+                        "CASH_MANAGE_POLICY"));
+    }
+
+    private void assignPermissions(Connection connection, List<String> roleNames, List<String> permissionKeys)
+            throws Exception {
+        String roleNamesSql = roleNames.stream().map(value -> "?").reduce((a, b) -> a + "," + b).orElse("?");
+        String keysSql = permissionKeys.stream().map(value -> "?").reduce((a, b) -> a + "," + b).orElse("?");
+        String sql = """
+            INSERT INTO RolesPermisos
+            (estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, id_permiso, id_rol)
+            SELECT 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'),
+                   'system', 'system', p.id_permiso, r.id_rol
+            FROM Roles r
+            JOIN Permisos p ON UPPER(p.clave) IN (__KEYS__)
+            WHERE UPPER(r.nombre_rol) IN (__ROLES__)
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM RolesPermisos rp
+                  WHERE rp.id_rol = r.id_rol
+                    AND rp.id_permiso = p.id_permiso
+              )
+            """.replace("__KEYS__", keysSql).replace("__ROLES__", roleNamesSql);
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            int index = 1;
+            for (String key : permissionKeys) {
+                statement.setString(index++, key.toUpperCase());
+            }
+            for (String roleName : roleNames) {
+                statement.setString(index++, roleName.toUpperCase());
+            }
             statement.executeUpdate();
         }
     }

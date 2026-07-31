@@ -1,18 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Dialog } from "primereact/dialog";
-import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
 
 import PagoEfectivo from "./PagoEfectivo";
 import PagoTarjeta from "./PagoTarjeta";
-import PagoTransferencia from "./PagoTransferencia";
+import PagoTarjetaCliente from "./PagoTarjetaCliente";
+import PagoVales from "./PagoVales";
 
 import "../../../../style/components/Ventas/ConfirmarPagoModal.css";
 
 const PAYMENT_ICONS = {
   EFECTIVO: "pi pi-money-bill",
   TARJETA: "pi pi-credit-card",
-  TRANSFERENCIA: "pi pi-send",
+  VALES: "pi pi-ticket",
+  CASH: "pi pi-money-bill",
+  TERMINAL: "pi pi-credit-card",
+  CARD: "pi pi-credit-card",
+  VOUCHER: "pi pi-ticket",
+};
+
+const PAYMENT_DESCRIPTIONS = {
+  EFECTIVO: "Recibido y cambio inmediato",
+  TARJETA: "Referencia o autorizacion",
+  VALES: "Referencia del vale",
+  CASH: "Recibido y cambio inmediato",
+  TERMINAL: "Terminal y autorizacion",
+  CARD: "Datos de tarjeta configurada",
+  VOUCHER: "Referencia del vale",
 };
 
 const normalizePaymentCode = (value) =>
@@ -20,52 +33,43 @@ const normalizePaymentCode = (value) =>
     .trim()
     .toUpperCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
 
-const PagoGenerico = ({ metodo, total, onCancelar, onPaymentSuccess }) => {
-  const [referencia, setReferencia] = useState("");
+const normalizePaymentType = (value) => {
+  const code = normalizePaymentCode(value);
+  if (["CASH", "TERMINAL", "CARD", "VOUCHER"].includes(code)) return code;
+  if (code.includes("EFECTIVO") || code.includes("CASH")) return "CASH";
+  if (code.includes("TERMINAL") || code.includes("MERCADO_PAGO")) return "TERMINAL";
+  if (code.includes("TARJETA") || code.includes("CREDITO") || code.includes("DEBITO") || code.includes("CARD")) return "CARD";
+  if (code.includes("VALE") || code.includes("VOUCHER")) return "VOUCHER";
+  return "CARD";
+};
 
-  const confirmarPago = () => {
-    onPaymentSuccess?.({
-      metodo,
-      referencia,
-      total,
-    });
-  };
+const money = (value) =>
+  (Number(value) || 0).toLocaleString("es-MX", {
+    style: "currency",
+    currency: "MXN",
+    maximumFractionDigits: 2,
+  });
 
-  return (
-    <div className="pago-metodo">
-      <p className="pago-total">
-        Total: <strong>${total.toFixed(2)}</strong>
-      </p>
-      <div className="pago-input-container">
-        <label htmlFor="ref-generica" className="pago-input-label">
-          Referencia
-        </label>
-        <div className="p-inputgroup">
-          <span className="p-inputgroup-addon">
-            <i className="pi pi-wallet" />
-          </span>
-          <InputText
-            id="ref-generica"
-            value={referencia}
-            onChange={(e) => setReferencia(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && confirmarPago()}
-            autoFocus
-          />
-        </div>
-      </div>
-      <div className="pago-acciones">
-        <Button label="Cancelar" className="p-button-text" onClick={onCancelar} />
-        <Button
-          label="Confirmar pago"
-          icon="pi pi-check"
-          className="p-button-success"
-          onClick={confirmarPago}
-        />
-      </div>
-    </div>
-  );
+const formatCantidad = (value) => {
+  const number = Number(value || 0);
+  if (!Number.isFinite(number)) return "0";
+  return Number.isInteger(number) ? String(number) : number.toFixed(3);
+};
+
+const formatPaymentLabel = (value) => {
+  const text = String(value || "").trim();
+  if (!text) return "Metodo";
+
+  return text
+    .toLowerCase()
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 };
 
 const ConfirmarPagoModal = ({
@@ -74,19 +78,33 @@ const ConfirmarPagoModal = ({
   total,
   carrito = [],
   metodosPago = [],
+  paymentConfig = null,
   onPaymentSuccess,
+  processing = false,
+  error = "",
+  clienteVenta = null,
+  onBackToCliente,
 }) => {
   const [metodo, setMetodo] = useState(null);
-  const paymentOptions = metodosPago.map((m) => {
-    const nombre = m.nombreMetodoPago || m.nombre || "";
-    const codigo = normalizePaymentCode(nombre);
-    return {
-      id: m.idMetodoPago || m.id || codigo,
-      label: nombre,
-      value: codigo,
-      icon: PAYMENT_ICONS[codigo] || "pi pi-wallet",
-    };
-  });
+
+  const paymentOptions = metodosPago
+    .map((m) => {
+      const nombre = m.nombreMetodoPago || m.nombre || "";
+      const codigo = normalizePaymentCode(m.codigo || nombre);
+      const tipo = normalizePaymentType(m.tipo || codigo || nombre);
+      return {
+        ...m,
+        id: m.idMetodoPago || m.id || codigo,
+        label: nombre,
+        code: codigo,
+        type: tipo,
+        icon: PAYMENT_ICONS[codigo] || PAYMENT_ICONS[tipo] || "pi pi-wallet",
+        description: PAYMENT_DESCRIPTIONS[codigo] || PAYMENT_DESCRIPTIONS[tipo] || "Referencia de cobro",
+        raw: m.raw || m,
+        sortOrder: Number(m.orden || 999),
+      };
+    })
+    .sort((a, b) => a.sortOrder - b.sortOrder);
 
   useEffect(() => {
     if (!visible) {
@@ -94,87 +112,208 @@ const ConfirmarPagoModal = ({
     }
   }, [visible]);
 
-
   const resetAndClose = () => {
     setMetodo(null);
-    onHide();
+    if (!processing) {
+      onHide();
+    }
   };
+
+  const volverACliente = () => {
+    if (processing) return;
+    setMetodo(null);
+    onBackToCliente?.();
+  };
+
+  const clienteNombre =
+    clienteVenta?.nombre || clienteVenta?.razonSocial || "Publico general";
+  const clienteDetalle =
+    clienteVenta?.rfc ||
+    clienteVenta?.telefono ||
+    clienteVenta?.email ||
+    "Sin cliente asociado";
+  const totalLineas = carrito.length;
+  const totalUnidades = carrito.reduce(
+    (acc, item) => acc + Number(item.cantidad || 0),
+    0
+  );
+  const preferredPayment =
+    paymentOptions.find((option) => option.type === "TERMINAL" && paymentConfig?.terminalEnabled !== false) ||
+    paymentOptions[0] ||
+    null;
+  const singlePayment = paymentOptions.length === 1;
 
   return (
     <Dialog
-      header="Selecciona un método de pago"
+      header={null}
       visible={visible}
       onHide={resetAndClose}
       modal
       draggable={false}
       className="confirmar-pago-modal-dialog"
     >
-      {/* ===============================
-          SELECCIÓN DE MÉTODO
-         =============================== */}
-      {!metodo && (
-        <div className="confirmar-pago-modal">
-          <p className="confirmar-pago-total">
-            Total a pagar: <strong>${total.toFixed(2)}</strong>
-          </p>
-
-          <div className="confirmar-pago-opciones">
-            {paymentOptions.length > 0 ? (
-              paymentOptions.map((option) => (
-                <Button
-                  key={option.id}
-                  label={option.label}
-                  icon={option.icon}
-                  className="pago-btn"
-                  onClick={() => setMetodo(option.value)}
-                />
-              ))
-            ) : (
-              <p>No hay metodos de pago activos.</p>
-            )}
+      <div className={"confirmar-pago-shell" + (metodo ? " is-detail" : "")}>
+        <header className="confirmar-pago-head">
+          <div>
+            <span>Pago de venta</span>
+            <h2>{metodo ? formatPaymentLabel(metodo.label) : "Metodo de pago"}</h2>
           </div>
-        </div>
-      )}
+          <div className="confirmar-pago-stepper" aria-hidden="true">
+            <span>Cliente</span>
+            <span className="is-active">Pago</span>
+          </div>
+          <button
+            type="button"
+            className="confirmar-pago-close"
+            onClick={resetAndClose}
+            disabled={processing}
+            aria-label="Cerrar"
+          >
+            <i className="pi pi-times" />
+          </button>
+        </header>
 
-      {/* ===============================
-          CONTENIDO SEGÚN MÉTODO
-         =============================== */}
-      {metodo === "EFECTIVO" && (
-        <PagoEfectivo
-          total={total}
-          carrito={carrito}
-          onCancelar={resetAndClose}
-          onPaymentSuccess={onPaymentSuccess}
-        />
-      )}
+        {!metodo && (
+          <div className="confirmar-pago-preflight">
+            <section className="confirmar-pago-ticket-card">
+              <div className="confirmar-pago-client-line">
+                <span>
+                  <small>Cliente</small>
+                  <strong>{clienteNombre}</strong>
+                  <em>{clienteDetalle}</em>
+                </span>
+                {onBackToCliente ? (
+                  <button type="button" onClick={volverACliente} disabled={processing}>
+                    Cambiar
+                  </button>
+                ) : null}
+              </div>
 
-      {metodo === "TARJETA" && (
-        <PagoTarjeta
-          total={total}
-          carrito={carrito}
-          onCancelar={resetAndClose}
-          onPaymentSuccess={onPaymentSuccess}
-        />
-      )}
+              <div className="confirmar-pago-total-card">
+                <span>Total a pagar</span>
+                <strong>{money(total)}</strong>
+                <small>
+                  {totalLineas} linea{totalLineas === 1 ? "" : "s"} -{" "}
+                  {formatCantidad(totalUnidades)} unidades
+                </small>
+              </div>
+            </section>
 
-      {metodo === "TRANSFERENCIA" && (
-        <PagoTransferencia
-          total={total}
-          carrito={carrito}
-          onCancelar={resetAndClose}
-          onPaymentSuccess={onPaymentSuccess}
-        />
-      )}
+            <section
+              className={
+                "confirmar-pago-methods" + (singlePayment ? " is-single" : "")
+              }
+            >
+              <div className="confirmar-pago-methods-head">
+                <div>
+                  <strong>{singlePayment ? "Metodo disponible" : "Elige metodo"}</strong>
+                  <small>
+                    {singlePayment
+                      ? "Solo hay un metodo activo para esta venta."
+                      : `${paymentOptions.length} metodos activos`}
+                  </small>
+                </div>
+              </div>
 
-      {metodo &&
-        !["EFECTIVO", "TARJETA", "TRANSFERENCIA"].includes(metodo) && (
-          <PagoGenerico
-            metodo={metodo}
+              <div className="confirmar-pago-method-grid">
+                {paymentOptions.length > 0 ? (
+                  paymentOptions.map((option) => {
+                    const preferred =
+                      preferredPayment &&
+                      String(preferredPayment.id) === String(option.id);
+
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        className={
+                          "confirmar-pago-method-card" +
+                          (preferred ? " is-preferred" : "")
+                        }
+                        onClick={() => setMetodo(option)}
+                        disabled={processing}
+                      >
+                        <span className="confirmar-pago-method-icon">
+                          <i className={option.icon} />
+                        </span>
+                        <span className="confirmar-pago-method-main">
+                          <strong>{formatPaymentLabel(option.label)}</strong>
+                          <small>{option.description}</small>
+                        </span>
+                        {singlePayment || preferred ? (
+                          <em>{singlePayment ? "Activo" : "Rapido"}</em>
+                        ) : null}
+                        <i className="pi pi-arrow-right confirmar-pago-method-arrow" />
+                      </button>
+                    );
+                  })
+                ) : (
+                  <div className="confirmar-pago-empty-methods">
+                    <i className="pi pi-wallet" />
+                    <strong>Sin metodos activos</strong>
+                    <span>Activa al menos un metodo de pago para cobrar.</span>
+                  </div>
+                )}
+              </div>
+            </section>
+          </div>
+        )}
+
+        {error ? (
+          <div className="confirmar-pago-error" role="alert">
+            <i className="pi pi-exclamation-triangle" />
+            <span>{error}</span>
+          </div>
+        ) : null}
+
+        {metodo?.type === "CASH" && (
+          <PagoEfectivo
             total={total}
+            carrito={carrito}
+            metodoPago={metodo}
             onCancelar={resetAndClose}
             onPaymentSuccess={onPaymentSuccess}
+            processing={processing}
+            paymentConfig={paymentConfig}
           />
         )}
+
+        {metodo?.type === "TERMINAL" && (
+          <PagoTarjeta
+            total={total}
+            carrito={carrito}
+            metodoPago={metodo}
+            onCancelar={resetAndClose}
+            onPaymentSuccess={onPaymentSuccess}
+            processing={processing}
+            paymentConfig={paymentConfig}
+          />
+        )}
+
+        {metodo?.type === "CARD" && (
+          <PagoTarjetaCliente
+            total={total}
+            carrito={carrito}
+            metodoPago={metodo}
+            onCancelar={resetAndClose}
+            onPaymentSuccess={onPaymentSuccess}
+            processing={processing}
+            paymentConfig={paymentConfig}
+          />
+        )}
+
+        {metodo?.type === "VOUCHER" && (
+          <PagoVales
+            total={total}
+            carrito={carrito}
+            metodoPago={metodo}
+            onCancelar={resetAndClose}
+            onPaymentSuccess={onPaymentSuccess}
+            processing={processing}
+            paymentConfig={paymentConfig}
+          />
+          )}
+      </div>
     </Dialog>
   );
 };

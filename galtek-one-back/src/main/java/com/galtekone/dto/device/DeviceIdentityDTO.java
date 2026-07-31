@@ -13,6 +13,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class DeviceIdentityDTO {
     private String installationId;
+    private String displayName;
+    @Deprecated
     private Integer cashRegisterId;
     
     private String cpuHash;

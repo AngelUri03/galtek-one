@@ -11,11 +11,32 @@ Este documento resume lo que existe actualmente en Configuracion, que piezas est
 
 La intencion es servir como fotografia funcional y tecnica del estado vigente para que otra herramienta o persona pueda analizar prioridades sin asumir capacidades inexistentes.
 
+## Aviso de vigencia
+
+Este documento conserva una fotografia historica del modulo Configuracion. Para conocer el estado vigente deben consultarse primero:
+
+- La seccion "Alineacion de contexto IA".
+- `MODULES_STATUS.md`.
+- El codigo real.
+
+Las notas de alineacion vigentes tienen prioridad sobre afirmaciones historicas anteriores.
+
+## Resumen vigente breve
+
+- Tienda consume `GET /empresas/actual` y `PUT /empresas/actual`.
+- Ticket e impresion tiene conexion real parcial.
+- Usuarios tiene endpoints de imagen y contrasena.
+- Roles y permisos tienen conexion real.
+- Overrides tienen endpoints centrados en usuario.
+- Caja y turnos consume `GET/PUT /configuracion/caja` y usa ayuda guiada desde el header de seccion.
+- Enforcement final de permisos sigue pendiente para el cierre del desarrollo.
+- Respaldos, promociones y varias secciones permanecen parciales o pendientes.
+
 ### 2. PRINCIPIO RECTOR ACTUAL
 Configuracion funciona hoy como un contenedor de ajustes generales y administracion interna.
 
-La parte mas real del modulo es administracion de usuarios, roles y permisos.
-La parte mas incompleta esta en tienda, respaldos/exportacion, promociones, soporte y secciones placeholder.
+La parte mas real del modulo es administracion de usuarios, roles, permisos, overrides, tienda y ticket/impresion en conexion parcial o real segun seccion.
+La fotografia historica anterior marco tienda, respaldos/exportacion, promociones, soporte y secciones placeholder como incompletas; revisar el aviso de vigencia y la alineacion antes de asumir ese estado como actual.
 
 Regla de lectura: si este documento marca una seccion como placeholder, maqueta, local o no conectada, no debe tratarse como funcionalidad productiva terminada.
 
@@ -662,7 +683,7 @@ Backend:
 - Todo lo demas requiere autenticacion JWT.
 - Se usa `JwtAuthFilter`.
 - Sesion HTTP es stateless.
-- CORS permite Tauri y localhost.
+- CORS se restringe a origenes Tauri y localhost configurados.
 
 Estado actual de autorizacion por permiso:
 
@@ -836,3 +857,75 @@ Lo que existe pero esta incompleto o solo visual:
 - Integraciones.
 
 La base tecnica para Configuracion ya existe en usuarios, roles, permisos, empresas y cajas. El primer analisis posterior debe partir de esta realidad: no todo lo visible esta conectado, y no todo lo existente en backend esta expuesto en la UI.
+
+### 38. ALINEACION DE CONTEXTO IA - 2026-07-20
+Este documento es contexto condicional. Leerlo solo para Configuracion, Tienda, Usuarios, Roles, Overrides, Ticket o secciones de Ajustes.
+
+Cuando aplique, leer junto con el contexto nucleo definido en `README_CONTEXT.md`:
+
+- `README_CONTEXT.md`
+- `AI_CONTEXT.md`
+- `DEVELOPMENT_RULES.md`
+- `CODEX_WORKFLOW.md`
+- La seccion relevante de `MODULES_STATUS.md`
+
+Leer `PROJECT_HISTORY.md` solo si se necesitan cambios anteriores, decisiones historicas, commits o actualizar documentacion.
+
+Todo cambio visual o de interaccion en este modulo debe respetar el estandar visual, de navegacion por teclado y velocidad operativa definido en `AI_CONTEXT.md` y `DEVELOPMENT_RULES.md`.
+
+Regla de lectura: este documento sigue siendo una base historica util, pero algunas afirmaciones quedaron superadas por el codigo actual. Si hay contradiccion, priorizar el codigo y marcar `pendiente de alinear`.
+
+Correcciones detectadas contra el codigo actual:
+
+- Tienda: las secciones que tratan Tienda como visual/no conectada quedan `pendiente de alinear`. `ConfTienda.jsx` actualmente consume `GET /empresas/actual` y `PUT /empresas/actual`, y expone `refresh`.
+- Ticket e impresion: el modulo ya tiene conexion real parcial. Existen `TicketConfig.jsx`, `TicketController` y `ConfiguracionTicketController`, con endpoints para configurar ticket, listar impresoras, imprimir y restaurar base.
+- Usuarios: las secciones que indicaban ausencia de endpoint de imagen quedan `pendiente de alinear`. El backend actual incluye `POST /usuarios/{id}/imagen`.
+- Password: existen endpoints para cambio de password de usuario y password propio: `PUT /usuarios/{id}/password` y `PUT /usuarios/me/password`.
+- Overrides/permisos por usuario: las secciones que mencionan una incompatibilidad con `PUT /usuarioPermisos/{idUsuario}` quedan `pendiente de alinear`. El codigo actual incluye endpoints en `UsuariosController` para overrides y permisos efectivos: `/usuarios/overrides`, `/usuarios/{id}/permisos-efectivos`, `/usuarios/{id}/overrides`.
+- Refresh de secciones: Tienda, Ticket, Usuarios, Roles y Overrides tienen integracion de recarga desde la pantalla de ajustes.
+- Soporte: existe componente visual, pero no se detecto ruta `/soporte` registrada en `AppRouter`. Mantener como preparado/no conectado hasta alinear.
+- Permisos: la base de roles, permisos y overrides existe, pero el enforcement final en pantallas, acciones, rutas y endpoints se aplicara al cierre del desarrollo completo.
+- Caja/Ventas: `VTA-CJA-004B` mantiene `CASH_OPEN`, `CASH_CLOSE_OWN`, `CASH_CLOSE_OTHERS`, `CASH_MOVEMENT_ENTRY`, `CASH_MOVEMENT_WITHDRAWAL`, `CASH_VIEW_SUMMARY` y `CASH_VIEW_HISTORY`, y agrega permisos de esperado, incidencias, movimientos y politica.
+- Configuracion: Ajustes incluye `Caja y turnos`, conectada a `GET/PUT /configuracion/caja`; no administrar aqui `CajasEntity` como cajon fisico operativo.
+- Permisos de caja aplicados ahora: apertura, cierre, entradas, retiros, revelado de esperado, incidencias y politica validan permisos especificos o compatibilidad legacy. El enforcement global completo sigue pendiente para la fase final.
+
+No borrar las secciones anteriores: conservarlas como historia de arquitectura y usar esta nota como capa de alineacion actual.
+
+### 39. ALINEACION CAJA Y TURNOS - 2026-07-20
+
+Esta capa describe el estado vigente de la seccion `Caja y turnos` dentro de Ajustes.
+
+Frontend vigente:
+
+- `configuracionSections.js` marca `Caja y turnos` como `functional` y `refreshable`.
+- `Ajustes.jsx` centraliza busqueda, sidebar, acciones rapidas, refresco de seccion y ayuda guiada.
+- `ConfiguracionSectionHeader.jsx` muestra el boton de ayuda junto al refresco cuando la seccion tiene pasos disponibles.
+- `AjustesCaja.jsx` carga, restaura y guarda politica de caja mediante su `ref.refresh`.
+- `AjustesCaja.css` contiene el pulido visual especifico de esa superficie.
+
+Backend vigente:
+
+- `GET /configuracion/caja` devuelve la politica vigente o default efectivo.
+- `PUT /configuracion/caja` guarda politica con permiso `CASH_MANAGE_POLICY` o compatibilidad `CONFIG_CAJA_EDITAR`.
+
+Opciones visibles de `Caja y turnos`:
+
+- `handoffPolicy`: define si la operacion prioriza continuidad (`CONTINUITY_FIRST`) o revision estricta supervisada (`STRICT_SUPERVISED`) ante diferencias.
+- `expectedBalanceVisibilityMode`: define como se permite ver el esperado (`PERMISSION_REQUIRED` u opciones equivalentes que el backend exponga).
+- `requireIncomingCountOnUserChange`: exige conteo entrante cuando cambia el cajero despues de un turno cerrado.
+- `requireOutgoingCountOnClose`: exige conteo saliente al cierre.
+- `allowContinueWithPendingIncident`: permite o bloquea continuidad cuando quedan incidencias pendientes.
+- `blindCountEnabled`: fuerza conteo ciego antes de revelar esperado.
+
+Ayuda guiada vigente:
+
+- La ayuda es una capa de orientacion, no cambia configuracion ni llama endpoints.
+- Oscurece la pantalla, calcula un spotlight sobre la seccion activa y muestra tarjeta explicativa con pasos.
+- Debe explicar para que sirve cada bloque y que implican las opciones antes de guardar.
+- La animacion debe aplicarse a transiciones de entrada/salida o cambio de paso; el elemento resaltado debe permanecer estable, sin rebote constante.
+
+Reglas visuales vigentes:
+
+- Los botones `Restaurar` y `Guardar politica` deben seguir los estilos de botones secundarios/primarios de Configuracion, con icono y texto correctamente separados.
+- Selects, switches y botones no deben conservar apariencia nativa o foco negro/azul.
+- La descripcion larga debe vivir en la ayuda guiada; la pantalla base debe ser densa, clara y operativa.

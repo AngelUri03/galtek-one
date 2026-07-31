@@ -65,13 +65,27 @@ INSERT INTO seed_permisos_catalogo VALUES
 (18, 'REIMPRIMIR_TICKET', 'VENTAS_REIMPRIMIR_TICKET', 'Reimprimir comprobantes de venta', 'VENTAS', 'Reimprimir ticket'),
 (19, 'VER', 'VENTAS_VER_HISTORIAL', 'Consultar ventas anteriores', 'VENTAS', 'Ver historial de ventas'),
 (20, 'CLIENTE', 'VENTAS_SELECCIONAR_CLIENTE', 'Asignar cliente a una venta', 'VENTAS', 'Seleccionar cliente'),
-(21, 'ABRIR', 'CAJA_ABRIR', 'Iniciar caja operativa', 'CAJA', 'Abrir caja'),
-(22, 'CERRAR', 'CAJA_CERRAR_PROPIA', 'Cerrar la caja del usuario actual', 'CAJA', 'Cerrar caja propia'),
-(23, 'CERRAR', 'CAJA_CERRAR_AJENA', 'Cerrar caja operada por otro usuario', 'CAJA', 'Cerrar caja ajena'),
+(21, 'ABRIR', 'CAJA_ABRIR', 'Iniciar turno operativo de caja', 'CAJA', 'Abrir turno'),
+(22, 'CERRAR', 'CAJA_CERRAR_PROPIA', 'Cerrar el turno del usuario actual', 'CAJA', 'Cerrar turno propio'),
+(23, 'CERRAR', 'CAJA_CERRAR_AJENA', 'Cerrar turno operado por otro usuario', 'CAJA', 'Cerrar turno ajeno'),
 (24, 'ENTRADA', 'CAJA_ENTRADA_EFECTIVO', 'Registrar ingresos manuales de efectivo', 'CAJA', 'Entrada de efectivo'),
 (25, 'RETIRO', 'CAJA_RETIRO_EFECTIVO', 'Registrar retiros manuales de efectivo', 'CAJA', 'Retiro de efectivo'),
 (26, 'ARQUEO', 'CAJA_VER_ARQUEO', 'Consultar conteos y diferencias de caja', 'CAJA', 'Ver arqueo'),
 (27, 'AJUSTAR', 'CAJA_AJUSTAR_DIFERENCIA', 'Corregir diferencias de arqueo', 'CAJA', 'Ajustar diferencia'),
+(86, 'OPEN', 'CASH_OPEN', 'Abrir turno operativo de caja', 'CAJA', 'Abrir turno'),
+(87, 'CLOSE_OWN', 'CASH_CLOSE_OWN', 'Cerrar el turno propio', 'CAJA', 'Cerrar turno propio'),
+(88, 'CLOSE_OTHERS', 'CASH_CLOSE_OTHERS', 'Cerrar o conciliar un turno de otro usuario', 'CAJA', 'Cerrar turno de otros'),
+(89, 'ENTRY', 'CASH_MOVEMENT_ENTRY', 'Registrar entradas manuales de efectivo', 'CAJA', 'Entrada manual'),
+(90, 'WITHDRAWAL', 'CASH_MOVEMENT_WITHDRAWAL', 'Registrar retiros manuales de efectivo', 'CAJA', 'Retiro manual'),
+(91, 'SUMMARY', 'CASH_VIEW_SUMMARY', 'Consultar resumen operativo de turno', 'CAJA', 'Ver resumen de turno'),
+(92, 'HISTORY', 'CASH_VIEW_HISTORY', 'Consultar historial de sesiones y movimientos de caja', 'CAJA', 'Ver historial de caja'),
+(93, 'SUMMARY', 'CASH_VIEW_SALES_SUMMARY', 'Consultar ventas y movimientos sin revelar efectivo esperado', 'CAJA', 'Ver resumen de ventas'),
+(94, 'MOVEMENTS', 'CASH_VIEW_MOVEMENTS', 'Consultar movimientos operativos de caja', 'CAJA', 'Ver movimientos de caja'),
+(95, 'EXPECTED', 'CASH_VIEW_EXPECTED_BALANCE', 'Consultar efectivo esperado de caja', 'CAJA', 'Ver efectivo esperado'),
+(96, 'REVEAL', 'CASH_REVEAL_EXPECTED_BALANCE', 'Revelar efectivo esperado con auditoria', 'CAJA', 'Revelar efectivo esperado'),
+(97, 'INCIDENTS', 'CASH_REVIEW_INCIDENTS', 'Revisar incidencias de caja pendientes', 'CAJA', 'Revisar incidencias'),
+(98, 'RESOLVE', 'CASH_RESOLVE_DISCREPANCY', 'Resolver discrepancias e incidencias de caja', 'CAJA', 'Resolver discrepancias'),
+(99, 'POLICY', 'CASH_MANAGE_POLICY', 'Configurar politica de caja y turnos', 'CAJA', 'Gestionar politica de caja'),
 (28, 'CREAR', 'INVENTARIO_CREAR_PRODUCTO', 'Dar de alta productos en inventario', 'INVENTARIO', 'Crear producto'),
 (29, 'EDITAR', 'INVENTARIO_EDITAR_PRODUCTO', 'Modificar datos generales de productos', 'INVENTARIO', 'Editar producto'),
 (30, 'PRECIO_EDITAR', 'INVENTARIO_EDITAR_PRECIO', 'Modificar precios de venta', 'INVENTARIO', 'Editar precio'),
@@ -150,11 +164,11 @@ FROM Permisos p
 UNION ALL
 SELECT 21000 + p.id_permiso, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', p.id_permiso, 21
 FROM Permisos p
-WHERE p.clave IN ('VENTAS_VER', 'VENTAS_CREAR', 'VENTAS_SELECCIONAR_CLIENTE', 'VENTAS_REIMPRIMIR_TICKET', 'VENTAS_VER_HISTORIAL', 'CLIENTES_VER')
+WHERE p.clave IN ('VENTAS_VER', 'VENTAS_CREAR', 'VENTAS_SELECCIONAR_CLIENTE', 'VENTAS_REIMPRIMIR_TICKET', 'VENTAS_VER_HISTORIAL', 'CLIENTES_VER', 'CASH_OPEN', 'CASH_CLOSE_OWN', 'CASH_VIEW_SUMMARY', 'CASH_VIEW_SALES_SUMMARY')
 UNION ALL
 SELECT 22000 + p.id_permiso, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', p.id_permiso, 22
 FROM Permisos p
-WHERE p.clave IN ('VENTAS_VER', 'VENTAS_CREAR', 'VENTAS_SELECCIONAR_CLIENTE', 'VENTAS_REIMPRIMIR_TICKET', 'CAJA_VER', 'CAJA_ABRIR', 'CAJA_CERRAR_PROPIA', 'CLIENTES_VER')
+WHERE p.clave IN ('VENTAS_VER', 'VENTAS_CREAR', 'VENTAS_SELECCIONAR_CLIENTE', 'VENTAS_REIMPRIMIR_TICKET', 'CAJA_VER', 'CAJA_ABRIR', 'CAJA_CERRAR_PROPIA', 'CLIENTES_VER', 'CASH_OPEN', 'CASH_CLOSE_OWN', 'CASH_VIEW_SUMMARY', 'CASH_VIEW_HISTORY', 'CASH_VIEW_SALES_SUMMARY', 'CASH_VIEW_MOVEMENTS')
 UNION ALL
 SELECT 23000 + p.id_permiso, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', p.id_permiso, 23
 FROM Permisos p
@@ -163,6 +177,11 @@ WHERE p.clave IN (
   'VENTAS_REIMPRIMIR_TICKET', 'VENTAS_VER_HISTORIAL', 'VENTAS_SELECCIONAR_CLIENTE',
   'CAJA_VER', 'CAJA_ABRIR', 'CAJA_CERRAR_PROPIA', 'CAJA_CERRAR_AJENA', 'CAJA_ENTRADA_EFECTIVO',
   'CAJA_RETIRO_EFECTIVO', 'CAJA_VER_ARQUEO', 'CAJA_MOVIMIENTOS',
+  'CASH_OPEN', 'CASH_CLOSE_OWN', 'CASH_CLOSE_OTHERS', 'CASH_MOVEMENT_ENTRY',
+  'CASH_MOVEMENT_WITHDRAWAL', 'CASH_VIEW_SUMMARY', 'CASH_VIEW_HISTORY',
+  'CASH_VIEW_SALES_SUMMARY', 'CASH_VIEW_MOVEMENTS', 'CASH_VIEW_EXPECTED_BALANCE',
+  'CASH_REVEAL_EXPECTED_BALANCE', 'CASH_REVIEW_INCIDENTS', 'CASH_RESOLVE_DISCREPANCY',
+  'CASH_MANAGE_POLICY',
   'INVENTARIO_VER', 'COMPRAS_VER', 'COMPRAS_CREAR', 'COMPRAS_CONFIRMAR', 'COMPRAS_CANCELAR',
   'COMPRAS_DEVOLVER', 'COMPRAS_VER_COSTOS', 'PROVEEDORES_VER', 'PROVEEDORES_CREAR_EDITAR',
   'PROVEEDORES_PRODUCTOS', 'PROVEEDORES_VER_AUDITORIA', 'CLIENTES_VER', 'CLIENTES_CREAR_EDITAR',
@@ -191,11 +210,17 @@ VALUES
 (2, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'PERMITIR', 'Supervisor autorizado para devoluciones', 3, 4);
 
 INSERT OR REPLACE INTO MetodoPago
-(id_metodo_pago, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, nombre, id_empresa)
+(id_metodo_pago, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, nombre, codigo, tipo, orden, visible_pos, requiere_referencia, requiere_verificacion, id_empresa)
 VALUES
-(1, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'EFECTIVO', 1),
-(2, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'TARJETA', 1),
-(3, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'TRANSFERENCIA', 1);
+(1, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'Efectivo', 'EFECTIVO', 'CASH', 2, 1, 0, 0, 1),
+(2, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'Terminal', 'TERMINAL', 'TERMINAL', 1, 1, 1, 1, 1),
+(3, 0, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'Tarjeta', 'TARJETA', 'CARD', 3, 1, 1, 1, 1),
+(4, 0, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 'Vales', 'VALES', 'VOUCHER', 4, 1, 1, 1, 1);
+
+INSERT OR REPLACE INTO ConfiguracionPagos
+(id_configuracion_pagos, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, terminal_enabled, terminal_provider, terminal_name, terminal_identifier, terminal_serial, terminal_store_id, terminal_account, terminales_json, terminal_priority, terminal_commission_enabled, terminal_commission_percent, terminal_require_reference, cash_rounding_default_enabled, card_bank_name, card_holder_name, card_number, card_account, card_instructions, voucher_issuer, voucher_instructions, voucher_require_folio, voucher_require_authorization, transfer_bank_name, transfer_account_name, transfer_clabe, version, id_empresa)
+VALUES
+(1, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now'), 'system', 'system', 1, 'MERCADO_PAGO', 'Mercado Pago', NULL, NULL, NULL, NULL, '[{"key":"terminal_1","nombre":"Mercado Pago","provider":"MERCADO_PAGO","enabled":true,"commissionEnabled":true,"commissionPercent":0}]', 1, 1, 0, 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, NULL, NULL, NULL, 0, 1);
 
 INSERT OR REPLACE INTO Unidades
 (id_unidad, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, nombre)
@@ -734,8 +759,8 @@ VALUES
 INSERT OR REPLACE INTO MovimientoCaja
 (id_movimiento_caja, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, fecha, monto, motivo, tipo, id_caja, id_empresa, id_usuario)
 VALUES
-(1, 1, STRFTIME('%Y-%m-%d %H:%M:%f','now','-14 day','+8 hour'), STRFTIME('%Y-%m-%d %H:%M:%f','now','-14 day','+8 hour'), 'system', 'system', STRFTIME('%Y-%m-%d %H:%M:%f','now','-14 day','+8 hour'), 1500.00, 'Fondo inicial caja principal', 'INGRESO', 1, 1, 2),
-(2, 1, STRFTIME('%Y-%m-%d %H:%M:%f','now','-14 day','+8 hour'), STRFTIME('%Y-%m-%d %H:%M:%f','now','-14 day','+8 hour'), 'system', 'system', STRFTIME('%Y-%m-%d %H:%M:%f','now','-14 day','+8 hour'), 800.00, 'Fondo inicial caja rapida', 'INGRESO', 2, 1, 3),
+(1, 1, STRFTIME('%Y-%m-%d %H:%M:%f','now','-14 day','+8 hour'), STRFTIME('%Y-%m-%d %H:%M:%f','now','-14 day','+8 hour'), 'system', 'system', STRFTIME('%Y-%m-%d %H:%M:%f','now','-14 day','+8 hour'), 1500.00, 'Aporte demo caja principal legacy', 'INGRESO', 1, 1, 2),
+(2, 1, STRFTIME('%Y-%m-%d %H:%M:%f','now','-14 day','+8 hour'), STRFTIME('%Y-%m-%d %H:%M:%f','now','-14 day','+8 hour'), 'system', 'system', STRFTIME('%Y-%m-%d %H:%M:%f','now','-14 day','+8 hour'), 800.00, 'Aporte demo caja rapida legacy', 'INGRESO', 2, 1, 3),
 (3, 1, STRFTIME('%Y-%m-%d %H:%M:%f','now','-10 day','+21 hour'), STRFTIME('%Y-%m-%d %H:%M:%f','now','-10 day','+21 hour'), 'system', 'system', STRFTIME('%Y-%m-%d %H:%M:%f','now','-10 day','+21 hour'), 950.00, 'Retiro parcial a boveda', 'EGRESO', 1, 1, 4),
 (4, 1, STRFTIME('%Y-%m-%d %H:%M:%f','now','-8 day','+20 hour'), STRFTIME('%Y-%m-%d %H:%M:%f','now','-8 day','+20 hour'), 'system', 'system', STRFTIME('%Y-%m-%d %H:%M:%f','now','-8 day','+20 hour'), 120.00, 'Reposicion cambio monedas', 'INGRESO', 2, 1, 4),
 (5, 1, STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day','+19 hour'), STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day','+19 hour'), 'system', 'system', STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day','+19 hour'), 240.00, 'Compra menor bolsas y limpieza', 'EGRESO', 1, 1, 2),

@@ -1,5 +1,6 @@
 package com.galtekone.entity;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -41,14 +42,49 @@ public class VentasEntity extends CommonEntity implements BaseEmpresa {
     
     @Column(name = "total", nullable = false)
     private Float total;
+
+    @Column(name = "total_original", precision = 12, scale = 2)
+    private BigDecimal totalOriginal;
+
+    @Column(name = "total_cobrado", precision = 12, scale = 2)
+    private BigDecimal totalCobrado;
+
+    @Column(name = "redondeo_aplicado", precision = 12, scale = 2)
+    private BigDecimal redondeoAplicado;
+
+    @Column(name = "comision_pago", precision = 12, scale = 2)
+    private BigDecimal comisionPago;
+
+    @Column(name = "comision_porcentaje", precision = 7, scale = 4)
+    private BigDecimal comisionPorcentaje;
+
+    @Column(name = "recibido", precision = 12, scale = 2)
+    private BigDecimal recibido;
+
+    @Column(name = "cambio", precision = 12, scale = 2)
+    private BigDecimal cambio;
+
+    @Column(name = "referencia_pago", length = 120)
+    private String referenciaPago;
+
+    @Column(name = "folio_pago", length = 120)
+    private String folioPago;
+
+    @Column(name = "pago_verificado")
+    private Boolean pagoVerificado;
     
     @ManyToOne
     @JoinColumn(name = "id_metodo_pago", nullable = false)
     private MetodoPagoEntity metodoPago;
     
+    @Deprecated
     @ManyToOne
-    @JoinColumn(name = "id_caja", nullable = false)
+    @JoinColumn(name = "id_caja")
     private CajasEntity caja;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_caja_sesion")
+    private CajaSesionEntity cajaSesion;
     
     @Column(name = "estado", nullable = false)
     private String estado;

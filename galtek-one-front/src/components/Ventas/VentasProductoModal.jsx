@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Dialog } from "primereact/dialog";
-import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
+import { Box, Minus, Plus, Scale } from "lucide-react";
 
 import "../../style/components/Ventas/VentasProductoModal.css";
 
@@ -11,6 +11,7 @@ const VentasProductoModal = ({
   producto,
   onAgregarProducto,
   onDisminuirProducto,
+  onConfirmPesaje,
   cantidadEnCarrito = 0,
 }) => {
   const [pesajeModal, setPesajeModal] = useState("");
@@ -26,28 +27,36 @@ const VentasProductoModal = ({
     precio,
     unidad,
     img,
-    descripcion =
-    "Descripción no disponible. Aquí podrás detallar características del producto, su uso, presentación, beneficios, recomendaciones o cualquier información relevante para el cliente.",
+    descripcion = "Producto disponible para venta.",
     esPesaje,
+    categoriaNombre,
+    sku,
+    codigoBarras,
   } = producto;
 
   const esProductoPesaje = esPesaje === true || unidad === "kg";
+  const precioNumerico = Number(precio || 0);
 
   const handleAgregar = () => {
     if (esProductoPesaje) {
       const cantidad = parseFloat(pesajeModal.replace(",", "."));
-      if (!isNaN(cantidad) && cantidad > 0) {
-        onAgregarProducto({
+      if (!Number.isNaN(cantidad) && cantidad > 0) {
+        const payload = {
           ...producto,
           cantidad,
           modoPesaje: true,
-        });
+        };
+        if (onConfirmPesaje) {
+          onConfirmPesaje(payload);
+        } else {
+          onAgregarProducto?.(payload);
+        }
         onHide();
       }
       return;
     }
 
-    onAgregarProducto(producto);
+    onAgregarProducto?.(producto);
     onHide();
   };
 
@@ -62,69 +71,100 @@ const VentasProductoModal = ({
       header={nombre}
     >
       <div className="ventas-modal-content">
-        {/* IMAGEN */}
         <div className="ventas-modal-img-wrapper">
           {img ? (
             <img src={img} alt={nombre} className="ventas-modal-img" />
           ) : (
             <div className="ventas-modal-placeholder">
-              <span className="pi pi-box" />
+              <Box size={42} aria-hidden="true" />
             </div>
           )}
         </div>
 
-        {/* INFO */}
         <div className="ventas-modal-info">
           <div className="ventas-modal-precio">
-            ${precio.toFixed(2)} <span>/ {unidad}</span>
+            ${precioNumerico.toFixed(2)} <span>/ {unidad}</span>
           </div>
 
-          <div className="ventas-modal-descripcion">f
+          <div className="ventas-modal-details">
+            <div>
+              <span>Categoria</span>
+              <strong>{categoriaNombre || "Sin categoria"}</strong>
+            </div>
+            <div>
+              <span>Unidad</span>
+              <strong>{unidad}</strong>
+            </div>
+            {(sku || codigoBarras) && (
+              <div>
+                <span>{sku ? "SKU" : "Codigo"}</span>
+                <strong>{sku || codigoBarras}</strong>
+              </div>
+            )}
+            {cantidadEnCarrito > 0 && (
+              <div>
+                <span>En venta</span>
+                <strong>
+                  {cantidadEnCarrito} {unidad}
+                </strong>
+              </div>
+            )}
+          </div>
+
+          <div className="ventas-modal-descripcion">
             <p>{descripcion}</p>
           </div>
         </div>
 
-        {/* PESAJE */}
         {esProductoPesaje && (
-          <div className="ventas-modal-pesaje">
-            <label>Peso (kg)</label>
+          <label className="ventas-modal-pesaje">
+            <span>
+              <Scale size={15} aria-hidden="true" />
+              Peso
+            </span>
             <InputText
               value={pesajeModal}
               onChange={(e) =>
                 setPesajeModal(e.target.value.replace(/[^\d.,]/g, ""))
               }
-              placeholder="Ej. 0.350"
+              placeholder="0.000 kg"
               inputMode="decimal"
+              autoFocus
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleAgregar();
               }}
             />
-          </div>
+          </label>
         )}
 
-        {/* ACCIONES */}
         <div className="ventas-modal-actions">
           {!esProductoPesaje && cantidadEnCarrito > 0 ? (
             <div className="ventas-modal-qty">
-              <Button
-                icon="pi pi-minus"
-                className="p-button-text"
-                onClick={() => onDisminuirProducto(producto)}
-              />
+              <button
+                type="button"
+                onClick={() => onDisminuirProducto?.(producto)}
+                aria-label="Disminuir producto"
+              >
+                <Minus size={16} aria-hidden="true" />
+              </button>
               <span>{cantidadEnCarrito}</span>
-              <Button
-                icon="pi pi-plus"
-                className="p-button-text"
-                onClick={() => onAgregarProducto(producto)}
-              />
+              <button
+                type="button"
+                onClick={() => onAgregarProducto?.(producto)}
+                aria-label="Aumentar producto"
+              >
+                <Plus size={16} aria-hidden="true" />
+              </button>
             </div>
           ) : (
-            <Button
-              label="Agregar al carrito"
-              icon="pi pi-shopping-cart"
+            <button
+              type="button"
               className="ventas-modal-btn-agregar"
               onClick={handleAgregar}
-            />
+            >
+              <Plus size={18} aria-hidden="true" />
+              <span>{esProductoPesaje ? "Agregar peso" : "Agregar producto"}</span>
+            </button>
           )}
         </div>
       </div>

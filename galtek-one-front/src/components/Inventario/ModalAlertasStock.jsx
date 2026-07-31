@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Dialog } from "primereact/dialog";
+import { Sidebar } from "primereact/sidebar";
 import { InputNumber } from "primereact/inputnumber";
 import { Button } from "primereact/button";
-import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
 
 import "../../style/components/Inventario/ModalAlertasStock.css";
@@ -33,14 +32,9 @@ export default function ModalAlertasStock({ open, producto, onHide, onSave }) {
   const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
-    if (!open) return;
-    if (!producto) return;
-
-    const c = producto.umbrales?.critico ?? 5;
-    const b = producto.umbrales?.bajo ?? 12;
-
-    setCritico(clampInt(c));
-    setBajo(clampInt(b));
+    if (!open || !producto) return;
+    setCritico(clampInt(producto.umbrales?.critico ?? 5));
+    setBajo(clampInt(producto.umbrales?.bajo ?? 12));
     setDirty(false);
   }, [open, producto]);
 
@@ -52,141 +46,76 @@ export default function ModalAlertasStock({ open, producto, onHide, onSave }) {
   const invalid = useMemo(() => bajo < critico, [bajo, critico]);
 
   const estadoPreview = useMemo(() => {
-    const c = clampInt(critico);
-    const b = clampInt(bajo);
-    const s = Number(stockActual) || 0;
-    return computeEstado(s, c, b);
+    return computeEstado(Number(stockActual) || 0, clampInt(critico), clampInt(bajo));
   }, [stockActual, critico, bajo]);
-
-  const estadoMeta = useMemo(() => {
-    const map = {
-      AGOTADO: { label: "Agotado", cls: "mas-chip mas-chip--agotado" },
-      CRITICO: { label: "Crítico", cls: "mas-chip mas-chip--critico" },
-      BAJO: { label: "Bajo", cls: "mas-chip mas-chip--bajo" },
-      OPTIMO: { label: "Óptimo", cls: "mas-chip mas-chip--optimo" },
-    };
-    return map[estadoPreview] || { label: estadoPreview, cls: "mas-chip" };
-  }, [estadoPreview]);
-
-  const header = (
-    <div className="mas-header">
-      <div className="mas-header-left">
-        <div className="mas-title">Alertas de stock</div>
-        <div className="mas-subtitle" title={producto?.nombre || ""}>
-          {producto?.nombre || "—"}
-        </div>
-      </div>
-
-      <div className="mas-header-right">
-        <span className="mas-chip mas-chip--soft">
-          Stock: <b className="tabular">{Number(stockActual) || 0}</b>
-        </span>
-        <span className={estadoMeta.cls}>{estadoMeta.label}</span>
-        {dirty ? <span className="mas-chip mas-chip--dirty">Cambios sin guardar</span> : null}
-      </div>
-    </div>
-  );
 
   const showToast = (severity, summary, detail) =>
     toast.current?.show({ severity, summary, detail, life: 2000 });
 
   const handleSave = () => {
     if (!producto) return;
-
     const c = clampInt(critico);
     const b = clampInt(bajo);
 
     if (b < c) {
-      showToast("warn", "Validación", "El umbral 'bajo' debe ser ≥ 'crítico'.");
+      showToast("warn", "Validación", "El umbral 'bajo' debe ser mayor o igual que 'crítico'.");
       return;
     }
 
-    const p = {
+    onSave?.({
       ...producto,
       umbrales: { critico: c, bajo: b },
-    };
-
-    onSave?.(p);
+    });
     setDirty(false);
   };
 
-  const footer = (
-    <div className="mas-footer">
-      <Button className="mas-btn mas-btn--cancel" label="Cerrar" onClick={onHide} />
-      <div className="grow" />
-      <Button
-        className="mas-btn mas-btn--ghost"
-        icon="pi pi-undo"
-        label="Revertir"
-        disabled={!dirty}
-        onClick={() => {
-          const c = producto?.umbrales?.critico ?? 5;
-          const b = producto?.umbrales?.bajo ?? 12;
-          setCritico(clampInt(c));
-          setBajo(clampInt(b));
-          setDirty(false);
-          showToast("info", "Alertas", "Cambios revertidos.");
-        }}
-      />
-      <Button
-        className="mas-btn mas-btn--apply"
-        icon="pi pi-save"
-        label="Guardar"
-        onClick={handleSave}
-        disabled={!producto || invalid}
-      />
+  const customHeader = (
+    <div className="prov-editor-header">
+      <span>CONFIGURAR UMBRALES</span>
+      <strong>{producto?.nombre || "Alertas de Stock"}</strong>
     </div>
   );
-
-  if (!open) return null;
 
   return (
     <>
       <Toast ref={toast} />
 
-      <Dialog
-        header={header}
+      <Sidebar
         visible={open}
-        onHide={onHide}
-        modal
-        closable
-        draggable={false}
-        className="mas-dialog"
-        footer={footer}
+        position="right"
+        onHide={() => onHide?.()}
+        header={customHeader}
+        className="prov-editor-sidebar p-sidebar-md"
+        dismissable={false}
       >
         {!producto ? (
-          <div className="mas-loading">Cargando…</div>
+          <div className="prov-editor-loading">Cargando...</div>
         ) : (
-          <div className="mas-wrap">
-            {/* Info / reglas (glass card) */}
-            <div className="mas-card mas-card--info">
-              <Message
-                severity="info"
-                className="mas-message"
-                text="Regla de estados: 0 → Agotado; ≤ crítico → Crítico; ≤ bajo → Bajo; > bajo → Óptimo."
-              />
-
-              <div className="mas-miniLegend">
-                <span className="mas-pill mas-pill--agotado">Agotado</span>
-                <span className="mas-pill mas-pill--critico">Crítico</span>
-                <span className="mas-pill mas-pill--bajo">Bajo</span>
-                <span className="mas-pill mas-pill--optimo">Óptimo</span>
+          <div className="prov-editor">
+            <div className="prov-editor-body">
+              {/* PREVIEW STATUS */}
+              <div className="prov-detail-hero" style={{ marginBottom: "16px" }}>
+                <div>
+                  <span className="prov-eyebrow">Estado Resultante</span>
+                  <h2 style={{ color: "#0a7463" }}>{estadoPreview}</h2>
+                </div>
+                <div className="prov-detail-hero-contact">
+                  <span>Existencia Actual</span>
+                  <strong>{stockActual} Unidades</strong>
+                </div>
               </div>
-            </div>
 
-            {/* Controls + Preview */}
-            <div className="mas-grid">
-              <div className="mas-card">
-                <div className="mas-cardTitle">
-                  Umbrales
-                  <span className="mas-cardHint">Defínelos por producto</span>
+              {/* SECCIÓN UMBRALES */}
+              <div className="prov-editor-section">
+                <div className="prov-editor-section-head">
+                  <span>1</span>
+                  <h3>Umbrales Mínimos</h3>
                 </div>
 
-                <div className="mas-controls">
-                  <div className="mas-field">
-                    <label>Umbral crítico</label>
+                <div className="prov-form-grid">
+                  <div className="prov-field">
+                    <span>Umbral Crítico</span>
                     <InputNumber
-                      className="mas-control mas-num"
                       value={critico}
                       onValueChange={(e) => {
                         setCritico(clampInt(e.value));
@@ -194,18 +123,12 @@ export default function ModalAlertasStock({ open, producto, onHide, onSave }) {
                       }}
                       min={0}
                       showButtons
-                      placeholder="Ej: 5"
                     />
-                    <div className="mas-help">
-                      Stock ≤ <b className="tabular">{clampInt(critico)}</b> se marca como{" "}
-                      <span className="mas-pill mas-pill--critico">Crítico</span>
-                    </div>
                   </div>
 
-                  <div className="mas-field">
-                    <label>Umbral bajo</label>
+                  <div className="prov-field">
+                    <span>Umbral Bajo</span>
                     <InputNumber
-                      className="mas-control mas-num"
                       value={bajo}
                       onValueChange={(e) => {
                         setBajo(clampInt(e.value));
@@ -213,89 +136,76 @@ export default function ModalAlertasStock({ open, producto, onHide, onSave }) {
                       }}
                       min={0}
                       showButtons
-                      placeholder="Ej: 12"
                     />
-                    <div className="mas-help">
-                      Stock ≤ <b className="tabular">{clampInt(bajo)}</b> se marca como{" "}
-                      <span className="mas-pill mas-pill--bajo">Bajo</span>
-                    </div>
                   </div>
                 </div>
 
-                {invalid ? (
-                  <div className="mas-error">
-                    <i className="pi pi-exclamation-triangle" />
-                    <span>
-                      El umbral <b>bajo</b> debe ser mayor o igual que <b>crítico</b>.
-                    </span>
+                {invalid && (
+                  <div className="prov-safe-box" style={{ marginTop: "12px", borderColor: "rgba(159, 63, 63, 0.3)" }}>
+                    <strong style={{ color: "#9f3f3f" }}>Conflicto detectado:</strong>
+                    <p style={{ margin: 0, fontSize: "0.8rem" }}>El umbral bajo debe ser estrictamente mayor o igual al crítico.</p>
                   </div>
-                ) : null}
+                )}
               </div>
 
-              <div className="mas-card mas-card--preview">
-                <div className="mas-cardTitle">
-                  Vista previa
-                  <span className="mas-cardHint">Con el stock actual</span>
+              {/* EXPLICACIÓN DE REGLAS */}
+              <div className="prov-editor-section">
+                <div className="prov-editor-section-head">
+                  <span>2</span>
+                  <h3>Comportamiento del Sistema</h3>
                 </div>
 
-                <div className="mas-previewTop">
-                  <div className="mas-previewStock">
-                    <span className="mas-muted">Stock actual</span>
-                    <div className="mas-stockBig tabular">{Number(stockActual) || 0}</div>
-                  </div>
-
-                  <div className="mas-previewState">
-                    <span className="mas-muted">Estado resultante</span>
-                    <div className={estadoMeta.cls}>{estadoMeta.label}</div>
-                  </div>
-                </div>
-
-                <div className="mas-range">
-                  <div className="mas-rangeRow">
-                    <span className="mas-rangeLabel">Agotado</span>
-                    <div className="mas-rangeBar">
-                      <span className="mas-rangeFill mas-rangeFill--agotado" style={{ width: "22%" }} />
+                <div className="prov-detail-list">
+                  <div className="prov-detail-list-item">
+                    <div>
+                      <strong>Agotado</strong>
+                      <span>Stock igual a 0</span>
                     </div>
-                    <span className="mas-rangeValue tabular">0</span>
+                    <span className="prov-state-tag p-tag-danger">0</span>
                   </div>
 
-                  <div className="mas-rangeRow">
-                    <span className="mas-rangeLabel">Crítico</span>
-                    <div className="mas-rangeBar">
-                      <span className="mas-rangeFill mas-rangeFill--critico" style={{ width: "58%" }} />
+                  <div className="prov-detail-list-item">
+                    <div>
+                      <strong>Crítico</strong>
+                      <span>Stock menor o igual al umbral crítico</span>
                     </div>
-                    <span className="mas-rangeValue tabular">≤ {clampInt(critico)}</span>
+                    <span className="prov-state-tag p-tag-warning">≤ {critico}</span>
                   </div>
 
-                  <div className="mas-rangeRow">
-                    <span className="mas-rangeLabel">Bajo</span>
-                    <div className="mas-rangeBar">
-                      <span className="mas-rangeFill mas-rangeFill--bajo" style={{ width: "82%" }} />
+                  <div className="prov-detail-list-item">
+                    <div>
+                      <strong>Bajo</strong>
+                      <span>Stock menor o igual al umbral bajo</span>
                     </div>
-                    <span className="mas-rangeValue tabular">≤ {clampInt(bajo)}</span>
+                    <span className="prov-state-tag p-tag-warning">≤ {bajo}</span>
                   </div>
 
-                  <div className="mas-rangeRow">
-                    <span className="mas-rangeLabel">Óptimo</span>
-                    <div className="mas-rangeBar">
-                      <span className="mas-rangeFill mas-rangeFill--optimo" style={{ width: "100%" }} />
+                  <div className="prov-detail-list-item">
+                    <div>
+                      <strong>Óptimo</strong>
+                      <span>Stock por encima del umbral bajo</span>
                     </div>
-                    <span className="mas-rangeValue tabular">&gt; {clampInt(bajo)}</span>
+                    <span className="prov-state-tag p-tag-success">&gt; {bajo}</span>
                   </div>
-                </div>
-
-                <div className="mas-note">
-                  <i className="pi pi-eye" />
-                  <span>
-                    Con estos umbrales, el producto quedaría en{" "}
-                    <b>{estadoMeta.label}</b> con el stock actual.
-                  </span>
                 </div>
               </div>
             </div>
+
+            {/* FOOTER */}
+            <div className="prov-editor-footer">
+              <Button type="button" label="Cancelar" className="prov-soft-btn" onClick={onHide} />
+              <Button
+                type="button"
+                label="Guardar Umbrales"
+                icon="pi pi-check"
+                className="prov-primary-btn"
+                disabled={invalid}
+                onClick={handleSave}
+              />
+            </div>
           </div>
         )}
-      </Dialog>
+      </Sidebar>
     </>
   );
 }

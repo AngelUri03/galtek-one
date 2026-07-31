@@ -14,6 +14,13 @@ const METODO_ICON = {
     transferencia: "pi-send",
 };
 
+const normalizeMetodo = (value) =>
+    String(value || "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
 function formatHora(fecha) {
     if (!fecha) return "--";
     const d = fecha instanceof Date ? fecha : new Date(fecha);
@@ -68,9 +75,9 @@ export default function HistorialVentasPanel({ visible, onHide, historial = [] }
             ) : (
                 <ul className="historial-lista">
                     {historial.map((venta, idx) => {
-                        const metodo = venta.pago?.metodoPago || venta.pago?.metodo || "efectivo";
+                        const metodo = normalizeMetodo(venta.pago?.metodo || venta.pago?.metodoPago || "efectivo");
                         const iconClass = METODO_ICON[metodo] || "pi-wallet";
-                        const label = METODO_LABEL[metodo] || metodo;
+                        const label = venta.pago?.metodoNombre || METODO_LABEL[metodo] || metodo;
                         const numero = historial.length - idx;
 
                         return (

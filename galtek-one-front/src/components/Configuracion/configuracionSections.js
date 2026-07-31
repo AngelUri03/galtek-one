@@ -42,6 +42,14 @@ export const CONFIG_SECTION_GROUPS = [
         refreshable: true,
       },
       {
+        key: "caja",
+        label: "Caja y turnos",
+        icon: "pi pi-wallet",
+        desc: "Saldo continuo, corte, relevo y conteo esperado.",
+        status: "functional",
+        refreshable: true,
+      },
+      {
         key: "promociones",
         label: "Promociones",
         icon: "pi pi-tags",
@@ -85,9 +93,8 @@ export const CONFIG_SECTION_GROUPS = [
         label: "Pagos / Terminal",
         icon: "pi pi-credit-card",
         desc: "Metodos de pago, comisiones, bancos y TPV.",
-        status: "coming",
-        placeholder:
-          "Aqui se configuraran metodos de pago, terminales, comisiones y transferencias.",
+        status: "functional",
+        refreshable: true,
       },
     ],
   },
@@ -167,6 +174,13 @@ export const QUICK_ACTIONS = [
     status: "functional",
   },
   {
+    key: "caja",
+    label: "Caja",
+    icon: "pi pi-wallet",
+    target: "caja",
+    status: "functional",
+  },
+  {
     key: "overrides",
     label: "Overrides",
     icon: "pi pi-user-edit",
@@ -186,8 +200,7 @@ export const QUICK_ACTIONS = [
     label: "Pagos",
     icon: "pi pi-credit-card",
     target: "pagos",
-    status: "coming",
-    disabled: true,
+    status: "functional",
   },
 ];
 

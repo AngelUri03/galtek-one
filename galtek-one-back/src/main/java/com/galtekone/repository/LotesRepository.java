@@ -42,6 +42,15 @@ public interface LotesRepository extends JpaRepository<LotesEntity, Integer>, Jp
             @Param("idAlmacen") Integer idAlmacen,
             @Param("idEmpresa") Integer idEmpresa);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT l FROM LotesEntity l " +
+            "WHERE l.producto.idProducto = :idProducto " +
+            "AND l.empresa.idEmpresa = :idEmpresa " +
+            "AND l.cantidad > 0 " +
+            "ORDER BY l.fechaCaducidad ASC NULLS LAST, l.idLote ASC")
+    List<LotesEntity> findDisponiblesParaVentaEnEmpresa(@Param("idProducto") Integer idProducto,
+            @Param("idEmpresa") Integer idEmpresa);
+
     @Query("SELECT SUM(l.cantidad) FROM LotesEntity l " +
             "WHERE l.producto.idProducto = :idProducto " +
             "AND l.almacen.idAlmacen = :idAlmacen " +

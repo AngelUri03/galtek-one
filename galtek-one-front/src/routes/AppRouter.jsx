@@ -16,6 +16,8 @@ import Privacidad from "../components/Login/Privacidad";
 import Ventas from "../components/Ventas/Ventas";
 import Inventario from "../components/Inventario/Inventario";
 import NotFound from "../components/NotFound/NotFound";
+import CashSalesGuard from "../components/Caja/CashSalesGuard";
+import CashControlPage from "../components/Caja/CashControlPage";
 
 import Clientes from "../components/Clientes/Clientes";
 import CrearClientes from "../components/Clientes/CrearClientes";
@@ -65,7 +67,15 @@ export default function AppRouter() {
 
         {/* RUTAS PROTEGIDAS (APP) */}
         <Route element={<RequireAuth />}>
-          <Route path="ventas" element={<Ventas />} />
+          <Route
+            path="ventas"
+            element={
+              <CashSalesGuard>
+                <Ventas />
+              </CashSalesGuard>
+            }
+          />
+          <Route path="control-caja" element={<CashControlPage />} />
           <Route path="inventario" element={<Inventario />} />
           <Route path="compras" element={<Compras />} />
           <Route path="proveedores" element={<Proveedores />} />

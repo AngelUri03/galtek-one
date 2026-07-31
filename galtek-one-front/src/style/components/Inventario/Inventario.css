@@ -1,494 +1,174 @@
 /* ==========================================================================
-   INVENTARIO - ESTILO LIQUID GLASS (APPLE STYLE)
+   INVENTARIO GLOBAL - CORRECCIONES ESTÉTICAS FINALES
    ========================================================================== */
 
-:root {
-  /* Variables Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.45);
-  --glass-border: 1px solid rgba(255, 255, 255, 0.6);
-  --glass-blur: blur(16px);
-  --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.05);
-  --inv-brand: #0a7463;
-}
-/* ======================== */
-/* PÁGINA (Layout Fijo)     */
-/* ======================== */
-.inv-page {
-    display: flex;
-    flex-direction: column;
-    width: calc(100% - 3rem);
-    height: 100vh;
-    margin: 0 1.5rem;
-    overflow: hidden; /* Congela el scroll general */
-    animation: fadeIn 0.4s ease-in-out;
+/* --------------------------------------------------------------------------
+   1. HEADER IDÉNTICO A PROVEEDORES (TEXTO DELGADO Y EN MAYÚSCULAS)
+   -------------------------------------------------------------------------- */
+.prov-header-title {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.8rem !important;
+  color: #0a7463 !important;
+  font-size: 1.15rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+  text-transform: uppercase !important;
 }
 
-/* Efecto luces desenfocadas atrás del cristal */
-.inv-page::before,
-.inv-page::after {
-  content: ''; position: absolute; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.6; pointer-events: none;
-}
-.inv-page::before { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #bae6fd; }
-.inv-page::after { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #bbf7d0; }
-
-.inv-header-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1.5rem; /* Ajustado para que sea delgado */
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    border: var(--glass-border);
-    border-radius: 12px;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+.prov-header-title i {
+  font-size: 1.3rem !important;
+  color: #0a7463 !important;
 }
 
-.inv-table {
-    background: rgba(255, 255, 255, 0.2) !important;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    border-radius: 12px;
-}
-
-.inv-table .p-datatable-thead > tr > th,
-.inv-table .p-datatable-tbody > tr {
-    background: transparent !important;
-}
-
-.text-truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 150px;
-    display: block;
-}
-
-/* Forzar transparencia de celdas */
-.p-datatable .p-datatable-wrapper, 
-.p-datatable .p-datatable-table {
-    background: transparent !important;
-}
-/* Efecto luces desenfocadas atrás del cristal */
-.inv-page::before,
-.inv-page::after {
-  content: ''; position: absolute; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.6; pointer-events: none;
-}
-.inv-page::before { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #bae6fd; }
-.inv-page::after { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #bbf7d0; }
-
-/* ========================================== */
-/* HEADER PRINCIPAL                         */
-/* ========================================== */
-.inv-header-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1.5rem;
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    border: var(--glass-border);
-    border-radius: 12px;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.inv-header-title { 
-  font-size: 1.15rem; 
-  font-weight: 800; 
-  color: var(--inv-brand); 
-  display: flex; 
-  align-items: center; 
-  gap: 0.8rem; 
-  text-transform: uppercase; 
-}
-
-.inv-header-title i { 
-  font-size: 1.3rem; 
-}
-
-/* ========================================== */
-/* TOOLBAR Y BUSCADOR (LIQUID GLASS)        */
-/* ========================================== */
-.inv-toolbar-glass {
-  display: flex; 
-  gap: 15px; 
-  align-items: center; 
-  justify-content: space-between;
-  background: var(--glass-bg); 
-  backdrop-filter: var(--glass-blur); 
-  border: var(--glass-border); 
-  box-shadow: var(--glass-shadow);
-  padding: 16px 24px; 
-  border-radius: 20px; 
-  margin-bottom: 20px;
-}
-
-.inv-search-wrapper {
-    position: relative;
-    flex: 1;
-    max-width: 1900px;
-    display: flex;       /* Agregamos esto */
-    align-items: center; /* Alineación vertical perfecta */
-}
-
-.inv-search-wrapper .pi-search {
-    position: absolute;
-    left: 1.2rem;
-    /* Quitamos el top y transform y dejamos que el flex del wrapper lo alinee */
-    pointer-events: none; 
-    color: var(--inv-brand);
-}
-
-.inv-search-input {
-    width: 100% !important; 
-    height: 46px !important; 
-    border-radius: 14px !important;
-    padding-left: 3.2rem !important;
-    /* Aseguramos que el contenido interno también esté centrado */
-    display: flex;
-    align-items: center;
-}
-
-.inv-search-input:focus {
-  background: #ffffff !important; 
-  border-color: var(--inv-brand) !important;
-  box-shadow: 0 0 0 3px rgba(10, 116, 99, 0.15) !important;
-}
-
-.inv-toolbar-actions { 
-  display: flex; 
-  gap: 12px; 
-  align-items: center; 
-}
-
-.inv-btn { 
-  height: 46px !important; 
-  border-radius: 14px !important; 
-  font-family: "Kodchasan", sans-serif !important; 
-  font-weight: 700 !important; 
-  font-size: 0.9rem !important; 
-  border: none !important; 
-  transition: all 0.2s ease; 
-}
-
-.inv-btn--primary { 
-  background: var(--inv-brand) !important; 
-  color: #fff !important; 
-  box-shadow: 0 4px 12px rgba(10, 116, 99, 0.25) !important; 
-}
-
-.inv-btn--primary:hover { 
-  transform: translateY(-2px); 
-  box-shadow: 0 6px 15px rgba(10, 116, 99, 0.35) !important; 
-}
-
-.inv-btn--ghost { 
-  background: rgba(255,255,255,0.6) !important; 
-  color: var(--inv-brand) !important; 
-  border: var(--glass-border) !important; 
-}
-
-.inv-btn--ghost:hover { 
-  background: #fff !important; 
-  transform: translateY(-2px); 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; 
-}
-
-.inv-icon-btn { 
-  width: 46px !important; 
-  padding: 0 !important; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-}
-
-@media (max-width: 768px) {
-  .inv-toolbar-glass { flex-direction: column; align-items: stretch; }
-  .inv-search-wrapper { max-width: 100%; }
-  .inv-toolbar-actions { justify-content: flex-end; flex-wrap: wrap; }
-}
-
-/* ========================================== */
-/* CONTROLES GLOBALES (Inputs, Dropdowns)     */
-/* ========================================== */
-
-.inv-page .p-inputtext, 
-.inv-page .p-dropdown, 
-.inv-page .p-multiselect, 
-.inv-page .p-calendar {
-  background: rgba(255, 255, 255, 0.75) !important; 
-  color: #334155 !important;
-  border: 1px solid rgba(255, 255, 255, 0.9) !important;
-  box-shadow: inset 0 2px 4px rgba(255,255,255,0.5) !important; 
-  border-radius: 10px !important;
+.prov-header-title span {
   font-family: "Kodchasan", sans-serif !important;
-  transition: all 0.2s ease;
+  color: #0a7463 !important;
+  font-size: 1.15rem !important;
+  font-weight: 900 !important;
 }
 
-.inv-page .p-inputtext:enabled:hover, 
-.inv-page .p-dropdown:not(.p-disabled):hover, 
-.inv-page .p-multiselect:not(.p-disabled):hover { 
-  background: rgba(255, 255, 255, 0.9) !important; 
-  border-color: #fff !important; 
+/* --------------------------------------------------------------------------
+   2. BUSCADOR INTEGRADO (ELIMINA EL CORTE PREVIO A LA LUPA)
+   -------------------------------------------------------------------------- */
+/* ==========================================================================
+   SOLUCIÓN AL BUSCADOR CORTADO (ELIMINA LA CAJA DOBLE INTERNA)
+   ========================================================================== */
+
+/* ==========================================================================
+   SOLUCIÓN AL BUSCADOR CORTADO (ELIMINA LA CAJA DOBLE INTERNA)
+   ========================================================================== */
+
+/* Contenedor principal de la barra de búsqueda */
+.prov-search-wrap {
+  display: flex !important;
+  align-items: center !important;
+  height: 46px !important;
+  border: 1px solid rgba(21, 43, 38, 0.14) !important;
+  border-radius: 14px !important;
+  background: linear-gradient(180deg, #ffffff, #f7f7f7) !important;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5) !important;
+  overflow: hidden !important;
+  position: relative !important;
 }
 
-.inv-page .p-inputtext:enabled:focus, 
-.inv-page .p-dropdown:not(.p-disabled).p-focus, 
-.inv-page .p-multiselect:not(.p-disabled).p-focus { 
-  border-color: var(--inv-brand) !important; 
-  background: #ffffff !important; 
-  box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.2) !important; 
+/* Ícono de la lupa */
+.prov-search-wrap > i {
+  flex: 0 0 42px !important;
+  color: #0a7463 !important;
+  font-size: 1rem !important;
+  text-align: center !important;
+  pointer-events: none;
 }
 
-/* ========================================== */
-/* PANELES DESPLEGABLES (Dropdown/Modals)     */
-/* ========================================== */
-
-.p-dropdown-panel, .p-multiselect-panel, .p-datepicker { 
-  border-radius: 12px !important; 
-  background: rgba(255, 255, 255, 0.85) !important; 
-  backdrop-filter: var(--glass-blur); 
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--glass-border) !important; 
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important; 
-  font-family: "Kodchasan", sans-serif !important; 
-  overflow: hidden; 
-}
-
-.p-dropdown-item, .p-multiselect-item { 
-  font-size: 0.85rem !important; 
-  padding: 0.5rem 1rem !important; 
-  color: #334155 !important; 
-  background: transparent !important;
-}
-
-.p-dropdown-item.p-highlight, 
-.p-multiselect-item.p-highlight, 
-.p-dropdown-item:not(.p-highlight):not(.p-disabled):hover, 
-.p-multiselect-item:not(.p-highlight):not(.p-disabled):hover { 
-  background: rgba(10, 116, 99, 0.12) !important; 
-  color: var(--inv-brand) !important; 
-}
-
-/* Modales / Dialogs Globales */
-.p-dialog {
-  background: rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: var(--glass-border);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.6) !important;
-  border-radius: 20px !important;
-  overflow: hidden;
-  font-family: "Kodchasan", sans-serif;
-}
-.p-dialog .p-dialog-header {
-  background: transparent !important;
-  border-bottom: 1px solid rgba(255,255,255,0.5);
-}
-.p-dialog .p-dialog-content {
-  background: transparent !important;
-  padding: 1.5rem;
-}
-.p-dialog-mask.p-component-overlay {
-  background: rgba(15, 23, 42, 0.2) !important;
-  backdrop-filter: blur(4px) !important;
-  -webkit-backdrop-filter: blur(4px) !important;
-}
-
-/* =========================== */
-/* TABLA INVENTARIO            */
-/* =========================== */
-.inv-table {
-    background: rgba(255, 255, 255, 0.2) !important;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-/* Forzar transparencia total en capas internas */
-.p-datatable .p-datatable-wrapper, 
-.p-datatable .p-datatable-table,
-.inv-table .p-datatable-thead > tr > th,
-.inv-table .p-datatable-tbody > tr {
-    background: transparent !important;
-}
-
-.text-truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 150px;
-    display: block;
-}
-
-
-/* Ajuste para que las filas tengan un ligero fondo al pasar el mouse */
-.inv-table .p-datatable-tbody > tr:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* Asegurar que el paginador también sea transparente */
-.inv-table .p-paginator {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.inv-table .p-datatable-wrapper {
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.inv-table .p-datatable-thead > tr > th {
-  background: rgba(255, 255, 255, 0.4) !important;
-  color: #334155 !important;
-  font-weight: 800;
-  font-size: 0.9rem;
-  padding: 12px 16px !important;
+/* INPUT INTERNO: Se fuerzan bordes/fondos transparentes para eliminar la división */
+.prov-search-wrap .p-inputtext,
+.prov-search-wrap input {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: 100% !important;
   border: none !important;
-  border-bottom: 1px solid rgba(255,255,255,0.6) !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: #1b2b27 !important;
+  font-size: 0.88rem !important;
+  font-family: "Kodchasan", sans-serif !important;
+  padding: 0 12px 0 0 !important; /* Espaciado limpio sin margin interno */
 }
 
-/* Esto fuerza que todo el contenido de las celdas esté alineado al centro verticalmente */
-.inv-table .p-datatable-tbody > tr > td {
-    vertical-align: middle !important;
-    padding: 0.5rem 1rem !important; /* Ajusta este padding si quieres que se vea más delgado */
-    display: table-cell;
-}                                   
-
-.inv-table .p-datatable-tbody > tr:hover > td {
-  background: rgba(255, 255, 255, 0.3) !important;
+/* Quitar resplandor extra al hacer foco en la barra */
+.prov-search-wrap:focus-within {
+  border-color: #0a7463 !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.18) !important;
+}
+/* --------------------------------------------------------------------------
+   3. CORRECCIÓN DE INPUTNUMBER (UNIFICA RECTÁNGULOS Y FLECHAS)
+   -------------------------------------------------------------------------- */
+.p-inputnumber {
+  display: flex !important;
+  align-items: stretch !important;
+  border: 1px solid rgba(21, 43, 38, 0.14) !important;
+  border-radius: 10px !important;
+  background: linear-gradient(180deg, #ffffff, #f7f7f7) !important;
+  overflow: hidden !important;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5) !important;
 }
 
-.inv-table .p-datatable-thead .p-sortable-column .p-sortable-column-icon,
-.inv-table .p-datatable-thead .p-sortable-column .pi {
-  color: #334155 !important;
+.p-inputnumber .p-inputnumber-input,
+.p-inputnumber input {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  height: 100% !important;
+  flex: 1 1 auto !important;
+}
+
+.p-inputnumber-button-group {
+  display: flex !important;
+  flex-direction: column !important;
+  border-radius: 0 !important;
+  border: none !important;
+}
+
+.p-inputnumber-button {
+  border-radius: 0 !important;
+  border: none !important;
+  background: #0a7463 !important;
+  color: #ffffff !important;
   box-shadow: none !important;
 }
 
-.inv-table .p-datatable-thead .p-sortable-column.p-highlight {
-  background: rgba(255, 255, 255, 0.6) !important;
-  color: var(--inv-brand) !important;
+.p-inputnumber-button:hover {
+  background: #085f52 !important;
 }
 
-.inv-table .p-datatable-thead .p-sortable-column.p-highlight .p-sortable-column-icon {
-  color: var(--inv-brand) !important;
-}
-
-/* ========================== */
-/* TABLA INTERNA (LOTES)      */
-/* ========================== */
-.inv-lotes-table {
-  background: rgba(255,255,255,0.3) !important;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.inv-lotes-table .p-datatable-thead > tr > th {
-  background: rgba(10, 116, 99, 0.1) !important;
-  color: var(--inv-brand) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.5) !important;
-}
-
-.inv-lotes-table .p-datatable-tbody > tr > td {
-  background: transparent !important;
-  border-bottom: 1px solid rgba(255,255,255,0.3) !important;
-}
-
-/* ======================================= */
-/* PAGINACIÓN PREMIUM                      */
-/* ======================================= */
-
-.inv-table .p-paginator {
-  background: transparent !important;
-  border: none !important;
-  padding: 1rem 0.5rem 0.5rem !important;
-  font-family: "Kodchasan", sans-serif !important;
-}
-
-.inv-table .p-paginator-current {
-  color: #475569 !important;
-  font-weight: 600;
-}
-
-.inv-table .p-paginator .p-paginator-element {
-  color: #475569 !important;
-  background: transparent !important;
-  border-radius: 10px;
-  transition: all 0.2s ease !important;
-}
-
-.inv-table .p-paginator .p-paginator-element:not(.p-disabled):hover {
-  background: rgba(255, 255, 255, 0.6) !important;
-  transform: translateY(-2px);
-}
-
-.inv-table .p-paginator .p-highlight {
-  background: var(--inv-brand) !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 10px rgba(10, 116, 99, 0.3) !important;
-}
-
-/* Imagen */
+/* --------------------------------------------------------------------------
+   4. ELEMENTOS DE TABLA E IMÁGENES
+   -------------------------------------------------------------------------- */
 .inv-thumb {
-  width: 56px;
-  height: 56px;
-  border-radius: 8px;
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
   object-fit: cover;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid rgba(10, 116, 99, 0.14);
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(20, 38, 34, 0.04);
 }
 
-/* Acciones */
-.table-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.inv-lotes-container {
+  background: rgba(10, 116, 99, 0.03);
+  border-radius: 10px;
+  border: 1px solid rgba(10, 116, 99, 0.1);
+  margin: 4px 10px;
 }
 
-/* ========================== */
-/* BOTONES DE ACCIÓN          */
-/* ========================== */
-.inv-action-btn {
-    background: rgba(255, 255, 255, 0.4) !important;
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-    width: 34px; height: 34px; border-radius: 10px;
-    color: var(--inv-brand) !important;
-}
-.inv-action-btn:hover {
-  background: #fff !important;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+/* --------------------------------------------------------------------------
+   5. NAVEGACIÓN Y FOCOS VERDES (SIN TONOS MORADOS)
+   -------------------------------------------------------------------------- */
+*:focus,
+*:focus-visible,
+.p-component:focus,
+.p-component:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.22) !important;
+  border-color: #0a7463 !important;
 }
 
-.inv-action-btn.danger { color: #ef4444 !important; }
-.inv-action-btn.danger:hover { background: #fee2e2 !important; color: #dc2626 !important; }
-
-/* ========================= */
-/* TOAST INV                 */
-/* ========================= */
-
-.inv-toast { font-family: "Kodchasan", sans-serif !important; }
-.inv-toast .p-toast-message {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: var(--glass-border);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15) !important;
-  border-radius: 14px;
-}
-/* ========================== */
-/* AJUSTES GLOBALES           */
-/* ========================== */
-.layout-sidebar {
-    display: none !important;
+.prov-table.p-datatable .p-datatable-tbody > tr.p-highlight {
+  background: rgba(10, 116, 99, 0.1) !important;
+  color: #0a7463 !important;
 }
 
-.layout-main-container {
-    margin-left: 0 !important;
+/* SKU estilo texto limpio y neutral */
+.inv-sku-text {
+  color: #52615d !important; /* Gris oscuro neutro */
+  font-weight: 600 !important;
+  font-size: 0.82rem !important;
+  letter-spacing: 0.3px;
+  font-family: "Kodchasan", sans-serif !important;
 }

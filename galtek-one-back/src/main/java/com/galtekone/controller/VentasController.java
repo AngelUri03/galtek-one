@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.galtekone.entity.VentasEntity;
 import com.galtekone.services.VentasService;
 import com.galtekone.utils.ApiResponseBuilder;
+import com.galtekone.utils.CajaOperacionException;
 import com.galtekone.utils.DynamicSpecification;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -83,6 +84,14 @@ public class VentasController {
 
             return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime,
                     "Venta creada correctamente");
+        } catch (CajaOperacionException e) {
+            return ApiResponseBuilder.buildErrorResponse(user, startTime,
+                    e.getCode() + ": " + e.getMessage(),
+                    e.getStatus());
+        } catch (IllegalArgumentException e) {
+            return ApiResponseBuilder.buildErrorResponse(user, startTime,
+                    e.getMessage(),
+                    HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return ApiResponseBuilder.buildErrorResponse(user, startTime,
                     "Error al crear la venta: " + e.getMessage(),
