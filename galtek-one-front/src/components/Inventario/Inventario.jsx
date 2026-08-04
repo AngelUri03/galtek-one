@@ -3,7 +3,8 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { ConfirmDialog } from "primereact/confirmdialog";
+import { Dialog } from "primereact/dialog";
+import { InputTextarea } from "primereact/inputtextarea";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
@@ -13,7 +14,6 @@ import Shell from "../common/Shell";
 import ModalEditarProducto from "./ModalEditarProducto";
 import ModalAjusteStock from "./ModalAjusteStock";
 import ModalAlertasStock from "./ModalAlertasStock";
-import ModalEliminarProducto from "./ModalEliminarProducto";
 import ModalAgregarProducto from "./ModalAgregarProducto";
 import ModalInformacion from "./ModalInformacion";
 
@@ -104,6 +104,34 @@ const readApiPayload = async (response, label = "solicitud") => {
   return payload;
 };
 
+// Mensajes y reglas para el diálogo de confirmación
+const actionMessages = {
+  archivar: {
+    title: "Archivar producto",
+    success: "Producto archivado.",
+    confirmLabel: "Archivar",
+    placeholder: "Ej. Producto descontinuado por el proveedor.",
+    detail: "El producto se retira de la venta y catálogo operativo, conservando su historial de ventas e inventario.",
+    consequences: [
+      "No aparecerá para nuevas ventas ni compras.",
+      "Se conserva todo el historial financiero y de movimientos.",
+      "Puede reactivarse si vuelve a venderse.",
+    ],
+  },
+  eliminar: {
+    title: "Eliminar producto físicamente",
+    success: "Producto eliminado correctamente.",
+    confirmLabel: "Eliminar físicamente",
+    placeholder: "Ej. Registro capturado por error.",
+    detail: "Esta acción elimina permanentemente el producto solo si no tiene ventas ni lotes históricos registrados.",
+    consequences: [
+      "Solo aplica a productos creados por error sin movimientos.",
+      "No procede si tiene ventas, inventario activo o compras previas.",
+      "Si tiene historial, se debe archivar o descontinuar.",
+    ],
+  },
+};
+
 export default function Inventario() {
   const toast = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -119,8 +147,12 @@ export default function Inventario() {
   const [modalEditar, setModalEditar] = useState({ open: false, producto: null });
   const [modalAjuste, setModalAjuste] = useState({ open: false, producto: null });
   const [modalAlertas, setModalAlertas] = useState({ open: false, producto: null });
-  const [modalEliminar, setModalEliminar] = useState({ open: false, producto: null });
   const [modalInfo, setModalInfo] = useState({ open: false, producto: null });
+
+  // Estado para la confirmación de eliminación / archivado segura
+  const [confirmAction, setConfirmAction] = useState(null);
+  const [actionPreparing, setActionPreparing] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const [categoriasOptions, setCategoriasOptions] = useState([]);
   const [proveedoresOptions, setProveedoresOptions] = useState([]);
@@ -166,6 +198,100 @@ export default function Inventario() {
   };
 
   useEffect(() => { loadCatalogs(); fetchProductos(); }, []);
+
+  // Lógica de eliminación / archivado segura heredada de Proveedores
+  const openProductoAction = async (action, producto) => {
+    if (!producto || !actionMessages[action]) return;
+
+    const baseAction = {
+      action,
+      producto,
+      motivo: "",
+      deletePolicy: null,
+      ...actionMessages[action],
+    };
+
+    if (action !== "eliminar") {
+      setConfirmAction(baseAction);
+      return;
+    }
+
+    setActionPreparing(true);
+    setConfirmAction({ ...baseAction, loadingPolicy: true });
+
+    try {
+      // Evaluación de la política de eliminación en backend o por existencias/lotes
+      let deletePolicy = null;
+      try {
+        const response = await api.fetchApi(
+          {},
+          "GET",
+          undefined,
+          `${endpoints.ventasProductos}/${producto.idProducto}/eliminacion-segura`
+        );
+        deletePolicy = await readApiPayload(response, "revisar eliminación");
+      } catch (err) {
+        // Fallback local: Si el producto tiene stock > 0 o lotes registrados, se bloquea la eliminación
+        const tieneLotesOStock = (producto.stock > 0) || (producto.lotes && producto.lotes.length > 0);
+        deletePolicy = {
+          puedeEliminar: !tieneLotesOStock,
+          mensaje: tieneLotesOStock
+            ? "El producto tiene existencias registradas o lotes asociados."
+            : "Validado para eliminación física.",
+          motivos: tieneLotesOStock ? ["Posee existencias en almacén o historial de lotes."] : [],
+        };
+      }
+
+      setConfirmAction((prev) =>
+        prev?.producto?.idProducto === producto.idProducto
+          ? { ...prev, deletePolicy, loadingPolicy: false }
+          : prev
+      );
+    } catch (error) {
+      console.error("Error al revisar eliminación:", error);
+    } finally {
+      setActionPreparing(false);
+    }
+  };
+
+  const confirmProductoAction = async () => {
+    if (!confirmAction) return;
+    if (!confirmAction.motivo?.trim()) {
+      toast.current?.show({ severity: "warn", summary: "Atención", detail: "Captura el motivo para continuar." });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const prod = confirmAction.producto;
+      if (confirmAction.action === "eliminar") {
+        const res = await api.fetchApi(
+          { "Content-Type": "application/json" },
+          "DELETE",
+          { motivo: confirmAction.motivo },
+          `${endpoints.ventasProductos}/${prod.idProducto}`
+        );
+        await readApiPayload(res, "eliminar producto");
+        toast.current?.show({ severity: "success", summary: "Éxito", detail: confirmAction.success });
+      } else if (confirmAction.action === "archivar") {
+        const res = await api.fetchApi(
+          { "Content-Type": "application/json" },
+          "PUT",
+          { estatus: false, motivo: confirmAction.motivo },
+          `${endpoints.ventasProductos}/${prod.idProducto}`
+        );
+        await readApiPayload(res, "archivar producto");
+        toast.current?.show({ severity: "success", summary: "Éxito", detail: confirmAction.success });
+      }
+
+      setConfirmAction(null);
+      fetchProductos();
+    } catch (error) {
+      toast.current?.show({ severity: "error", summary: "Error", detail: error.message || "No se pudo completar la acción." });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleCreateProducto = async (nuevo) => {
     try {
@@ -258,14 +384,47 @@ export default function Inventario() {
     return <img src={src} alt={row.nombre} className="inv-thumb" />;
   };
 
-  const accionesBody = (row) => (
-    <div className="prov-row-actions">
-      <Button icon="pi pi-eye" className="prov-row-action" tooltip="Información" onClick={() => setModalInfo({ open: true, producto: row })} />
-      <Button icon="pi pi-pencil" className="prov-row-action" tooltip="Editar" onClick={() => setModalEditar({ open: true, producto: row })} />
-      <Button icon="pi pi-sliders-h" className="prov-row-action" tooltip="Umbrales" onClick={() => setModalAlertas({ open: true, producto: row })} />
-      <Button icon="pi pi-sync" className="prov-row-action" tooltip="Ajustar" onClick={() => setModalAjuste({ open: true, producto: row })} />
+const accionesBody = (row) => (
+    <div className="prov-row-actions" onClick={(e) => e.stopPropagation()}>
+      <Button 
+        icon="pi pi-eye" 
+        className="prov-row-action" 
+        tooltip="Información" 
+        onClick={() => setModalInfo({ open: true, producto: row })} 
+      />
+      <Button 
+        icon="pi pi-pencil" 
+        className="prov-row-action" 
+        tooltip="Editar" 
+        onClick={() => setModalEditar({ open: true, producto: row })} 
+      />
+      <Button 
+        icon="pi pi-sliders-h" 
+        className="prov-row-action" 
+        tooltip="Umbrales" 
+        onClick={() => setModalAlertas({ open: true, producto: row })} 
+      />
+      <Button 
+        icon="pi pi-sync" 
+        className="prov-row-action" 
+        tooltip="Ajustar" 
+        onClick={() => setModalAjuste({ open: true, producto: row })} 
+      />
       <div className="prov-row-action-separator" />
-      <Button icon="pi pi-trash" className="prov-row-action prov-menu-danger" tooltip="Eliminar" onClick={() => setModalEliminar({ open: true, producto: row })} />
+      {/* Botón Archivar/Descontinuar */}
+      <Button 
+        icon="pi pi-inbox" 
+        className="prov-row-action prov-menu-caution" 
+        tooltip="Archivar / Descontinuar" 
+        onClick={() => openProductoAction("archivar", row)} 
+      />
+      {/* Botón Eliminar Físicamente */}
+      <Button 
+        icon="pi pi-trash" 
+        className="prov-row-action prov-menu-danger" 
+        tooltip="Eliminar" 
+        onClick={() => openProductoAction("eliminar", row)} 
+      />
     </div>
   );
 
@@ -286,11 +445,12 @@ export default function Inventario() {
     </div>
   );
 
+  const isDeleteBlocked = confirmAction?.action === "eliminar" && confirmAction?.deletePolicy?.puedeEliminar === false;
+
   return (
     <Shell>
       <Toast ref={toast} className="prov-toast" />
       <Tooltip />
-      <ConfirmDialog />
 
       <main className="proveedores-page">
         {/* HEADER EXTACTO AL DE PROVEEDORES */}
@@ -420,7 +580,6 @@ export default function Inventario() {
               )} 
             />
 
-            {/* COLUMNA SKU - NEUTRO GRIS */}
             <Column 
               field="sku" 
               header="SKU" 
@@ -445,16 +604,16 @@ export default function Inventario() {
               }}
             />
             
-                            <Column 
-                  field="precioVenta" 
-                  header="P. Venta" 
-                  sortable 
-                  body={(row) => (
-                    <strong className="inv-table-text-dark">
-                      ${Number(row.precioVenta || 0).toFixed(2)}
-                    </strong>
-                  )} 
-                />
+            <Column 
+              field="precioVenta" 
+              header="P. Venta" 
+              sortable 
+              body={(row) => (
+                <strong className="inv-table-text-dark">
+                  ${Number(row.precioVenta || 0).toFixed(2)}
+                </strong>
+              )} 
+            />
             <Column header="Acciones" body={accionesBody} frozen alignFrozen="right" style={{ width: '180px' }} />
           </DataTable>
         </section>
@@ -464,7 +623,6 @@ export default function Inventario() {
         <ModalEditarProducto open={modalEditar.open} producto={modalEditar.producto} onHide={() => setModalEditar({ open: false, producto: null })} onSave={() => { fetchProductos(); setModalEditar({ open: false, producto: null }); }} categoriasOptions={categoriasOptions} proveedoresOptions={proveedoresOptions} unidadesOptions={unidadesOptions} almacenesOptions={almacenesOptions} />
         <ModalAjusteStock open={modalAjuste.open} producto={modalAjuste.producto} onHide={() => setModalAjuste({ open: false, producto: null })} onApply={() => { fetchProductos(); setModalAjuste({ open: false, producto: null }); }} almacenesOptions={almacenesOptions} />
         <ModalAlertasStock open={modalAlertas.open} producto={modalAlertas.producto} onHide={() => setModalAlertas({ open: false, producto: null })} onSave={() => { fetchProductos(); setModalAlertas({ open: false, producto: null }); }} />
-        <ModalEliminarProducto open={modalEliminar.open} producto={modalEliminar.producto} onHide={() => setModalEliminar({ open: false, producto: null })} onConfirm={() => { fetchProductos(); setModalEliminar({ open: false, producto: null }); }} />
         
         <ModalAgregarProducto 
           open={modalAgregar} 
@@ -475,6 +633,106 @@ export default function Inventario() {
           almacenesOptions={almacenesOptions} 
           unidadesOptions={unidadesOptions} 
         />
+
+        {/* DIÁLOGO DE CONFIRMACIÓN SEGURA Y AUDITORÍA (HEREDADO DE PROVEEDORES) */}
+        <Dialog
+          header={confirmAction?.title || ""}
+          visible={Boolean(confirmAction)}
+          onHide={() => setConfirmAction(null)}
+          modal
+          draggable={false}
+          dismissableMask
+          className="prov-confirm-dialog"
+          style={{ width: "34rem" }}
+          footer={
+            <div className="prov-dialog-footer">
+              <Button
+                label={isDeleteBlocked ? "Cerrar" : "Cancelar"}
+                className="p-button-text prov-text-btn"
+                onClick={() => setConfirmAction(null)}
+                disabled={saving || actionPreparing}
+              />
+              {!isDeleteBlocked && (
+                <Button
+                  label={confirmAction?.confirmLabel || "Confirmar"}
+                  icon={confirmAction?.action === "eliminar" ? "pi pi-trash" : "pi pi-check"}
+                  className={
+                    confirmAction?.action === "eliminar"
+                      ? "prov-danger-btn"
+                      : "prov-primary-btn"
+                  }
+                  onClick={confirmProductoAction}
+                  loading={saving}
+                  disabled={saving || actionPreparing || confirmAction?.loadingPolicy || !confirmAction?.motivo?.trim()}
+                />
+              )}
+            </div>
+          }
+        >
+          <div className="prov-safe-action-body">
+            <p className="prov-confirm-text">{confirmAction?.detail}</p>
+
+            {confirmAction?.consequences?.length ? (
+              <div className="prov-safe-box">
+                <strong>Consecuencias</strong>
+                <ul>
+                  {confirmAction.consequences.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {confirmAction?.action === "eliminar" && (
+              <div className={isDeleteBlocked ? "prov-delete-policy is-blocked" : "prov-delete-policy"}>
+                {confirmAction.loadingPolicy ? (
+                  <span>Revisando historial y existencias del producto...</span>
+                ) : (
+                  <>
+                    <strong>
+                      {confirmAction.deletePolicy?.puedeEliminar
+                        ? "Eliminación permitida"
+                        : "Eliminación bloqueada"}
+                    </strong>
+                    <p>
+                      {confirmAction.deletePolicy?.mensaje ||
+                        "El backend debe validar que no existan existencias ni movimientos registrados."}
+                    </p>
+                    {confirmAction.deletePolicy?.motivos?.length ? (
+                      <ul>
+                        {confirmAction.deletePolicy.motivos.map((reason) => (
+                          <li key={reason}>{reason}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </>
+                )}
+              </div>
+            )}
+
+            {!isDeleteBlocked && (
+              <label className="prov-field prov-safe-reason">
+                <span>Motivo</span>
+                <InputTextarea
+                  value={confirmAction?.motivo || ""}
+                  onChange={(event) =>
+                    setConfirmAction((prev) =>
+                      prev ? { ...prev, motivo: event.target.value } : prev
+                    )
+                  }
+                  rows={3}
+                  autoResize
+                  maxLength={500}
+                  placeholder={confirmAction?.placeholder}
+                  disabled={saving || actionPreparing || confirmAction?.loadingPolicy}
+                />
+                <small>
+                  Este motivo queda asociado a la auditoría de inventario.
+                </small>
+              </label>
+            )}
+          </div>
+        </Dialog>
       </main>
     </Shell>
   );
