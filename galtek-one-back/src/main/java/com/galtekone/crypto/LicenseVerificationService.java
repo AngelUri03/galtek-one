@@ -47,6 +47,12 @@ public class LicenseVerificationService {
                     .parseClaimsJws(token);
             
             return jws.getBody();
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            throw new IllegalArgumentException("ERR_JWT_EXPIRED");
+        } catch (io.jsonwebtoken.security.SignatureException e) {
+            throw new IllegalArgumentException("ERR_JWT_TAMPERED");
+        } catch (io.jsonwebtoken.MalformedJwtException e) {
+            throw new IllegalArgumentException("ERR_JWT_MALFORMED");
         } catch (Exception e) {
             // Firma invalida, modificada por un pirata, expirada o malformada
             throw new IllegalArgumentException("Token invalido o corrupto: " + e.getMessage(), e);

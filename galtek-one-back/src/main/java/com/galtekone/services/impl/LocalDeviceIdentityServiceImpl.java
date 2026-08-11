@@ -101,7 +101,8 @@ public class LocalDeviceIdentityServiceImpl implements LocalDeviceIdentityServic
                 licenseVerificationService.verifyLicense(dbEntity.getLicenseToken());
             } catch (Exception e) {
                 deviceLockState.setLocked(true);
-                deviceLockState.setLockReason("Licencia invalida o corrupta");
+                deviceLockState.setLockReason(e.getMessage());
+                if (fileData == null) syncToFile(dbEntity, file);
                 return;
             }
 
@@ -128,7 +129,7 @@ public class LocalDeviceIdentityServiceImpl implements LocalDeviceIdentityServic
 
                     if (matches < 3) {
                         deviceLockState.setLocked(true);
-                        deviceLockState.setLockReason("Fallo de verificacion de hardware (Similitud menor al 75%)");
+                        deviceLockState.setLockReason("HARDWARE_MISMATCH");
                     }
                 }
             }
@@ -167,7 +168,7 @@ public class LocalDeviceIdentityServiceImpl implements LocalDeviceIdentityServic
                     licenseVerificationService.verifyLicense(newEntity.getLicenseToken());
                 } catch (Exception e) {
                     deviceLockState.setLocked(true);
-                    deviceLockState.setLockReason("Licencia invalida o corrupta");
+                    deviceLockState.setLockReason(e.getMessage());
                     return;
                 }
 
@@ -185,7 +186,7 @@ public class LocalDeviceIdentityServiceImpl implements LocalDeviceIdentityServic
 
                     if (matches < 3) {
                         deviceLockState.setLocked(true);
-                        deviceLockState.setLockReason("Fallo de verificacion de hardware tras restauracion");
+                        deviceLockState.setLockReason("HARDWARE_MISMATCH");
                     }
                 }
             } else {
@@ -236,14 +237,15 @@ public class LocalDeviceIdentityServiceImpl implements LocalDeviceIdentityServic
         Optional<LocalDeviceEntity> dbEntityOpt = localDeviceRepository.findAll().stream().findFirst();
         if (dbEntityOpt.isPresent()) {
             LocalDeviceEntity entity = dbEntityOpt.get();
+            HardwareHashes currentHardware = hardwareIdentifierService.getCurrentHardwareHashes();
             DeviceIdentityDTO dto = new DeviceIdentityDTO(
                     entity.getInstallationId(),
                     entity.getDisplayName(),
                     entity.getCashRegisterId(),
-                    entity.getCpuHash(),
-                    entity.getMotherboardHash(),
-                    entity.getMacHash(),
-                    entity.getDiskHash(),
+                    currentHardware.cpuHash(),
+                    currentHardware.motherboardHash(),
+                    currentHardware.macHash(),
+                    currentHardware.diskHash(),
                     entity.getLicenseToken(),
                     entity.getCreatedAt(),
                     null,
@@ -309,7 +311,7 @@ public class LocalDeviceIdentityServiceImpl implements LocalDeviceIdentityServic
             if (currentHardware.diskHash().equals(claims.get("diskHash", String.class))) matches++;
 
             if (matches < 3) {
-                throw new IllegalArgumentException("Token invalido: El hardware no corresponde a la licencia original.");
+                throw new IllegalArgumentException("HARDWARE_MISMATCH");
             }
 
             Integer legacyCashRegisterId = dbEntity.getCashRegisterId();

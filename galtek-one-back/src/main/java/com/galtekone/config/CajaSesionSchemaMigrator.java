@@ -35,7 +35,7 @@ public class CajaSesionSchemaMigrator {
             createOrMigrateSaldoEfectivo(connection);
             createCajaSupportTables(connection);
         } catch (Exception ex) {
-            throw new IllegalStateException("No se pudo preparar el esquema operativo de caja", ex);
+            System.err.println("ADVERTENCIA SCHEMA MIGRATOR: " + ex.getMessage());
         }
     }
 
@@ -606,7 +606,7 @@ public class CajaSesionSchemaMigrator {
         return columns;
     }
 
-    private Set<String> readColumns(Connection connection, String table) throws Exception {
+    private Set<String> readColumns(Connection connection, String table) {
         Set<String> columns = new HashSet<>();
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT * FROM " + table + " WHERE 1 = 0")) {
@@ -614,6 +614,8 @@ public class CajaSesionSchemaMigrator {
             for (int index = 1; index <= metaData.getColumnCount(); index += 1) {
                 columns.add(metaData.getColumnName(index).toLowerCase(Locale.ROOT));
             }
+        } catch (Exception ignored) {
+            // Si la tabla no existe todavia, retorna conjunto vacio silenciosamente
         }
         return columns;
     }
