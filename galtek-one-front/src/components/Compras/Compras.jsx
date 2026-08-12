@@ -1,77 +1,125 @@
-/*import React from "react";
-import Shell from "../common/Shell";
-import { Link } from "react-router-dom";
-import { Card } from "primereact/card";
-//import { Button } from "primereact/button";
-import "../../style/components/Compras/Compras.css";
-import useLockBodyScroll from "../../Hooks/UseLockBodyScroll";
-
-export default function Compras() {
-  useLockBodyScroll(true);
-  return (
-    <Shell>
-      <div className="compras-wrapper">
-        <h1 className="compras-title">Registro de compras</h1>
-        <div className="compras-cards">
-          <Link to="/compras/producto" className="compras-card">
-            <i className="pi pi-box"></i>
-            <h3>Producto</h3>
-          </Link>
-          <Link to="/compras/ticket" className="compras-card">
-            <i className="pi pi-ticket"></i>
-            <h3>Ticket</h3>
-          </Link>
-          <Link to="/compras/proveedor" className="compras-card">
-            <i className="pi pi-warehouse"></i>
-            <h3>Proveedor</h3>
-          </Link>
-        </div>
-      </div>
-    </Shell>
-  );
-}*/
-
-import React, { useState } from "react";
+/*import React, { useState } from "react";
 import Shell from "../common/Shell";
 import { TabView, TabPanel } from "primereact/tabview";
 import NuevaCompra from "./NuevaCompra";
 import HistorialCompras from "./HistorialCompras";
 import "../../style/components/Compras/Compras.css";
 import PanelSugerencias from "./PanelSugerencias";
-// import useLockBodyScroll from "../../Hooks/UseLockBodyScroll"; // Eliminado para liberar el scroll general
+// import useLockBodyScroll from "../../Hooks/UseLockBodyScroll"; 
 
 export default function Compras() {
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
     <Shell>
-      <div className="compras-workspace-wrapper">
+      
+      <main className="compras-workspace-wrapper">
+        
+        
+        <section className="comp-header">
+          <div className="comp-header-title">
+            <i className="pi pi-shopping-cart" />
+            <span>COMPRAS</span>
+          </div>
+        </section>
+
         <div className="compras-tabs-container">
           <TabView activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
             
-            {/* Ícono de carrito añadido para reafirmar visualmente que estamos en Compras */}
-            <TabPanel header="Nueva Compra" leftIcon="pi pi-shopping-cart mr-2">
+            <TabPanel header="Nueva Compra" leftIcon="pi pi-shopping-cart">
               <NuevaCompra />
             </TabPanel>
 
-            <TabPanel header="Historial de Compras" leftIcon="pi pi-history mr-2">
+            <TabPanel header="Historial de Compras" leftIcon="pi pi-history">
               <HistorialCompras />
             </TabPanel>
 
-            <TabPanel header="Borradores" leftIcon="pi pi-file-edit mr-2">
+            <TabPanel header="Borradores" leftIcon="pi pi-file-edit">
               <div className="placeholder-content">
+                <i className="pi pi-file-edit" style={{ fontSize: "2rem", marginBottom: "8px", color: "var(--comp-brand)" }}></i>
                 <h2>Borradores</h2>
                 <p>Espacio para retomar compras guardadas temporalmente.</p>
               </div>
             </TabPanel>
 
-            <TabPanel header="Sugerencias" leftIcon="pi pi-lightbulb mr-2">
-              <PanelSugerencias /> 
+            <TabPanel header="Sugerencias" leftIcon="pi pi-lightbulb">
+              <PanelSugerencias />
             </TabPanel>
 
           </TabView>
         </div>
-      </div>
+      </main>
+    </Shell>
+  );
+}*/
+
+import React, { useState } from "react";
+import Shell from "../common/Shell";
+import NuevaCompra from "./NuevaCompra";
+import HistorialCompras from "./HistorialCompras";
+import "../../style/components/Compras/Compras.css";
+import PanelSugerencias from "./PanelSugerencias";
+
+export default function Compras() {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  return (
+    <Shell>
+      <main className="compras-workspace-wrapper">
+        
+        {/* HEADER COMBINADO: Título a la izquierda, Pestañas a la derecha */}
+        <section className="comp-header">
+          <div className="comp-header-title">
+            <i className="pi pi-shopping-cart" />
+            <span>COMPRAS</span>
+          </div>
+          
+          <nav className="comp-header-tabs">
+            <button 
+              className={`comp-tab-btn ${activeIndex === 0 ? "active" : ""}`}
+              onClick={() => setActiveIndex(0)}
+            >
+              <i className="pi pi-shopping-cart" /> Nueva Compra
+            </button>
+            
+            <button 
+              className={`comp-tab-btn ${activeIndex === 1 ? "active" : ""}`}
+              onClick={() => setActiveIndex(1)}
+            >
+              <i className="pi pi-history" /> Historial
+            </button>
+
+            <button 
+              className={`comp-tab-btn ${activeIndex === 2 ? "active" : ""}`}
+              onClick={() => setActiveIndex(2)}
+            >
+              <i className="pi pi-file-edit" /> Borradores
+            </button>
+
+            <button 
+              className={`comp-tab-btn ${activeIndex === 3 ? "active" : ""}`}
+              onClick={() => setActiveIndex(3)}
+            >
+              <i className="pi pi-lightbulb" /> Sugerencias
+            </button>
+          </nav>
+        </section>
+
+        {/* CONTENIDO DINÁMICO: Renderiza solo el componente activo */}
+        <section className="comp-content">
+          {activeIndex === 0 && <NuevaCompra />}
+          {activeIndex === 1 && <HistorialCompras />}
+          {activeIndex === 2 && (
+            <div className="placeholder-content">
+              <i className="pi pi-file-edit" style={{ fontSize: "2rem", marginBottom: "8px", color: "var(--comp-brand)" }}></i>
+              <h2>Borradores</h2>
+              <p>Espacio para retomar compras guardadas temporalmente.</p>
+            </div>
+          )}
+          {activeIndex === 3 && <PanelSugerencias />}
+        </section>
+
+      </main>
     </Shell>
   );
 }

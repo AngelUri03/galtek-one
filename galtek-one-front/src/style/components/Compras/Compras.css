@@ -1,172 +1,326 @@
 /* ==========================================================================
-   CONFIGURACIÓN GLOBAL: FONDO DEGRADADO Y TARJETAS BLANCAS
+   CONFIGURACIÓN GLOBAL Y VARIABLES DE CRISTAL (GLASSMORPHISM)
    ========================================================================== */
-
 :root {
-  --rvx-brand: #00A38B; 
+  --comp-brand: #0a7463; /* Homologado al color de Proveedores */
+  --comp-control-height: 40px;
+  --comp-glass-bg: rgba(255, 255, 255, 0.45);
+  --comp-glass-border: 1px solid rgba(255, 255, 255, 0.6);
+  --comp-glass-blur: blur(16px);
+  --comp-glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.05);
 }
 
-/* Fuente general para todo el módulo Compras */
 .compras-workspace-wrapper,
-.p-tabview,
-.p-tabview-nav-link,
-.p-tabview-panels {
-  font-family: 'Kodchasan', sans-serif !important;
-}
-
-h1, h2, h3 {
-  font-weight: 700;
-}
-
-p, span, label, button, input, select {
-  font-weight: 400;
-}
-
-/* 
-  FONDO PRINCIPAL: Aquí mantenemos el gradiente azul/verde 
-*/
-.compras-workspace-wrapper {
-  padding: 0.5rem 2rem 2rem 2rem; 
-  max-width: 1500px;
-  margin: 0 auto;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 100%);
-}
-
-.compras-header {
-  margin-bottom: 2rem;
-}
-
-.compras-header h1 {
-  font-size: 2.2rem;
-  color: #333;
-}
-
-/* --- TABS: BLANCOS SÓLIDOS PARA QUE NO SE VEAN AZULES --- */
-.compras-tabs-container .p-tabview-nav {
-  border-bottom: 2px solid #e4e4e4;
-  background: #ffffff !important; 
-  border-radius: 0.5rem 0.5rem 0 0; /* Un pequeño redondeo para que se vea limpio */
-}
-
-.compras-tabs-container .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-  color: #00A38B !important;
-  border-color: #00A38B !important;
-  font-weight: 700;
-  background: #ffffff !important;
-}
-
-.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link {
-  color: #666;
-  padding: 1rem 1.5rem;
-  transition: all 0.2s ease-in-out;
-  background: #ffffff !important;
-}
-
-.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link:focus {
-  box-shadow: 0 0 0 0.2rem rgba(0, 163, 139, 0.2) !important;
-}
-
-.compras-tabs-container .p-tabview-nav li .p-tabview-nav-link:not(.p-disabled):hover {
-  border-color: #00A38B;
-  color: #00A38B;
-}
-
-.compras-tabs-container .p-tabview-panels {
-  background: transparent !important;
-  padding: 0 !important;
-}
-
-.compras-tabs-container .mr-2 {
-  margin-right: 0.5rem;
-}
-
-/* 
-  TARJETAS PRINCIPALES: Eliminamos el borde blanco molesto y mantenemos el volumen 
-*/
-.compras-workspace-wrapper .nc-card {
-  background: linear-gradient(145deg, #ffffff 0%, #f4f9fa 100%) !important;
-  border: none !important; /* <-- Esto elimina la línea blanca de la imagen 45cfe5.png */
-  outline: none !important;
-  border-radius: 1.25rem !important; 
-  box-shadow: 
-    inset 0 2px 4px rgba(255, 255, 255, 1), 
-    inset 0 -3px 10px rgba(220, 230, 240, 0.5), 
-    0 8px 24px rgba(0, 0, 0, 0.04) !important;
-  transition: all 0.3s ease;
-  overflow: hidden; /* Asegura que nada se desborde por los bordes redondeados */
-}
-
-.compras-workspace-wrapper .nc-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    inset 0 2px 4px rgba(255, 255, 255, 1), 
-    inset 0 -3px 10px rgba(220, 230, 240, 0.5), 
-    0 12px 28px rgba(0, 163, 139, 0.08) !important;
-}
-
-/* Contenedores provisionales (Placeholders) */
-.placeholder-content {
-  padding: 4rem 2rem;
-  text-align: center;
-  background: #ffffff;
-  border-radius: 0.75rem;
-  margin-top: 1rem;
-  color: #666;
-  border: 2px dashed #ccc;
-}
-
-.placeholder-content h2 {
-  color: #00A38B;
-  margin-bottom: 1rem;
-}
-
-/* 
-  CONTENEDORES INTERNOS: 
-  Los hacemos completamente transparentes para que hereden 
-  el degradado y el volumen de la .nc-card sin cortes ni bordes.
-*/
-.compras-workspace-wrapper .p-stepper,
-.compras-workspace-wrapper .p-stepper-panels,
-.compras-workspace-wrapper .p-stepper-panel,
-.compras-workspace-wrapper .sugerencia-panel {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important; /* Quitamos la sombra doble */
-  outline: none !important;
-}
-
-/* Opcional: Aseguramos que los fondos de las cabeceras del stepper de PrimeReact también sean transparentes */
-.compras-workspace-wrapper .p-stepper .p-stepper-nav {
-  background: transparent !important;
-  border: none !important;
+.compras-workspace-wrapper .p-tabview,
+.compras-workspace-wrapper .p-tabview-nav-link,
+.compras-workspace-wrapper .p-tabview-panels {
+  font-family: "Kodchasan", sans-serif !important;
 }
 
 /* ==========================================================================
-   CORRECCIÓN DE SCROLL HORIZONTAL EN STEPPER Y TABLAS
+   FONDO PRINCIPAL Y ESFERAS DESENFOCADAS (Igual que Proveedores)
    ========================================================================== */
-
-/* 1. Evitar que el panel del stepper se desborde (Scroll exterior) */
-.compras-workspace-wrapper .p-stepper-panels,
-.compras-workspace-wrapper .p-stepper-panel {
-  overflow-x: hidden !important;
-  min-width: 0 !important; /* Fix crucial para contenedores Grid/Flex */
+.compras-workspace-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: calc(100vh - 4rem);
+  min-height: 0;
+  margin: 0;
+  padding: 1rem 1.5rem;
+  color: #142521;
+  background: linear-gradient(135deg, rgba(242, 250, 247, 0.96), rgba(255, 255, 255, 0.92) 46%, rgba(224, 247, 236, 0.86)), #f4faf7;
+  overflow: hidden;
+  animation: fadeIn 0.4s ease-in-out;
 }
 
-/* 2. Evitar el scroll interno de la tabla y forzar ajuste (Scroll interior) */
+.compras-workspace-wrapper::before,
+.compras-workspace-wrapper::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.compras-workspace-wrapper::before {
+  top: -18%;
+  left: -12%;
+  width: 46vw;
+  height: 46vw;
+  background: #d7f4e5;
+}
+
+.compras-workspace-wrapper::after {
+  right: -14%;
+  bottom: -22%;
+  width: 46vw;
+  height: 46vw;
+  background: #c9f0da;
+}
+
+/* ==========================================================================
+   HEADER SUPERIOR
+   ========================================================================== */
+.comp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 64px;
+  padding: 0.55rem 1.5rem;
+  margin-bottom: 0.85rem;
+  border: var(--comp-glass-border);
+  border-radius: 12px;
+  background: var(--comp-glass-bg);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--comp-glass-shadow);
+  flex: 0 0 auto;
+}
+
+.comp-header-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: var(--comp-brand);
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.comp-header-title i {
+  font-size: 1.3rem;
+}
+
+/* ==========================================================================
+   HEADER SUPERIOR (Ahora contiene las pestañas a la derecha)
+   ========================================================================== */
+.comp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Clave: Separa el título de las pestañas */
+  gap: 1rem;
+  min-height: 64px;
+  padding: 0.55rem 1.5rem;
+  margin-bottom: 0.85rem;
+  border: var(--comp-glass-border);
+  border-radius: 12px;
+  background: var(--comp-glass-bg);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--comp-glass-shadow);
+  flex: 0 0 auto;
+}
+
+.comp-header-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: var(--comp-brand);
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.comp-header-title i {
+  font-size: 1.3rem;
+}
+
+/* ==========================================================================
+   BOTONES DE NAVEGACIÓN (Sustituyen al TabView)
+   ========================================================================== */
+.comp-header-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.comp-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: #63716d;
+  padding: 0.65rem 1.25rem;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.comp-tab-btn i {
+  font-size: 1rem;
+}
+
+.comp-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--comp-brand);
+  transform: translateY(-1px);
+}
+
+.comp-tab-btn.active {
+  background: var(--comp-brand);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(10, 116, 99, 0.25);
+}
+
+.comp-tab-btn.active i {
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   CONTENEDOR DEL COMPONENTE ACTIVO (Adaptable a la pantalla sin scroll general)
+   ========================================================================== */
+.comp-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0; /* Clave absoluta para que el flexbox respete el alto de la pantalla */
+  height: 100%;
+  overflow: hidden; /* Cortamos el desbordamiento para garantizar el margen inferior */
+  padding-bottom: 2px; /* Pequeño respiro visual interno */
+}
+
+/* 
+  Hacemos que el componente interno (NuevaCompra, Historial, etc.) tome el 100% 
+  del espacio sobrante y maneje su propio scroll de manera invisible.
+*/
+.comp-content > div {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto; /* Permite scroll interno solo si el contenido es gigante */
+  
+  /* Oculta la barra de scroll en Firefox y Edge/IE */
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+}
+
+/* Oculta la barra de scroll gruesa en Chrome, Safari y Opera */
+.comp-content > div::-webkit-scrollbar {
+  display: none;
+}
+
+/* Aseguramos que las tarjetas internas de NuevaCompra tampoco generen scrollbars feos */
+.nc-card {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.nc-card::-webkit-scrollbar {
+  display: none;
+}
+
+/* ==========================================================================
+   PANELES Y TARJETAS INTERNAS
+   ========================================================================== */
+.compras-tabs-container .p-tabview-panels {
+  flex: 1;
+  min-height: 0;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  overflow-y: auto;
+}
+
+/* Forzamos que las tarjetas de tus subcomponentes tengan el estilo de cristal */
+.nc-card, .compras-workspace-wrapper .p-card {
+  border: var(--comp-glass-border) !important;
+  border-radius: 16px !important;
+  background: var(--comp-glass-bg) !important;
+  backdrop-filter: var(--comp-glass-blur) !important;
+  box-shadow: var(--comp-glass-shadow) !important;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+/* Diseño del Placeholder de Borradores homologado al error-state de Proveedores */
+.placeholder-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 250px;
+  padding: 28px;
+  text-align: center;
+  color: #52615d;
+  border: 1px dashed rgba(21, 43, 38, 0.14) !important;
+  border-radius: 12px !important;
+  background: rgba(248, 251, 250, 0.72) !important;
+}
+
+.placeholder-content h2 {
+  margin: 8px 0;
+  color: var(--comp-brand);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.placeholder-content p {
+  max-width: 420px;
+  margin: 0;
+  color: #66736f;
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+/* Prevenir scroll horizontal indeseado en los subcomponentes */
+.compras-workspace-wrapper .p-stepper-panels,
+.compras-workspace-wrapper .p-stepper-panel,
 .compras-workspace-wrapper .p-datatable-wrapper {
   overflow-x: hidden !important;
-  width: 100% !important;
 }
 
-/* 3. Asegurar que la tabla ocupe exactamente el espacio disponible */
-.compras-workspace-wrapper .p-datatable table {
-  width: 100% !important;
-  table-layout: auto !important;
+/* ==========================================================================
+   AJUSTE FINO DE MÁRGENES Y ALTURA (Homologación 100% con Proveedores)
+   ========================================================================== */
+
+/* 1. Anulamos cualquier margen o padding invisible del wrapper de NuevaCompra */
+.comp-content > div {
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex;
+  align-items: stretch !important; /* Obliga a los hijos a estirarse hasta abajo */
+  height: 100%;
 }
 
-/* Opcional: Permitir que el texto largo en la tabla baje de línea en lugar de empujar */
-.compras-workspace-wrapper .p-datatable .p-datatable-tbody > tr > td {
-  white-space: normal !important;
-  word-wrap: break-word !important;
+/* 2. Quitamos el espacio extra de las tarjetas y las forzamos a ocupar el 100% del alto */
+.nc-card, .compras-workspace-wrapper .p-card {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  height: 100% !important; /* Se expanden como la tabla de Proveedores */
+  display: flex;
+  flex-direction: column; /* Asegura que el contenido interno se distribuya bien */
+}
+
+/* 3. Ajuste de contenido interno de la tarjeta (Opcional pero recomendado) */
+/* Si "Resumen Financiero" o "Datos del Documento" tienen body, lo expandimos */
+.nc-card .p-card-body, 
+.compras-workspace-wrapper .p-card .p-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.nc-card .p-card-content, 
+.compras-workspace-wrapper .p-card .p-card-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto; /* Solo genera scroll interno DENTRO de la tarjeta si hay muchos datos */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.nc-card .p-card-content::-webkit-scrollbar, 
+.compras-workspace-wrapper .p-card .p-card-content::-webkit-scrollbar {
+  display: none;
 }

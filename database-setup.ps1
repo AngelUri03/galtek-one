@@ -27,13 +27,14 @@ if ($shouldSeed -and -not (Test-Path -LiteralPath $SeedPath)) {
 }
 
 $sqliteJar = Get-ChildItem -Path "$env:USERPROFILE\.m2\repository\org\xerial\sqlite-jdbc" -Recurse -Filter "sqlite-jdbc-*.jar" -ErrorAction SilentlyContinue |
+  Where-Object { $_.Name -notmatch "sources|javadoc" } |
   Sort-Object LastWriteTime -Descending |
   Select-Object -First 1
 
 if (-not $sqliteJar) {
   Push-Location "$PSScriptRoot\galtek-one-back"
   try {
-    mvn -q -DskipTests dependency:copy-dependencies "-DincludeGroupIds=org.xerial" "-DincludeArtifactIds=sqlite-jdbc" "-DoutputDirectory=target/db-tools"
+    .\mvnw.cmd -q -DskipTests dependency:copy-dependencies "-DincludeGroupIds=org.xerial" "-DincludeArtifactIds=sqlite-jdbc" "-DoutputDirectory=target/db-tools"
   } finally {
     Pop-Location
   }
@@ -44,7 +45,7 @@ if (-not $sqliteJar) {
 }
 
 if (-not $sqliteJar) {
-  throw "No se encontro sqlite-jdbc. Ejecuta primero: cd galtek-one-back; mvn -DskipTests package"
+  throw "No se encontro sqlite-jdbc. Ejecuta primero: cd galtek-one-back; .\mvnw.cmd -DskipTests package"
 }
 
 $tempDir = Join-Path $env:TEMP "galtek-one-db-setup"

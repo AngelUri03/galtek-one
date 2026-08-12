@@ -25,9 +25,6 @@ import ClienteSeleccionado from "../components/Clientes/ClienteSeleccionado";
 import EditarCliente from "../components/Clientes/EditarCliente";
 
 import Compras from "../components/Compras/Compras";
-import ComprasProducto from "../components/Compras/ComprasProducto";
-import ComprasTicket from "../components/Compras/ComprasTicket";
-import ComprasProveedor from "../components/Compras/ComprasProveedor";
 import Proveedores from "../components/Proveedores/Proveedores";
 
 /* --- REPORTES Y CONFIGURACIÓN --- */
@@ -82,11 +79,6 @@ export default function AppRouter() {
           <Route path="inventario" element={<Inventario />} />
           <Route path="compras" element={<Compras />} />
           <Route path="proveedores" element={<Proveedores />} />
-          
-          {/* Sub-rutas Compras */}
-          <Route path="/compras/producto" element={<ComprasProducto />} />
-          <Route path="/compras/ticket" element={<ComprasTicket />} />
-          <Route path="/compras/proveedor" element={<ComprasProveedor />} />
 
           {/* Clientes */}
           <Route path="clientes" element={<Clientes />} />
