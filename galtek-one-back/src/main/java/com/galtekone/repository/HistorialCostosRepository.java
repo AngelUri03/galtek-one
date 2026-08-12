@@ -12,17 +12,28 @@ import com.galtekone.entity.HistorialCostosEntity;
 
 @Repository
 public interface HistorialCostosRepository
-        extends JpaRepository<HistorialCostosEntity, Integer>, JpaSpecificationExecutor<HistorialCostosEntity> {
+        extends JpaRepository<HistorialCostosEntity, Integer>,
+                JpaSpecificationExecutor<HistorialCostosEntity> {
 
-    // buscar historial de costos por id y empresa
-    Optional<HistorialCostosEntity> findByIdHistorialCostosAndEmpresa_IdEmpresa(Integer IdHistorialCostos,
+    Optional<HistorialCostosEntity> findByIdHistorialCostosAndEmpresa_IdEmpresa(
+            Integer idHistorialCostos,
             Integer idEmpresa);
 
-    // Obtener el costo más reciente de un producto antes de una fecha dada
-    Optional<HistorialCostosEntity> findTopByProducto_IdProductoAndEmpresa_IdEmpresaAndFechaCreacionLessThanEqualOrderByFechaCreacionDesc(
-            Integer idProducto, Integer idEmpresa, LocalDateTime fecha);
+    Optional<HistorialCostosEntity>
+    findTopByProducto_IdProductoAndEmpresa_IdEmpresaAndFechaCambioLessThanEqualOrderByFechaCambioDesc(
+            Integer idProducto,
+            Integer idEmpresa,
+            LocalDateTime fecha);
 
-    List<HistorialCostosEntity> findByProveedor_IdProveedorAndProducto_IdProductoAndEmpresa_IdEmpresaOrderByFechaCreacionDesc(
-            Integer idProveedor, Integer idProducto, Integer idEmpresa);
+    Optional<HistorialCostosEntity>
+    findTopByProducto_IdProductoAndEmpresa_IdEmpresaOrderByFechaCambioDesc(
+            Integer idProducto,
+            Integer idEmpresa);
+
+    List<HistorialCostosEntity>
+    findByProveedor_IdProveedorAndProducto_IdProductoAndEmpresa_IdEmpresaOrderByFechaCambioDesc(
+            Integer idProveedor,
+            Integer idProducto,
+            Integer idEmpresa);
 }
 

@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.Optional;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -157,7 +159,7 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
     @Override
     public ProveedorProductoEntity deleteForProveedor(Integer idProveedor, Integer idProveedorProducto, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
-        ensureProveedor(idProveedor, empresaId);
+        ensureProveedor(idProveedor,empresaId);
         ProveedorProductoEntity entity = proveedorProductoRepository
                 .findByIdProveedorProductoAndProveedor_IdProveedorAndEmpresa_IdEmpresa(idProveedorProducto, idProveedor, empresaId)
                 .orElseThrow(() -> new EntityNotFoundException("Producto asociado no encontrado o no pertenece al proveedor"));
@@ -183,7 +185,7 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
         }
 
         return historialCostosRepository
-                .findByProveedor_IdProveedorAndProducto_IdProductoAndEmpresa_IdEmpresaOrderByFechaCreacionDesc(
+                .findByProveedor_IdProveedorAndProducto_IdProductoAndEmpresa_IdEmpresaOrderByFechaCambioDesc(
                         idProveedor, idProducto, empresaId);
     }
 
@@ -273,20 +275,42 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
     }
 
     private void registerCostHistory(ProveedorProductoEntity entity, String user) {
-        BigDecimal cost = entity.getUltimoCosto();
-        if (cost == null || entity.getProveedor() == null || entity.getProducto() == null || entity.getEmpresa() == null) {
-            return;
-        }
 
-        HistorialCostosEntity history = new HistorialCostosEntity();
-        history.setProveedor(entity.getProveedor());
-        history.setProducto(entity.getProducto());
-        history.setEmpresa(entity.getEmpresa());
-        history.setPrecioCompra(cost);
-        history.setUsuarioCreacion(user);
-        history.setEstatus(true);
-        historialCostosRepository.save(history);
+    BigDecimal nuevoCosto = entity.getUltimoCosto();
+
+    if (nuevoCosto == null
+            || entity.getProveedor() == null
+            || entity.getProducto() == null
+            || entity.getEmpresa() == null) {
+        return;
     }
+
+    Optional<HistorialCostosEntity> ultimoRegistro =
+            historialCostosRepository
+                    .findTopByProducto_IdProductoAndEmpresa_IdEmpresaOrderByFechaCambioDesc(
+                            entity.getProducto().getIdProducto(),
+                            entity.getEmpresa().getIdEmpresa());
+
+    BigDecimal costoAnterior = ultimoRegistro
+            .map(HistorialCostosEntity::getCostoNuevo)
+            .orElse(BigDecimal.ZERO);
+
+    HistorialCostosEntity history = new HistorialCostosEntity();
+
+    history.setProveedor(entity.getProveedor());
+    history.setProducto(entity.getProducto());
+    history.setEmpresa(entity.getEmpresa());
+
+    history.setCostoAnterior(costoAnterior);
+    history.setCostoNuevo(nuevoCosto);
+    history.setDiferencia(nuevoCosto.subtract(costoAnterior));
+
+    history.setUsuario(user);
+    history.setFechaCambio(LocalDateTime.now());
+
+    historialCostosRepository.save(history);
+    }
+   
 
     private ProveedoresEntity ensureProveedor(Integer idProveedor, Integer empresaId) {
         if (idProveedor == null) throw new IllegalArgumentException("El idProveedor es obligatorio");

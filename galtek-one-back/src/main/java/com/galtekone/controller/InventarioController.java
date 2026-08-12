@@ -109,7 +109,7 @@ public class InventarioController {
 					"Error al actualizar los Inventarios: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
+/* 
 	@DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> deleteInventario(@RequestHeader(name = "user", required = true) String user,
 			@PathVariable Integer id) {
@@ -125,5 +125,5 @@ public class InventarioController {
 					"Error al actualizar los inventarios: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
+*/
 }

@@ -84,10 +84,9 @@ public class ReporteFinancieroServiceImpl implements ReporteFinancieroService {
                             && !h.getFechaCreacion().isAfter(fechaVenta))
                     .max(Comparator.comparing(HistorialCostosEntity::getFechaCreacion));
 
-            BigDecimal costoUnitario = BigDecimal.ZERO;
-            if (historial.isPresent()) {
-                costoUnitario = historial.get().getPrecioCompra();
-            }
+            BigDecimal costoUnitario = historial
+                .map(HistorialCostosEntity::getCostoNuevo)
+                .orElse(BigDecimal.ZERO);
 
             BigDecimal costoLinea = costoUnitario.multiply(detalle.getCantidad());
             BigDecimal ingresoLinea = BigDecimal.valueOf(detalle.getSubtotal());
