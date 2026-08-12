@@ -6,22 +6,37 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Stepper } from "primereact/stepper";
 import { StepperPanel } from "primereact/stepperpanel"; 
+import { Calendar } from "primereact/calendar";
+import { InputTextarea } from "primereact/inputtextarea";
 import "../../style/components/Compras/NuevaCompra.css";
 
 export default function NuevaCompra() {
-  const stepperRef = useRef(null); // Referencia para controlar el Stepper
+  const stepperRef = useRef(null); 
+  
   // Estados iniciales para la UI
   const [proveedor, setProveedor] = useState(null);
   const [ticket, setTicket] = useState("");
+  const [fechaEmision, setFechaEmision] = useState(null);
+  const [fechaEntrega, setFechaEntrega] = useState(null);
+  const [formaPago, setFormaPago] = useState(null);
+  const [observaciones, setObservaciones] = useState("");
+  
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [cantidad, setCantidad] = useState("");
-  const [carrito, setCarrito] = useState([]); // Aquí se irán guardando los productos a comprar
+  const [carrito, setCarrito] = useState([]); 
 
   // Datos simulados para probar la UI
   const proveedoresMock = [
-    { label: "Abarrotes Central", value: "1" },
-    { label: "Carnes Frías del Norte", value: "2" },
-    { label: "Frutas y Verduras San Miguel", value: "3" }
+    { label: "Abarrotes Central", value: "1", tel: "55 1234 5678", credito: "15 Días", rating: "Excelente" },
+    { label: "Carnes Frías del Norte", value: "2", tel: "81 9876 5432", credito: "Contado", rating: "Bueno" },
+    { label: "Frutas y Verduras San Miguel", value: "3", tel: "33 4567 8901", credito: "30 Días", rating: "Regular" }
+  ];
+
+  const formasPagoMock = [
+    { label: "Efectivo", value: "EFECTIVO" },
+    { label: "Transferencia Bancaria", value: "TRANSFERENCIA" },
+    { label: "Tarjeta de Crédito", value: "TARJETA" },
+    { label: "Crédito a Proveedor", value: "CREDITO" }
   ];
 
   const productosMock = [
@@ -32,6 +47,9 @@ export default function NuevaCompra() {
   ];
 
   const money = (n) => `$${(Number(n) || 0).toFixed(2)}`;
+
+  // Obtener info del proveedor seleccionado
+  const proveedorInfo = proveedoresMock.find(p => p.value === proveedor);
 
   // --- LÓGICA DEL CARRITO ---
   const agregarProducto = () => {
@@ -59,7 +77,7 @@ export default function NuevaCompra() {
 
   // Cálculos del resumen
   const subtotal = carrito.reduce((acc, item) => acc + item.importe, 0);
-  const total = subtotal; // Aquí podrías sumar impuestos si aplican en un futuro
+  const total = subtotal; 
 
   const accionTemplate = (rowData) => (
     <Button 
@@ -78,8 +96,10 @@ export default function NuevaCompra() {
         <Stepper ref={stepperRef} linear>
           
           <StepperPanel header="Datos del Documento">
-            <div className="stepper-scrollable-content">
-              <div className="nc-form-grid">
+            <div className="stepper-scrollable-content paso-sin-scroll">
+              <div className="nc-form-grid-unified">
+                
+                {/* --- FILA 1 --- */}
                 <div className="field">
                   <label>Proveedor</label>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -89,17 +109,18 @@ export default function NuevaCompra() {
                       onChange={(e) => setProveedor(e.value)} 
                       placeholder="Escriba o seleccione un proveedor" 
                       className="w-full"
-                      editable
+                      filter
                     />
                     <Button 
                       icon="pi pi-plus" 
-                      className="p-button-outlined btn-outline-verde" 
+                      className="p-button-outlined nc-btn-secundario" 
                       aria-label="Nuevo Proveedor" 
                       title="Alta Rápida de Proveedor" 
                       onClick={() => alert("Aquí abriremos el modal de Alta Rápida")}
                     />
                   </div>
                 </div>
+
                 <div className="field">
                   <label>No. Ticket / Factura</label>
                   <InputText 
@@ -109,14 +130,92 @@ export default function NuevaCompra() {
                     className="w-full"
                   />
                 </div>
+
+                {/* Tarjeta de Info del Proveedor (Ocupa ambas columnas para no romper el Grid) */}
+                {proveedorInfo && (
+                  <div className="nc-proveedor-info is-full">
+                    <div className="nc-info-item">
+                      <i className="pi pi-phone" />
+                      <div>
+                        <small>Contacto</small>
+                        <strong>{proveedorInfo.tel}</strong>
+                      </div>
+                    </div>
+                    <div className="nc-info-item">
+                      <i className="pi pi-wallet" />
+                      <div>
+                        <small>Términos</small>
+                        <strong>{proveedorInfo.credito}</strong>
+                      </div>
+                    </div>
+                    <div className="nc-info-item">
+                      <i className="pi pi-star" />
+                      <div>
+                        <small>Calificación</small>
+                        <strong>{proveedorInfo.rating}</strong>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* --- FILA 2 --- */}
+                <div className="field">
+                  <label>Fecha de Emisión</label>
+                  <Calendar 
+                    value={fechaEmision} 
+                    onChange={(e) => setFechaEmision(e.value)} 
+                    showIcon 
+                    placeholder="Seleccione la fecha"
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="field">
+                  <label>Fecha de Entrega Esperada</label>
+                  <Calendar 
+                    value={fechaEntrega} 
+                    onChange={(e) => setFechaEntrega(e.value)} 
+                    showIcon 
+                    placeholder="Seleccione la fecha"
+                    className="w-full"
+                  />
+                </div>
+
+                {/* --- FILA 3 --- */}
+                <div className="field">
+                  <label>Forma de Pago</label>
+                  <Dropdown 
+                    value={formaPago} 
+                    options={formasPagoMock} 
+                    onChange={(e) => setFormaPago(e.value)} 
+                    placeholder="Seleccione método de pago" 
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="field">
+                  <label>Observaciones de la Compra</label>
+                  <InputTextarea 
+                    value={observaciones} 
+                    onChange={(e) => setObservaciones(e.target.value)} 
+                    placeholder="Notas adicionales, condiciones de entrega..." 
+                    className="w-full nc-textarea-fixed"
+                    maxLength={250} /* Límite máximo de caracteres permitidos */
+                  />
+                  <small style={{ color: '#888', textAlign: 'right', marginTop: '2px', fontSize: '0.75rem' }}>
+                    {observaciones.length}/250
+                  </small>
+                </div>
+
               </div>
             </div>
-            <div className="stepper-acciones flex justify-content-end mt-4">
+            
+            <div className="stepper-acciones">
               <Button 
                 label="Siguiente" 
                 icon="pi pi-arrow-right" 
                 iconPos="right" 
-                className="btn-verde" 
+                className="nc-btn-principal" 
                 onClick={() => stepperRef.current.nextCallback()} 
                 disabled={!proveedor || !ticket} 
               />
@@ -138,7 +237,7 @@ export default function NuevaCompra() {
                     />
                     <Button 
                       icon="pi pi-plus" 
-                      className="p-button-outlined btn-outline-verde" 
+                      className="p-button-outlined nc-btn-secundario" 
                       aria-label="Nuevo Producto" 
                       title="Alta Rápida de Producto"
                       onClick={() => alert("Aquí abriremos el modal de Alta Rápida de Producto")}
@@ -159,14 +258,14 @@ export default function NuevaCompra() {
                 <Button 
                   icon="pi pi-plus" 
                   label="Agregar" 
-                  className="btn-verde nc-btn-agregar" 
+                  className="nc-btn-principal nc-btn-agregar" 
                   onClick={agregarProducto}
                   disabled={!productoSeleccionado || !cantidad || cantidad <= 0}
                 />
               </div>
 
               <div className="nc-tabla-carrito">
-                <DataTable value={carrito} emptyMessage="No hay productos agregados." style={{ maxWidth: '100%' }}>
+                <DataTable value={carrito} emptyMessage="No hay productos agregados." scrollable scrollHeight="100%" className="prov-table">
                   <Column field="nombre" header="Producto" />
                   <Column field="cantidad" header="Cantidad" align="center" />
                   <Column field="precio" header="Precio U." body={(r) => money(r.precio)} />
@@ -175,11 +274,11 @@ export default function NuevaCompra() {
                 </DataTable>
               </div>
             </div>
-            <div className="stepper-acciones flex justify-content-start mt-4">
+            <div className="stepper-acciones flex justify-content-start">
               <Button 
                 label="Atrás" 
                 icon="pi pi-arrow-left" 
-                className="p-button-outlined btn-outline-verde" 
+                className="p-button-outlined nc-btn-secundario" 
                 onClick={() => stepperRef.current.prevCallback()} 
               />
             </div>
@@ -205,23 +304,26 @@ export default function NuevaCompra() {
             <Button 
               label="Guardar Compra" 
               icon="pi pi-check" 
-              className="btn-verde w-full mb-2" 
+              className="nc-btn-principal w-full mb-2" 
               disabled={carrito.length === 0 || !proveedor}
             />
             <Button 
               label="Guardar Borrador" 
               icon="pi pi-save" 
-              className="p-button-outlined btn-outline-verde w-full mb-2" 
+              className="p-button-outlined nc-btn-secundario w-full mb-2" 
             />
             <Button 
               label="Cancelar" 
               icon="pi pi-times" 
-              className="btn-gris-cancelar w-full" 
+              className="nc-btn-cancelar w-full" 
               onClick={() => {
                 setCarrito([]); 
                 setTicket(""); 
                 setProveedor(null);
-                // Si el usuario cancela, lo regresamos al paso 1 del stepper
+                setFechaEmision(null);
+                setFechaEntrega(null);
+                setFormaPago(null);
+                setObservaciones("");
                 if(stepperRef.current) stepperRef.current.setActiveStep(0);
               }}
             />
