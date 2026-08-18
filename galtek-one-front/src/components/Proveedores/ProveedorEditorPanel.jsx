@@ -322,6 +322,12 @@ export default function ProveedorEditorPanel({
     if (Number(form.diasCredito || 0) < 0) {
       nextErrors.diasCredito = "No puede ser negativo.";
     }
+
+    // Dentro de la función validate() en ProveedorEditorPanel.jsx:
+
+      if (form.razonSocial && form.razonSocial.trim().length > 100) {
+        nextErrors.razonSocial = "La razón social no puede exceder los 100 caracteres.";
+      }
     if (Number(form.limiteCredito || 0) < 0) {
       nextErrors.limiteCredito = "No puede ser negativo.";
     }
@@ -427,7 +433,9 @@ export default function ProveedorEditorPanel({
                     label="Razon social"
                     value={form.razonSocial}
                     onChange={(value) => updateField("razonSocial", value)}
+                    error={errors.razonSocial}
                     placeholder="Ej. Comercial Central SA de CV"
+                    maxLength={100}
                   />
                   <TextField
                     label="RFC"
@@ -466,6 +474,7 @@ export default function ProveedorEditorPanel({
                       value={form.categoriaPrincipal}
                       onChange={(value) => updateField("categoriaPrincipal", value)}
                       placeholder="Ej. Cremeria local"
+                      maxLength={50}
                     />
                   ) : null}
                   <label className="prov-field">
@@ -477,7 +486,7 @@ export default function ProveedorEditorPanel({
                       placeholder="Selecciona estado"
                     />
                   </label>
-                  <div className="prov-address-block prov-field-wide">
+<div className="prov-address-block prov-field-wide">
                     <div className="prov-address-title">Direccion o zona</div>
                     <div className="prov-address-grid">
                       <TextField
@@ -485,6 +494,7 @@ export default function ProveedorEditorPanel({
                         value={form.direccionCalle}
                         onChange={(value) => updateAddressField("direccionCalle", value)}
                         placeholder="Ej. Av. Central"
+                        maxLength={120}
                       />
                       <TextField
                         label="No. exterior"
@@ -493,6 +503,7 @@ export default function ProveedorEditorPanel({
                           updateAddressField("direccionNumeroExterior", value)
                         }
                         placeholder="Ej. 120"
+                        maxLength={15}
                       />
                       <TextField
                         label="No. interior"
@@ -501,24 +512,28 @@ export default function ProveedorEditorPanel({
                           updateAddressField("direccionNumeroInterior", value)
                         }
                         placeholder="Ej. Local 4"
+                        maxLength={15}
                       />
                       <TextField
                         label="Colonia o zona"
                         value={form.direccionColonia}
                         onChange={(value) => updateAddressField("direccionColonia", value)}
                         placeholder="Ej. Centro"
+                        maxLength={100}
                       />
                       <TextField
                         label="Municipio o ciudad"
                         value={form.direccionMunicipio}
                         onChange={(value) => updateAddressField("direccionMunicipio", value)}
                         placeholder="Ej. Queretaro"
+                        maxLength={100}
                       />
                       <TextField
                         label="Estado"
                         value={form.direccionEstado}
                         onChange={(value) => updateAddressField("direccionEstado", value)}
                         placeholder="Ej. Queretaro"
+                        maxLength={100}
                       />
                       <TextField
                         label="Codigo postal"
@@ -535,6 +550,7 @@ export default function ProveedorEditorPanel({
                         value={form.direccionReferencia}
                         onChange={(value) => updateAddressField("direccionReferencia", value)}
                         placeholder="Ej. Nave A-12, atras de cremeria"
+                        maxLength={200}
                       />
                     </div>
                   </div>
@@ -608,14 +624,13 @@ export default function ProveedorEditorPanel({
                           inputMode="tel"
                           maxLength={14}
                         />
-                        <TextField
-                          label="Correo"
-                          value={contacto.correo}
-                          onChange={(value) => updateEmailContact(index, value)}
-                          error={errors[`contactos.${index}.correo`]}
-                          placeholder="ventas@proveedor.com"
-                          inputMode="email"
-                          maxLength={120}
+                          <TextField
+                          label="Contacto"
+                          value={contacto.nombre}
+                          onChange={(value) => updateContact(index, "nombre", value)}
+                          error={errors[`contactos.${index}.nombre`]}
+                          placeholder="Ej. Martha Gomez"
+                          maxLength={100}
                         />
                         <TextField
                           label="Notas"
