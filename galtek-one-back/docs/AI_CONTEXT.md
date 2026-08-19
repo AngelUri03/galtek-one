@@ -79,6 +79,16 @@ Reglas estrategicas:
 - El movimiento debe comunicar cambios de estado sin retrasar la operacion.
 - Cualquier pantalla nueva o modificada debe contemplar carga, skeleton cuando aplique, vacio, sin resultados, error, reintento, guardando, guardado, cambios sin guardar, textos largos, pocos datos y muchos datos.
 
+Gramatica oficial de superficies:
+
+- Pagina = modulo.
+- Drawer = contexto de trabajo.
+- Navegacion interna del drawer = profundizacion dentro de ese contexto.
+- Modal = accion puntual.
+- Toast o feedback inline = resultado.
+
+Regla de oro: navegar cambia el contenido del drawer; actuar abre modal. GaltekOne debe mantener como maximo `Pagina -> Drawer -> Modal puntual`, sin drawer sobre drawer y sin mega-modal como subpantalla. La definicion completa vive en `DEVELOPMENT_RULES.md`.
+
 ## Navegacion por teclado y velocidad operativa
 
 GaltekOne debe poder utilizarse correctamente con teclado. Esto no es solo accesibilidad: es productividad esencial para un POS usado durante jornadas largas.

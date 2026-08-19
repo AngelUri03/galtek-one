@@ -12,6 +12,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.galtekone.config.EmpresaContextHolder;
+import com.galtekone.dto.proveedor.ProveedorCostoHistorialRowDTO;
+import com.galtekone.dto.proveedor.ProveedorProductoRowDTO;
 import com.galtekone.entity.EmpresasEntity;
 import com.galtekone.entity.HistorialCostosEntity;
 import com.galtekone.entity.ProductosEntity;
@@ -53,6 +55,16 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
         obj.setProveedor(resolveProveedor(obj.getProveedor(), idEmpresa));
         obj.setProducto(resolveProducto(obj.getProducto(), idEmpresa));
         obj.setEmpresa(empresa(idEmpresa));
+
+        ProveedorProductoEntity existing = findExistingRelation(
+                obj.getProveedor().getIdProveedor(),
+                obj.getProducto().getIdProducto(),
+                idEmpresa
+        );
+        if (existing != null) {
+            return reactivateExisting(existing, obj, user, idEmpresa);
+        }
+
         obj.setUsuarioCreacion(user);
         syncEstatus(obj);
 
@@ -69,8 +81,15 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
 
         Specification<ProveedorProductoEntity> empresaSpec =
                 (root, query, cb) -> cb.equal(root.get("empresa").get("idEmpresa"), idEmpresa);
+        Specification<ProveedorProductoEntity> relacionActivaSpec =
+                (root, query, cb) -> cb.or(
+                        cb.equal(root.get("estadoRelacion"), "ACTIVA"),
+                        cb.and(cb.isNull(root.get("estadoRelacion")), cb.isTrue(root.get("estatus")))
+                );
 
-        return proveedorProductoRepository.findAll(Specification.where(empresaSpec).and(specs));
+        return proveedorProductoRepository.findAll(
+                Specification.where(empresaSpec).and(relacionActivaSpec).and(specs)
+        );
     }
 
     @Override
@@ -82,6 +101,7 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
         ProveedorProductoEntity entity = proveedorProductoRepository
                 .findByIdProveedorProductoAndEmpresa_IdEmpresa(obj.getIdProveedorProducto(), idEmpresa)
                 .orElseThrow(() -> new EntityNotFoundException("ProveedorProducto no encontrado o no pertenece a la empresa"));
+        ensureProveedorEditable(entity.getProveedor());
 
         validate(obj, false);
         BigDecimal previousCost = entity.getUltimoCosto();
@@ -103,6 +123,7 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
         ProveedorProductoEntity entity = proveedorProductoRepository
                 .findByIdProveedorProductoAndEmpresa_IdEmpresa(idProveedorProducto, idEmpresa)
                 .orElseThrow(() -> new EntityNotFoundException("ProveedorProducto no encontrado o no pertenece a la empresa"));
+        ensureProveedorEditable(entity.getProveedor());
 
         entity.setEstadoRelacion("INACTIVA");
         entity.setEstatus(false);
@@ -112,16 +133,17 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
     }
 
     @Override
-    public List<ProveedorProductoEntity> readByProveedor(Integer idProveedor) {
+    public List<ProveedorProductoRowDTO> readByProveedor(Integer idProveedor) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
         ensureProveedor(idProveedor, empresaId);
-        return proveedorProductoRepository.findByProveedor_IdProveedorAndEmpresa_IdEmpresa(idProveedor, empresaId);
+        return proveedorProductoRepository.findRowsByProveedorAndEmpresa(idProveedor, empresaId);
     }
 
     @Override
     public ProveedorProductoEntity createForProveedor(Integer idProveedor, ProveedorProductoEntity obj, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
         ProveedoresEntity proveedor = ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(proveedor);
         if (obj == null) throw new IllegalArgumentException("La relacion proveedor-producto es obligatoria");
 
         obj.setProveedor(proveedor);
@@ -129,6 +151,16 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
         normalize(obj);
         obj.setProducto(resolveProducto(obj.getProducto(), empresaId));
         obj.setEmpresa(empresa(empresaId));
+
+        ProveedorProductoEntity existing = findExistingRelation(
+                idProveedor,
+                obj.getProducto().getIdProducto(),
+                empresaId
+        );
+        if (existing != null) {
+            return reactivateExisting(existing, obj, user, empresaId);
+        }
+
         obj.setUsuarioCreacion(user);
         syncEstatus(obj);
 
@@ -140,7 +172,7 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
     @Override
     public ProveedorProductoEntity updateForProveedor(Integer idProveedor, Integer idProveedorProducto, ProveedorProductoEntity obj, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
-        ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(ensureProveedor(idProveedor, empresaId));
         ProveedorProductoEntity entity = proveedorProductoRepository
                 .findByIdProveedorProductoAndProveedor_IdProveedorAndEmpresa_IdEmpresa(idProveedorProducto, idProveedor, empresaId)
                 .orElseThrow(() -> new EntityNotFoundException("Producto asociado no encontrado o no pertenece al proveedor"));
@@ -159,7 +191,7 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
     @Override
     public ProveedorProductoEntity deleteForProveedor(Integer idProveedor, Integer idProveedorProducto, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
-        ensureProveedor(idProveedor,empresaId);
+        ensureProveedorEditable(ensureProveedor(idProveedor,empresaId));
         ProveedorProductoEntity entity = proveedorProductoRepository
                 .findByIdProveedorProductoAndProveedor_IdProveedorAndEmpresa_IdEmpresa(idProveedorProducto, idProveedor, empresaId)
                 .orElseThrow(() -> new EntityNotFoundException("Producto asociado no encontrado o no pertenece al proveedor"));
@@ -172,20 +204,15 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
     }
 
     @Override
-    public Object readCostHistory(Integer idProveedor, Integer idProveedorProducto) {
+    public List<ProveedorCostoHistorialRowDTO> readCostHistory(Integer idProveedor, Integer idProveedorProducto) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
         ensureProveedor(idProveedor, empresaId);
-        ProveedorProductoEntity relation = proveedorProductoRepository
-                .findByIdProveedorProductoAndProveedor_IdProveedorAndEmpresa_IdEmpresa(idProveedorProducto, idProveedor, empresaId)
+        Integer idProducto = proveedorProductoRepository
+                .findProductoIdByRelacion(idProveedorProducto, idProveedor, empresaId)
                 .orElseThrow(() -> new EntityNotFoundException("Producto asociado no encontrado o no pertenece al proveedor"));
 
-        Integer idProducto = relation.getProducto() == null ? null : relation.getProducto().getIdProducto();
-        if (idProducto == null) {
-            throw new IllegalStateException("La relacion no tiene producto interno asociado");
-        }
-
         return historialCostosRepository
-                .findByProveedor_IdProveedorAndProducto_IdProductoAndEmpresa_IdEmpresaOrderByFechaCambioDesc(
+                .findRowsByProveedorProductoEmpresa(
                         idProveedor, idProducto, empresaId);
     }
 
@@ -246,6 +273,36 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
             target.setEstadoRelacion(source.getEstatus() ? "ACTIVA" : "INACTIVA");
         }
         normalizeCostFields(target);
+    }
+
+    private ProveedorProductoEntity reactivateExisting(
+            ProveedorProductoEntity existing,
+            ProveedorProductoEntity source,
+            String user,
+            Integer empresaId
+    ) {
+        ensureProveedorEditable(existing.getProveedor());
+        BigDecimal previousCost = existing.getUltimoCosto();
+        applyUpdate(existing, source, empresaId);
+        existing.setEstadoRelacion("ACTIVA");
+        existing.setEstatus(true);
+        existing.setUsuarioModificacion(user);
+        syncEstatus(existing);
+
+        ProveedorProductoEntity saved = proveedorProductoRepository.save(existing);
+        registerCostHistoryIfChanged(saved, previousCost, user);
+        return saved;
+    }
+
+    private ProveedorProductoEntity findExistingRelation(Integer idProveedor, Integer idProducto, Integer empresaId) {
+        return proveedorProductoRepository
+                .findAllByProveedor_IdProveedorAndProducto_IdProductoAndEmpresa_IdEmpresaOrderByIdProveedorProductoAsc(
+                        idProveedor,
+                        idProducto,
+                        empresaId)
+                .stream()
+                .findFirst()
+                .orElse(null);
     }
 
     private void normalize(ProveedorProductoEntity obj) {
@@ -322,7 +379,15 @@ public class ProveedorProductoServiceImpl implements ProveedorProductoService {
         if (proveedor == null || proveedor.getIdProveedor() == null) {
             throw new IllegalArgumentException("El proveedor es obligatorio");
         }
-        return ensureProveedor(proveedor.getIdProveedor(), empresaId);
+        ProveedoresEntity resolved = ensureProveedor(proveedor.getIdProveedor(), empresaId);
+        ensureProveedorEditable(resolved);
+        return resolved;
+    }
+
+    private void ensureProveedorEditable(ProveedoresEntity proveedor) {
+        if (proveedor != null && "ARCHIVADO".equalsIgnoreCase(trimToNull(proveedor.getEstadoProveedor()))) {
+            throw new IllegalStateException("El proveedor esta archivado como baja historica definitiva y no acepta cambios ni relaciones operativas.");
+        }
     }
 
     private ProductosEntity resolveProducto(ProductosEntity producto, Integer empresaId) {

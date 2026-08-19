@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.galtekone.config.EmpresaContextHolder;
+import com.galtekone.dto.proveedor.ProveedorActivoRowDTO;
 import com.galtekone.dto.proveedor.ProveedorActivoEvidenciaRequest;
 import com.galtekone.dto.proveedor.ProveedorActivoIncidenteRequest;
 import com.galtekone.dto.proveedor.ProveedorActivoEstadoRequest;
@@ -85,18 +86,30 @@ public class ProveedorActivoServiceImpl implements ProveedorActivoService {
     private ProveedoresRepository proveedoresRepository;
 
     @Override
-    public List<ProveedorActivoEntity> readByProveedor(Integer idProveedor) {
+    public List<ProveedorActivoRowDTO> readByProveedor(Integer idProveedor) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
         ensureProveedor(idProveedor, empresaId);
-        List<ProveedorActivoEntity> activos = repository.findByProveedor_IdProveedorAndEmpresa_IdEmpresa(idProveedor, empresaId);
-        attachHistorial(activos, empresaId);
-        return activos;
+        return repository.findRowsByProveedorAndEmpresa(idProveedor, empresaId);
+    }
+
+    @Override
+    public List<ProveedorActivoHistorialEntity> readHistory(Integer idProveedor, Integer idProveedorActivo) {
+        Integer empresaId = EmpresaContextHolder.getEmpresaId();
+        find(idProveedor, idProveedorActivo, empresaId);
+        List<ProveedorActivoHistorialEntity> history = historialRepository
+                .findByActivo_IdProveedorActivoInAndEmpresa_IdEmpresaOrderByFechaEventoAscIdProveedorActivoHistorialAsc(
+                        List.of(idProveedorActivo),
+                        empresaId
+                );
+        attachEvidencias(history, empresaId);
+        return history;
     }
 
     @Override
     public ProveedorActivoEntity create(Integer idProveedor, ProveedorActivoEntity obj, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
         ProveedoresEntity proveedor = ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(proveedor);
         validate(obj, true);
         normalize(obj);
 
@@ -125,7 +138,7 @@ public class ProveedorActivoServiceImpl implements ProveedorActivoService {
     @Override
     public ProveedorActivoEntity update(Integer idProveedor, Integer idProveedorActivo, ProveedorActivoEntity obj, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
-        ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(ensureProveedor(idProveedor, empresaId));
         ProveedorActivoEntity entity = find(idProveedor, idProveedorActivo, empresaId);
         Map<String, String> before = snapshot(entity);
         String previousState = operationalState(entity);
@@ -145,7 +158,7 @@ public class ProveedorActivoServiceImpl implements ProveedorActivoService {
     @Override
     public ProveedorActivoEntity changeState(Integer idProveedor, Integer idProveedorActivo, ProveedorActivoEstadoRequest request, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
-        ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(ensureProveedor(idProveedor, empresaId));
         ProveedorActivoEntity entity = find(idProveedor, idProveedorActivo, empresaId);
 
         if (request == null || isBlank(request.getEstadoNuevo())) {
@@ -183,7 +196,7 @@ public class ProveedorActivoServiceImpl implements ProveedorActivoService {
     @Override
     public ProveedorActivoEntity reportIncident(Integer idProveedor, Integer idProveedorActivo, ProveedorActivoIncidenteRequest request, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
-        ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(ensureProveedor(idProveedor, empresaId));
         ProveedorActivoEntity entity = find(idProveedor, idProveedorActivo, empresaId);
 
         if (request == null || isBlank(request.getDescripcion())) {
@@ -217,7 +230,7 @@ public class ProveedorActivoServiceImpl implements ProveedorActivoService {
     @Override
     public ProveedorActivoEntity delete(Integer idProveedor, Integer idProveedorActivo, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
-        ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(ensureProveedor(idProveedor, empresaId));
         ProveedorActivoEntity entity = find(idProveedor, idProveedorActivo, empresaId);
         Map<String, String> before = snapshot(entity);
         String previousState = operationalState(entity);
@@ -387,6 +400,12 @@ public class ProveedorActivoServiceImpl implements ProveedorActivoService {
     private ProveedoresEntity ensureProveedor(Integer idProveedor, Integer empresaId) {
         return proveedoresRepository.findByIdProveedorAndEmpresa_IdEmpresa(idProveedor, empresaId)
                 .orElseThrow(() -> new EntityNotFoundException("Proveedor no encontrado o no pertenece a tu empresa"));
+    }
+
+    private void ensureProveedorEditable(ProveedoresEntity proveedor) {
+        if (proveedor != null && "ARCHIVADO".equalsIgnoreCase(trimToNull(proveedor.getEstadoProveedor()))) {
+            throw new IllegalStateException("El proveedor esta archivado como baja historica definitiva y no acepta cambios ni relaciones operativas.");
+        }
     }
 
     private ProveedorActivoEntity find(Integer idProveedor, Integer idActivo, Integer empresaId) {

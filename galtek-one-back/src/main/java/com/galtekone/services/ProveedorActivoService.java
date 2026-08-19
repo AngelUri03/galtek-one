@@ -2,13 +2,17 @@ package com.galtekone.services;
 
 import java.util.List;
 
+import com.galtekone.dto.proveedor.ProveedorActivoRowDTO;
 import com.galtekone.dto.proveedor.ProveedorActivoIncidenteRequest;
 import com.galtekone.dto.proveedor.ProveedorActivoEstadoRequest;
 import com.galtekone.entity.ProveedorActivoEntity;
+import com.galtekone.entity.ProveedorActivoHistorialEntity;
 
 public interface ProveedorActivoService {
 
-    List<ProveedorActivoEntity> readByProveedor(Integer idProveedor);
+    List<ProveedorActivoRowDTO> readByProveedor(Integer idProveedor);
+
+    List<ProveedorActivoHistorialEntity> readHistory(Integer idProveedor, Integer idProveedorActivo);
 
     ProveedorActivoEntity create(Integer idProveedor, ProveedorActivoEntity obj, String user);
 

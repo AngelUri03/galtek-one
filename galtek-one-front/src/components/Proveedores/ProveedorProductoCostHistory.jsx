@@ -22,7 +22,11 @@ function normalizeRows(payload) {
 }
 
 function formatUser(row) {
-  return row?.usuarioCreacion || row?.usuarioModificacion || "system";
+  return row?.usuario || row?.usuarioCreacion || row?.usuarioModificacion || "system";
+}
+
+function costValue(row) {
+  return row?.costoNuevo ?? row?.precioCompra ?? row?.costo ?? null;
 }
 
 export default function ProveedorProductoCostHistory({
@@ -71,14 +75,16 @@ export default function ProveedorProductoCostHistory({
           <strong title={name}>{name}</strong>
           <small>{sku ? `SKU ${sku}` : "Sin SKU interno"}</small>
         </div>
-        <Button
-          icon="pi pi-times"
-          className="prov-row-action"
-          onClick={onClose}
-          aria-label="Cerrar historial"
-          tooltip="Cerrar"
-          tooltipOptions={{ position: "top" }}
-        />
+        {onClose ? (
+          <Button
+            icon="pi pi-times"
+            className="prov-row-action"
+            onClick={onClose}
+            aria-label="Cerrar historial"
+            tooltip="Cerrar"
+            tooltipOptions={{ position: "top" }}
+          />
+        ) : null}
       </div>
 
       {loading ? (
@@ -94,10 +100,23 @@ export default function ProveedorProductoCostHistory({
           {rows.map((row, index) => (
             <div className="prov-cost-history-row" key={row.idHistorialCostos || index}>
               <div className="prov-cost-history-date">
-                <span>{formatDate(row.fechaCreacion)}</span>
+                <span>{formatDate(row.fechaCambio || row.fechaCreacion)}</span>
                 <small>{formatUser(row)}</small>
               </div>
-              <strong>{moneyOrDash(row.precioCompra)}</strong>
+              <div className="prov-cost-history-values">
+                <span>
+                  Anterior
+                  <strong>{moneyOrDash(row.costoAnterior)}</strong>
+                </span>
+                <span>
+                  Nuevo
+                  <strong>{moneyOrDash(costValue(row))}</strong>
+                </span>
+                <span>
+                  Cambio
+                  <strong>{moneyOrDash(row.diferencia)}</strong>
+                </span>
+              </div>
             </div>
           ))}
         </div>

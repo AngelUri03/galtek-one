@@ -158,6 +158,16 @@ No se encontraron transcripciones de conversaciones en `.codex/` o `.agents/`. L
 - `CashOpeningScreen` deja de anunciar incidencia o pedir motivo cuando el conteo visible coincide con el saldo esperado.
 - Se agrega prueba de regresion para evitar incidencias y movimientos falsos en apertura exacta.
 
+2026-08-13:
+
+- Tarea `UX-DS-001`.
+- Se define la gramatica oficial de superficies de GaltekOne: pagina como modulo, drawer como contexto, navegacion interna como profundidad, modal como accion puntual y toast como resultado.
+- Proveedores deja de usar el mega-modal avanzado para Productos, Activos, Documentos y Auditoria.
+- Se introduce `WorkspaceDrawer`/`ModalSurface` como base reusable de overlays y se aplica `ProveedorWorkspaceDrawer` con pila interna.
+- Agregar/editar activo y agregar/editar documento pasan a vistas internas del mismo drawer.
+- La tabla de Proveedores reduce acciones visibles a Ver, Editar y `Mas acciones`.
+- Inventario queda documentado para seguir el patron futuro `Inventario -> Producto -> Lotes -> Nuevo lote` dentro de un solo Drawer Workspace.
+
 ## Historia por area
 
 ### Backend

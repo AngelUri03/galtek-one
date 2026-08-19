@@ -78,6 +78,8 @@ Si el codigo contradice los documentos, priorizar el codigo y dejar la diferenci
 - Mantener `react-scripts`.
 - Mantener compatibilidad Tauri.
 - No limitarse a hacer que funcione: entregar una experiencia visualmente pulida, coherente, premium, rapida, intuitiva y completamente operable con teclado.
+- Aplicar la gramatica de superficies definida en `DEVELOPMENT_RULES.md`: pagina como modulo, drawer como contexto, navegacion interna como profundidad, modal como accion puntual y toast como resultado.
+- No crear drawer sobre drawer ni mega-modal como subpantalla. Para relaciones, historiales, colecciones y subflujos usar Drawer Workspace con un solo drawer fisico.
 
 ## Antes de modificar permisos
 

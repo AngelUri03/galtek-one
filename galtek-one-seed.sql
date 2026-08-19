@@ -627,7 +627,7 @@ INSERT INTO seed_proveedor_avanzado VALUES
 (9,1,'Carnes Frias del Norte S.A.','CFN090909QR9','DISTRIBUIDOR_FORMAL','Carnes frias','ACTIVO',NULL,'REACTIVAR','Ruta refrigerada vigente','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-2 day'),'Requiere espacio en refrigerador antes de recibir.','ENTREGA_DOMICILIO',1,1,0,1,0,'Lunes y jueves','08:00-12:00',1100,'24 horas',0,'Entrega con termometro; conservar ticket de temperatura.','CREDITO',1,7,7000,1,1,0,0,'Credito corto sujeto a devolucion documentada.'),
 (10,0,'Congelados Polar S.A.','CPO101010ST0','DISTRIBUIDOR_FORMAL','Congelados','ARCHIVADO','INACTIVO','ARCHIVAR','Proveedor sustituido; conservar documentos de equipo','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-21 day'),'Archivado por cambio de distribuidor; no usar en operaciones nuevas.','ENTREGA_DOMICILIO',0,1,0,0,0,'Sin ruta','09:00-17:00',1500,'72 horas',150,'Solo consulta historica.','CREDITO',1,14,9000,0,0,0,0,'Tiene activo perdido y comodato archivado.'),
 (11,1,'Farma Basica S.A.','FBA111111UV1','DISTRIBUIDOR_FORMAL','Farmacia basica','ACTIVO',NULL,'REACTIVAR','Credito aprobado','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-8 day'),'Documentos de credito vigentes.','ENTREGA_DOMICILIO',1,0,1,0,0,'Viernes','12:00-17:00',800,'48 horas',0,'Controlar caducidades largas y productos sensibles.','CREDITO',1,30,15000,0,1,0,1,'Credito mensual con documento firmado.'),
-(12,1,'Mascotas Amigas','MAM121212WX2','PROVEEDOR_INFORMAL','Mascotas','ACTIVO',NULL,'REACTIVAR','Proveedor atiende solo por WhatsApp','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'Pedido rapido por WhatsApp; no maneja factura.','MIXTO',1,0,0,0,1,'Sabado','10:00-14:00',400,'Mismo dia',60,'Puede entregar en moto o se recoge en local.','CONTADO',0,NULL,NULL,0,0,0,0,'Solo acepta efectivo o transferencia.'),
+(12,1,'Mascotas Amigas','MAM121212WX2','PROVEEDOR_INFORMAL','Mascotas','ACTIVO',NULL,'REACTIVAR','Proveedor atiende solo por WhatsApp','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'Pedido rapido por WhatsApp; no maneja factura.','MIXTO',1,0,0,0,1,'Sabado','10:00-14:00',400,'Mismo dia',60,'Puede entregar en moto o preparar pedido para recoleccion en local.','CONTADO',0,NULL,NULL,0,0,0,0,'Solo acepta efectivo o transferencia.'),
 (13,0,'Papeleria Escolar del Centro','PEC131313YZ3','ESTABLECIMIENTO_COMPRA','Papeleria','INACTIVO','ACTIVO','DESACTIVAR','Temporada escolar cerrada','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-16 day'),'Usar solo en temporada alta; revisar precios antes de reactivar.','RECOGE_TENDERO',0,1,0,0,1,'Agosto y septiembre','09:00-18:00',300,'Mismo dia',0,'Compra en mostrador por temporada.','CONTADO',0,NULL,NULL,0,0,0,1,'Descuento por paquete escolar completo.'),
 (14,1,'Ferreteria Express','FEX141414AB4','ESTABLECIMIENTO_COMPRA','Ferreteria','ACTIVO',NULL,'REACTIVAR','Proveedor eventual para emergencia','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-11 day'),'Proveedor de respaldo para pilas, focos y reparaciones.','MIXTO',1,1,0,0,1,'Bajo pedido','09:00-19:00',200,'Mismo dia',40,'Usar para faltantes y compras urgentes.','CONTADO',0,NULL,NULL,0,0,0,0,'Puede mandar por mensajeria local.'),
 (15,1,'Desechables Luna','DLU151515CD5','PROVEEDOR_INFORMAL','Desechables','ACTIVO',NULL,'REACTIVAR','Proveedor de fiesta y temporada','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-4 day'),'Buenos precios por volumen; confirmar disponibilidad.','MIXTO',1,1,0,0,1,'Lunes a viernes','08:00-17:00',500,'24 horas',50,'Entrega con costo o recoleccion en bodega.','MIXTO',1,7,3000,0,0,1,1,'Descuento por caja cerrada y pedido minimo flexible.'),
@@ -670,6 +670,61 @@ SET
   notas_comerciales = (SELECT notas_comerciales FROM seed_proveedor_avanzado s WHERE s.id_proveedor = Proveedores.id_proveedor)
 WHERE id_proveedor IN (SELECT id_proveedor FROM seed_proveedor_avanzado);
 
+UPDATE Proveedores SET tipo_proveedor = 'PROVEEDOR_INFORMAL'
+WHERE tipo_proveedor IS NULL OR TRIM(tipo_proveedor) = '' OR tipo_proveedor IN ('ENTREGA_DOMICILIO', 'MIXTO');
+UPDATE Proveedores SET estado_proveedor = CASE WHEN estatus = 0 THEN 'INACTIVO' ELSE 'ACTIVO' END
+WHERE estado_proveedor IS NULL OR TRIM(estado_proveedor) = '';
+UPDATE Proveedores SET modalidad_abastecimiento = 'ENTREGA_DOMICILIO'
+WHERE modalidad_abastecimiento IS NULL OR TRIM(modalidad_abastecimiento) = '';
+UPDATE Proveedores SET forma_pago_principal = CASE WHEN maneja_credito = 1 THEN 'CREDITO' ELSE 'CONTADO' END
+WHERE forma_pago_principal IS NULL OR TRIM(forma_pago_principal) = '';
+
+UPDATE Proveedores
+SET tipo_proveedor = UPPER(REPLACE(REPLACE(TRIM(tipo_proveedor), ' ', '_'), '-', '_'))
+WHERE tipo_proveedor IS NOT NULL AND TRIM(tipo_proveedor) <> '';
+UPDATE Proveedores
+SET modalidad_abastecimiento = UPPER(REPLACE(REPLACE(TRIM(modalidad_abastecimiento), ' ', '_'), '-', '_'))
+WHERE modalidad_abastecimiento IS NOT NULL AND TRIM(modalidad_abastecimiento) <> '';
+UPDATE Proveedores
+SET forma_pago_principal = UPPER(REPLACE(REPLACE(TRIM(forma_pago_principal), ' ', '_'), '-', '_'))
+WHERE forma_pago_principal IS NOT NULL AND TRIM(forma_pago_principal) <> '';
+UPDATE Proveedores
+SET estado_proveedor = UPPER(REPLACE(REPLACE(TRIM(estado_proveedor), ' ', '_'), '-', '_'))
+WHERE estado_proveedor IS NOT NULL AND TRIM(estado_proveedor) <> '';
+
+UPDATE Proveedores SET tipo_proveedor = 'PROVEEDOR_INFORMAL'
+WHERE tipo_proveedor NOT IN ('DISTRIBUIDOR_FORMAL', 'PROVEEDOR_INFORMAL', 'ESTABLECIMIENTO_COMPRA');
+UPDATE Proveedores SET modalidad_abastecimiento = 'ENTREGA_DOMICILIO'
+WHERE modalidad_abastecimiento NOT IN ('ENTREGA_DOMICILIO', 'RECOGE_TENDERO', 'MIXTO');
+UPDATE Proveedores SET forma_pago_principal = CASE WHEN maneja_credito = 1 THEN 'CREDITO' ELSE 'CONTADO' END
+WHERE forma_pago_principal NOT IN ('CONTADO', 'CREDITO', 'MIXTO');
+UPDATE Proveedores SET estado_proveedor = CASE WHEN estatus = 0 THEN 'INACTIVO' ELSE 'ACTIVO' END
+WHERE estado_proveedor NOT IN ('ACTIVO', 'INACTIVO', 'ARCHIVADO');
+
+UPDATE Proveedores SET razon_social = nombre
+WHERE tipo_proveedor = 'DISTRIBUIDOR_FORMAL'
+  AND (razon_social IS NULL OR TRIM(razon_social) = '')
+  AND rfc IS NOT NULL
+  AND TRIM(rfc) <> '';
+UPDATE Proveedores SET tipo_proveedor = 'PROVEEDOR_INFORMAL'
+WHERE tipo_proveedor = 'DISTRIBUIDOR_FORMAL'
+  AND (rfc IS NULL OR TRIM(rfc) = '' OR LENGTH(TRIM(rfc)) NOT IN (12, 13));
+
+UPDATE Proveedores SET maneja_credito = CASE WHEN forma_pago_principal IN ('CREDITO', 'MIXTO') THEN 1 ELSE 0 END;
+UPDATE Proveedores SET dias_credito = 7
+WHERE forma_pago_principal IN ('CREDITO', 'MIXTO') AND (dias_credito IS NULL OR dias_credito <= 0);
+UPDATE Proveedores SET limite_credito = 5000
+WHERE forma_pago_principal IN ('CREDITO', 'MIXTO') AND (limite_credito IS NULL OR limite_credito <= 0);
+UPDATE Proveedores SET dias_credito = NULL, limite_credito = NULL
+WHERE forma_pago_principal = 'CONTADO';
+UPDATE Proveedores SET estatus = CASE WHEN estado_proveedor = 'ACTIVO' THEN 1 ELSE 0 END;
+
+UPDATE Proveedores SET contacto = 'Contacto ' || nombre
+WHERE contacto IS NULL OR TRIM(contacto) = '';
+UPDATE Proveedores SET telefono = printf('55%08d', id_proveedor)
+WHERE (telefono IS NULL OR TRIM(telefono) = '')
+  AND (correo IS NULL OR TRIM(correo) = '');
+
 INSERT OR REPLACE INTO ProveedorContacto
 (id_proveedor_contacto, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, nombre, rol, telefono, whatsapp, correo, notas, contacto_principal, estado_contacto, id_proveedor, id_empresa)
 VALUES
@@ -696,6 +751,85 @@ VALUES
 (1021,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-9 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'system','system','Rocio Campos','VENDEDOR','5551001015','5551001015','ventas@desechablesluna.mx','Venta mayoreo.',1,'ACTIVO',15,1),
 (1022,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'system','system','Ana Beltran','VENDEDOR','5551001016','5551001016','pedidos@bebefeliz.mx','Pedidos de bebe.',1,'ACTIVO',16,1),
 (1023,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-6 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-1 day'),'system','system','Victor Rey','COBRANZA','5551001216','','cobranza@bebefeliz.mx','Cobranza quincenal.',0,'ACTIVO',16,1);
+
+UPDATE ProveedorContacto SET rol = 'OTRO'
+WHERE rol IS NULL OR TRIM(rol) = '' OR rol NOT IN ('VENDEDOR', 'REPARTIDOR', 'COBRANZA', 'ATENCION_CLIENTES', 'ENCARGADO', 'OTRO');
+UPDATE ProveedorContacto SET estado_contacto = CASE WHEN estatus = 0 THEN 'INACTIVO' ELSE 'ACTIVO' END
+WHERE estado_contacto IS NULL OR TRIM(estado_contacto) = '' OR estado_contacto NOT IN ('ACTIVO', 'INACTIVO');
+UPDATE ProveedorContacto SET estatus = CASE WHEN estado_contacto = 'ACTIVO' THEN 1 ELSE 0 END;
+UPDATE ProveedorContacto SET contacto_principal = 0 WHERE contacto_principal IS NULL;
+
+INSERT INTO ProveedorContacto
+(estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, nombre, rol, telefono, whatsapp, correo, notas, contacto_principal, estado_contacto, id_proveedor, id_empresa)
+SELECT
+  CASE WHEN p.estado_proveedor = 'ACTIVO' THEN 1 ELSE 0 END,
+  STRFTIME('%Y-%m-%d %H:%M:%f', 'now'),
+  STRFTIME('%Y-%m-%d %H:%M:%f', 'now'),
+  'system',
+  'system',
+  COALESCE(NULLIF(TRIM(p.contacto), ''), 'Contacto ' || p.nombre),
+  'VENDEDOR',
+  COALESCE(NULLIF(TRIM(p.telefono), ''), printf('55%08d', p.id_proveedor)),
+  COALESCE(NULLIF(TRIM(p.telefono), ''), printf('55%08d', p.id_proveedor)),
+  COALESCE(NULLIF(TRIM(p.correo), ''), ''),
+  'Contacto principal generado para completar datos obligatorios.',
+  1,
+  CASE WHEN p.estado_proveedor = 'ACTIVO' THEN 'ACTIVO' ELSE 'INACTIVO' END,
+  p.id_proveedor,
+  p.id_empresa
+FROM Proveedores p
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM ProveedorContacto c
+  WHERE c.id_proveedor = p.id_proveedor
+    AND c.id_empresa = p.id_empresa
+    AND c.nombre IS NOT NULL
+    AND TRIM(c.nombre) <> ''
+    AND (
+      COALESCE(TRIM(c.telefono), '') <> ''
+      OR COALESCE(TRIM(c.whatsapp), '') <> ''
+      OR COALESCE(TRIM(c.correo), '') <> ''
+    )
+);
+
+UPDATE ProveedorContacto
+SET contacto_principal = 1
+WHERE id_proveedor_contacto IN (
+  SELECT MIN(c.id_proveedor_contacto)
+  FROM ProveedorContacto c
+  GROUP BY c.id_proveedor, c.id_empresa
+  HAVING SUM(CASE WHEN c.contacto_principal = 1 THEN 1 ELSE 0 END) = 0
+);
+
+UPDATE Proveedores
+SET
+  contacto = COALESCE((
+    SELECT NULLIF(TRIM(c.nombre), '')
+    FROM ProveedorContacto c
+    WHERE c.id_proveedor = Proveedores.id_proveedor
+      AND c.id_empresa = Proveedores.id_empresa
+      AND c.contacto_principal = 1
+    ORDER BY c.id_proveedor_contacto
+    LIMIT 1
+  ), contacto),
+  telefono = COALESCE((
+    SELECT NULLIF(TRIM(c.telefono), '')
+    FROM ProveedorContacto c
+    WHERE c.id_proveedor = Proveedores.id_proveedor
+      AND c.id_empresa = Proveedores.id_empresa
+      AND c.contacto_principal = 1
+    ORDER BY c.id_proveedor_contacto
+    LIMIT 1
+  ), telefono),
+  correo = COALESCE((
+    SELECT NULLIF(TRIM(c.correo), '')
+    FROM ProveedorContacto c
+    WHERE c.id_proveedor = Proveedores.id_proveedor
+      AND c.id_empresa = Proveedores.id_empresa
+      AND c.contacto_principal = 1
+    ORDER BY c.id_proveedor_contacto
+    LIMIT 1
+  ), correo);
 
 INSERT OR REPLACE INTO ProveedorActivo
 (id_proveedor_activo, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, nombre, tipo, numero_serie, fecha_entrega, fecha_regreso, estado_fisico, ubicacion_tienda, condiciones_prestamo, deposito_garantia, estado_activo_prestado, notas, id_proveedor, id_empresa)
@@ -831,31 +965,47 @@ WHERE id_proveedor_documento IN (
 );
 
 INSERT OR REPLACE INTO HistorialCostos
-(id_historial_costos, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, precio_compra, id_empresa, id_producto, id_proveedor)
+(id_historial_costos, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, costo_anterior, costo_nuevo, diferencia, motivo, referencia, usuario, fecha_cambio, id_empresa, id_producto, id_proveedor)
 SELECT
-  id_producto, 1, STRFTIME('%Y-%m-%d %H:%M:%f', 'now', '-45 day'), STRFTIME('%Y-%m-%d %H:%M:%f', 'now', '-45 day'), 'system', 'system',
-  ROUND(precio_compra, 2), 1, id_producto, id_proveedor
+  id_producto, 1,
+  STRFTIME('%Y-%m-%d %H:%M:%f', 'now', '-45 day'),
+  STRFTIME('%Y-%m-%d %H:%M:%f', 'now', '-45 day'),
+  'system', 'system',
+  NULL, ROUND(precio_compra, 2), NULL,
+  'Costo inicial', 'Carga inicial', 'system',
+  STRFTIME('%Y-%m-%d %H:%M:%f', 'now', '-45 day'),
+  1, id_producto, id_proveedor
 FROM seed_productos;
 
 INSERT OR REPLACE INTO HistorialCostos
-(id_historial_costos, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, precio_compra, id_empresa, id_producto, id_proveedor)
+(id_historial_costos, estatus, fecha_creacion, fecha_modificacion, usuario_creacion, usuario_modificacion, costo_anterior, costo_nuevo, diferencia, motivo, referencia, usuario, fecha_cambio, id_empresa, id_producto, id_proveedor)
 VALUES
-(10001,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-180 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-180 day'),'system','system',21.50,1,1,1),
-(10002,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-150 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-150 day'),'system','system',22.25,1,1,1),
-(10003,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-120 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-120 day'),'system','system',23.00,1,1,1),
-(10004,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),'system','system',23.60,1,1,1),
-(10005,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-60 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-60 day'),'system','system',24.20,1,1,1),
-(10006,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-30 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-30 day'),'system','system',25.00,1,1,1),
-(10007,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-135 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-135 day'),'system','system',6.80,1,25,3),
-(10008,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-105 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-105 day'),'system','system',7.10,1,25,3),
-(10009,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-75 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-75 day'),'system','system',7.25,1,25,3),
-(10010,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-45 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-45 day'),'system','system',7.40,1,25,3),
-(10011,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-15 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-15 day'),'system','system',7.50,1,25,3),
-(10012,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),'system','system',8.10,1,41,5),
-(10013,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-55 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-55 day'),'system','system',8.60,1,41,5),
-(10014,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-20 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-20 day'),'system','system',9.00,1,41,5),
-(10015,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-70 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-70 day'),'system','system',42.00,1,89,10),
-(10016,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),'system','system',45.00,1,89,10);
+(10001,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-180 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-180 day'),'system','system',NULL,21.50,NULL,'Costo inicial','Carga inicial','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-180 day'),1,1,1),
+(10002,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-150 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-150 day'),'system','system',21.50,22.25,0.75,'Actualizacion de costo','Lista de proveedor','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-150 day'),1,1,1),
+(10003,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-120 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-120 day'),'system','system',22.25,23.00,0.75,'Actualizacion de costo','Lista de proveedor','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-120 day'),1,1,1),
+(10004,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),'system','system',23.00,23.60,0.60,'Actualizacion de costo','Lista de proveedor','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),1,1,1),
+(10005,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-60 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-60 day'),'system','system',23.60,24.20,0.60,'Actualizacion de costo','Lista de proveedor','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-60 day'),1,1,1),
+(10006,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-30 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-30 day'),'system','system',24.20,25.00,0.80,'Actualizacion de costo','Lista de proveedor','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-30 day'),1,1,1),
+(10007,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-135 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-135 day'),'system','system',NULL,6.80,NULL,'Costo inicial','Carga inicial','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-135 day'),1,25,3),
+(10008,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-105 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-105 day'),'system','system',6.80,7.10,0.30,'Actualizacion de costo','Lista de proveedor','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-105 day'),1,25,3),
+(10009,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-75 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-75 day'),'system','system',7.10,7.25,0.15,'Actualizacion de costo','Lista de proveedor','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-75 day'),1,25,3),
+(10010,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-45 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-45 day'),'system','system',7.25,7.40,0.15,'Actualizacion de costo','Lista de proveedor','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-45 day'),1,25,3),
+(10011,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-15 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-15 day'),'system','system',7.40,7.50,0.10,'Actualizacion de costo','Lista de proveedor','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-15 day'),1,25,3),
+(10012,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),'system','system',NULL,8.10,NULL,'Costo inicial','Carga inicial','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-90 day'),1,41,5),
+(10013,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-55 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-55 day'),'system','system',8.10,8.60,0.50,'Actualizacion de costo','Lista de proveedor','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-55 day'),1,41,5),
+(10014,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-20 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-20 day'),'system','system',8.60,9.00,0.40,'Actualizacion de costo','Lista de proveedor','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-20 day'),1,41,5),
+(10015,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-70 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-70 day'),'system','system',NULL,42.00,NULL,'Costo inicial','Carga inicial','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-70 day'),1,89,10),
+(10016,1,STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),'system','system',42.00,45.00,3.00,'Actualizacion de costo','Lista de proveedor','system',STRFTIME('%Y-%m-%d %H:%M:%f','now','-25 day'),1,89,10);
+
+UPDATE HistorialCostos
+SET costo_anterior = costo_nuevo
+WHERE costo_anterior IS NULL
+  AND costo_nuevo IS NOT NULL;
+
+UPDATE HistorialCostos
+SET diferencia = costo_nuevo - costo_anterior
+WHERE costo_nuevo IS NOT NULL
+  AND costo_anterior IS NOT NULL;
 
 DROP TABLE IF EXISTS seed_compra_header;
 CREATE TEMP TABLE seed_compra_header (
@@ -1080,6 +1230,8 @@ UPDATE ProveedorContacto SET fecha_creacion = fecha_creacion || '.000' WHERE fec
 UPDATE ProveedorContacto SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
 UPDATE ProveedorActivo SET fecha_creacion = fecha_creacion || '.000' WHERE fecha_creacion IS NOT NULL AND LENGTH(fecha_creacion) = 19;
 UPDATE ProveedorActivo SET fecha_modificacion = fecha_modificacion || '.000' WHERE fecha_modificacion IS NOT NULL AND LENGTH(fecha_modificacion) = 19;
+UPDATE ProveedorActivo SET fecha_entrega = CASE WHEN LENGTH(TRIM(CAST(fecha_entrega AS TEXT))) >= 13 THEN DATE(CAST(CAST(fecha_entrega AS INTEGER) / 1000 AS INTEGER), 'unixepoch') ELSE DATE(CAST(fecha_entrega AS INTEGER), 'unixepoch') END WHERE fecha_entrega IS NOT NULL AND TRIM(CAST(fecha_entrega AS TEXT)) NOT LIKE '%-%' AND CAST(fecha_entrega AS INTEGER) > 1000000000;
+UPDATE ProveedorActivo SET fecha_regreso = CASE WHEN LENGTH(TRIM(CAST(fecha_regreso AS TEXT))) >= 13 THEN DATE(CAST(CAST(fecha_regreso AS INTEGER) / 1000 AS INTEGER), 'unixepoch') ELSE DATE(CAST(fecha_regreso AS INTEGER), 'unixepoch') END WHERE fecha_regreso IS NOT NULL AND TRIM(CAST(fecha_regreso AS TEXT)) NOT LIKE '%-%' AND CAST(fecha_regreso AS INTEGER) > 1000000000;
 UPDATE ProveedorActivo SET fecha_entrega = SUBSTR(fecha_entrega, 1, 10) WHERE fecha_entrega IS NOT NULL AND LENGTH(fecha_entrega) > 10;
 UPDATE ProveedorActivo SET fecha_regreso = SUBSTR(fecha_regreso, 1, 10) WHERE fecha_regreso IS NOT NULL AND LENGTH(fecha_regreso) > 10;
 UPDATE ProveedorDocumento SET fecha_creacion = fecha_creacion || '.000' WHERE fecha_creacion IS NOT NULL AND LENGTH(fecha_creacion) = 19;

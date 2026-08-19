@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
@@ -21,11 +21,40 @@ import {
   AdvancedEmpty,
   AdvancedFormActions,
   AdvancedSection,
+  FieldLabel,
   TextAreaField,
   TextField,
 } from "./ProveedorAdvancedShared";
 
 const api = new APIfetchApi();
+
+const ACTIVO_FIELD_LIMITS = {
+  nombre: 90,
+  numeroSerie: 60,
+  estadoFisico: 90,
+  ubicacionTienda: 90,
+  condicionesPrestamo: 420,
+  notas: 420,
+};
+
+function limitActivoValue(field, value) {
+  const limit = ACTIVO_FIELD_LIMITS[field];
+  if (!limit || typeof value !== "string") return value;
+  return value.slice(0, limit);
+}
+
+function focusFirstFormError(root, errors) {
+  const firstField = Object.keys(errors).find((field) => errors[field]);
+  if (!firstField || !root) return;
+
+  window.requestAnimationFrame(() => {
+    const field = root.querySelector(`[data-field-key="${firstField}"]`);
+    if (!field) return;
+    field.scrollIntoView({ behavior: "smooth", block: "center" });
+    const control = field.querySelector("input, textarea, button, .p-dropdown, .p-calendar, .p-inputnumber-input");
+    control?.focus?.({ preventScroll: true });
+  });
+}
 
 function getActivoUrl(idProveedor, idActivo) {
   return idActivo
@@ -74,7 +103,257 @@ function activoStateClass(item) {
 }
 
 function historyCount(item) {
+  const count = Number(item?.historialCount ?? item?.historialEventosCount);
+  if (Number.isFinite(count)) return count;
   return Array.isArray(item?.historial) ? item.historial.length : 0;
+}
+
+export function ProveedorActivoFormView({
+  proveedor,
+  item = null,
+  showToast,
+  onCancel,
+  onSaved,
+  onDirtyChange,
+}) {
+  const formRef = useRef(null);
+  const [form, setForm] = useState(() => createActivoForm(item));
+  const [initialSnapshot, setInitialSnapshot] = useState(() =>
+    JSON.stringify(createActivoForm(item))
+  );
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
+  const editing = Boolean(form?.idProveedorActivo);
+
+  useEffect(() => {
+    const nextForm = createActivoForm(item);
+    setForm(nextForm);
+    setInitialSnapshot(JSON.stringify(nextForm));
+    setErrors({});
+  }, [item]);
+
+  const currentSnapshot = useMemo(() => JSON.stringify(form), [form]);
+  const dirty = Boolean(initialSnapshot && currentSnapshot !== initialSnapshot);
+
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+    return () => onDirtyChange?.(false);
+  }, [dirty, onDirtyChange]);
+
+  const update = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: limitActivoValue(field, value) }));
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const validate = () => {
+    const nextErrors = {};
+    if (!String(form.nombre || "").trim()) nextErrors.nombre = "El nombre es obligatorio.";
+    if (!String(form.tipo || "").trim()) nextErrors.tipo = "Selecciona un tipo.";
+    if (!String(form.fechaEntrega || "").trim()) nextErrors.fechaEntrega = "Indica la fecha de entrega.";
+    if (!editing && !String(form.estadoFisico || "").trim()) {
+      nextErrors.estadoFisico = "Indica el estado fisico inicial.";
+    }
+    if (!editing && !String(form.ubicacionTienda || "").trim()) {
+      nextErrors.ubicacionTienda = "Indica donde queda el activo.";
+    }
+    if (form.depositoGarantia != null && Number(form.depositoGarantia) < 0) {
+      nextErrors.depositoGarantia = "No puede ser negativo.";
+    }
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length) {
+      focusFirstFormError(formRef.current, nextErrors);
+      return false;
+    }
+    return true;
+  };
+
+  const save = async () => {
+    if (!validate()) return;
+
+    setSaving(true);
+    try {
+      const response = await api.fetchApi(
+        {},
+        editing ? "PUT" : "POST",
+        buildActivoPayload(form),
+        getActivoUrl(proveedor.idProveedor, form.idProveedorActivo)
+      );
+      const saved = await readApiPayload(response, "guardar activo");
+      showToast?.(
+        "success",
+        "Activos prestados",
+        editing ? "Activo actualizado correctamente." : "Activo agregado correctamente."
+      );
+      onDirtyChange?.(false);
+      await onSaved?.(saved);
+    } catch (error) {
+      showToast?.("error", "Activos prestados", error?.message || "No se pudo guardar.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="prov-workspace-form prov-asset-workspace-form" ref={formRef}>
+      <div className="prov-form-grid prov-workspace-form-body">
+        <TextField
+          label="Nombre"
+          value={form.nombre}
+          onChange={(value) => update("nombre", value)}
+          error={errors.nombre}
+          required
+          fieldKey="nombre"
+          maxLength={ACTIVO_FIELD_LIMITS.nombre}
+          placeholder="Ej. Enfriador Coca-Cola 2 puertas"
+          autoFocus
+        />
+        <label className={`prov-field ${errors.tipo ? "has-error" : ""}`} data-field-key="tipo">
+          <FieldLabel required>Tipo</FieldLabel>
+          <Dropdown
+            value={form.tipo}
+            options={ACTIVO_TIPO_OPTIONS}
+            onChange={(event) => update("tipo", event.value)}
+            placeholder="Selecciona tipo"
+            aria-invalid={errors.tipo ? "true" : undefined}
+          />
+          {errors.tipo ? <small className="prov-field-error">{errors.tipo}</small> : null}
+        </label>
+        <TextField
+          label="Numero de serie"
+          value={form.numeroSerie}
+          onChange={(value) => update("numeroSerie", value)}
+          fieldKey="numeroSerie"
+          maxLength={ACTIVO_FIELD_LIMITS.numeroSerie}
+          placeholder="Ej. CC-2026-0001"
+        />
+        <label className={`prov-field ${errors.fechaEntrega ? "has-error" : ""}`} data-field-key="fechaEntrega">
+          <FieldLabel required>Fecha de entrega</FieldLabel>
+          <Calendar
+            value={localDateToValue(form.fechaEntrega)}
+            onChange={(event) => update("fechaEntrega", valueToLocalDate(event.value))}
+            dateFormat="dd/mm/yy"
+            showIcon
+            placeholder="15/07/2026"
+            className="prov-date-calendar"
+            panelClassName="prov-date-panel"
+            disabled={editing && Boolean(form.fechaEntrega)}
+            inputProps={{
+              "aria-invalid": errors.fechaEntrega ? "true" : undefined,
+              "aria-required": true,
+            }}
+          />
+          {editing && form.fechaEntrega ? (
+            <small className="prov-field-hint">La entrega original queda fija para auditoria.</small>
+          ) : null}
+          {errors.fechaEntrega ? <small className="prov-field-error">{errors.fechaEntrega}</small> : null}
+        </label>
+        <label className="prov-field">
+          <span>Fecha de regreso</span>
+          <Calendar
+            value={localDateToValue(form.fechaRegreso)}
+            onChange={(event) => update("fechaRegreso", valueToLocalDate(event.value))}
+            dateFormat="dd/mm/yy"
+            showIcon
+            placeholder="15/07/2026"
+            className="prov-date-calendar"
+            panelClassName="prov-date-panel"
+          />
+        </label>
+
+        {editing ? (
+          <>
+            <div className="prov-field prov-readonly-field">
+              <span>Estado fisico actual</span>
+              <strong>{form.estadoFisico || "--"}</strong>
+              <small>Se actualiza con Incidente o Cambiar estado.</small>
+            </div>
+            <div className="prov-field prov-readonly-field">
+              <span>Ubicacion actual</span>
+              <strong>{form.ubicacionTienda || "--"}</strong>
+              <small>Se actualiza con Incidente o Cambiar estado.</small>
+            </div>
+          </>
+        ) : (
+          <>
+            <TextField
+              label="Estado fisico inicial"
+              value={form.estadoFisico}
+              onChange={(value) => update("estadoFisico", value)}
+              error={errors.estadoFisico}
+              required
+              fieldKey="estadoFisico"
+              maxLength={ACTIVO_FIELD_LIMITS.estadoFisico}
+              placeholder="Ej. Bueno, rayado, puerta floja, falla termostato"
+            />
+            <TextField
+              label="Ubicacion inicial en tienda"
+              value={form.ubicacionTienda}
+              onChange={(value) => update("ubicacionTienda", value)}
+              error={errors.ubicacionTienda}
+              required
+              fieldKey="ubicacionTienda"
+              maxLength={ACTIVO_FIELD_LIMITS.ubicacionTienda}
+              placeholder="Ej. Entrada, pasillo frio, mostrador, fachada"
+            />
+          </>
+        )}
+
+        <label className={`prov-field ${errors.depositoGarantia ? "has-error" : ""}`} data-field-key="depositoGarantia">
+          <span>Deposito o garantia</span>
+          <InputNumber
+            value={form.depositoGarantia}
+            onValueChange={(event) => update("depositoGarantia", event.value)}
+            mode="currency"
+            currency="MXN"
+            locale="es-MX"
+            min={0}
+            max={9999999}
+            placeholder="$0.00"
+          />
+          {errors.depositoGarantia ? (
+            <small className="prov-field-error">{errors.depositoGarantia}</small>
+          ) : null}
+        </label>
+        <TextAreaField
+          label="Condiciones del prestamo"
+          value={form.condicionesPrestamo}
+          onChange={(value) => update("condicionesPrestamo", value)}
+          className="prov-field-wide"
+          fieldKey="condicionesPrestamo"
+          maxLength={ACTIVO_FIELD_LIMITS.condicionesPrestamo}
+          placeholder="Ej. Comodato condicionado a compra minima semanal y uso exclusivo del proveedor."
+        />
+        <TextAreaField
+          label="Notas"
+          value={form.notas}
+          onChange={(value) => update("notas", value)}
+          className="prov-field-wide"
+          fieldKey="notas"
+          maxLength={ACTIVO_FIELD_LIMITS.notas}
+          placeholder="Ej. Revisar limpieza semanal, conservar comodato y evidencia de movimientos."
+        />
+        {!editing ? (
+          <div className="prov-field-wide">
+            <ProveedorActivoEvidencePicker
+              evidences={form.evidencias || []}
+              onChange={(value) => update("evidencias", value)}
+              disabled={saving}
+              label="Evidencias iniciales"
+            />
+          </div>
+        ) : null}
+      </div>
+      <AdvancedFormActions
+        editing={editing}
+        saving={saving}
+        onCancel={onCancel}
+        onSave={save}
+        saveLabel={editing ? "Guardar activo" : "Agregar activo"}
+        className="prov-workspace-editor-footer"
+        editorStyle
+      />
+    </div>
+  );
 }
 
 export default function ProveedorActivosSection({
@@ -83,7 +362,12 @@ export default function ProveedorActivosSection({
   documentos = [],
   onRefresh,
   showToast,
+  highlightedActivoId,
+  readOnly = false,
+  onOpenForm,
+  onOpenHistory,
 }) {
+  const inlineFormRef = useRef(null);
   const [form, setForm] = useState(null);
   const [savingForm, setSavingForm] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -98,18 +382,30 @@ export default function ProveedorActivosSection({
   const editing = Boolean(form?.idProveedorActivo);
 
   const update = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((prev) => ({ ...prev, [field]: limitActivoValue(field, value) }));
     setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
   const validate = () => {
     const nextErrors = {};
     if (!String(form.nombre || "").trim()) nextErrors.nombre = "El nombre es obligatorio.";
+    if (!String(form.tipo || "").trim()) nextErrors.tipo = "Selecciona un tipo.";
+    if (!String(form.fechaEntrega || "").trim()) nextErrors.fechaEntrega = "Indica la fecha de entrega.";
+    if (!editing && !String(form.estadoFisico || "").trim()) {
+      nextErrors.estadoFisico = "Indica el estado fisico inicial.";
+    }
+    if (!editing && !String(form.ubicacionTienda || "").trim()) {
+      nextErrors.ubicacionTienda = "Indica donde queda el activo.";
+    }
     if (form.depositoGarantia != null && Number(form.depositoGarantia) < 0) {
       nextErrors.depositoGarantia = "No puede ser negativo.";
     }
     setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
+    if (Object.keys(nextErrors).length) {
+      focusFirstFormError(inlineFormRef.current, nextErrors);
+      return false;
+    }
+    return true;
   };
 
   const refreshAfterChange = async () => {
@@ -119,6 +415,19 @@ export default function ProveedorActivosSection({
     } finally {
       setRefreshing(false);
     }
+  };
+
+  const openForm = (item = null) => {
+    if (readOnly) {
+      showToast?.("info", "Proveedor archivado", "Los activos quedan solo como historial.");
+      return;
+    }
+    if (onOpenForm) {
+      onOpenForm(item);
+      return;
+    }
+    setForm(createActivoForm(item));
+    setErrors({});
   };
 
   const save = async () => {
@@ -194,41 +503,50 @@ export default function ProveedorActivosSection({
   return (
     <AdvancedSection
       title="Activos prestados"
-      subtitle="Equipo, exhibidores, evidencias e historial operativo."
+      subtitle={
+        readOnly
+          ? "Consulta historica de equipo, evidencias e historial de uso."
+          : "Equipo, exhibidores, evidencias e historial de uso."
+      }
       icon="pi pi-th-large"
       addLabel="Agregar activo"
-      onAdd={() => {
-        setForm(createActivoForm());
-        setErrors({});
-      }}
+      onAdd={readOnly ? null : () => openForm(null)}
     >
       {form ? (
-        <div className="prov-adv-form">
+        <div className="prov-adv-form" ref={inlineFormRef}>
           <div className="prov-form-grid">
             <TextField
               label="Nombre"
               value={form.nombre}
               onChange={(value) => update("nombre", value)}
               error={errors.nombre}
+              required
+              fieldKey="nombre"
+              maxLength={ACTIVO_FIELD_LIMITS.nombre}
               placeholder="Ej. Enfriador Coca-Cola 2 puertas"
             />
-            <label className="prov-field">
-              <span>Tipo</span>
+            <label className={`prov-field ${errors.tipo ? "has-error" : ""}`} data-field-key="tipo">
+              <FieldLabel required>Tipo</FieldLabel>
               <Dropdown
                 value={form.tipo}
                 options={ACTIVO_TIPO_OPTIONS}
                 onChange={(event) => update("tipo", event.value)}
                 placeholder="Selecciona tipo"
+                aria-invalid={errors.tipo ? "true" : undefined}
               />
+              {errors.tipo ? <small className="prov-field-error">{errors.tipo}</small> : null}
             </label>
             <TextField
               label="Número de serie"
               value={form.numeroSerie}
               onChange={(value) => update("numeroSerie", value)}
+              fieldKey="numeroSerie"
+              maxLength={ACTIVO_FIELD_LIMITS.numeroSerie}
               placeholder="Ej. CC-2026-0001"
             />
-            <label className="prov-field">
-              <span>Fecha de entrega</span>
+            <label className={`prov-field ${errors.fechaEntrega ? "has-error" : ""}`} data-field-key="fechaEntrega">
+              <FieldLabel required>Fecha de entrega</FieldLabel>
+              {errors.fechaEntrega ? <small className="prov-field-error">{errors.fechaEntrega}</small> : null}
               <Calendar
                 value={localDateToValue(form.fechaEntrega)}
                 onChange={(event) => update("fechaEntrega", valueToLocalDate(event.value))}
@@ -238,6 +556,10 @@ export default function ProveedorActivosSection({
                 className="prov-date-calendar"
                 panelClassName="prov-date-panel"
                 disabled={editing && Boolean(form.fechaEntrega)}
+                inputProps={{
+                  "aria-invalid": errors.fechaEntrega ? "true" : undefined,
+                  "aria-required": true,
+                }}
               />
               {editing && form.fechaEntrega ? (
                 <small className="prov-field-hint">La entrega original queda fija para auditoría.</small>
@@ -275,12 +597,20 @@ export default function ProveedorActivosSection({
                   label="Estado físico inicial"
                   value={form.estadoFisico}
                   onChange={(value) => update("estadoFisico", value)}
+                  error={errors.estadoFisico}
+                  required
+                  fieldKey="estadoFisico"
+                  maxLength={ACTIVO_FIELD_LIMITS.estadoFisico}
                   placeholder="Ej. Bueno, rayado, puerta floja, falla termostato"
                 />
                 <TextField
                   label="Ubicación inicial en tienda"
                   value={form.ubicacionTienda}
                   onChange={(value) => update("ubicacionTienda", value)}
+                  error={errors.ubicacionTienda}
+                  required
+                  fieldKey="ubicacionTienda"
+                  maxLength={ACTIVO_FIELD_LIMITS.ubicacionTienda}
                   placeholder="Ej. Entrada, pasillo frío, mostrador, fachada"
                 />
               </>
@@ -295,6 +625,7 @@ export default function ProveedorActivosSection({
                 currency="MXN"
                 locale="es-MX"
                 min={0}
+                max={9999999}
                 placeholder="$0.00"
               />
               {errors.depositoGarantia ? <small className="prov-field-error">{errors.depositoGarantia}</small> : null}
@@ -304,6 +635,8 @@ export default function ProveedorActivosSection({
               value={form.condicionesPrestamo}
               onChange={(value) => update("condicionesPrestamo", value)}
               className="prov-field-wide"
+              fieldKey="condicionesPrestamo"
+              maxLength={ACTIVO_FIELD_LIMITS.condicionesPrestamo}
               placeholder="Ej. Comodato condicionado a compra mínima semanal y uso exclusivo del proveedor."
             />
             <TextAreaField
@@ -311,6 +644,8 @@ export default function ProveedorActivosSection({
               value={form.notas}
               onChange={(value) => update("notas", value)}
               className="prov-field-wide"
+              fieldKey="notas"
+              maxLength={ACTIVO_FIELD_LIMITS.notas}
               placeholder="Ej. Revisar limpieza semanal, conservar comodato y evidencia de movimientos."
             />
             {!editing ? (
@@ -344,10 +679,15 @@ export default function ProveedorActivosSection({
         <div className="prov-adv-card-grid">
           {items.map((item) => {
             const isUpdating = updatingActivo?.id === item.idProveedorActivo;
+            const isHighlighted =
+              highlightedActivoId &&
+              Number(highlightedActivoId) === Number(item.idProveedorActivo);
 
             return (
               <article
-                className={`prov-adv-card prov-asset-card ${isUpdating ? "is-updating" : ""}`}
+                className={`prov-adv-card prov-asset-card ${isUpdating ? "is-updating" : ""} ${
+                  isHighlighted ? "is-highlighted" : ""
+                }`}
                 key={item.idProveedorActivo || item.nombre}
               >
                 <div className="prov-adv-card-main">
@@ -379,34 +719,35 @@ export default function ProveedorActivosSection({
                 </div>
                 <AdvancedCardActions
                   disabled={isUpdating}
-                  onEdit={() => {
-                    setForm(createActivoForm(item));
-                    setErrors({});
-                  }}
+                  onEdit={readOnly ? null : () => openForm(item)}
                   extra={
                     <>
-                      <Button
-                        icon="pi pi-directions"
-                        className="prov-row-action"
-                        onClick={() => setStateItem(item)}
-                        disabled={isUpdating}
-                        aria-label="Cambiar estado"
-                        tooltip="Cambiar estado"
-                        tooltipOptions={{ position: "top" }}
-                      />
-                      <Button
-                        icon="pi pi-exclamation-triangle"
-                        className="prov-row-action"
-                        onClick={() => setIncidentItem(item)}
-                        disabled={isUpdating}
-                        aria-label="Registrar incidente"
-                        tooltip="Registrar incidente"
-                        tooltipOptions={{ position: "top" }}
-                      />
+                      {!readOnly ? (
+                        <>
+                          <Button
+                            icon="pi pi-directions"
+                            className="prov-row-action"
+                            onClick={() => setStateItem(item)}
+                            disabled={isUpdating}
+                            aria-label="Cambiar estado"
+                            tooltip="Cambiar estado"
+                            tooltipOptions={{ position: "top" }}
+                          />
+                          <Button
+                            icon="pi pi-exclamation-triangle"
+                            className="prov-row-action"
+                            onClick={() => setIncidentItem(item)}
+                            disabled={isUpdating}
+                            aria-label="Registrar incidente"
+                            tooltip="Registrar incidente"
+                            tooltipOptions={{ position: "top" }}
+                          />
+                        </>
+                      ) : null}
                       <Button
                         icon="pi pi-history"
                         className="prov-row-action"
-                        onClick={() => setHistoryItem(item)}
+                        onClick={() => (onOpenHistory ? onOpenHistory(item) : setHistoryItem(item))}
                         disabled={isUpdating}
                         aria-label="Ver historial"
                         tooltip="Ver historial"
@@ -423,12 +764,14 @@ export default function ProveedorActivosSection({
         <AdvancedEmpty text="Sin activos prestados. Registra enfriadores, stands, lonas o equipo del proveedor." />
       )}
 
-      <ProveedorActivoHistoryModal
-        visible={Boolean(historyItem)}
-        activo={historyItem}
-        documentos={documentos}
-        onHide={() => setHistoryItem(null)}
-      />
+      {!onOpenHistory ? (
+        <ProveedorActivoHistoryModal
+          visible={Boolean(historyItem)}
+          activo={historyItem}
+          documentos={documentos}
+          onHide={() => setHistoryItem(null)}
+        />
+      ) : null}
       <ProveedorActivoStateModal
         visible={Boolean(stateItem)}
         activo={stateItem}

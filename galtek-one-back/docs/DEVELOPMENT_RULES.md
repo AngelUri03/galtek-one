@@ -209,6 +209,49 @@ Reglas obligatorias:
 - El flujo completo debe poder completarse sin mouse.
 - Popovers y menus no deben perder foco ni cerrarse de forma impredecible.
 
+## Gramatica de superficies de GaltekOne
+
+Regla oficial de interaccion:
+
+- Pagina = modulo o espacio operativo principal.
+- Drawer = contexto de trabajo de una entidad principal.
+- Navegacion interna del drawer = profundizar dentro de ese contexto.
+- Modal = accion puntual, critica, irreversible o breve.
+- Toast o feedback inline = resultado de la operacion.
+
+Reglas obligatorias:
+
+- Solo debe existir un drawer fisico abierto.
+- La profundidad logica vive dentro del drawer mediante pila o navegacion interna.
+- El maximo permitido es `Pagina -> Drawer -> Modal puntual`.
+- Nunca abrir drawer sobre drawer.
+- Nunca usar mega-modal como sustituto de subpantalla.
+- Navegar cambia el contenido del drawer.
+- Actuar abre modal.
+- Escape dentro del drawer retrocede un nivel; en el primer nivel cierra el drawer.
+- Si hay cambios sin guardar, volver, cerrar, navegar o usar Escape debe pedir confirmacion disenada.
+- Todos los drawers y modales deben usar el backdrop unificado del sistema.
+- No acumular blur ni opacidad al navegar dentro del drawer.
+- El foco debe entrar al titulo o primer campo util, restaurarse al origen al cerrar y conservarse tras guardar cuando sea razonable.
+
+Tamanos semanticos:
+
+- Drawer `detail`: lectura o detalle simple, aproximadamente 560 a 620 px.
+- Drawer `form`: crear o editar entidad, aproximadamente 640 a 760 px.
+- Drawer `workspace`: colecciones, historial, relaciones y subflujos, aproximadamente 820 a 1000 px.
+- Modal `small`: confirmacion puntual.
+- Modal `medium`: captura breve.
+- Modal `large`: solo cuando el contenido puntual lo justifique, por ejemplo preview de archivo.
+
+Ejemplo de navegacion esperada:
+
+- `Proveedores -> Proveedor -> Activos prestados -> Nuevo activo` dentro de un solo Drawer Workspace.
+- `Inventario -> Producto -> Lotes -> Nuevo lote` debe seguir el mismo patron cuando se implemente.
+
+Ejemplos de modal correcto:
+
+- Desactivar, archivar, eliminar, confirmar devolucion, marcar como danado, resolver incidencia o confirmar una operacion irreversible.
+
 ## Formularios
 
 - El flujo debe llevar naturalmente desde el primer campo hasta Guardar.

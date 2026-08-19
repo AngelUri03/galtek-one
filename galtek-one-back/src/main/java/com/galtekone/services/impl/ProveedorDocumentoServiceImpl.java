@@ -93,6 +93,7 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
     public ProveedorDocumentoEntity create(Integer idProveedor, ProveedorDocumentoEntity obj, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
         ProveedoresEntity proveedor = ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(proveedor);
         validate(obj, true);
         normalize(obj);
 
@@ -111,7 +112,7 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
     @Override
     public ProveedorDocumentoEntity update(Integer idProveedor, Integer idProveedorDocumento, ProveedorDocumentoEntity obj, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
-        ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(ensureProveedor(idProveedor, empresaId));
         ProveedorDocumentoEntity entity = find(idProveedor, idProveedorDocumento, empresaId);
         validate(obj, false);
 
@@ -131,7 +132,7 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
     @Override
     public ProveedorDocumentoEntity newVersion(Integer idProveedor, Integer idProveedorDocumento, ProveedorDocumentoVersionRequest request, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
-        ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(ensureProveedor(idProveedor, empresaId));
         ProveedorDocumentoEntity entity = find(idProveedor, idProveedorDocumento, empresaId);
 
         if (request == null || isBlank(request.getMotivo())) {
@@ -163,7 +164,7 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
     @Override
     public ProveedorDocumentoEntity delete(Integer idProveedor, Integer idProveedorDocumento, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
-        ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(ensureProveedor(idProveedor, empresaId));
         ProveedorDocumentoEntity entity = find(idProveedor, idProveedorDocumento, empresaId);
         Map<String, String> before = snapshot(entity);
 
@@ -181,6 +182,12 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
     private ProveedoresEntity ensureProveedor(Integer idProveedor, Integer empresaId) {
         return proveedoresRepository.findByIdProveedorAndEmpresa_IdEmpresa(idProveedor, empresaId)
                 .orElseThrow(() -> new EntityNotFoundException("Proveedor no encontrado o no pertenece a tu empresa"));
+    }
+
+    private void ensureProveedorEditable(ProveedoresEntity proveedor) {
+        if (proveedor != null && "ARCHIVADO".equalsIgnoreCase(trimToNull(proveedor.getEstadoProveedor()))) {
+            throw new IllegalStateException("El proveedor esta archivado como baja historica definitiva y no acepta cambios ni relaciones operativas.");
+        }
     }
 
     private ProveedorDocumentoEntity find(Integer idProveedor, Integer idDocumento, Integer empresaId) {

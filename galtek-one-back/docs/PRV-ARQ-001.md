@@ -192,10 +192,14 @@ Columnas funcionales:
 
 La columna "Ultima actividad" fue removida de la vista principal para reducir scroll lateral y mantener foco operacional.
 
-Acciones directas por fila:
+Acciones visibles prioritarias por fila:
 
 - Ver detalle.
 - Editar proveedor.
+- Mas acciones.
+
+El menu `Mas acciones` agrupa navegacion secundaria y acciones de estado:
+
 - Productos asociados.
 - Activos prestados.
 - Documentos.
@@ -205,7 +209,9 @@ Acciones directas por fila:
 
 Reglas:
 
-- No usar menu de "mas opciones" como contenedor principal de acciones importantes.
+- No saturar la tabla con todos los iconos simultaneos.
+- El menu `Mas acciones` no debe ocultar funcionalidad; debe reducir ruido visual y stops de tabulacion.
+- La navegacion secundaria tambien debe estar disponible desde el Drawer Workspace del proveedor.
 - No mostrar eliminar como boton rojo principal.
 - Las acciones deben ser iconos discretos, consistentes y con tooltip.
 - Durante carga o accion segura, los botones deben deshabilitarse para evitar dobles operaciones.
@@ -355,7 +361,8 @@ Debe mostrar:
 
 Reglas:
 
-- No debe tener botones internos de gestion avanzada.
+- Puede tener accesos de navegacion interna a Productos asociados, Activos prestados, Documentos y Auditoria.
+- Estos accesos no editan directamente; cambian la vista del mismo Drawer Workspace.
 - No debe registrar compras.
 - No debe modificar stock.
 - No debe duplicar reportes.
@@ -403,6 +410,10 @@ Acciones permitidas:
 - Abrir referencia a Compras si existe ruta/patron.
 - Ver historial de costos.
 - Desactivar o reactivar relacion.
+
+Regla UX vigente:
+
+- Productos asociados se muestra como vista interna del Drawer Workspace del proveedor, no como mega-modal.
 
 ### 19. HISTORIAL DE COSTOS
 El historial de costos registra cambios de costo relacionados con un proveedor y un producto.
@@ -453,6 +464,8 @@ Campos:
 
 Reglas:
 
+- Activos prestados se muestra como vista interna del Drawer Workspace del proveedor, no como mega-modal.
+- Agregar o editar activo navega a una vista dedicada dentro del mismo drawer.
 - Fecha de entrega, una vez registrada, no debe modificarse.
 - Fecha de regreso puede modificarse, pero debe quedar auditada.
 - Nombre, tipo y numero de serie pueden editarse.
@@ -550,6 +563,8 @@ Estados:
 
 Reglas:
 
+- Documentos se muestra como vista interna del Drawer Workspace del proveedor, no como mega-modal.
+- Agregar o editar documento navega a una vista dedicada dentro del mismo drawer.
 - Todo documento debe pertenecer a un proveedor.
 - El activo relacionado no es obligatorio.
 - Actualmente los documentos se guardan sin activo relacionado por defecto.
@@ -649,7 +664,7 @@ Debe mostrar:
 Reglas:
 
 - La vista de detalle muestra resumen compacto.
-- El modal propio de auditoria muestra trazabilidad completa.
+- La vista interna de auditoria en Drawer Workspace muestra trazabilidad completa.
 - El historial de costos se carga bajo demanda al abrir auditoria para no hacer pesada la pantalla principal.
 - Auditoria no debe permitir editar.
 - Auditoria debe ayudar al dueno a confiar en el sistema y detectar modificaciones relevantes.
@@ -735,23 +750,24 @@ Reglas:
 ### 32. FRONTEND - COMPONENTES Y RESPONSABILIDAD
 Componentes vigentes:
 
-- `Proveedores.jsx`: orquestacion de pagina, carga, filtros, acciones seguras, detalle y modales avanzados.
+- `Proveedores.jsx`: orquestacion de pagina, carga, filtros, acciones seguras y Drawer Workspace.
 - `ProveedoresSummary.jsx`: resumen operativo.
 - `ProveedoresFilters.jsx`: busqueda y filtros.
-- `ProveedoresTable.jsx`: tabla principal y acciones directas.
+- `ProveedoresTable.jsx`: tabla principal con acciones visibles prioritarias y menu `Mas acciones`.
 - `ProveedorEditorPanel.jsx`: alta/edicion por secciones.
-- `ProveedorDetailPanel.jsx`: vista de consulta completa.
-- `ProveedorAdvancedModals.jsx`: contenedor de productos, activos, documentos y auditoria.
+- `ProveedorWorkspaceDrawer.jsx`: pila interna de vistas del proveedor en un solo drawer fisico.
+- `ProveedorDetailPanel.jsx`: vista de consulta completa reutilizable como contenido del workspace.
 - `ProveedorProductosSection.jsx`: relacion producto-proveedor.
 - `ProveedorProductoCostHistory.jsx`: historial de costos.
-- `ProveedorActivosSection.jsx`: gestion de activos.
+- `ProveedorActivosSection.jsx`: gestion de activos y vista de formulario reutilizable.
 - `ProveedorActivoStateModal.jsx`: cambio de estado de activo.
 - `ProveedorActivoIncidentModal.jsx`: incidente de activo.
 - `ProveedorActivoEvidencePicker.jsx`: evidencias fotograficas.
-- `ProveedorActivoHistoryModal.jsx`: historial del activo.
-- `ProveedorDocumentosSection.jsx`: documentos, preview, descarga, versionado e historial.
+- `ProveedorActivoHistoryModal.jsx`: historial del activo reutilizable como contenido interno y fallback modal.
+- `ProveedorDocumentosSection.jsx`: documentos, preview, descarga, versionado, historial y vista de formulario reutilizable.
 - `ProveedorAuditSection.jsx`: auditoria consolidada.
 - `ProveedorAdvancedShared.jsx`: controles compartidos de secciones avanzadas.
+- `../common/OverlaySurfaces.jsx`: base reusable para `WorkspaceDrawer` y `ModalSurface`.
 - `proveedoresUtils.js`: normalizacion, filtros, payload de proveedor/contacto.
 - `proveedorAdvancedUtils.js`: opciones, payloads y helpers avanzados.
 - `proveedorEditorUtils.js`: telefono, correo, direccion, dias, horario y anticipacion.
@@ -761,7 +777,8 @@ Reglas:
 - No crear archivos gigantes innecesarios.
 - Separar logicas por componente.
 - No meter todo en el detalle.
-- El detalle consulta; los modales especificos gestionan.
+- El detalle consulta; la navegacion secundaria vive dentro del Drawer Workspace.
+- Los modales especificos quedan reservados para acciones puntuales o previews justificadas.
 - Mantener estilos en `src/style/components/Proveedores/Proveedores.css`.
 - No usar CSS global innecesario.
 - No introducir azul de Prime sin justificacion.

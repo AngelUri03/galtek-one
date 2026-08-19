@@ -47,6 +47,7 @@ public class ProveedorContactoServiceImpl implements ProveedorContactoService {
     public ProveedorContactoEntity create(Integer idProveedor, ProveedorContactoEntity obj, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
         ProveedoresEntity proveedor = ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(proveedor);
         validate(obj, true);
         normalize(obj);
 
@@ -62,7 +63,7 @@ public class ProveedorContactoServiceImpl implements ProveedorContactoService {
     @Override
     public ProveedorContactoEntity update(Integer idProveedor, Integer idProveedorContacto, ProveedorContactoEntity obj, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
-        ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(ensureProveedor(idProveedor, empresaId));
         ProveedorContactoEntity entity = find(idProveedor, idProveedorContacto, empresaId);
         validate(obj, false);
         applyUpdate(entity, obj);
@@ -76,7 +77,7 @@ public class ProveedorContactoServiceImpl implements ProveedorContactoService {
     @Override
     public ProveedorContactoEntity delete(Integer idProveedor, Integer idProveedorContacto, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
-        ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(ensureProveedor(idProveedor, empresaId));
         ProveedorContactoEntity entity = find(idProveedor, idProveedorContacto, empresaId);
 
         entity.setEstadoContacto("INACTIVO");
@@ -89,6 +90,12 @@ public class ProveedorContactoServiceImpl implements ProveedorContactoService {
     private ProveedoresEntity ensureProveedor(Integer idProveedor, Integer empresaId) {
         return proveedoresRepository.findByIdProveedorAndEmpresa_IdEmpresa(idProveedor, empresaId)
                 .orElseThrow(() -> new EntityNotFoundException("Proveedor no encontrado o no pertenece a tu empresa"));
+    }
+
+    private void ensureProveedorEditable(ProveedoresEntity proveedor) {
+        if (proveedor != null && "ARCHIVADO".equalsIgnoreCase(trimToNull(proveedor.getEstadoProveedor()))) {
+            throw new IllegalStateException("El proveedor esta archivado como baja historica definitiva y no acepta cambios ni relaciones.");
+        }
     }
 
     private ProveedorContactoEntity find(Integer idProveedor, Integer idContacto, Integer empresaId) {
@@ -104,6 +111,9 @@ public class ProveedorContactoServiceImpl implements ProveedorContactoService {
         }
         if (!isBlank(obj.getRol())) validateValue("rol", obj.getRol(), ROLES);
         if (!isBlank(obj.getEstadoContacto())) validateValue("estadoContacto", obj.getEstadoContacto(), ESTADOS);
+        if (isBlank(obj.getTelefono()) && isBlank(obj.getWhatsapp()) && isBlank(obj.getCorreo())) {
+            throw new IllegalArgumentException("El contacto debe tener telefono, WhatsApp o correo");
+        }
     }
 
     private void applyUpdate(ProveedorContactoEntity target, ProveedorContactoEntity source) {

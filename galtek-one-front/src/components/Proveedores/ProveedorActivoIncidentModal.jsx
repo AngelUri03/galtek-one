@@ -85,7 +85,7 @@ export default function ProveedorActivoIncidentModal({
     >
       <div className="prov-asset-state-shell">
         <div className="prov-asset-state-current">
-          <span>Estado operativo</span>
+          <span>Estado del equipo</span>
           <strong>{enumText(normalizeState(activo))}</strong>
         </div>
 

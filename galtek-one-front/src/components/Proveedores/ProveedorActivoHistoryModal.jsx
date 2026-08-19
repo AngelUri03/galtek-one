@@ -71,6 +71,14 @@ function downloadEvidence(evidence) {
   document.body.removeChild(link);
 }
 
+function formatBytes(value) {
+  const bytes = Number(value || 0);
+  if (!Number.isFinite(bytes) || bytes <= 0) return "Sin tamano";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 function formatDateTime(value) {
   if (!value) return "Sin dato";
   const date = new Date(value);
@@ -118,25 +126,13 @@ function normalizeEvents(activo, documentos) {
   ];
 }
 
-export default function ProveedorActivoHistoryModal({ visible, activo, documentos = [], onHide }) {
+export function ProveedorActivoHistoryContent({ activo, documentos = [] }) {
   const events = useMemo(() => normalizeEvents(activo, documentos), [activo, documentos]);
   const [preview, setPreview] = useState(null);
 
   return (
     <>
-      <Dialog
-        header="Historial del activo"
-        visible={visible}
-        onHide={onHide}
-        modal
-        draggable={false}
-        dismissableMask
-        focusOnShow={false}
-        closeButtonProps={{ tabIndex: -1 }}
-        className="prov-advanced-dialog prov-asset-history-dialog"
-        style={{ width: "62rem", maxWidth: "calc(100vw - 2rem)" }}
-      >
-        <div className="prov-asset-history-shell">
+      <div className="prov-asset-history-shell">
           <div className="prov-asset-history-hero">
             <span className="prov-adv-icon">
               <i className="pi pi-history" />
@@ -201,16 +197,18 @@ export default function ProveedorActivoHistoryModal({ visible, activo, documento
                               >
                                 <img src={src} alt={evidence.evidenciaNombre || "Evidencia del activo"} />
                               </button>
-                              <div>
+                              <div className="prov-asset-evidence-info">
                                 <strong>{evidence.evidenciaNombre || "Evidencia del movimiento"}</strong>
-                                <span>{evidence.evidenciaMimeType} · {evidence.evidenciaTamanoBytes || 0} bytes</span>
-                                <Button
-                                  label="Descargar"
-                                  icon="pi pi-download"
-                                  className="prov-soft-btn prov-download-btn"
-                                  onClick={() => downloadEvidence(evidence)}
-                                />
+                                <span>{evidence.evidenciaMimeType} - {formatBytes(evidence.evidenciaTamanoBytes)}</span>
                               </div>
+                              <Button
+                                icon="pi pi-download"
+                                className="prov-evidence-download-btn"
+                                onClick={() => downloadEvidence(evidence)}
+                                aria-label="Descargar evidencia"
+                                tooltip="Descargar evidencia"
+                                tooltipOptions={{ position: "top" }}
+                              />
                             </article>
                           );
                         })}
@@ -221,11 +219,15 @@ export default function ProveedorActivoHistoryModal({ visible, activo, documento
               );
             })}
           </div>
-        </div>
-      </Dialog>
+      </div>
 
       <Dialog
-        header={preview?.evidenciaNombre || "Vista previa"}
+        header={
+          <div className="prov-image-preview-title">
+            <span>Evidencia</span>
+            <strong>{preview?.evidenciaNombre || "Vista previa"}</strong>
+          </div>
+        }
         visible={Boolean(preview)}
         onHide={() => setPreview(null)}
         modal
@@ -237,11 +239,32 @@ export default function ProveedorActivoHistoryModal({ visible, activo, documento
         style={{ width: "min(74rem, calc(100vw - 2rem))" }}
       >
         {preview ? (
-          <div className="prov-image-preview-body">
-            <img src={preview.dataUrl} alt={preview.evidenciaNombre || "Evidencia del activo"} />
+          <div className="prov-image-preview-shell">
+            <div className="prov-image-preview-body">
+              <img src={preview.dataUrl} alt={preview.evidenciaNombre || "Evidencia del activo"} />
+            </div>
           </div>
         ) : null}
       </Dialog>
     </>
+  );
+}
+
+export default function ProveedorActivoHistoryModal({ visible, activo, documentos = [], onHide }) {
+  return (
+    <Dialog
+      header="Historial del activo"
+      visible={visible}
+      onHide={onHide}
+      modal
+      draggable={false}
+      dismissableMask
+      focusOnShow={false}
+      closeButtonProps={{ tabIndex: -1 }}
+      className="prov-advanced-dialog prov-asset-history-dialog"
+      style={{ width: "62rem", maxWidth: "calc(100vw - 2rem)" }}
+    >
+      <ProveedorActivoHistoryContent activo={activo} documentos={documentos} />
+    </Dialog>
   );
 }

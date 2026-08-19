@@ -13,18 +13,16 @@ export default function ProveedoresSummary({ stats, loading }) {
       label: "Sin productos",
       value: stats.sinProductos,
       icon: "pi pi-box",
-      hint: stats.sinProductos == null ? "Requiere detalle" : "",
     },
     {
       label: "Con activos",
       value: stats.conActivos,
       icon: "pi pi-th-large",
-      hint: stats.conActivos == null ? "Requiere detalle" : "",
     },
   ];
 
   return (
-    <div className="prov-summary" aria-label="Resumen operativo de proveedores">
+    <div className="prov-summary" aria-label="Resumen de proveedores">
       {cards.map((card) => (
         <div className="prov-summary-card" key={card.label}>
           <i className={card.icon} />
@@ -35,7 +33,6 @@ export default function ProveedoresSummary({ stats, loading }) {
             ) : (
               <strong>{renderValue(card.value)}</strong>
             )}
-            {card.hint && !loading ? <small>{card.hint}</small> : null}
           </div>
         </div>
       ))}

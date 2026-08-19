@@ -1,0 +1,339 @@
+:root {
+  --gto-surface-brand: #0a7463;
+  --gto-surface-text: #142521;
+  --gto-surface-muted: #62716d;
+  --gto-overlay-backdrop: rgba(12, 24, 21, 0.28);
+  --gto-overlay-dialog-backdrop: rgba(12, 24, 21, 0.2);
+  --gto-overlay-blur: blur(6px);
+  --gto-overlay-dialog-blur: blur(2px);
+  --gto-surface-border: 1px solid rgba(21, 43, 38, 0.1);
+  --gto-surface-shadow: -26px 0 58px rgba(14, 33, 29, 0.18);
+  --gto-modal-shadow: 0 24px 60px rgba(14, 33, 29, 0.18);
+  --gto-drawer-detail: clamp(680px, 48vw, 760px);
+  --gto-drawer-form: clamp(640px, 50vw, 760px);
+  --gto-drawer-workspace: clamp(820px, 68vw, 1000px);
+  --gto-modal-small: min(34rem, calc(100vw - 2rem));
+  --gto-modal-medium: min(46rem, calc(100vw - 2rem));
+  --gto-modal-large: min(70rem, calc(100vw - 2rem));
+  --gto-motion-fast: 180ms;
+}
+
+.p-sidebar-mask.p-component-overlay {
+  background: var(--gto-overlay-backdrop) !important;
+  backdrop-filter: var(--gto-overlay-blur);
+  -webkit-backdrop-filter: var(--gto-overlay-blur);
+  transition: background-color var(--gto-motion-fast) ease,
+    backdrop-filter var(--gto-motion-fast) ease !important;
+}
+
+.p-dialog-mask.p-component-overlay {
+  background: var(--gto-overlay-dialog-backdrop) !important;
+  backdrop-filter: var(--gto-overlay-dialog-blur);
+  -webkit-backdrop-filter: var(--gto-overlay-dialog-blur);
+  transition: background-color var(--gto-motion-fast) ease,
+    backdrop-filter var(--gto-motion-fast) ease !important;
+}
+
+.gto-workspace-drawer.p-sidebar {
+  position: fixed !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  border-left: var(--gto-surface-border) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(245, 250, 248, 0.96)),
+    #ffffff !important;
+  box-shadow: var(--gto-surface-shadow) !important;
+  overflow: hidden !important;
+  transition: width var(--gto-motion-fast) ease, transform var(--gto-motion-fast) ease !important;
+}
+
+.gto-workspace-drawer.gto-drawer--detail.p-sidebar {
+  width: var(--gto-drawer-detail);
+}
+
+.gto-workspace-drawer.gto-drawer--form.p-sidebar {
+  width: var(--gto-drawer-form);
+}
+
+.gto-workspace-drawer.gto-drawer--workspace.p-sidebar {
+  width: var(--gto-drawer-workspace);
+}
+
+.gto-workspace-drawer .p-sidebar-header {
+  padding: 0 !important;
+  border-bottom: 1px solid rgba(21, 43, 38, 0.08) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+}
+
+.gto-workspace-drawer .p-sidebar-content {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 82px);
+  min-height: 0;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+.gto-workspace-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  width: 100%;
+  box-sizing: border-box;
+  gap: 12px;
+  align-items: center;
+  min-height: 82px;
+  padding: 16px 22px;
+}
+
+.gto-workspace-header-main {
+  min-width: 0;
+}
+
+.gto-workspace-back.p-button {
+  min-height: 28px !important;
+  height: 28px !important;
+  max-width: 100%;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--gto-surface-brand) !important;
+  box-shadow: none !important;
+  font-size: 0.78rem !important;
+  font-weight: 850 !important;
+}
+
+.gto-workspace-back .p-button-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gto-workspace-eyebrow {
+  display: block;
+  color: var(--gto-surface-brand);
+  font-size: 0.72rem;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.gto-workspace-title {
+  margin: 3px 0 0;
+  color: var(--gto-surface-text);
+  font-size: 1.22rem;
+  font-weight: 900;
+  line-height: 1.15;
+  outline: none;
+  overflow-wrap: anywhere;
+}
+
+.gto-workspace-title:focus,
+.gto-workspace-title:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.gto-workspace-subtitle {
+  display: block;
+  margin-top: 3px;
+  color: var(--gto-surface-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.gto-workspace-close.p-button {
+  justify-self: end;
+  width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.68) !important;
+  color: #243632 !important;
+  box-shadow: none !important;
+}
+
+.gto-workspace-close.p-button:hover,
+.gto-workspace-close.p-button:focus,
+.gto-workspace-close.p-button:focus-visible,
+.gto-workspace-back.p-button:hover,
+.gto-workspace-back.p-button:focus,
+.gto-workspace-back.p-button:focus-visible {
+  outline: none !important;
+  background: rgba(10, 116, 99, 0.1) !important;
+  color: var(--gto-surface-brand) !important;
+  box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.16) !important;
+}
+
+.gto-workspace-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(10, 116, 99, 0.34) transparent;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(245, 250, 248, 0.92)),
+    #ffffff;
+}
+
+.gto-workspace-body::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.gto-workspace-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.gto-workspace-body::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(10, 116, 99, 0.28);
+}
+
+.gto-workspace-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(10, 116, 99, 0.44);
+}
+
+.gto-workspace-body::-webkit-scrollbar-thumb:active {
+  background: rgba(10, 116, 99, 0.68);
+}
+
+.gto-workspace-body::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.gto-workspace-view {
+  min-height: 100%;
+  padding: 18px 22px 24px;
+  animation-duration: var(--gto-motion-fast);
+  animation-timing-function: ease;
+  animation-fill-mode: both;
+}
+
+.gto-workspace-view.is-forward {
+  animation-name: gtoWorkspaceForward;
+}
+
+.gto-workspace-view.is-back {
+  animation-name: gtoWorkspaceBack;
+}
+
+.gto-workspace-footer {
+  flex: 0 0 auto;
+  padding: 12px 22px 18px;
+  border-top: 1px solid rgba(21, 43, 38, 0.08);
+  background:
+    linear-gradient(180deg, rgba(245, 250, 248, 0.92), rgba(245, 250, 248, 0.98)),
+    #ffffff;
+}
+
+.gto-modal.p-dialog {
+  overflow: hidden;
+  border: var(--gto-surface-border) !important;
+  border-radius: 18px !important;
+  background:
+    linear-gradient(180deg, rgba(248, 252, 250, 0.96), rgba(236, 247, 242, 0.94)),
+    #eef7f3 !important;
+  box-shadow: var(--gto-modal-shadow) !important;
+}
+
+.gto-modal.gto-modal--small.p-dialog {
+  width: var(--gto-modal-small) !important;
+}
+
+.gto-modal.gto-modal--medium.p-dialog {
+  width: var(--gto-modal-medium) !important;
+}
+
+.gto-modal.gto-modal--large.p-dialog {
+  width: var(--gto-modal-large) !important;
+}
+
+.gto-modal .p-dialog-header,
+.gto-modal .p-dialog-content,
+.gto-modal .p-dialog-footer {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.gto-modal .p-dialog-header {
+  padding: 18px 22px 8px !important;
+}
+
+.gto-modal .p-dialog-content {
+  padding: 12px 24px 14px !important;
+}
+
+.gto-modal .p-dialog-footer {
+  padding: 0 24px 22px !important;
+}
+
+.gto-modal .p-dialog-header-close,
+.gto-modal .p-dialog-header-icon {
+  width: 38px !important;
+  height: 38px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.62) !important;
+  color: #243632 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.gto-modal .p-dialog-header-close:hover,
+.gto-modal .p-dialog-header-close:focus,
+.gto-modal .p-dialog-header-close:focus-visible,
+.gto-modal .p-dialog-header-icon:focus,
+.gto-modal .p-dialog-header-icon:focus-visible {
+  background: rgba(10, 116, 99, 0.1) !important;
+  color: var(--gto-surface-brand) !important;
+  box-shadow: 0 0 0 2px rgba(10, 116, 99, 0.16) !important;
+}
+
+@keyframes gtoWorkspaceForward {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes gtoWorkspaceBack {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gto-workspace-drawer.p-sidebar,
+  .gto-workspace-view,
+  .p-sidebar-mask.p-component-overlay,
+  .p-dialog-mask.p-component-overlay {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .gto-workspace-drawer.gto-drawer--detail.p-sidebar,
+  .gto-workspace-drawer.gto-drawer--form.p-sidebar,
+  .gto-workspace-drawer.gto-drawer--workspace.p-sidebar {
+    width: calc(100vw - 24px);
+  }
+}

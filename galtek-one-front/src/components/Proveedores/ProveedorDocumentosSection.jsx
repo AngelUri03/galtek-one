@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
@@ -282,7 +282,7 @@ function OfficePreview({ documento }) {
   );
 }
 
-function DocumentoPreviewDialog({ documento, onHide }) {
+export function DocumentoPreviewDialog({ documento, onHide }) {
   const dataUrl = documentDataUrl(documento);
   const mime = String(documento?.mimeType || "");
   const isImage = mime.startsWith("image/");
@@ -329,21 +329,10 @@ function DocumentoPreviewDialog({ documento, onHide }) {
   );
 }
 
-function DocumentoHistoryDialog({ documento, onHide, onPreview }) {
+export function DocumentoHistoryContent({ documento, onPreview }) {
   const events = documento?.historial || [];
   return (
-    <Dialog
-      header="Historial del documento"
-      visible={Boolean(documento)}
-      onHide={onHide}
-      modal
-      draggable={false}
-      dismissableMask
-      focusOnShow={false}
-      closeButtonProps={{ tabIndex: -1 }}
-      className="prov-advanced-dialog prov-document-history-dialog"
-      style={{ width: "min(70rem, calc(100vw - 2rem))" }}
-    >
+    <>
       {documento ? (
         <div className="prov-document-history">
           <div className="prov-document-history-hero">
@@ -442,6 +431,25 @@ function DocumentoHistoryDialog({ documento, onHide, onPreview }) {
           )}
         </div>
       ) : null}
+    </>
+  );
+}
+
+function DocumentoHistoryDialog({ documento, onHide, onPreview }) {
+  return (
+    <Dialog
+      header="Historial del documento"
+      visible={Boolean(documento)}
+      onHide={onHide}
+      modal
+      draggable={false}
+      dismissableMask
+      focusOnShow={false}
+      closeButtonProps={{ tabIndex: -1 }}
+      className="prov-advanced-dialog prov-document-history-dialog"
+      style={{ width: "min(70rem, calc(100vw - 2rem))" }}
+    >
+      <DocumentoHistoryContent documento={documento} onPreview={onPreview} />
     </Dialog>
   );
 }
@@ -542,11 +550,226 @@ function DocumentoVersionDialog({
   );
 }
 
+export function ProveedorDocumentoFormView({
+  proveedor,
+  item = null,
+  showToast,
+  onCancel,
+  onSaved,
+  onDirtyChange,
+}) {
+  const fileInputRef = useRef(null);
+  const [form, setForm] = useState(() => createDocumentoForm(item));
+  const [initialSnapshot, setInitialSnapshot] = useState(() =>
+    JSON.stringify(createDocumentoForm(item))
+  );
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
+  const editing = Boolean(form?.idProveedorDocumento);
+
+  useEffect(() => {
+    const nextForm = createDocumentoForm(item);
+    setForm(nextForm);
+    setInitialSnapshot(JSON.stringify(nextForm));
+    setErrors({});
+  }, [item]);
+
+  const currentSnapshot = useMemo(() => JSON.stringify(form), [form]);
+  const dirty = Boolean(initialSnapshot && currentSnapshot !== initialSnapshot);
+
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+    return () => onDirtyChange?.(false);
+  }, [dirty, onDirtyChange]);
+
+  const update = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const readFileIntoForm = async (file) => {
+    const mimeType = detectMime(file);
+    if (!mimeType) {
+      setErrors((prev) => ({ ...prev, archivo: "Formato no permitido." }));
+      return;
+    }
+    if (file.size > MAX_DOCUMENT_BYTES) {
+      setErrors((prev) => ({ ...prev, archivo: "Maximo 25 MB." }));
+      return;
+    }
+
+    try {
+      const archivoBase64 = await fileToBase64(file);
+      setForm((prev) => ({
+        ...prev,
+        archivoNombre: file.name,
+        archivoBase64,
+        mimeType,
+        tamanoBytes: file.size,
+      }));
+      setErrors((prev) => ({ ...prev, archivo: "" }));
+    } catch (error) {
+      setErrors((prev) => ({
+        ...prev,
+        archivo: error.message || "No se pudo cargar el archivo.",
+      }));
+    }
+  };
+
+  const handleFile = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || editing) return;
+    await readFileIntoForm(file);
+  };
+
+  const validate = () => {
+    const nextErrors = {};
+    if (!String(form.nombre || "").trim()) nextErrors.nombre = "El nombre es obligatorio.";
+    if (!editing && !form.archivoBase64) {
+      nextErrors.archivo = "Selecciona el archivo del documento.";
+    }
+    if (!editing && form.tamanoBytes != null && Number(form.tamanoBytes) > MAX_DOCUMENT_BYTES) {
+      nextErrors.archivo = "Maximo 25 MB.";
+    }
+    if (
+      !editing &&
+      form.mimeType &&
+      !DOCUMENTO_MIME_OPTIONS.some((option) => option.value === form.mimeType)
+    ) {
+      nextErrors.archivo = "Formato no permitido.";
+    }
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const save = async () => {
+    if (!validate()) return;
+
+    setSaving(true);
+    try {
+      const response = await api.fetchApi(
+        {},
+        editing ? "PUT" : "POST",
+        buildDocumentoPayload(form),
+        getDocumentoUrl(proveedor.idProveedor, form.idProveedorDocumento)
+      );
+      const saved = await readApiPayload(response, "guardar documento");
+      showToast?.(
+        "success",
+        "Documentos",
+        editing ? "Documento actualizado correctamente." : "Documento agregado correctamente."
+      );
+      onDirtyChange?.(false);
+      await onSaved?.(saved);
+    } catch (error) {
+      showToast?.("error", "Documentos", error?.message || "No se pudo guardar.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="prov-adv-form prov-workspace-form">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={ACCEPTED_FILES}
+        className="prov-hidden-file"
+        onChange={handleFile}
+      />
+      <div className="prov-form-grid">
+        <TextField
+          label="Nombre del documento"
+          value={form.nombre}
+          onChange={(value) => update("nombre", value)}
+          error={errors.nombre}
+          placeholder="Ej. Comodato enfriador Coca-Cola"
+          autoFocus
+        />
+        <label className="prov-field">
+          <span>Tipo</span>
+          <Dropdown
+            value={form.tipo}
+            options={DOCUMENTO_TIPO_OPTIONS}
+            onChange={(event) => update("tipo", event.value)}
+          />
+        </label>
+
+        {editing ? (
+          <div className="prov-field-wide">
+            <span className="prov-document-version-label">Archivo original protegido</span>
+            <FileMetaStrip documento={form} locked />
+            <p className="prov-document-lock-note">
+              El archivo no se reemplaza desde edicion. Para una copia firmada o corregida usa
+              Nueva version y quedara auditada.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className={`prov-document-uploader prov-field-wide ${errors.archivo ? "has-error" : ""}`}>
+              <div>
+                <span>Archivo obligatorio</span>
+                <strong>{form.archivoNombre || "Sin archivo seleccionado"}</strong>
+                <small>PDF, imagen, Excel, Word, PowerPoint, CSV o texto - maximo 25 MB.</small>
+              </div>
+              <Button
+                label={form.archivoBase64 ? "Cambiar archivo" : "Seleccionar archivo"}
+                icon="pi pi-upload"
+                className="prov-soft-btn"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={saving}
+              />
+            </div>
+            {errors.archivo ? (
+              <small className="prov-field-error prov-field-wide">{errors.archivo}</small>
+            ) : null}
+          </>
+        )}
+
+        <div className="prov-document-meta-readonly prov-field-wide">
+          <span>Formato <strong>{mimeLabel(form.mimeType)}</strong></span>
+          <span>Tamano <strong>{bytesLabel(form.tamanoBytes)}</strong></span>
+          <span>
+            Almacenamiento <strong>{form.archivoBase64 ? "Base de datos" : "Sin contenido cargado"}</strong>
+          </span>
+        </div>
+
+        <label className="prov-field">
+          <span>Estado</span>
+          <Dropdown
+            value={form.estadoDocumento}
+            options={DOCUMENTO_ESTADO_OPTIONS}
+            onChange={(event) => update("estadoDocumento", event.value)}
+          />
+        </label>
+        <TextAreaField
+          label="Descripcion"
+          value={form.descripcion}
+          onChange={(value) => update("descripcion", value)}
+          className="prov-field-wide"
+          placeholder="Ej. Contrato firmado, lista vigente o evidencia relacionada al proveedor."
+        />
+      </div>
+      <AdvancedFormActions
+        editing={editing}
+        saving={saving}
+        onCancel={onCancel}
+        onSave={save}
+      />
+    </div>
+  );
+}
+
 export default function ProveedorDocumentosSection({
   proveedor,
   items = [],
   onRefresh,
   showToast,
+  highlightedDocumentoId,
+  readOnly = false,
+  onOpenForm,
+  onOpenHistory,
 }) {
   const fileInputRef = useRef(null);
   const versionFileInputRef = useRef(null);
@@ -752,22 +975,40 @@ export default function ProveedorDocumentosSection({
   };
 
   const openVersion = (item) => {
+    if (readOnly) {
+      showToast?.("info", "Proveedor archivado", "Los documentos quedan solo como historial.");
+      return;
+    }
     setVersionItem(item);
     setVersionErrors({});
     setVersionForm({ motivo: "", archivoNombre: "", archivoBase64: "", mimeType: "", tamanoBytes: null });
   };
 
+  const openForm = (item = null) => {
+    if (readOnly) {
+      showToast?.("info", "Proveedor archivado", "Los documentos quedan solo como historial.");
+      return;
+    }
+    if (onOpenForm) {
+      onOpenForm(item);
+      return;
+    }
+    setForm(createDocumentoForm(item));
+    setErrors({});
+  };
+
   return (
     <AdvancedSection
       title="Documentos"
-      subtitle="Contratos, comodatos, listas y evidencias guardados en base de datos."
+      subtitle={
+        readOnly
+          ? "Consulta historica de contratos, comodatos, listas y evidencias."
+          : "Contratos, comodatos, listas y evidencias guardados en base de datos."
+      }
       icon="pi pi-file"
       addLabel="Agregar documento"
       addDisabled={saving || versionSaving}
-      onAdd={() => {
-        setForm(createDocumentoForm());
-        setErrors({});
-      }}
+      onAdd={readOnly ? null : () => openForm(null)}
     >
       {saving ? (
         <div className="prov-adv-sync">
@@ -866,8 +1107,16 @@ export default function ProveedorDocumentosSection({
           {items.map((item) => {
             const storedInDb = Boolean(item.archivoBase64);
             const isArchived = String(item.estadoDocumento || "").toUpperCase() === "ARCHIVADO";
+            const isHighlighted =
+              highlightedDocumentoId &&
+              Number(highlightedDocumentoId) === Number(item.idProveedorDocumento);
             return (
-              <article className="prov-adv-card prov-document-card" key={item.idProveedorDocumento || item.nombre}>
+              <article
+                className={`prov-adv-card prov-document-card ${
+                  isHighlighted ? "is-highlighted" : ""
+                }`}
+                key={item.idProveedorDocumento || item.nombre}
+              >
                 <div className="prov-adv-card-main">
                   <div>
                     <strong title={item.nombre}>{item.nombre || "Documento"}</strong>
@@ -891,11 +1140,8 @@ export default function ProveedorDocumentosSection({
                   <span>Descripcion <strong>{item.descripcion || "--"}</strong></span>
                 </div>
                 <AdvancedCardActions
-                  onEdit={() => {
-                    setForm(createDocumentoForm(item));
-                    setErrors({});
-                  }}
-                  onArchive={isArchived ? null : () => setConfirm(item)}
+                  onEdit={readOnly ? null : () => openForm(item)}
+                  onArchive={readOnly || isArchived ? null : () => setConfirm(item)}
                   archiveLabel="Archivar documento"
                   disabled={saving || versionSaving}
                   extra={
@@ -918,25 +1164,27 @@ export default function ProveedorDocumentosSection({
                         tooltip="Descargar"
                         tooltipOptions={{ position: "top" }}
                       />
-                      <Button
-                        icon="pi pi-refresh"
-                        className="prov-row-action"
-                        onClick={() => openVersion(item)}
-                        disabled={!storedInDb || saving || versionSaving}
-                        aria-label="Nueva version"
-                        tooltip="Nueva version"
-                        tooltipOptions={{ position: "top" }}
-                      />
+                      {!readOnly ? (
+                        <Button
+                          icon="pi pi-refresh"
+                          className="prov-row-action"
+                          onClick={() => openVersion(item)}
+                          disabled={!storedInDb || saving || versionSaving}
+                          aria-label="Nueva version"
+                          tooltip="Nueva version"
+                          tooltipOptions={{ position: "top" }}
+                        />
+                      ) : null}
                       <Button
                         icon="pi pi-history"
                         className="prov-row-action"
-                        onClick={() => setHistory(item)}
+                        onClick={() => (onOpenHistory ? onOpenHistory(item) : setHistory(item))}
                         disabled={saving || versionSaving}
                         aria-label="Historial"
                         tooltip="Historial"
                         tooltipOptions={{ position: "top" }}
                       />
-                      {isArchived ? (
+                      {isArchived && !readOnly ? (
                         <Button
                           icon="pi pi-undo"
                           className="prov-row-action"
@@ -959,11 +1207,13 @@ export default function ProveedorDocumentosSection({
       )}
 
       <DocumentoPreviewDialog documento={preview} onHide={() => setPreview(null)} />
-      <DocumentoHistoryDialog
-        documento={history}
-        onHide={() => setHistory(null)}
-        onPreview={setPreview}
-      />
+      {!onOpenHistory ? (
+        <DocumentoHistoryDialog
+          documento={history}
+          onHide={() => setHistory(null)}
+          onPreview={setPreview}
+        />
+      ) : null}
       <DocumentoVersionDialog
         item={versionItem}
         form={versionForm}

@@ -36,7 +36,7 @@ Nota: esta matriz no reemplaza el estado funcional del resumen ejecutivo. En est
 | Caja | No evaluado | No evaluado | No evaluado | No evaluado | Saldo continuo, apertura con reporte de diferencia, cierre, movimientos efectivo/tarjeta, historial paginado por cortes y politica conectados; QA runtime pendiente. |
 | Inventario | No evaluado | No evaluado | No evaluado | No evaluado | Requiere QA integral con ventas/compras. |
 | Compras | No evaluado | No evaluado | No evaluado | No evaluado | Alta de compra sigue parcial/mock segun lectura actual. |
-| Proveedores | No evaluado | No evaluado | No evaluado | No evaluado | Referencia visual principal por madurez de codigo/historia; QA pendiente. |
+| Proveedores | No evaluado | No evaluado | No evaluado | No evaluado | Referencia visual principal; Drawer Workspace aplicado en UX-DS-001, QA runtime pendiente. |
 | Clientes | No evaluado | No evaluado | No evaluado | No evaluado | Referencia visual principal por madurez de codigo/historia; QA pendiente. |
 | Reportes | No evaluado | No evaluado | No evaluado | No evaluado | Requiere validar filtros, exports y estados. |
 | Respaldos/exportaciones | No evaluado | No evaluado | No evaluado | No evaluado | UI presente, integracion real no detectada. |
@@ -481,6 +481,7 @@ Que funciona:
 - CRUD y estado de proveedores.
 - Eliminacion segura.
 - Subrecursos avanzados.
+- Drawer Workspace aplicado como patron de referencia para detalle, productos, activos, documentos y auditoria.
 - Documentacion tecnica amplia.
 
 Que esta parcial:

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import com.galtekone.dto.proveedor.ProveedorProductoRowDTO;
 import com.galtekone.entity.ProveedorProductoEntity;
 
 public interface ProveedorProductoService extends CommonService<ProveedorProductoEntity>{
@@ -31,7 +32,7 @@ public interface ProveedorProductoService extends CommonService<ProveedorProduct
             Integer idEmpresa
     );
 
-    List<ProveedorProductoEntity> readByProveedor(Integer idProveedor);
+    List<ProveedorProductoRowDTO> readByProveedor(Integer idProveedor);
 
     ProveedorProductoEntity createForProveedor(Integer idProveedor, ProveedorProductoEntity obj, String user);
 

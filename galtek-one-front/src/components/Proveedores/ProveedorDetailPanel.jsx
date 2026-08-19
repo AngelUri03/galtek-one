@@ -1,9 +1,8 @@
 import React from "react";
+import { Button } from "primereact/button";
 import { Sidebar } from "primereact/sidebar";
 import { Skeleton } from "primereact/skeleton";
 import { Tag } from "primereact/tag";
-import ProveedorAdvancedSummary from "./ProveedorAdvancedSummary";
-import ProveedorAuditSection from "./ProveedorAuditSection";
 import { enumText } from "./proveedorAdvancedUtils";
 import { parseAddressText } from "./proveedorEditorUtils";
 import {
@@ -141,11 +140,72 @@ function LoadingDetail() {
   );
 }
 
-export default function ProveedorDetailPanel({
-  visible,
+function DetailWorkspaceActions({
+  productos,
+  activos,
+  documentos,
+  productosCount,
+  activosCount,
+  onNavigateSection,
+}) {
+  if (!onNavigateSection) return null;
+
+  const totalProductos = productosCount ?? productos.length;
+  const totalActivos = activosCount ?? activos.length;
+
+  const actions = [
+    {
+      key: "productos",
+      label: "Productos asociados",
+      icon: "pi pi-box",
+      meta: `${totalProductos} relaciones`,
+    },
+    {
+      key: "activos",
+      label: "Activos prestados",
+      icon: "pi pi-th-large",
+      meta: `${totalActivos} activos`,
+    },
+    {
+      key: "documentos",
+      label: "Documentos",
+      icon: "pi pi-file",
+      meta: `${documentos.length} documentos`,
+    },
+    {
+      key: "auditoria",
+      label: "Auditoria",
+      icon: "pi pi-history",
+      meta: "Trazabilidad",
+    },
+  ];
+
+  return (
+    <section className="prov-detail-workspace-nav" aria-label="Navegacion del proveedor">
+      {actions.map((action) => (
+        <Button
+          key={action.key}
+          className="prov-detail-workspace-action"
+          onClick={() => onNavigateSection(action.key)}
+          aria-label={action.label}
+        >
+          <i className={action.icon} />
+          <span>
+            <strong>{action.label}</strong>
+            <small>{action.meta}</small>
+          </span>
+          <i className="pi pi-arrow-right" />
+        </Button>
+      ))}
+    </section>
+  );
+}
+
+export function ProveedorDetailContent({
   proveedor,
   loading,
-  onHide,
+  readOnly = false,
+  onNavigateSection,
 }) {
   const estado = proveedor?.estadoProveedor || "ACTIVO";
   const contactos = proveedor?.contactos || [];
@@ -175,24 +235,8 @@ export default function ProveedorDetailPanel({
         ["Referencia", direccion.direccionReferencia],
       ];
 
-  const header = (
-    <div className="prov-detail-panel-title">
-      <span>Proveedor</span>
-      <strong>{proveedor?.nombreProveedor || "Proveedor"}</strong>
-    </div>
-  );
-
   return (
-    <Sidebar
-      visible={visible}
-      onHide={onHide}
-      position="right"
-      blockScroll
-      showCloseIcon={false}
-      className="prov-detail-sidebar"
-      header={header}
-    >
-      <div className="prov-detail-panel">
+    <div className="prov-detail-panel">
         {loading && !proveedor ? (
           <LoadingDetail />
         ) : proveedor ? (
@@ -208,7 +252,7 @@ export default function ProveedorDetailPanel({
                 <p>
                   {proveedor.razonSocial ||
                     proveedor.categoriaPrincipal ||
-                    "Proveedor operativo de abastecimiento"}
+                    "Proveedor de abastecimiento"}
                 </p>
               </div>
               <div className="prov-detail-hero-contact">
@@ -216,6 +260,24 @@ export default function ProveedorDetailPanel({
                 <strong>{proveedor.telefono || proveedor.whatsapp || "Sin telefono"}</strong>
               </div>
             </section>
+
+            {readOnly ? (
+              <div className="prov-state-explain is-archived">
+                <i className="pi pi-lock" />
+                <div>
+                  <strong>Proveedor archivado</strong>
+                  <span>No se puede usar ni editar.</span>
+                </div>
+              </div>
+            ) : estado === "INACTIVO" ? (
+              <div className="prov-state-explain is-inactive">
+                <i className="pi pi-pause-circle" />
+                <div>
+                  <strong>Proveedor pausado</strong>
+                  <span>Puede volver a usarse si se reactiva.</span>
+                </div>
+              </div>
+            ) : null}
 
             <div className="prov-detail-metric-grid">
               <InfoItem
@@ -231,14 +293,23 @@ export default function ProveedorDetailPanel({
                 )}
               />
               <InfoItem
-                label="Productos asociados"
-                value={proveedor.productosAsociadosCount ?? productos.length ?? "--"}
+                label="Pago"
+                value={labelFromOptions(PAGO_OPTIONS, proveedor.formaPagoPrincipal, "Sin dato")}
               />
               <InfoItem
-                label="Activos prestados"
-                value={proveedor.activosPrestadosCount ?? activos.length ?? "--"}
+                label="Estado"
+                value={labelFromOptions(ESTADO_PROVEEDOR_FORM_OPTIONS, estado, enumText(estado))}
               />
             </div>
+
+            <DetailWorkspaceActions
+              productos={productos}
+              activos={activos}
+              documentos={documentos}
+              productosCount={proveedor.productosAsociadosCount}
+              activosCount={proveedor.activosPrestadosCount}
+              onNavigateSection={onNavigateSection}
+            />
 
             <DetailSection title="Datos generales" icon="pi pi-id-card">
               <div className="prov-detail-info-grid is-four">
@@ -360,19 +431,43 @@ export default function ProveedorDetailPanel({
               />
               <DetailNote label="Notas comerciales" value={proveedor.notasComerciales} />
             </DetailSection>
-
-            <ProveedorAdvancedSummary
-              productos={productos}
-              activos={activos}
-              documentos={documentos}
-            />
-
-            <ProveedorAuditSection proveedor={proveedor} />
           </div>
         ) : (
           <EmptySection text="Selecciona un proveedor para ver el detalle." />
         )}
-      </div>
+    </div>
+  );
+}
+
+export default function ProveedorDetailPanel({
+  visible,
+  proveedor,
+  loading,
+  onHide,
+  onNavigateSection,
+}) {
+  const header = (
+    <div className="prov-detail-panel-title">
+      <span>Proveedor</span>
+      <strong>{proveedor?.nombreProveedor || "Proveedor"}</strong>
+    </div>
+  );
+
+  return (
+    <Sidebar
+      visible={visible}
+      onHide={onHide}
+      position="right"
+      blockScroll
+      showCloseIcon={false}
+      className="prov-detail-sidebar"
+      header={header}
+    >
+      <ProveedorDetailContent
+        proveedor={proveedor}
+        loading={loading}
+        onNavigateSection={onNavigateSection}
+      />
     </Sidebar>
   );
 }

@@ -54,6 +54,7 @@ public class ProveedorAcuerdoServiceImpl implements ProveedorAcuerdoService {
     public ProveedorAcuerdoEntity create(Integer idProveedor, ProveedorAcuerdoEntity obj, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
         ProveedoresEntity proveedor = ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(proveedor);
         validate(obj, true);
         normalize(obj);
 
@@ -69,7 +70,7 @@ public class ProveedorAcuerdoServiceImpl implements ProveedorAcuerdoService {
     @Override
     public ProveedorAcuerdoEntity update(Integer idProveedor, Integer idProveedorAcuerdo, ProveedorAcuerdoEntity obj, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
-        ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(ensureProveedor(idProveedor, empresaId));
         ProveedorAcuerdoEntity entity = find(idProveedor, idProveedorAcuerdo, empresaId);
         validate(obj, false);
         applyUpdate(entity, obj, idProveedor, empresaId);
@@ -82,7 +83,7 @@ public class ProveedorAcuerdoServiceImpl implements ProveedorAcuerdoService {
     @Override
     public ProveedorAcuerdoEntity delete(Integer idProveedor, Integer idProveedorAcuerdo, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
-        ensureProveedor(idProveedor, empresaId);
+        ensureProveedorEditable(ensureProveedor(idProveedor, empresaId));
         ProveedorAcuerdoEntity entity = find(idProveedor, idProveedorAcuerdo, empresaId);
 
         entity.setEstadoAcuerdo("ARCHIVADO");
@@ -95,6 +96,12 @@ public class ProveedorAcuerdoServiceImpl implements ProveedorAcuerdoService {
     private ProveedoresEntity ensureProveedor(Integer idProveedor, Integer empresaId) {
         return proveedoresRepository.findByIdProveedorAndEmpresa_IdEmpresa(idProveedor, empresaId)
                 .orElseThrow(() -> new EntityNotFoundException("Proveedor no encontrado o no pertenece a tu empresa"));
+    }
+
+    private void ensureProveedorEditable(ProveedoresEntity proveedor) {
+        if (proveedor != null && "ARCHIVADO".equalsIgnoreCase(trimToNull(proveedor.getEstadoProveedor()))) {
+            throw new IllegalStateException("El proveedor esta archivado como baja historica definitiva y no acepta cambios ni relaciones operativas.");
+        }
     }
 
     private ProveedorAcuerdoEntity find(Integer idProveedor, Integer idAcuerdo, Integer empresaId) {

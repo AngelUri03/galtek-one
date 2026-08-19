@@ -36,13 +36,13 @@ public class ProveedoresEntity extends CommonEntity implements BaseEmpresa{
     @Column(name = "rfc")
     private String rfc;
 
-    @Column(name = "tipo_proveedor")
-    private String tipoProveedor;
+    @Column(name = "tipo_proveedor", nullable = false)
+    private String tipoProveedor = "PROVEEDOR_INFORMAL";
 
     @Column(name = "categoria_principal")
     private String categoriaPrincipal;
 
-    @Column(name = "estado_proveedor")
+    @Column(name = "estado_proveedor", nullable = false)
     private String estadoProveedor = "ACTIVO";
 
     @Column(name = "estado_proveedor_anterior")
@@ -75,8 +75,8 @@ public class ProveedoresEntity extends CommonEntity implements BaseEmpresa{
     @Column(name = "direccion")
     private String direccion;
 
-    @Column(name = "modalidad_abastecimiento")
-    private String modalidadAbastecimiento;
+    @Column(name = "modalidad_abastecimiento", nullable = false)
+    private String modalidadAbastecimiento = "ENTREGA_DOMICILIO";
 
     @Column(name = "pedido_whatsapp")
     private Boolean pedidoWhatsapp = false;
@@ -111,8 +111,8 @@ public class ProveedoresEntity extends CommonEntity implements BaseEmpresa{
     @Column(name = "observaciones_abastecimiento", length = 2000)
     private String observacionesAbastecimiento;
 
-    @Column(name = "forma_pago_principal")
-    private String formaPagoPrincipal;
+    @Column(name = "forma_pago_principal", nullable = false)
+    private String formaPagoPrincipal = "CONTADO";
 
     @Column(name = "maneja_credito")
     private Boolean manejaCredito = false;

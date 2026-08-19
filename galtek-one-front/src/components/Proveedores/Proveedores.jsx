@@ -1,33 +1,47 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Shell from "../common/Shell";
 import { APIfetchApi } from "../../API/APIfetch";
 import { endpoints } from "../../API/api";
 import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import { Tooltip } from "primereact/tooltip";
-import ProveedorAdvancedModals from "./ProveedorAdvancedModals";
-import ProveedorDetailPanel from "./ProveedorDetailPanel";
+import { ModalSurface } from "../common/OverlaySurfaces";
 import ProveedorEditorPanel from "./ProveedorEditorPanel";
+import ProveedorWorkspaceDrawer from "./ProveedorWorkspaceDrawer";
 import ProveedoresFilters from "./ProveedoresFilters";
 import ProveedoresSummary from "./ProveedoresSummary";
 import ProveedoresTable from "./ProveedoresTable";
 import {
   emptyFilters,
   getListPayload,
-  hasKnownCount,
   normalizeProveedor,
   readApiPayload,
-  searchableText,
 } from "./proveedoresUtils";
 import "../../style/components/Proveedores/Proveedores.css";
 
 const api = new APIfetchApi();
 
-const DETAIL_ENRICH_LIMIT = 80;
+const INITIAL_DYNAMIC_ROWS = 7;
+const FIXED_TABLE_ROW_OPTIONS = [10, 20];
+const INITIAL_STATS = {
+  total: 0,
+  activos: 0,
+  inactivos: 0,
+  archivados: 0,
+  sinProductos: 0,
+  conActivos: 0,
+};
+const INITIAL_TABLE_STATE = {
+  first: 0,
+  page: 0,
+  rows: INITIAL_DYNAMIC_ROWS,
+  sortField: "nombreProveedor",
+  sortOrder: 1,
+};
 
 const getDetailUrl = (idProveedor) => `${endpoints.proveedores}/${idProveedor}`;
+const getEditDetailUrl = (idProveedor) => `${getDetailUrl(idProveedor)}?include=edicion`;
 const getDeleteReviewUrl = (idProveedor) =>
   `${endpoints.proveedores}/${idProveedor}/eliminacion-segura`;
 const getContactUrl = (idProveedor, idContacto) =>
@@ -52,23 +66,13 @@ const actionMessages = {
     confirmLabel: "Desactivar",
     placeholder: "Ej. Ya no surte temporalmente la tienda.",
     detail: "El proveedor queda fuera de la operacion diaria, pero conserva historial, compras, productos, activos y documentos.",
-    consequences: [
-      "No aparecera por defecto para nuevas operaciones.",
-      "Su historial comercial se conserva para consulta.",
-      "Puede reactivarse cuando vuelva a surtir.",
-    ],
   },
   archivar: {
     title: "Archivar proveedor",
-    success: "Proveedor archivado.",
+    success: "Proveedor archivado como baja historica definitiva.",
     confirmLabel: "Archivar",
-    placeholder: "Ej. Relacion cerrada, se conserva para historial.",
-    detail: "El proveedor se retira de la operacion normal y queda disponible solo como consulta historica.",
-    consequences: [
-      "No aparece en flujos operativos normales.",
-      "Se conservan compras, productos, activos y documentos.",
-      "Puede reactivarse si la relacion comercial vuelve a operar.",
-    ],
+    placeholder: "Ej. Baja definitiva; se conserva solo por historial.",
+    detail: "El proveedor queda como baja historica definitiva: no se reactiva ni acepta nuevas relaciones.",
   },
   reactivar: {
     title: "Reactivar proveedor",
@@ -76,11 +80,6 @@ const actionMessages = {
     confirmLabel: "Reactivar",
     placeholder: "Ej. Vuelve a surtir la tienda esta semana.",
     detail: "El proveedor volvera a estar disponible para operacion diaria.",
-    consequences: [
-      "Aparecera como proveedor activo.",
-      "Se mantiene todo el historial previo.",
-      "Podra asociarse a productos y usarse en abastecimiento.",
-    ],
   },
   eliminar: {
     title: "Eliminar proveedor fisicamente",
@@ -88,24 +87,87 @@ const actionMessages = {
     confirmLabel: "Eliminar fisicamente",
     placeholder: "Ej. Alta capturada por error y sin uso real.",
     detail: "Esta accion solo procede si el backend confirma que el proveedor no tiene uso ni historial relevante.",
-    consequences: [
-      "Solo aplica a proveedores creados por error.",
-      "No procede si tiene compras, productos, activos, documentos, contactos o auditoria.",
-      "Si tiene historial, usa desactivar o archivar.",
-    ],
   },
 };
 
-const dependencyLabels = {
-  comprasHistoricas: "Compras historicas",
-  productosAsociados: "Productos asociados",
-  contactos: "Contactos",
-  activosPrestados: "Activos prestados",
-  documentosAnexos: "Documentos anexos",
-  auditoriaRelevante: "Auditoria relevante",
+const toNumber = (value, fallback = 0) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
 };
 
-const hiddenDependencyKeys = new Set([["acu", "erdos", "Comerciales"].join("")]);
+const expectedSubresourceCount = (key, proveedor = {}, detail = {}) => {
+  const data = detail?.proveedor ? { ...(proveedor || {}), ...detail.proveedor } : {
+    ...(proveedor || {}),
+    ...(detail || {}),
+  };
+
+  if (key === "productos") {
+    return toNumber(
+      data.productosAsociadosCount ?? data.productosCount ?? data.productosAsociados,
+      0
+    );
+  }
+  if (key === "activos") {
+    return toNumber(data.activosPrestadosCount ?? data.activosCount, 0);
+  }
+  if (key === "documentos") {
+    return toNumber(data.documentosCount, 0);
+  }
+  return 0;
+};
+
+const shouldFetchSubresource = (key, proveedor, detail) => {
+  const embedded = detail?.[key];
+  if (!Array.isArray(embedded)) return true;
+  const expected = expectedSubresourceCount(key, proveedor, detail);
+  return expected > embedded.length;
+};
+
+const normalizeDirectorySummary = (summary = {}, totalRecords = 0) => ({
+  total: toNumber(summary.total, totalRecords),
+  activos: toNumber(summary.activos),
+  inactivos: toNumber(summary.inactivos),
+  archivados: toNumber(summary.archivados),
+  sinProductos: toNumber(summary.sinProductos),
+  conActivos: toNumber(summary.conActivos),
+});
+
+const normalizeDirectoryPage = (data = {}) => {
+  const items = getListPayload(data);
+  const totalRecords = toNumber(data.totalRecords ?? data.totalElements, items.length);
+
+  return {
+    items,
+    totalRecords,
+    page: toNumber(data.page ?? data.number),
+    size: toNumber(data.size, items.length),
+    summary: normalizeDirectorySummary(data.summary, totalRecords),
+  };
+};
+
+const estimateRowsForShell = (shell) => {
+  if (!shell) return null;
+
+  const shellRect = shell.getBoundingClientRect();
+  const viewportHeight =
+    typeof window !== "undefined" ? window.innerHeight || 0 : 0;
+  const viewportAvailableHeight =
+    viewportHeight && shellRect.top ? viewportHeight - shellRect.top - 16 : 0;
+  const shellHeight = Math.max(shellRect.height || 0, viewportAvailableHeight);
+  const headHeight =
+    shell.querySelector(".prov-table-head")?.getBoundingClientRect().height || 48;
+  const tableHeaderHeight =
+    shell.querySelector(".p-datatable-thead")?.getBoundingClientRect().height || 42;
+  const paginatorHeight =
+    shell.querySelector(".p-paginator")?.getBoundingClientRect().height || 64;
+  const rowHeight =
+    shell.querySelector(".p-datatable-tbody > tr")?.getBoundingClientRect().height || 56;
+  const usableHeight = shellHeight - headHeight - tableHeaderHeight - paginatorHeight - 6;
+  const estimatedRows = Math.floor(usableHeight / rowHeight);
+
+  if (!Number.isFinite(estimatedRows) || estimatedRows < 1) return null;
+  return Math.max(3, Math.min(estimatedRows, 20));
+};
 
 const normalizeCategoriaOptions = (rows = []) =>
   rows
@@ -121,27 +183,73 @@ const normalizeCategoriaOptions = (rows = []) =>
     )
     .sort((a, b) => a.label.localeCompare(b.label, "es"));
 
-const isDeleteBlocked = (action) =>
-  action?.action === "eliminar" && action?.deletePolicy?.puedeEliminar === false;
+const proveedorEstado = (proveedor) =>
+  String(proveedor?.estadoProveedor || "ACTIVO").toUpperCase();
+
+const defaultRemovalResolution = (proveedor) => {
+  const estado = proveedorEstado(proveedor);
+  if (estado === "ACTIVO") return "desactivar";
+  if (estado === "INACTIVO") return "archivar";
+  return null;
+};
+
+const removalSummaryText = (action) => {
+  if (!action) return "";
+  if (action.loadingPolicy) return "Revisando si existe historial o relaciones activas...";
+  if (action.deletePolicy?.puedeEliminar) {
+    return "No tiene movimientos ni relaciones. Puedes borrarlo por completo.";
+  }
+  if (proveedorEstado(action.proveedor) === "ACTIVO") {
+    return "Elige si solo dejara de usarse por ahora o si ya no se usara nunca mas.";
+  }
+  if (proveedorEstado(action.proveedor) === "INACTIVO") {
+    return "Esta pausado. Puedes quitarlo definitivamente del uso diario.";
+  }
+  return "Este proveedor ya esta archivado y no se puede usar ni editar.";
+};
+
+const resolveConfirmTargetAction = (action) => {
+  if (!action) return null;
+  if (action.action !== "salida") return action.action;
+  if (action.loadingPolicy) return null;
+  if (action.deletePolicy?.puedeEliminar) return "eliminar";
+  return action.selectedResolution || null;
+};
 
 const mergeProveedorResult = (current, result) => {
   if (!current && !result) return null;
+  const pickResultArray = (resultValue, currentValue) =>
+    Array.isArray(resultValue) ? resultValue : currentValue;
+
   return normalizeProveedor({
     ...(current?.raw || {}),
     ...(current || {}),
     ...(result || {}),
-    contactos: current?.contactos || result?.contactos,
-    productosAsociados: current?.productosAsociados || result?.productosAsociados,
-    activosPrestados: current?.activosPrestados || result?.activosPrestados,
-    documentos: current?.documentos || result?.documentos,
+    contactos: pickResultArray(result?.contactos, current?.contactos),
+    productosAsociados: pickResultArray(
+      result?.productosAsociados,
+      current?.productosAsociados
+    ),
+    activosPrestados: pickResultArray(result?.activosPrestados, current?.activosPrestados),
+    documentos: pickResultArray(result?.documentos, current?.documentos),
   });
 };
 
 export default function Proveedores() {
   const toast = useRef(null);
+  const lastFocusRef = useRef(null);
+  const tableShellRef = useRef(null);
+  const listRequestRef = useRef(0);
+  const editorRequestRef = useRef(0);
+  const userSelectedRowsRef = useRef(false);
   const [proveedores, setProveedores] = useState([]);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filters, setFilters] = useState(emptyFilters);
+  const [stats, setStats] = useState(INITIAL_STATS);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [tableBaseRows, setTableBaseRows] = useState(INITIAL_DYNAMIC_ROWS);
+  const [tableState, setTableState] = useState(INITIAL_TABLE_STATE);
   const [loading, setLoading] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -150,16 +258,30 @@ export default function Proveedores() {
   const [editorLoading, setEditorLoading] = useState(false);
   const [editorMode, setEditorMode] = useState("create");
   const [editorProveedor, setEditorProveedor] = useState(null);
-  const [detailVisible, setDetailVisible] = useState(false);
   const [selectedProveedor, setSelectedProveedor] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null);
   const [actionPreparing, setActionPreparing] = useState(false);
-  const [advancedSection, setAdvancedSection] = useState(null);
+  const [workspaceVisible, setWorkspaceVisible] = useState(false);
+  const [workspaceInitialSection, setWorkspaceInitialSection] = useState(null);
   const [categoriaOptions, setCategoriaOptions] = useState([]);
   const [categoriasLoading, setCategoriasLoading] = useState(false);
 
   const showToast = useCallback((severity, summary, detail) => {
     toast.current?.show({ severity, summary, detail, life: 3200 });
+  }, []);
+
+  const rememberFocus = useCallback(() => {
+    const activeElement = document.activeElement;
+    lastFocusRef.current =
+      activeElement instanceof HTMLElement ? activeElement : lastFocusRef.current;
+  }, []);
+
+  const restoreFocus = useCallback(() => {
+    window.setTimeout(() => {
+      if (lastFocusRef.current && document.body.contains(lastFocusRef.current)) {
+        lastFocusRef.current.focus();
+      }
+    }, 60);
   }, []);
 
   const fetchProveedorSubresources = useCallback(async (idProveedor, mode = "all") => {
@@ -206,9 +328,15 @@ export default function Proveedores() {
         console.warn("No se pudo cargar detalle base de proveedor:", error);
       }
 
-      const subresources = options?.subresources
-        ? await fetchProveedorSubresources(proveedor.idProveedor, options.subresources)
-        : {};
+      const requestedKeys = pickSubresourceKeys(options?.subresources);
+      const missingKeys =
+        options?.subresources && detail
+          ? requestedKeys.filter((key) => shouldFetchSubresource(key, proveedor, detail))
+          : requestedKeys;
+      const subresources =
+        options?.subresources && missingKeys.length
+          ? await fetchProveedorSubresources(proveedor.idProveedor, missingKeys)
+          : {};
 
       if (!detail && !Object.keys(subresources).length) {
         return normalizeProveedor(proveedor);
@@ -220,6 +348,30 @@ export default function Proveedores() {
       return normalizeProveedor(proveedor);
     }
   }, [fetchProveedorSubresources]);
+
+  const fetchProveedorEditDetail = useCallback(async (proveedor) => {
+    if (!proveedor?.idProveedor) return normalizeProveedor(proveedor);
+
+    try {
+      const response = await api.fetchApi(
+        {},
+        "GET",
+        undefined,
+        getEditDetailUrl(proveedor.idProveedor),
+        { logoutOnUnauthorized: false }
+      );
+      const detail = await readApiPayload(response, "edicion de proveedor");
+      return {
+        ...normalizeProveedor(proveedor, detail || {}),
+        detailLoaded: false,
+        editLoaded: true,
+      };
+    } catch (error) {
+      console.warn("No se pudo cargar detalle ligero de proveedor:", error);
+      const fallback = await fetchProveedorDetail(proveedor, { subresources: ["contactos"] });
+      return { ...fallback, editLoaded: true };
+    }
+  }, [fetchProveedorDetail]);
 
   const fetchCategorias = useCallback(async () => {
     setCategoriasLoading(true);
@@ -241,36 +393,134 @@ export default function Proveedores() {
     }
   }, []);
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(search.trim()), 260);
+    return () => window.clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    let active = true;
+    let animationFrame = null;
+    const timers = [];
+
+    const updateRowsFromShell = () => {
+      if (!active) return;
+      const nextRows = estimateRowsForShell(tableShellRef.current);
+      if (!nextRows) return;
+
+      setTableBaseRows(nextRows);
+
+      if (userSelectedRowsRef.current) return;
+
+      setTableState((prev) =>
+        prev.rows === nextRows
+          ? prev
+          : { ...prev, rows: nextRows, page: 0, first: 0 }
+      );
+    };
+
+    const scheduleRowsMeasure = () => {
+      if (!active) return;
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(updateRowsFromShell);
+    };
+
+    [0, 90, 220, 420, 720].forEach((delay) => {
+      timers.push(window.setTimeout(scheduleRowsMeasure, delay));
+    });
+
+    document.fonts?.ready?.then?.(scheduleRowsMeasure);
+
+    const observer =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(scheduleRowsMeasure)
+        : null;
+
+    if (tableShellRef.current && observer) {
+      observer.observe(tableShellRef.current);
+    }
+
+    window.addEventListener("resize", scheduleRowsMeasure);
+    window.addEventListener("focus", scheduleRowsMeasure);
+    document.addEventListener("visibilitychange", scheduleRowsMeasure);
+
+    return () => {
+      active = false;
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      timers.forEach((timer) => window.clearTimeout(timer));
+      observer?.disconnect();
+      window.removeEventListener("resize", scheduleRowsMeasure);
+      window.removeEventListener("focus", scheduleRowsMeasure);
+      document.removeEventListener("visibilitychange", scheduleRowsMeasure);
+    };
+  }, []);
+
   const fetchProveedores = useCallback(async () => {
+    const requestId = listRequestRef.current + 1;
+    listRequestRef.current = requestId;
     setLoading(true);
     setLoadError("");
 
     try {
-      const response = await api.fetchApi({}, "GET", undefined, endpoints.proveedores);
-      const payloadData = await readApiPayload(response, "proveedores");
-      const baseRows = getListPayload(payloadData).map((proveedor) =>
-        normalizeProveedor(proveedor)
-      );
+      const params = new URLSearchParams({
+        page: String(tableState.page),
+        size: String(tableState.rows),
+        sort: tableState.sortField || "nombreProveedor",
+        direction: tableState.sortOrder === -1 ? "desc" : "asc",
+      });
 
-      setProveedores(baseRows);
-
-      if (baseRows.length && baseRows.length <= DETAIL_ENRICH_LIMIT) {
-        setDetailLoading(true);
-        const enriched = await Promise.all(
-          baseRows.map((proveedor) => fetchProveedorDetail(proveedor, { subresources: "all" }))
-        );
-        setProveedores(enriched);
+      if (debouncedSearch) {
+        params.set("search", debouncedSearch);
       }
+
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value && value !== emptyFilters[key]) {
+          params.set(key, value);
+        }
+      });
+
+      const response = await api.fetchApi(
+        {},
+        "GET",
+        undefined,
+        `${endpoints.proveedores}/page?${params.toString()}`
+      );
+      const payloadData = await readApiPayload(response, "proveedores");
+      const pageData = normalizeDirectoryPage(payloadData);
+      const rows = pageData.items.map((proveedor) => normalizeProveedor(proveedor));
+
+      if (requestId !== listRequestRef.current) return;
+
+      if (!rows.length && pageData.totalRecords > 0 && tableState.page > 0) {
+        setTableState((prev) => ({ ...prev, page: 0, first: 0 }));
+        return;
+      }
+
+      setProveedores(rows);
+      setTotalRecords(pageData.totalRecords);
+      setStats(pageData.summary);
     } catch (error) {
+      if (requestId !== listRequestRef.current) return;
       console.error("Error al obtener proveedores:", error);
       setProveedores([]);
+      setTotalRecords(0);
+      setStats(INITIAL_STATS);
       setLoadError(error?.message || "No se pudo cargar proveedores.");
       showToast("error", "Proveedores", "No se pudo cargar la lista.");
     } finally {
-      setLoading(false);
-      setDetailLoading(false);
+      if (requestId === listRequestRef.current) {
+        setLoading(false);
+      }
     }
-  }, [fetchProveedorDetail, showToast]);
+  }, [
+    debouncedSearch,
+    filters,
+    showToast,
+    tableState.page,
+    tableState.rows,
+    tableState.sortField,
+    tableState.sortOrder,
+  ]);
 
   useEffect(() => {
     fetchProveedores();
@@ -280,67 +530,9 @@ export default function Proveedores() {
     fetchCategorias();
   }, [fetchCategorias]);
 
-  const stats = useMemo(() => {
-    const knownProducts = proveedores.every((proveedor) =>
-      hasKnownCount(proveedor.productosAsociadosCount)
-    );
-    const knownAssets = proveedores.every((proveedor) =>
-      hasKnownCount(proveedor.activosPrestadosCount)
-    );
-
-    return {
-      total: proveedores.length,
-      activos: proveedores.filter((proveedor) => proveedor.estadoProveedor === "ACTIVO").length,
-      inactivos: proveedores.filter((proveedor) => proveedor.estadoProveedor === "INACTIVO").length,
-      archivados: proveedores.filter((proveedor) => proveedor.estadoProveedor === "ARCHIVADO").length,
-      sinProductos: knownProducts
-        ? proveedores.filter((proveedor) => Number(proveedor.productosAsociadosCount) === 0).length
-        : null,
-      conActivos: knownAssets
-        ? proveedores.filter((proveedor) => Number(proveedor.activosPrestadosCount) > 0).length
-        : null,
-    };
-  }, [proveedores]);
-
-  const filteredProveedores = useMemo(() => {
-    const query = search.trim().toLowerCase();
-
-    return proveedores.filter((proveedor) => {
-      const matchesSearch = !query || searchableText(proveedor).includes(query);
-      const matchesEstado =
-        filters.estado === "TODOS" || proveedor.estadoProveedor === filters.estado;
-      const matchesTipo =
-        filters.tipo === "TODOS" || proveedor.tipoProveedor === filters.tipo;
-      const matchesModalidad =
-        filters.modalidad === "TODOS" ||
-        proveedor.modalidadAbastecimiento === filters.modalidad;
-      const matchesPago =
-        filters.pago === "TODOS" || proveedor.formaPagoPrincipal === filters.pago;
-      const matchesProductos =
-        filters.productos === "TODOS" ||
-        (hasKnownCount(proveedor.productosAsociadosCount) &&
-          ((filters.productos === "CON_PRODUCTOS" &&
-            Number(proveedor.productosAsociadosCount) > 0) ||
-            (filters.productos === "SIN_PRODUCTOS" &&
-              Number(proveedor.productosAsociadosCount) === 0)));
-      const matchesActivos =
-        filters.activos === "TODOS" ||
-        (hasKnownCount(proveedor.activosPrestadosCount) &&
-          Number(proveedor.activosPrestadosCount) > 0);
-
-      return (
-        matchesSearch &&
-        matchesEstado &&
-        matchesTipo &&
-        matchesModalidad &&
-        matchesPago &&
-        matchesProductos &&
-        matchesActivos
-      );
-    });
-  }, [filters, proveedores, search]);
-
   const openCreate = () => {
+    editorRequestRef.current += 1;
+    rememberFocus();
     setEditorMode("create");
     setEditorProveedor(null);
     setEditorLoading(false);
@@ -355,24 +547,43 @@ export default function Proveedores() {
 
   const openEdit = async (proveedor) => {
     if (!proveedor) return;
+    if (proveedorEstado(proveedor) === "ARCHIVADO") {
+      showToast(
+        "info",
+        "Proveedor archivado",
+        "Este proveedor ya no se puede editar."
+      );
+      return;
+    }
 
-    setDetailVisible(false);
+    const requestId = editorRequestRef.current + 1;
+    editorRequestRef.current = requestId;
+    rememberFocus();
+    setWorkspaceVisible(false);
     setEditorMode("edit");
     setEditorProveedor(proveedor);
     setEditorVisible(true);
 
-    if (!proveedor.detailLoaded) {
+    if (!proveedor.detailLoaded && !proveedor.editLoaded) {
       setEditorLoading(true);
-      const enriched = await fetchProveedorDetail(proveedor, { subresources: "all" });
-      setEditorProveedor(enriched);
-      updateProveedorInList(enriched);
-      setEditorLoading(false);
+      try {
+        const enriched = await fetchProveedorEditDetail(proveedor);
+        if (requestId !== editorRequestRef.current) return;
+        setEditorProveedor(enriched);
+        updateProveedorInList(enriched);
+      } finally {
+        if (requestId === editorRequestRef.current) {
+          setEditorLoading(false);
+        }
+      }
     }
   };
 
   const openDetail = async (proveedor) => {
+    rememberFocus();
     setSelectedProveedor(proveedor);
-    setDetailVisible(true);
+    setWorkspaceInitialSection(null);
+    setWorkspaceVisible(true);
 
     if (!proveedor.detailLoaded) {
       setDetailLoading(true);
@@ -381,22 +592,6 @@ export default function Proveedores() {
       updateProveedorInList(enriched);
       setDetailLoading(false);
     }
-  };
-
-  const openAdvancedSectionForProveedor = async (proveedor, section) => {
-    if (!proveedor?.idProveedor) return;
-
-    setSelectedProveedor(proveedor);
-    let target = proveedor;
-    if (!proveedor.detailLoaded) {
-      setDetailLoading(true);
-      target = await fetchProveedorDetail(proveedor, { subresources: "all" });
-      setSelectedProveedor(target);
-      updateProveedorInList(target);
-      setDetailLoading(false);
-    }
-    setDetailVisible(false);
-    setAdvancedSection(section);
   };
 
   const refreshSelectedProveedor = useCallback(async () => {
@@ -459,6 +654,7 @@ export default function Proveedores() {
       );
       setEditorVisible(false);
       setEditorProveedor(null);
+      restoreFocus();
       await fetchProveedores();
     } catch (error) {
       console.error("Error al guardar proveedor:", error);
@@ -478,29 +674,39 @@ export default function Proveedores() {
     return readApiPayload(response, "revisar eliminacion");
   };
 
-  const openProveedorAction = async (action, proveedor) => {
-    if (!proveedor || !actionMessages[action]) return;
+  const openRemovalAction = async (proveedor) => {
+    if (!proveedor?.idProveedor) return;
 
+    rememberFocus();
     const baseAction = {
-      action,
+      action: "salida",
       proveedor,
       motivo: "",
+      selectedResolution: defaultRemovalResolution(proveedor),
+      archiveConfirmed: false,
       deletePolicy: null,
-      ...actionMessages[action],
+      loadingPolicy: true,
+      title: "Resolver salida del proveedor",
+      placeholder: "Ej. Ya no debe permanecer en el directorio.",
+      detail:
+        "Se revisa si el proveedor puede eliminarse fisicamente. Si tiene historial o relaciones, se conserva la informacion y se retira de operacion.",
     };
 
-    if (action !== "eliminar") {
-      setConfirmAction(baseAction);
-      return;
-    }
-
     setActionPreparing(true);
-    setConfirmAction({ ...baseAction, loadingPolicy: true });
+    setConfirmAction(baseAction);
     try {
       const deletePolicy = await fetchDeletePolicy(proveedor);
       setConfirmAction((prev) =>
         prev?.proveedor?.idProveedor === proveedor.idProveedor
-          ? { ...prev, deletePolicy, loadingPolicy: false }
+          ? {
+              ...prev,
+              deletePolicy,
+              loadingPolicy: false,
+              selectedResolution: deletePolicy?.puedeEliminar
+                ? "eliminar"
+                : defaultRemovalResolution(proveedor),
+              archiveConfirmed: false,
+            }
           : prev
       );
     } catch (error) {
@@ -515,6 +721,8 @@ export default function Proveedores() {
                 mensaje: "No se puede confirmar eliminacion sin validacion del backend.",
               },
               loadingPolicy: false,
+              selectedResolution: defaultRemovalResolution(proveedor),
+              archiveConfirmed: false,
             }
           : prev
       );
@@ -546,28 +754,29 @@ export default function Proveedores() {
 
   const confirmProveedorAction = async () => {
     if (!confirmAction) return;
-    if (!confirmAction.motivo?.trim()) {
-      showToast("warn", "Motivo requerido", "Captura el motivo para continuar.");
+    const targetAction = resolveConfirmTargetAction(confirmAction);
+    if (!targetAction) {
+      showToast("warn", "Accion no disponible", "No hay una salida segura disponible para este proveedor.");
       return;
     }
-    if (isDeleteBlocked(confirmAction)) {
-      showToast("warn", "Eliminacion bloqueada", "Usa desactivar o archivar para conservar historial.");
+    if (!confirmAction.motivo?.trim()) {
+      showToast("warn", "Motivo requerido", "Captura el motivo para continuar.");
       return;
     }
 
     setSaving(true);
     try {
       const result = await runProveedorAction(
-        confirmAction.action,
+        targetAction,
         confirmAction.proveedor,
         confirmAction.motivo
       );
-      if (confirmAction.action === "eliminar") {
+      if (targetAction === "eliminar") {
         setProveedores((prev) =>
           prev.filter((item) => item.idProveedor !== confirmAction.proveedor.idProveedor)
         );
         if (selectedProveedor?.idProveedor === confirmAction.proveedor.idProveedor) {
-          setDetailVisible(false);
+          setWorkspaceVisible(false);
           setSelectedProveedor(null);
         }
       } else {
@@ -576,7 +785,13 @@ export default function Proveedores() {
         updateSelectedFromAction(confirmAction.proveedor, result);
       }
       setConfirmAction(null);
-      showToast("success", "Proveedores", confirmAction.success);
+      restoreFocus();
+      await fetchProveedores();
+      showToast(
+        "success",
+        "Proveedores",
+        confirmAction.success || actionMessages[targetAction]?.success || "Accion completada."
+      );
     } catch (error) {
       console.error("Error en accion de proveedor:", error);
       showToast("error", "Proveedores", error?.message || "No se pudo completar la accion.");
@@ -585,29 +800,107 @@ export default function Proveedores() {
     }
   };
 
+  const resetTableToFirstPage = useCallback(() => {
+    setTableState((prev) =>
+      prev.first === 0 && prev.page === 0 ? prev : { ...prev, first: 0, page: 0 }
+    );
+  }, []);
+
+  const handleSearchChange = (value) => {
+    setSearch(value);
+    resetTableToFirstPage();
+  };
+
   const updateFilter = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
+    resetTableToFirstPage();
   };
 
   const clearFilters = () => {
     setSearch("");
     setFilters(emptyFilters);
+    resetTableToFirstPage();
   };
 
-  const deleteBlocked = isDeleteBlocked(confirmAction);
+  const handleTablePage = (event) => {
+    if (event.rows !== tableState.rows) {
+      userSelectedRowsRef.current = event.rows !== tableBaseRows;
+    }
+
+    setTableState((prev) => ({
+      ...prev,
+      first: event.first,
+      page: event.page ?? Math.floor(event.first / event.rows),
+      rows: event.rows,
+    }));
+  };
+
+  const handleTableSort = (event) => {
+    setTableState((prev) => ({
+      ...prev,
+      sortField: event.sortField || INITIAL_TABLE_STATE.sortField,
+      sortOrder: event.sortOrder || INITIAL_TABLE_STATE.sortOrder,
+      first: 0,
+      page: 0,
+    }));
+  };
+
+  const closeEditor = () => {
+    editorRequestRef.current += 1;
+    setEditorVisible(false);
+    restoreFocus();
+  };
+
+  const closeWorkspace = () => {
+    setWorkspaceVisible(false);
+    restoreFocus();
+  };
+
+  const closeConfirmAction = () => {
+    setConfirmAction(null);
+    restoreFocus();
+  };
+
+  const isRemovalFlow = confirmAction?.action === "salida";
+  const targetAction = resolveConfirmTargetAction(confirmAction);
+  const removalPolicyReady = isRemovalFlow && !confirmAction?.loadingPolicy;
+  const removalCanDelete = removalPolicyReady && confirmAction?.deletePolicy?.puedeEliminar;
+  const removalNeedsPreserve = removalPolicyReady && !confirmAction?.deletePolicy?.puedeEliminar;
+  const removalAlreadyArchived =
+    removalNeedsPreserve && proveedorEstado(confirmAction?.proveedor) === "ARCHIVADO";
+  const confirmLabel = isRemovalFlow
+    ? removalAlreadyArchived
+      ? "Sin accion disponible"
+      : removalCanDelete
+      ? "Eliminar definitivamente"
+      : targetAction === "archivar"
+      ? "Quitar proveedor"
+      : "Desactivar proveedor"
+    : confirmAction?.confirmLabel || "Confirmar";
+  const confirmIcon =
+    targetAction === "eliminar"
+      ? "pi pi-trash"
+      : targetAction === "archivar"
+      ? "pi pi-exclamation-triangle"
+      : "pi pi-check";
   const confirmDisabled =
     saving ||
     actionPreparing ||
     confirmAction?.loadingPolicy ||
     !confirmAction?.motivo?.trim() ||
-    deleteBlocked;
-  const deleteDependencies = confirmAction?.deletePolicy?.dependencias || {};
-  const deleteReasons = Array.isArray(confirmAction?.deletePolicy?.motivos)
-    ? confirmAction.deletePolicy.motivos
-    : [];
-  const deleteDependencyEntries = Object.entries(deleteDependencies)
-    .filter(([key]) => !hiddenDependencyKeys.has(key))
-    .filter(([, value]) => Number(value) > 0);
+    (targetAction === "archivar" && !confirmAction?.archiveConfirmed) ||
+    !targetAction ||
+    removalAlreadyArchived;
+  const hasActiveDirectoryQuery =
+    search.trim() ||
+    Object.entries(filters).some(([key, value]) => value !== emptyFilters[key]);
+  const rowOptions = Array.from(
+    new Set([tableBaseRows, ...FIXED_TABLE_ROW_OPTIONS])
+  ).sort((a, b) => a - b);
+  const pageStart = totalRecords && proveedores.length ? tableState.first + 1 : 0;
+  const pageEnd = totalRecords && proveedores.length
+    ? Math.min(tableState.first + proveedores.length, totalRecords)
+    : 0;
 
   return (
     <Shell>
@@ -633,22 +926,22 @@ export default function Proveedores() {
         <ProveedoresFilters
           search={search}
           filters={filters}
-          loading={loading || detailLoading}
-          onSearchChange={setSearch}
+          loading={loading}
+          onSearchChange={handleSearchChange}
           onFilterChange={updateFilter}
           onClear={clearFilters}
           onRefresh={fetchProveedores}
         />
 
-        <section className="prov-table-shell">
+        <section className="prov-table-shell" ref={tableShellRef}>
           <div className="prov-table-head">
             <div>
               <strong>Relacion comercial</strong>
               <span>
-                {filteredProveedores.length} de {proveedores.length} proveedores
+                {pageStart}-{pageEnd} de {totalRecords} proveedores
               </span>
             </div>
-            {detailLoading ? <small>Actualizando datos comerciales...</small> : null}
+            {loading && proveedores.length ? <small>Actualizando listado...</small> : null}
           </div>
 
           {loadError ? (
@@ -665,13 +958,20 @@ export default function Proveedores() {
             </div>
           ) : (
             <ProveedoresTable
-              rows={filteredProveedores}
-              loading={loading || detailLoading || saving || actionPreparing}
-              hasProviders={proveedores.length > 0}
+              rows={proveedores}
+              loading={loading || saving || actionPreparing}
+              hasProviders={totalRecords > 0 || Boolean(hasActiveDirectoryQuery)}
+              first={tableState.first}
+              rowsPerPage={tableState.rows}
+              rowsPerPageOptions={rowOptions}
+              totalRecords={totalRecords}
+              sortField={tableState.sortField}
+              sortOrder={tableState.sortOrder}
+              onPage={handleTablePage}
+              onSort={handleTableSort}
               onView={openDetail}
               onEdit={openEdit}
-              onManage={openAdvancedSectionForProveedor}
-              onAction={openProveedorAction}
+              onRemove={openRemovalAction}
             />
           )}
         </section>
@@ -685,110 +985,190 @@ export default function Proveedores() {
         saving={saving}
         categoriaOptions={categoriaOptions}
         categoriasLoading={categoriasLoading}
-        onHide={() => setEditorVisible(false)}
+        onHide={closeEditor}
         onSave={saveProveedor}
       />
 
-      <ProveedorDetailPanel
+      <ProveedorWorkspaceDrawer
+        visible={workspaceVisible}
         proveedor={selectedProveedor}
-        visible={detailVisible}
         loading={detailLoading}
-        onHide={() => setDetailVisible(false)}
-      />
-
-      <ProveedorAdvancedModals
-        section={advancedSection}
-        proveedor={selectedProveedor}
-        onHide={() => setAdvancedSection(null)}
+        initialSection={workspaceInitialSection}
+        onHide={closeWorkspace}
         onRefresh={refreshSelectedProveedor}
         showToast={showToast}
       />
 
-      <Dialog
-        header={confirmAction?.title || ""}
+      <ModalSurface
+        title={confirmAction?.title || ""}
         visible={Boolean(confirmAction)}
-        onHide={() => setConfirmAction(null)}
-        modal
-        draggable={false}
-        dismissableMask
+        onHide={closeConfirmAction}
+        size="small"
         className="prov-confirm-dialog"
-        style={{ width: "34rem" }}
         footer={
           <div className="prov-dialog-footer">
             <Button
-              label={deleteBlocked ? "Cerrar" : "Cancelar"}
+              label="Cancelar"
               className="p-button-text prov-text-btn"
-              onClick={() => setConfirmAction(null)}
+              onClick={closeConfirmAction}
               disabled={saving || actionPreparing}
             />
-            {!deleteBlocked ? (
-              <Button
-                label={confirmAction?.confirmLabel || "Confirmar"}
-                icon={confirmAction?.action === "eliminar" ? "pi pi-trash" : "pi pi-check"}
-                className={
-                  confirmAction?.action === "eliminar"
-                    ? "prov-danger-btn"
-                    : "prov-primary-btn"
-                }
-                onClick={confirmProveedorAction}
-                loading={saving}
-                disabled={confirmDisabled}
-              />
-            ) : null}
+            <Button
+              label={confirmLabel}
+              icon={confirmIcon}
+              className={
+                targetAction === "eliminar" || targetAction === "archivar"
+                  ? "prov-danger-btn"
+                  : "prov-primary-btn"
+              }
+              onClick={confirmProveedorAction}
+              loading={saving}
+              disabled={confirmDisabled}
+            />
           </div>
         }
       >
         <div className="prov-safe-action-body">
-          <p className="prov-confirm-text">{confirmAction?.detail}</p>
-
-          {confirmAction?.consequences?.length ? (
-            <div className="prov-safe-box">
-              <strong>Consecuencias</strong>
-              <ul>
-                {confirmAction.consequences.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-
-          {confirmAction?.action === "eliminar" ? (
-            <div className={deleteBlocked ? "prov-delete-policy is-blocked" : "prov-delete-policy"}>
-              {confirmAction.loadingPolicy ? (
-                <span>Revisando historial y relaciones del proveedor...</span>
-              ) : (
-                <>
+          {(isRemovalFlow || confirmAction?.action === "eliminar") ? (
+            <>
+              <div
+                className={
+                  targetAction === "archivar"
+                    ? "prov-delete-policy is-danger"
+                    : removalNeedsPreserve
+                    ? "prov-delete-policy is-blocked"
+                    : "prov-delete-policy"
+                }
+              >
+                <i
+                  className={
+                    confirmAction?.loadingPolicy
+                      ? "pi pi-spin pi-spinner"
+                      : removalCanDelete
+                      ? "pi pi-trash"
+                      : "pi pi-shield"
+                  }
+                />
+                <div>
                   <strong>
-                    {confirmAction.deletePolicy?.puedeEliminar
-                      ? "Eliminacion permitida"
-                      : "Eliminacion bloqueada"}
+                    {confirmAction?.loadingPolicy
+                      ? "Revisando proveedor"
+                      : removalCanDelete
+                      ? "Eliminar definitivamente"
+                      : targetAction === "archivar"
+                      ? "Quitar proveedor"
+                      : "Elegir salida"}
                   </strong>
-                  <p>
-                    {confirmAction.deletePolicy?.mensaje ||
-                      "El backend debe validar que no exista uso antes de eliminar."}
-                  </p>
-                  {deleteReasons.length ? (
-                    <ul>
-                      {deleteReasons.map((reason) => (
-                        <li key={reason}>{reason}</li>
-                      ))}
-                    </ul>
-                  ) : null}
-                  {deleteDependencyEntries.length ? (
-                    <div className="prov-delete-counts">
-                      {deleteDependencyEntries.map(([key, value]) => (
-                          <span key={key}>
-                            {dependencyLabels[key] || key}: {value}
-                          </span>
-                        ))}
-                    </div>
+                  <p>{removalSummaryText(confirmAction)}</p>
+                </div>
+              </div>
+
+              {removalNeedsPreserve ? (
+                <>
+                  <div
+                    className={`prov-removal-options ${
+                      proveedorEstado(confirmAction?.proveedor) !== "ACTIVO" ? "is-single" : ""
+                    }`}
+                    aria-label="Opciones de salida del proveedor"
+                  >
+                    {proveedorEstado(confirmAction?.proveedor) === "ACTIVO" ? (
+                      <button
+                        type="button"
+                        className={
+                          confirmAction.selectedResolution === "desactivar"
+                            ? "is-selected"
+                            : ""
+                        }
+                        onClick={() =>
+                          setConfirmAction((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  selectedResolution: "desactivar",
+                                  archiveConfirmed: false,
+                                }
+                              : prev
+                          )
+                        }
+                        disabled={saving || actionPreparing}
+                      >
+                        <i className="pi pi-pause-circle" />
+                        <span>
+                          <strong>Desactivar</strong>
+                          <small>Pausa temporal, puede volver</small>
+                        </span>
+                      </button>
+                    ) : null}
+                    {proveedorEstado(confirmAction?.proveedor) !== "ARCHIVADO" ? (
+                      <button
+                        type="button"
+                        className={
+                          confirmAction.selectedResolution === "archivar"
+                            ? "is-danger is-selected"
+                            : "is-danger"
+                        }
+                        onClick={() =>
+                          setConfirmAction((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  selectedResolution: "archivar",
+                                  archiveConfirmed: false,
+                                }
+                              : prev
+                          )
+                        }
+                        disabled={saving || actionPreparing}
+                      >
+                        <i className="pi pi-folder" />
+                        <span>
+                          <strong>Archivar</strong>
+                          <small>Quitar definitivamente</small>
+                        </span>
+                      </button>
+                    ) : null}
+                    {proveedorEstado(confirmAction?.proveedor) === "ARCHIVADO" ? (
+                      <div className="prov-removal-locked">
+                        <i className="pi pi-lock" />
+                        <span>No hay accion disponible</span>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {targetAction === "archivar" ? (
+                    <label className="prov-archive-confirm">
+                      <span>
+                        <i className="pi pi-exclamation-triangle" />
+                      </span>
+                      <div>
+                        <strong>No se podra usar este proveedor.</strong>
+                        <small>
+                          No podras editarlo ni usarlo en compras, productos, activos, documentos o contactos.
+                        </small>
+                        <em>
+                          <input
+                            type="checkbox"
+                            checked={Boolean(confirmAction?.archiveConfirmed)}
+                            onChange={(event) =>
+                              setConfirmAction((prev) =>
+                                prev
+                                  ? { ...prev, archiveConfirmed: event.target.checked }
+                                  : prev
+                              )
+                            }
+                            disabled={saving || actionPreparing}
+                          />
+                          Confirmo que ya no se usara este proveedor.
+                        </em>
+                      </div>
+                    </label>
                   ) : null}
                 </>
-              )}
-            </div>
+              ) : null}
+            </>
           ) : null}
 
-          {!deleteBlocked ? (
+          {!removalAlreadyArchived ? (
             <label className="prov-field prov-safe-reason">
               <span>Motivo</span>
               <InputTextarea
@@ -798,8 +1178,7 @@ export default function Proveedores() {
                     prev ? { ...prev, motivo: event.target.value } : prev
                   )
                 }
-                rows={3}
-                autoResize
+                rows={2}
                 maxLength={500}
                 placeholder={confirmAction?.placeholder}
                 disabled={saving || actionPreparing || confirmAction?.loadingPolicy}
@@ -810,7 +1189,7 @@ export default function Proveedores() {
             </label>
           ) : null}
         </div>
-      </Dialog>
+      </ModalSurface>
     </Shell>
   );
 }

@@ -99,8 +99,7 @@ public class ProveedoresController {
             cleanFilters.remove("sort");
             cleanFilters.remove("direction");
 
-            Specification<ProveedoresEntity> specs = dynamicSpecification.buildSpecification(cleanFilters, ProveedoresEntity.class);
-            Object resp = proveedoresService.readPage(specs, page, size, sort, direction);
+            Object resp = proveedoresService.readDirectoryPage(cleanFilters, page, size, sort, direction);
 
             return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Proveedores paginados obtenidos con exito");
         } catch (Exception e) {
@@ -111,12 +110,15 @@ public class ProveedoresController {
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getProveedorDetalle(
             @RequestHeader(name = "user", required = true) String user,
-            @PathVariable Integer id) {
+            @PathVariable Integer id,
+            @RequestParam(name = "include", defaultValue = "all") String include) {
 
         long startTime = System.currentTimeMillis();
 
         try {
-            Object resp = proveedoresService.detail(id);
+            Object resp = "edicion".equalsIgnoreCase(include) || "edit".equalsIgnoreCase(include)
+                    ? proveedoresService.editDetail(id)
+                    : proveedoresService.detail(id);
             return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Detalle de proveedor obtenido con exito");
         } catch (Exception e) {
             return handleError(user, startTime, "Error al obtener el detalle del proveedor: " + e.getMessage(), e);
@@ -331,6 +333,20 @@ public class ProveedoresController {
             return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Activo de proveedor creado con exito");
         } catch (Exception e) {
             return handleError(user, startTime, "Error al crear activo: " + e.getMessage(), e);
+        }
+    }
+
+    @GetMapping(path = "/{id}/activos/{idActivo}/historial", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getHistorialActivo(
+            @RequestHeader(name = "user", required = true) String user,
+            @PathVariable Integer id,
+            @PathVariable Integer idActivo) {
+        long startTime = System.currentTimeMillis();
+        try {
+            Object resp = proveedorActivoService.readHistory(id, idActivo);
+            return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Historial de activo obtenido con exito");
+        } catch (Exception e) {
+            return handleError(user, startTime, "Error al obtener historial de activo: " + e.getMessage(), e);
         }
     }
 

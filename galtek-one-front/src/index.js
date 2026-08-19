@@ -12,6 +12,7 @@ import "@fontsource/kodchasan/500.css";
 import "@fontsource/kodchasan/600.css";
 import "@fontsource/kodchasan/700.css";
 import "./index.css";
+import "./style/components/common/OverlaySurfaces.css";
 
 import { DeviceProvider } from "./auth/DeviceContext";
 

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
+import { Skeleton } from "primereact/skeleton";
 import { APIfetchApi } from "../../API/APIfetch";
 import { endpoints } from "../../API/api";
 import { formatDate, moneyOrDash, readApiPayload } from "./proveedoresUtils";
@@ -14,7 +15,6 @@ import {
   AdvancedSection,
   ConfirmActionDialog,
 } from "./ProveedorAdvancedShared";
-import ProveedorProductoCostHistory from "./ProveedorProductoCostHistory";
 
 const api = new APIfetchApi();
 
@@ -42,18 +42,31 @@ function valueOrDash(value) {
   return value;
 }
 
+const productActionTooltip = {
+  position: "top",
+  className: "prov-product-action-tooltip",
+};
+
+const productEdgeTooltip = {
+  position: "left",
+  className: "prov-product-action-tooltip",
+};
+
 export default function ProveedorProductosSection({
   proveedor,
   items = [],
+  loading = false,
   onRefresh,
+  onOpenCostHistory,
   showToast,
+  readOnly = false,
 }) {
   const navigate = useNavigate();
   const [confirm, setConfirm] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [historyItem, setHistoryItem] = useState(null);
   const [updatingRelation, setUpdatingRelation] = useState(null);
   const hasItems = items.length > 0;
+  const showLoading = loading && !hasItems;
 
   const openInventory = (item) => {
     const idProducto = productId(item);
@@ -90,7 +103,11 @@ export default function ProveedorProductosSection({
       getProductoUrl(proveedor.idProveedor, item.idProveedorProducto)
     );
     await readApiPayload(response, "desactivar producto asociado");
-    showToast?.("success", "Productos asociados", "Relacion desactivada.");
+    showToast?.(
+      "success",
+      "Productos asociados",
+      "Relacion pausada. Ya no aparecera en compras nuevas."
+    );
   };
 
   const reactivate = async (item) => {
@@ -101,7 +118,11 @@ export default function ProveedorProductosSection({
       getProductoUrl(proveedor.idProveedor, item.idProveedorProducto)
     );
     await readApiPayload(response, "reactivar producto asociado");
-    showToast?.("success", "Productos asociados", "Relacion reactivada.");
+    showToast?.(
+      "success",
+      "Productos asociados",
+      "Relacion reactivada. Ya aparecera en compras nuevas."
+    );
   };
 
   const applyStateAction = async () => {
@@ -120,9 +141,6 @@ export default function ProveedorProductosSection({
       } else {
         await deactivate(currentAction.item);
       }
-      setHistoryItem((current) =>
-        current?.idProveedorProducto === currentAction.item.idProveedorProducto ? null : current
-      );
       await onRefresh?.();
     } catch (error) {
       showToast?.("error", "Productos asociados", error?.message || "No se pudo completar.");
@@ -135,19 +153,28 @@ export default function ProveedorProductosSection({
   return (
     <AdvancedSection
       title="Productos asociados"
-      subtitle="Relacion comercial de surtido, preferencia y costos."
+      subtitle={
+        readOnly
+          ? "Consulta historica de surtido, preferencia y costos."
+          : "Relacion comercial de surtido, preferencia y costos."
+      }
       icon="pi pi-box"
     >
-      {historyItem ? (
-        <ProveedorProductoCostHistory
-          proveedor={proveedor}
-          item={historyItem}
-          onClose={() => setHistoryItem(null)}
-          showToast={showToast}
-        />
-      ) : null}
-
-      {hasItems ? (
+      {showLoading ? (
+        <div className="prov-product-card-grid">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div className="prov-product-card is-loading" key={index}>
+              <Skeleton width="68%" height="18px" />
+              <Skeleton width="48%" height="13px" />
+              <div className="prov-product-meta-grid">
+                {Array.from({ length: 4 }).map((__, metaIndex) => (
+                  <Skeleton key={metaIndex} height="48px" borderRadius="10px" />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : hasItems ? (
         <div className="prov-product-card-grid">
           {items.map((item) => {
             const title = relationProductName(item);
@@ -221,7 +248,7 @@ export default function ProveedorProductosSection({
                     disabled={isUpdating}
                     aria-label="Abrir en inventario"
                     tooltip="Abrir en inventario"
-                    tooltipOptions={{ position: "top" }}
+                    tooltipOptions={productActionTooltip}
                   />
                   <Button
                     icon="pi pi-shopping-cart"
@@ -230,18 +257,18 @@ export default function ProveedorProductosSection({
                     disabled={isUpdating}
                     aria-label="Ver en compras"
                     tooltip="Ver en compras"
-                    tooltipOptions={{ position: "top" }}
+                    tooltipOptions={productActionTooltip}
                   />
                   <Button
                     icon="pi pi-chart-line"
                     className="prov-row-action"
-                    onClick={() => setHistoryItem(item)}
-                    disabled={isUpdating}
+                    onClick={() => onOpenCostHistory?.(item)}
+                    disabled={isUpdating || !onOpenCostHistory}
                     aria-label="Historial de costos"
                     tooltip="Historial de costos"
-                    tooltipOptions={{ position: "top" }}
+                    tooltipOptions={productActionTooltip}
                   />
-                  {isActive ? (
+                  {isActive && !readOnly ? (
                     <Button
                       icon="pi pi-ban"
                       className="prov-row-action"
@@ -249,11 +276,11 @@ export default function ProveedorProductosSection({
                       disabled={isUpdating}
                       loading={isUpdating && updatingRelation?.action === "desactivar"}
                       aria-label="Desactivar relacion"
-                      tooltip="Desactivar relacion"
-                      tooltipOptions={{ position: "top" }}
+                      tooltip="Pausar en compras"
+                      tooltipOptions={productEdgeTooltip}
                     />
                   ) : null}
-                  {isInactive ? (
+                  {isInactive && !readOnly ? (
                     <Button
                       icon="pi pi-refresh"
                       className="prov-row-action"
@@ -261,8 +288,8 @@ export default function ProveedorProductosSection({
                       disabled={isUpdating}
                       loading={isUpdating && updatingRelation?.action === "reactivar"}
                       aria-label="Reactivar relacion"
-                      tooltip="Reactivar relacion"
-                      tooltipOptions={{ position: "top" }}
+                      tooltip="Usar en compras"
+                      tooltipOptions={productEdgeTooltip}
                     />
                   ) : null}
                 </div>
@@ -276,11 +303,11 @@ export default function ProveedorProductosSection({
 
       <ConfirmActionDialog
         visible={Boolean(confirm)}
-        title={confirm?.action === "reactivar" ? "Reactivar relacion" : "Desactivar relacion"}
+        title={confirm?.action === "reactivar" ? "Usar producto en compras" : "Pausar producto en compras"}
         detail={
           confirm?.action === "reactivar"
-            ? "La relacion volvera a quedar activa para este proveedor. No se modifica inventario, compras ni stock."
-            : "La relacion con el producto quedara inactiva. No se modifica inventario, compras ni stock."
+            ? "Este producto volvera a aparecer al registrar compras nuevas con este proveedor."
+            : "Este producto dejara de aparecer al registrar compras nuevas con este proveedor. Su historial queda disponible por si lo vuelves a usar."
         }
         loading={saving}
         onCancel={() => setConfirm(null)}

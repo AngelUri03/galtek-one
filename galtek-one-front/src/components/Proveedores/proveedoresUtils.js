@@ -21,15 +21,13 @@ export const TIPO_OPTIONS = [
   { label: "Distribuidor formal", value: "DISTRIBUIDOR_FORMAL" },
   { label: "Proveedor informal", value: "PROVEEDOR_INFORMAL" },
   { label: "Establecimiento", value: "ESTABLECIMIENTO_COMPRA" },
-  { label: "Entrega a domicilio", value: "ENTREGA_DOMICILIO" },
-  { label: "Mixto", value: "MIXTO" },
 ];
 
 export const MODALIDAD_OPTIONS = [
   { label: "Todas", value: "TODOS" },
   { label: "Entrega a domicilio", value: "ENTREGA_DOMICILIO" },
-  { label: "Recoge tendero", value: "RECOGE_TENDERO" },
-  { label: "Mixto", value: "MIXTO" },
+  { label: "Recoleccion en proveedor", value: "RECOGE_TENDERO" },
+  { label: "Entrega y recoleccion", value: "MIXTO" },
 ];
 
 export const PRODUCTOS_OPTIONS = [
@@ -62,7 +60,6 @@ export const ROL_CONTACTO_OPTIONS = [
 export const ESTADO_PROVEEDOR_FORM_OPTIONS = [
   { label: "Activo", value: "ACTIVO" },
   { label: "Inactivo", value: "INACTIVO" },
-  { label: "Archivado", value: "ARCHIVADO" },
 ];
 
 export const emptyFilters = {
@@ -139,9 +136,10 @@ const normalizeCollection = (items) => (Array.isArray(items) ? items : []);
 
 export const normalizeProveedor = (proveedor, detail = null) => {
   const data =
-    detail?.proveedor ||
-    (detail && !Array.isArray(detail) ? { ...(proveedor || {}), ...detail } : proveedor) ||
-    {};
+    detail?.proveedor
+      ? { ...(proveedor || {}), ...detail.proveedor }
+      : (detail && !Array.isArray(detail) ? { ...(proveedor || {}), ...detail } : proveedor) ||
+        {};
   const contactos = normalizeCollection(firstArray(detail?.contactos, data.contactos));
   const productos = firstArray(detail?.productos, data.productos, data.productosAsociados);
   const activos = firstArray(detail?.activos, data.activos, data.activosPrestados);
@@ -160,7 +158,7 @@ export const normalizeProveedor = (proveedor, detail = null) => {
   const activosPrestadosCount =
     numberOrNull(data.activosPrestadosCount) ??
     numberOrNull(data.activosCount) ??
-    (activos ? activos.filter((activo) => activo?.estatus !== false).length : null);
+    (activos ? activos.length : null);
 
   const estadoProveedor = normalizeState(data);
   const telefono = data.telefono || contactoPrincipal?.telefono || "";
@@ -172,7 +170,7 @@ export const normalizeProveedor = (proveedor, detail = null) => {
     nombreProveedor: data.nombreProveedor ?? data.nombre ?? "",
     razonSocial: data.razonSocial ?? "",
     rfc: data.rfc ?? "",
-    tipoProveedor: data.tipoProveedor ?? "",
+    tipoProveedor: data.tipoProveedor || "PROVEEDOR_INFORMAL",
     categoriaPrincipal: data.categoriaPrincipal ?? "",
     notasInternas: data.notasInternas ?? "",
     contacto: data.contacto ?? contactoPrincipal?.nombre ?? "",
@@ -182,7 +180,7 @@ export const normalizeProveedor = (proveedor, detail = null) => {
     whatsapp,
     correo,
     direccion: data.direccion ?? "",
-    modalidadAbastecimiento: data.modalidadAbastecimiento ?? "",
+    modalidadAbastecimiento: data.modalidadAbastecimiento || "ENTREGA_DOMICILIO",
     pedidoWhatsapp: data.pedidoWhatsapp === true,
     pedidoLlamada: data.pedidoLlamada === true,
     pedidoApp: data.pedidoApp === true,
@@ -195,7 +193,7 @@ export const normalizeProveedor = (proveedor, detail = null) => {
     costoEnvio: data.costoEnvio ?? null,
     observacionesAbastecimiento: data.observacionesAbastecimiento ?? "",
     formaPagoPrincipal:
-      data.formaPagoPrincipal || (data.manejaCredito ? "CREDITO" : ""),
+      data.formaPagoPrincipal || (data.manejaCredito ? "CREDITO" : "CONTADO"),
     manejaCredito:
       data.manejaCredito === true ||
       data.formaPagoPrincipal === "CREDITO" ||
@@ -237,6 +235,7 @@ export const createProveedorForm = (proveedor = null) => {
       categoriaPrincipal: "",
       estadoProveedor: "ACTIVO",
       notasInternas: "",
+      tieneDireccion: false,
       direccion: "",
       ...parseAddressText(""),
       contactos: [createEmptyContact(true)],
@@ -246,6 +245,7 @@ export const createProveedorForm = (proveedor = null) => {
       pedidoApp: false,
       visitaRuta: false,
       compraMostrador: false,
+      requiereRecurrencia: false,
       diasVisitaEntrega: "",
       diasVisitaModo: "SEMANA",
       diasSemanaVisita: [],
@@ -255,6 +255,7 @@ export const createProveedorForm = (proveedor = null) => {
       horarioInicio: "",
       horarioFin: "",
       pedidoMinimo: null,
+      requiereAnticipacion: false,
       tiempoEstimadoEntrega: "",
       anticipacionCantidad: null,
       anticipacionUnidad: "HORAS",
@@ -278,6 +279,9 @@ export const createProveedorForm = (proveedor = null) => {
   const schedule = parseScheduleText(proveedor.horarioHabitual || "");
   const leadTime = parseLeadTimeText(proveedor.tiempoEstimadoEntrega || "");
   const address = parseAddressText(proveedor.direccion || "");
+  const hasAddress = Boolean(trim(proveedor.direccion));
+  const hasRecurrence = Boolean(trim(proveedor.diasVisitaEntrega) || trim(proveedor.horarioHabitual));
+  const hasAnticipation = Boolean(trim(proveedor.tiempoEstimadoEntrega));
   const contactos =
     proveedor.contactos?.length > 0
       ? proveedor.contactos.map(normalizeContacto)
@@ -305,6 +309,7 @@ export const createProveedorForm = (proveedor = null) => {
     categoriaPrincipal: proveedor.categoriaPrincipal || "",
     estadoProveedor: proveedor.estadoProveedor || "ACTIVO",
     notasInternas: proveedor.notasInternas || base.notasInternas || "",
+    tieneDireccion: hasAddress,
     direccion: proveedor.direccion || "",
     ...address,
     contactos,
@@ -314,17 +319,22 @@ export const createProveedorForm = (proveedor = null) => {
     pedidoApp: proveedor.pedidoApp || false,
     visitaRuta: proveedor.visitaRuta || false,
     compraMostrador: proveedor.compraMostrador || false,
+    requiereRecurrencia: hasRecurrence,
     diasVisitaEntrega: proveedor.diasVisitaEntrega || "",
     ...visitDays,
     horarioHabitual: proveedor.horarioHabitual || "",
     ...schedule,
     pedidoMinimo: numberOrNull(proveedor.pedidoMinimo),
+    requiereAnticipacion: hasAnticipation,
     tiempoEstimadoEntrega: proveedor.tiempoEstimadoEntrega || "",
     ...leadTime,
     costoEnvio: numberOrNull(proveedor.costoEnvio),
     observacionesAbastecimiento: proveedor.observacionesAbastecimiento || "",
     formaPagoPrincipal: proveedor.formaPagoPrincipal || "CONTADO",
-    manejaCredito: proveedor.manejaCredito || proveedor.formaPagoPrincipal === "CREDITO",
+    manejaCredito:
+      proveedor.manejaCredito ||
+      proveedor.formaPagoPrincipal === "CREDITO" ||
+      proveedor.formaPagoPrincipal === "MIXTO",
     diasCredito: numberOrNull(proveedor.diasCredito),
     limiteCredito: numberOrNull(proveedor.limiteCredito),
     permiteDevoluciones: proveedor.permiteDevoluciones || false,
@@ -357,7 +367,8 @@ export const buildProveedorPayload = (form) => {
     form.anticipacionUnidad,
     form.anticipacionContexto
   );
-  const direccion = buildAddressText(form) || form.direccion;
+  const direccion = form.tieneDireccion ? buildAddressText(form) || form.direccion : "";
+  const usesCredit = form.formaPagoPrincipal === "CREDITO" || form.formaPagoPrincipal === "MIXTO";
 
   return {
     nombreProveedor: trim(form.nombreProveedor),
@@ -371,22 +382,28 @@ export const buildProveedorPayload = (form) => {
     telefono: trim(principal?.telefono),
     correo: trim(principal?.correo),
     direccion: trim(direccion),
-    modalidadAbastecimiento: form.modalidadAbastecimiento || null,
+    modalidadAbastecimiento: form.modalidadAbastecimiento || "ENTREGA_DOMICILIO",
     pedidoWhatsapp: Boolean(form.pedidoWhatsapp),
     pedidoLlamada: Boolean(form.pedidoLlamada),
     pedidoApp: Boolean(form.pedidoApp),
     visitaRuta: Boolean(form.visitaRuta),
     compraMostrador: Boolean(form.compraMostrador),
-    diasVisitaEntrega: trim(diasVisitaEntrega || form.diasVisitaEntrega),
-    horarioHabitual: trim(horarioHabitual || form.horarioHabitual),
+    diasVisitaEntrega: form.requiereRecurrencia
+      ? trim(diasVisitaEntrega || form.diasVisitaEntrega)
+      : "",
+    horarioHabitual: form.requiereRecurrencia
+      ? trim(horarioHabitual || form.horarioHabitual)
+      : "",
     pedidoMinimo: numberOrNull(form.pedidoMinimo),
-    tiempoEstimadoEntrega: trim(tiempoEstimadoEntrega || form.tiempoEstimadoEntrega),
+    tiempoEstimadoEntrega: form.requiereAnticipacion
+      ? trim(tiempoEstimadoEntrega || form.tiempoEstimadoEntrega)
+      : "",
     costoEnvio: numberOrNull(form.costoEnvio),
     observacionesAbastecimiento: trim(form.observacionesAbastecimiento),
-    formaPagoPrincipal: form.formaPagoPrincipal || null,
-    manejaCredito: Boolean(form.manejaCredito || form.formaPagoPrincipal === "CREDITO"),
-    diasCredito: numberOrNull(form.diasCredito),
-    limiteCredito: numberOrNull(form.limiteCredito),
+    formaPagoPrincipal: form.formaPagoPrincipal || "CONTADO",
+    manejaCredito: usesCredit,
+    diasCredito: usesCredit ? numberOrNull(form.diasCredito) : null,
+    limiteCredito: usesCredit ? numberOrNull(form.limiteCredito) : null,
     permiteDevoluciones: Boolean(form.permiteDevoluciones),
     cambiosCaducidad: Boolean(form.cambiosCaducidad),
     bonificaciones: Boolean(form.bonificaciones),

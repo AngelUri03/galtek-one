@@ -1,8 +1,8 @@
 import React from "react";
 import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
+import { ModalSurface } from "../common/OverlaySurfaces";
 
 export function AdvancedSection({ title, subtitle, icon, onAdd, addLabel, addDisabled = false, children }) {
   return (
@@ -71,27 +71,69 @@ export function AdvancedCardActions({ onEdit, onArchive, archiveLabel = "Archiva
   );
 }
 
-export function TextField({ label, value, onChange, error, className = "", ...props }) {
+export function FieldLabel({ children, required = false }) {
   return (
-    <label className={`prov-field ${className}`}>
-      <span>{label}</span>
-      <InputText value={value || ""} onChange={(event) => onChange(event.target.value)} {...props} />
+    <span className={required ? "prov-required-label" : undefined}>
+      {children}
+      {required ? <b aria-hidden="true">*</b> : null}
+    </span>
+  );
+}
+
+export function TextField({
+  label,
+  value,
+  onChange,
+  error,
+  className = "",
+  required = false,
+  fieldKey,
+  ...props
+}) {
+  return (
+    <label
+      className={`prov-field ${error ? "has-error" : ""} ${className}`}
+      data-field-key={fieldKey}
+    >
+      <FieldLabel required={required}>{label}</FieldLabel>
+      <InputText
+        value={value || ""}
+        onChange={(event) => onChange(event.target.value)}
+        aria-invalid={error ? "true" : undefined}
+        aria-required={required || undefined}
+        {...props}
+      />
       {error ? <small className="prov-field-error">{error}</small> : null}
     </label>
   );
 }
 
-export function TextAreaField({ label, value, onChange, className = "", ...props }) {
+export function TextAreaField({
+  label,
+  value,
+  onChange,
+  error,
+  className = "",
+  required = false,
+  fieldKey,
+  ...props
+}) {
   return (
-    <label className={`prov-field ${className}`}>
-      <span>{label}</span>
+    <label
+      className={`prov-field ${error ? "has-error" : ""} ${className}`}
+      data-field-key={fieldKey}
+    >
+      <FieldLabel required={required}>{label}</FieldLabel>
       <InputTextarea
         value={value || ""}
         onChange={(event) => onChange(event.target.value)}
+        aria-invalid={error ? "true" : undefined}
+        aria-required={required || undefined}
         autoResize
         rows={2}
         {...props}
       />
+      {error ? <small className="prov-field-error">{error}</small> : null}
     </label>
   );
 }
@@ -105,17 +147,14 @@ export function ConfirmActionDialog({
   onConfirm,
 }) {
   return (
-    <Dialog
-      header={title || ""}
+    <ModalSurface
+      title={title || ""}
       visible={visible}
       onHide={onCancel}
-      modal
-      draggable={false}
-      dismissableMask
       focusOnShow={false}
       closeButtonProps={{ tabIndex: -1 }}
+      size="small"
       className="prov-confirm-dialog"
-      style={{ width: "32rem" }}
       footer={
         <div className="prov-dialog-footer">
           <Button
@@ -135,13 +174,21 @@ export function ConfirmActionDialog({
       }
     >
       <p className="prov-confirm-text">{detail}</p>
-    </Dialog>
+    </ModalSurface>
   );
 }
 
-export function AdvancedFormActions({ editing, saving, onCancel, onSave }) {
-  return (
-    <div className="prov-adv-form-actions">
+export function AdvancedFormActions({
+  editing,
+  saving,
+  onCancel,
+  onSave,
+  className = "",
+  saveLabel,
+  editorStyle = false,
+}) {
+  const actions = (
+    <>
       <Button
         label="Cancelar"
         icon="pi pi-times"
@@ -150,12 +197,26 @@ export function AdvancedFormActions({ editing, saving, onCancel, onSave }) {
         disabled={saving}
       />
       <Button
-        label={editing ? "Guardar" : "Agregar"}
+        label={saveLabel || (editing ? "Guardar" : "Agregar")}
         icon="pi pi-check"
         className="prov-primary-btn"
         onClick={onSave}
         loading={saving}
       />
+    </>
+  );
+
+  if (editorStyle) {
+    return (
+      <div className={`prov-editor-footer ${className}`}>
+        <div className="prov-editor-footer-actions">{actions}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`prov-adv-form-actions ${className}`}>
+      {actions}
     </div>
   );
 }
