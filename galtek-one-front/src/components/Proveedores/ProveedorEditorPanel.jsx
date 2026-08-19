@@ -699,6 +699,12 @@ export default function ProveedorEditorPanel({
     if (Number(form.diasCredito || 0) < 0) {
       nextErrors.diasCredito = "No puede ser negativo.";
     }
+
+    // Dentro de la función validate() en ProveedorEditorPanel.jsx:
+
+      if (form.razonSocial && form.razonSocial.trim().length > 100) {
+        nextErrors.razonSocial = "La razón social no puede exceder los 100 caracteres.";
+      }
     if (Number(form.limiteCredito || 0) < 0) {
       nextErrors.limiteCredito = "No puede ser negativo.";
     }
