@@ -261,7 +261,7 @@ export function ProveedorDetailContent({
               </div>
             </section>
 
-            {readOnly ? (
+            {estado === "ARCHIVADO" ? (
               <div className="prov-state-explain is-archived">
                 <i className="pi pi-lock" />
                 <div>
@@ -275,6 +275,14 @@ export function ProveedorDetailContent({
                 <div>
                   <strong>Proveedor pausado</strong>
                   <span>Puede volver a usarse si se reactiva.</span>
+                </div>
+              </div>
+            ) : readOnly ? (
+              <div className="prov-state-explain is-archived">
+                <i className="pi pi-lock" />
+                <div>
+                  <strong>Proveedor bloqueado</strong>
+                  <span>No se puede modificar en este estado.</span>
                 </div>
               </div>
             ) : null}

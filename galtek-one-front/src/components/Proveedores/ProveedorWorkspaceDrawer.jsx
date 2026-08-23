@@ -118,8 +118,8 @@ export default function ProveedorWorkspaceDrawer({
   const productos = useMemo(() => proveedor?.productosAsociados || [], [proveedor]);
   const activos = useMemo(() => proveedor?.activosPrestados || [], [proveedor]);
   const documentos = useMemo(() => proveedor?.documentos || [], [proveedor]);
-  const readOnly =
-    String(proveedor?.estadoProveedor || "ACTIVO").toUpperCase() === "ARCHIVADO";
+  const estadoProveedor = String(proveedor?.estadoProveedor || "ACTIVO").toUpperCase();
+  const readOnly = estadoProveedor !== "ACTIVO";
 
   const resolvedAsset = useMemo(() => {
     if (!current?.item?.idProveedorActivo) return current?.item || null;
@@ -454,7 +454,7 @@ export default function ProveedorWorkspaceDrawer({
     }
 
     if (current.view === "auditoria") {
-      return <ProveedorAuditSection proveedor={proveedor} detailed />;
+      return <ProveedorAuditSection proveedor={proveedor} detailed showToast={showToast} />;
     }
 
     return null;
@@ -466,7 +466,13 @@ export default function ProveedorWorkspaceDrawer({
         visible={visible}
         eyebrow="Proveedor"
         title={title}
-        subtitle={readOnly ? "Proveedor archivado: no se puede usar ni editar" : subtitle}
+        subtitle={
+          estadoProveedor === "ARCHIVADO"
+            ? "Proveedor archivado: no se puede usar ni editar"
+            : estadoProveedor === "INACTIVO"
+            ? "Proveedor inactivo: reactivalo antes de editar"
+            : subtitle
+        }
         backLabel={backLabel}
         onBack={previous ? popView : null}
         onClose={closeDrawer}

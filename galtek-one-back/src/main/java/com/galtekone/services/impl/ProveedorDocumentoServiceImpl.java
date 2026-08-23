@@ -39,7 +39,7 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
             "IDENTIFICACION",
             "OTRO"
     );
-    private static final Set<String> ESTADOS = Set.of("ACTIVO", "ARCHIVADO");
+    private static final Set<String> ESTADOS = Set.of("ACTIVO", "INACTIVO", "ARCHIVADO");
     private static final Set<String> MIME_TYPES = Set.of(
             "application/pdf",
             "image/jpeg",
@@ -115,6 +115,7 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
         ensureProveedorEditable(ensureProveedor(idProveedor, empresaId));
         ProveedorDocumentoEntity entity = find(idProveedor, idProveedorDocumento, empresaId);
         validate(obj, false);
+        ensureDocumentoCanUpdate(entity, obj);
 
         Map<String, String> before = snapshot(entity);
         applyUpdate(entity, obj);
@@ -124,7 +125,7 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
 
         ProveedorDocumentoEntity saved = repository.save(entity);
         Map<String, String> after = snapshot(saved);
-        recordEditIfNeeded(saved, before, after, user, empresaId);
+        recordEditIfNeeded(saved, before, after, user, empresaId, before.get("Estado"), after.get("Estado"));
         attachHistorial(List.of(saved), empresaId);
         return saved;
     }
@@ -134,6 +135,7 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
         ensureProveedorEditable(ensureProveedor(idProveedor, empresaId));
         ProveedorDocumentoEntity entity = find(idProveedor, idProveedorDocumento, empresaId);
+        ensureDocumentoActive(entity, "registrar una nueva version");
 
         if (request == null || isBlank(request.getMotivo())) {
             throw new IllegalArgumentException("El motivo de nueva version es obligatorio");
@@ -166,6 +168,7 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
         ensureProveedorEditable(ensureProveedor(idProveedor, empresaId));
         ProveedorDocumentoEntity entity = find(idProveedor, idProveedorDocumento, empresaId);
+        ensureDocumentoCanArchive(entity);
         Map<String, String> before = snapshot(entity);
 
         entity.setEstadoDocumento("ARCHIVADO");
@@ -185,9 +188,19 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
     }
 
     private void ensureProveedorEditable(ProveedoresEntity proveedor) {
-        if (proveedor != null && "ARCHIVADO".equalsIgnoreCase(trimToNull(proveedor.getEstadoProveedor()))) {
-            throw new IllegalStateException("El proveedor esta archivado como baja historica definitiva y no acepta cambios ni relaciones operativas.");
+        String estado = estadoProveedor(proveedor);
+        if (!"ACTIVO".equals(estado)) {
+            throw new IllegalStateException("El proveedor no esta activo. Reactivalo antes de modificar documentos.");
         }
+    }
+
+    private String estadoProveedor(ProveedoresEntity proveedor) {
+        if (proveedor == null) return "ACTIVO";
+        String estado = trimToNull(proveedor.getEstadoProveedor());
+        if (estado == null) {
+            return Boolean.FALSE.equals(proveedor.getEstatus()) ? "INACTIVO" : "ACTIVO";
+        }
+        return estado.toUpperCase();
     }
 
     private ProveedorDocumentoEntity find(Integer idProveedor, Integer idDocumento, Integer empresaId) {
@@ -228,7 +241,7 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
         if (source.getEstadoDocumento() != null) target.setEstadoDocumento(validateValue("estadoDocumento", source.getEstadoDocumento(), ESTADOS));
         target.setActivo(null);
         if (source.getEstatus() != null && source.getEstadoDocumento() == null) {
-            target.setEstadoDocumento(source.getEstatus() ? "ACTIVO" : "ARCHIVADO");
+            target.setEstadoDocumento(source.getEstatus() ? "ACTIVO" : "INACTIVO");
         }
     }
 
@@ -247,9 +260,32 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
         }
     }
 
-    private void recordEditIfNeeded(ProveedorDocumentoEntity documento, Map<String, String> before, Map<String, String> after, String user, Integer empresaId) {
+    private void recordEditIfNeeded(
+            ProveedorDocumentoEntity documento,
+            Map<String, String> before,
+            Map<String, String> after,
+            String user,
+            Integer empresaId,
+            String previousState,
+            String nextState
+    ) {
         if (!hasDiff(before, after)) return;
-        recordHistory(documento, "EDICION", "Metadatos del documento actualizados.", detailDiff(before, after, true), detailDiff(before, after, false), false, user, empresaId);
+        String tipoEvento = "EDICION";
+        String descripcion = "Metadatos del documento actualizados.";
+        if (!Objects.equals(normalizeValue(previousState), normalizeValue(nextState))) {
+            String next = normalizeValue(nextState);
+            if ("INACTIVO".equals(next)) {
+                tipoEvento = "INACTIVACION";
+                descripcion = "Documento inactivado para pausar su operacion.";
+            } else if ("ACTIVO".equals(next)) {
+                tipoEvento = "REACTIVACION";
+                descripcion = "Documento reactivado para operacion normal.";
+            } else if ("ARCHIVADO".equals(next)) {
+                tipoEvento = "ARCHIVADO";
+                descripcion = "Documento archivado como historial definitivo.";
+            }
+        }
+        recordHistory(documento, tipoEvento, descripcion, detailDiff(before, after, true), detailDiff(before, after, false), false, user, empresaId);
     }
 
     private void recordHistory(
@@ -336,7 +372,59 @@ public class ProveedorDocumentoServiceImpl implements ProveedorDocumentoService 
     }
 
     private void syncEstatus(ProveedorDocumentoEntity obj) {
-        obj.setEstatus(!"ARCHIVADO".equals(validateValue("estadoDocumento", obj.getEstadoDocumento(), ESTADOS)));
+        obj.setEstatus("ACTIVO".equals(validateValue("estadoDocumento", obj.getEstadoDocumento(), ESTADOS)));
+    }
+
+    private void ensureDocumentoCanUpdate(ProveedorDocumentoEntity entity, ProveedorDocumentoEntity request) {
+        String currentState = validateValue("estadoDocumento", entity.getEstadoDocumento(), ESTADOS);
+        String nextState = request == null || request.getEstadoDocumento() == null
+                ? currentState
+                : validateValue("estadoDocumento", request.getEstadoDocumento(), ESTADOS);
+
+        if ("ARCHIVADO".equals(currentState)) {
+            throw new IllegalStateException("El documento archivado es historico definitivo y no puede reactivarse ni modificarse.");
+        }
+        if ("INACTIVO".equals(currentState) && !"ACTIVO".equals(nextState)) {
+            throw new IllegalStateException("El documento inactivo solo puede reactivarse antes de modificarlo.");
+        }
+        if ("INACTIVO".equals(currentState) && "ACTIVO".equals(nextState) && hasMetadataChange(entity, request)) {
+            throw new IllegalStateException("Reactiva el documento antes de modificar sus metadatos.");
+        }
+    }
+
+    private void ensureDocumentoActive(ProveedorDocumentoEntity entity, String action) {
+        String currentState = validateValue("estadoDocumento", entity.getEstadoDocumento(), ESTADOS);
+        if ("ARCHIVADO".equals(currentState)) {
+            throw new IllegalStateException("No se puede " + action + " porque el documento esta archivado como historial definitivo.");
+        }
+        if ("INACTIVO".equals(currentState)) {
+            throw new IllegalStateException("No se puede " + action + " porque el documento esta inactivo. Reactivalo primero.");
+        }
+    }
+
+    private void ensureDocumentoCanArchive(ProveedorDocumentoEntity entity) {
+        String currentState = validateValue("estadoDocumento", entity.getEstadoDocumento(), ESTADOS);
+        if ("ARCHIVADO".equals(currentState)) {
+            throw new IllegalStateException("El documento ya esta archivado como historial definitivo.");
+        }
+    }
+
+    private boolean hasMetadataChange(ProveedorDocumentoEntity entity, ProveedorDocumentoEntity request) {
+        if (request == null) return false;
+        if (request.getNombre() != null && !Objects.equals(trimToNull(request.getNombre()), trimToNull(entity.getNombre()))) return true;
+        if (request.getTipo() != null && !Objects.equals(normalizeNullable(request.getTipo()), normalizeNullable(defaultIfBlank(entity.getTipo(), "OTRO")))) return true;
+        if (request.getDescripcion() != null && !Objects.equals(trimToNull(request.getDescripcion()), trimToNull(entity.getDescripcion()))) return true;
+        return false;
+    }
+
+    private String normalizeNullable(String value) {
+        String clean = trimToNull(value);
+        return clean == null ? null : normalizeValue(clean);
+    }
+
+    private String defaultIfBlank(String value, String fallback) {
+        String clean = trimToNull(value);
+        return clean == null ? fallback : clean;
     }
 
     private EmpresasEntity empresa(Integer empresaId) {

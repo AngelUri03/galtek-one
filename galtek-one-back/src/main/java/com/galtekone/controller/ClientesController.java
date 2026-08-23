@@ -1,5 +1,6 @@
 package com.galtekone.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,32 @@ public class ClientesController {
             return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Clientes obtenidos con exito");
         } catch (Exception e) {
             return handleError(user, startTime, "Error al obtener los clientes: " + e.getMessage(), e);
+        }
+    }
+
+    @GetMapping(path = {"/page", "/paginado"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getClientesPaginado(
+            @RequestHeader(name = "user", required = true) String user,
+            @RequestParam Map<String, String> filters,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "nombre") String sort,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        long startTime = System.currentTimeMillis();
+
+        try {
+            Map<String, String> cleanFilters = new HashMap<>(filters);
+            cleanFilters.remove("page");
+            cleanFilters.remove("size");
+            cleanFilters.remove("sort");
+            cleanFilters.remove("direction");
+
+            Object resp = clientesService.readDirectoryPage(cleanFilters, page, size, sort, direction);
+
+            return ApiResponseBuilder.buildSuccessResponse(resp, user, startTime, "Clientes paginados obtenidos con exito");
+        } catch (Exception e) {
+            return handleError(user, startTime, "Error al obtener clientes paginados: " + e.getMessage(), e);
         }
     }
 

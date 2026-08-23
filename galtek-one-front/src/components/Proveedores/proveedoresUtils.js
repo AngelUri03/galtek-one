@@ -63,7 +63,7 @@ export const ESTADO_PROVEEDOR_FORM_OPTIONS = [
 ];
 
 export const emptyFilters = {
-  estado: "TODOS",
+  estado: "ACTIVO",
   tipo: "TODOS",
   modalidad: "TODOS",
   productos: "TODOS",

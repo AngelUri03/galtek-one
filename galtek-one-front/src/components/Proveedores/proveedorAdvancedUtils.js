@@ -50,6 +50,7 @@ export const DOCUMENTO_TIPO_OPTIONS = [
 
 export const DOCUMENTO_ESTADO_OPTIONS = [
   { label: "Activo", value: "ACTIVO" },
+  { label: "Inactivo", value: "INACTIVO" },
   { label: "Archivado", value: "ARCHIVADO" },
 ];
 

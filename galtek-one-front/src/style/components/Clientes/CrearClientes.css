@@ -11,20 +11,64 @@
 .crear-wrapper,
 .crear-card,
 .edit-wrapper,
-.edit-card,
-.p-button,
-.p-inputtext,
-.p-dialog,
-.p-datatable,
-.p-column-header-content {
+.edit-card {
   font-family: 'Kodchasan', sans-serif !important;
 }
 
-h1, h2, h3 {
+.crear-wrapper .p-button,
+.crear-wrapper .p-inputtext,
+.crear-wrapper .p-dialog,
+.crear-wrapper .p-datatable,
+.crear-wrapper .p-column-header-content,
+.crear-card .p-button,
+.crear-card .p-inputtext,
+.crear-card .p-dialog,
+.crear-card .p-datatable,
+.crear-card .p-column-header-content,
+.pedido-dialog .p-button,
+.pedido-dialog .p-inputtext,
+.pedido-dialog .p-dialog,
+.pedido-dialog .p-datatable,
+.pedido-dialog .p-column-header-content {
+  font-family: 'Kodchasan', sans-serif !important;
+}
+
+.crear-wrapper h1,
+.crear-wrapper h2,
+.crear-wrapper h3,
+.crear-card h1,
+.crear-card h2,
+.crear-card h3,
+.pedido-dialog h1,
+.pedido-dialog h2,
+.pedido-dialog h3 {
   font-weight: 700;
 }
 
-p, span, td, th, label, button, input, select {
+.crear-wrapper p,
+.crear-wrapper span,
+.crear-wrapper td,
+.crear-wrapper th,
+.crear-wrapper label,
+.crear-wrapper button,
+.crear-wrapper input,
+.crear-wrapper select,
+.crear-card p,
+.crear-card span,
+.crear-card td,
+.crear-card th,
+.crear-card label,
+.crear-card button,
+.crear-card input,
+.crear-card select,
+.pedido-dialog p,
+.pedido-dialog span,
+.pedido-dialog td,
+.pedido-dialog th,
+.pedido-dialog label,
+.pedido-dialog button,
+.pedido-dialog input,
+.pedido-dialog select {
   font-weight: 400;
 }
 

@@ -40,6 +40,9 @@ const normalizeSearchText = (value) =>
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
 
+const isActiveCliente = (cliente) =>
+  String(cliente?.estadoCliente || "ACTIVO").toUpperCase() === "ACTIVO";
+
 const localDateKey = (value) => {
   const date = value ? new Date(value) : new Date();
   if (Number.isNaN(date.getTime())) return "";
@@ -364,7 +367,9 @@ const Ventas = () => {
           { logoutOnUnauthorized: false }
         );
         const data = await parseApiData(res, "No se pudieron consultar los clientes.");
-        const rows = getListPayload(data).map((cliente) => normalizeCliente(cliente));
+        const rows = getListPayload(data)
+          .map((cliente) => normalizeCliente(cliente))
+          .filter(isActiveCliente);
 
         setClientesVenta(rows);
         clientesVentaLoadedRef.current = true;

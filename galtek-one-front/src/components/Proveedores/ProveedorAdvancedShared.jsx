@@ -53,18 +53,18 @@ export function AdvancedCardActions({ onEdit, onArchive, archiveLabel = "Archiva
           disabled={disabled}
           aria-label="Editar"
           tooltip="Editar"
-          tooltipOptions={{ position: "top" }}
+          tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
         />
       ) : null}
       {onArchive ? (
         <Button
-          icon="pi pi-ban"
+          icon="pi pi-folder"
           className="prov-row-action"
           onClick={onArchive}
           disabled={disabled}
           aria-label={archiveLabel}
           tooltip={archiveLabel}
-          tooltipOptions={{ position: "top" }}
+          tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
         />
       ) : null}
     </div>

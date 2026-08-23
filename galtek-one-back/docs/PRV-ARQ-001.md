@@ -559,6 +559,7 @@ Tipos vigentes:
 Estados:
 
 - ACTIVO.
+- INACTIVO.
 - ARCHIVADO.
 
 Reglas:
@@ -575,7 +576,10 @@ Reglas:
 - El formato se detecta automaticamente.
 - El tamano se calcula, no se captura manualmente.
 - Al archivar, conserva historial y archivo.
-- Si esta archivado, la accion visible debe ser restaurar/desarchivar, no archivar otra vez.
+- Si esta inactivo, no permite editar, descargar ni versionar; solo consultar historial, reactivar o archivar definitivamente.
+- Si esta archivado, queda como historial definitivo: no permite editar, descargar, versionar ni reactivar; solo consultar historial.
+- Archivar es una salida definitiva y debe pedirse con confirmacion disenada.
+- El estado del documento no se edita desde metadatos; se gestiona desde un flujo dedicado con confirmaciones.
 
 Formatos permitidos:
 
@@ -855,7 +859,7 @@ QA debe validar escenarios reales:
 32. Descargar Word/Excel/PowerPoint.
 33. Registrar nueva version de documento con motivo.
 34. Ver historial de documento con archivo anterior/nuevo.
-35. Archivar y restaurar documento.
+35. Desactivar, reactivar y archivar documento con sus bloqueos.
 36. Abrir auditoria y verificar eventos de todos los componentes.
 37. Confirmar que ninguna accion de Proveedores aumenta stock.
 38. Confirmar que ninguna accion de Proveedores crea compra.

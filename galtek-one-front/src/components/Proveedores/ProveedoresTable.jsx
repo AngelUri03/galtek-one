@@ -117,7 +117,7 @@ function RowActions({ row, loading, onView, onEdit, onRemove }) {
         disabled={loading}
         aria-label="Ver detalle"
         tooltip="Ver detalle"
-        tooltipOptions={{ position: "top" }}
+        tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
       />
       <Button
         icon="pi pi-pencil"
@@ -126,7 +126,7 @@ function RowActions({ row, loading, onView, onEdit, onRemove }) {
         disabled={loading || isArchived}
         aria-label="Editar"
         tooltip={isArchived ? "Archivado: solo consulta" : "Editar"}
-        tooltipOptions={{ position: "top" }}
+        tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
       />
       <Button
         icon="pi pi-trash"
@@ -135,7 +135,7 @@ function RowActions({ row, loading, onView, onEdit, onRemove }) {
         disabled={loading || isArchived}
         aria-label="Resolver salida del proveedor"
         tooltip={isArchived ? "Archivado: baja historica" : "Resolver salida"}
-        tooltipOptions={{ position: "top" }}
+        tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
       />
     </div>
   );

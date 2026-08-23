@@ -82,7 +82,7 @@ export default function ProveedorProductoCostHistory({
             onClick={onClose}
             aria-label="Cerrar historial"
             tooltip="Cerrar"
-            tooltipOptions={{ position: "top" }}
+            tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
           />
         ) : null}
       </div>

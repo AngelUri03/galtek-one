@@ -11,20 +11,64 @@
 .crear-wrapper,
 .crear-card,
 .edit-wrapper,
-.edit-card,
-.p-button,
-.p-inputtext,
-.p-dialog,
-.p-datatable,
-.p-column-header-content {
+.edit-card {
   font-family: 'Kodchasan', sans-serif !important;
 }
 
-h1, h2, h3 {
+.cliente-sel-wrapper .p-button,
+.cliente-sel-wrapper .p-inputtext,
+.cliente-sel-wrapper .p-dialog,
+.cliente-sel-wrapper .p-datatable,
+.cliente-sel-wrapper .p-column-header-content,
+.cliente-sel-card .p-button,
+.cliente-sel-card .p-inputtext,
+.cliente-sel-card .p-dialog,
+.cliente-sel-card .p-datatable,
+.cliente-sel-card .p-column-header-content,
+.pedido-dialog .p-button,
+.pedido-dialog .p-inputtext,
+.pedido-dialog .p-dialog,
+.pedido-dialog .p-datatable,
+.pedido-dialog .p-column-header-content {
+  font-family: 'Kodchasan', sans-serif !important;
+}
+
+.cliente-sel-wrapper h1,
+.cliente-sel-wrapper h2,
+.cliente-sel-wrapper h3,
+.cliente-sel-card h1,
+.cliente-sel-card h2,
+.cliente-sel-card h3,
+.pedido-dialog h1,
+.pedido-dialog h2,
+.pedido-dialog h3 {
   font-weight: 700;
 }
 
-p, span, td, th, label, button, input, select {
+.cliente-sel-wrapper p,
+.cliente-sel-wrapper span,
+.cliente-sel-wrapper td,
+.cliente-sel-wrapper th,
+.cliente-sel-wrapper label,
+.cliente-sel-wrapper button,
+.cliente-sel-wrapper input,
+.cliente-sel-wrapper select,
+.cliente-sel-card p,
+.cliente-sel-card span,
+.cliente-sel-card td,
+.cliente-sel-card th,
+.cliente-sel-card label,
+.cliente-sel-card button,
+.cliente-sel-card input,
+.cliente-sel-card select,
+.pedido-dialog p,
+.pedido-dialog span,
+.pedido-dialog td,
+.pedido-dialog th,
+.pedido-dialog label,
+.pedido-dialog button,
+.pedido-dialog input,
+.pedido-dialog select {
   font-weight: 400;
 }
 
@@ -145,7 +189,28 @@ p, span, td, th, label, button, input, select {
   min-width: 8rem;
   margin-top: 0 !important;
   margin-bottom: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.45rem !important;
+  line-height: 1 !important;
 }
+
+.btn-verde.p-button .p-button-icon,
+.p-button.btn-verde .p-button-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+
+.btn-verde.p-button .p-button-label,
+.p-button.btn-verde .p-button-label {
+  flex: 0 0 auto !important;
+  line-height: 1 !important;
+}
+
 .btn-verde.p-button:hover, .p-button.btn-verde:hover {
   background-color: #008a75 !important;
 }

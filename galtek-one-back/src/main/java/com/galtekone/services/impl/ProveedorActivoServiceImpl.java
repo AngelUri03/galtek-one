@@ -403,9 +403,19 @@ public class ProveedorActivoServiceImpl implements ProveedorActivoService {
     }
 
     private void ensureProveedorEditable(ProveedoresEntity proveedor) {
-        if (proveedor != null && "ARCHIVADO".equalsIgnoreCase(trimToNull(proveedor.getEstadoProveedor()))) {
-            throw new IllegalStateException("El proveedor esta archivado como baja historica definitiva y no acepta cambios ni relaciones operativas.");
+        String estado = estadoProveedor(proveedor);
+        if (!"ACTIVO".equals(estado)) {
+            throw new IllegalStateException("El proveedor no esta activo. Reactivalo antes de modificar activos.");
         }
+    }
+
+    private String estadoProveedor(ProveedoresEntity proveedor) {
+        if (proveedor == null) return "ACTIVO";
+        String estado = trimToNull(proveedor.getEstadoProveedor());
+        if (estado == null) {
+            return Boolean.FALSE.equals(proveedor.getEstatus()) ? "INACTIVO" : "ACTIVO";
+        }
+        return estado.toUpperCase();
     }
 
     private ProveedorActivoEntity find(Integer idProveedor, Integer idActivo, Integer empresaId) {

@@ -1,36 +1,75 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Shell from "../common/Shell";
 import { APIfetchApi } from "../../API/APIfetch";
 import { endpoints } from "../../API/api";
 import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import { Tooltip } from "primereact/tooltip";
-import ClienteDetailPanel from "./ClienteDetailPanel";
+import { ModalSurface } from "../common/OverlaySurfaces";
 import ClienteEditorPanel from "./ClienteEditorPanel";
-import ClienteAdvancedModals from "./ClienteAdvancedModals";
+import ClienteWorkspaceDrawer from "./ClienteWorkspaceDrawer";
 import ClientesFilters from "./ClientesFilters";
 import ClientesSummary from "./ClientesSummary";
 import ClientesTable from "./ClientesTable";
 import {
   emptyFilters,
   getListPayload,
-  hasAddressData,
-  hasFiscalData,
   normalizeCliente,
   readApiPayload,
-  searchableText,
 } from "./clientesUtils";
 import "../../style/components/Clientes/Clientes.css";
 
 const api = new APIfetchApi();
 
-const DETAIL_ENRICH_LIMIT = 80;
+const INITIAL_DYNAMIC_ROWS = 7;
+const FIXED_TABLE_ROW_OPTIONS = [10, 20];
+const INITIAL_STATS = {
+  total: 0,
+  activos: 0,
+  inactivos: 0,
+  archivados: 0,
+  conFiscales: 0,
+  conDireccion: 0,
+};
+const INITIAL_TABLE_STATE = {
+  first: 0,
+  page: 0,
+  rows: INITIAL_DYNAMIC_ROWS,
+  sortField: "nombre",
+  sortOrder: 1,
+};
 
 const getDetailUrl = (idCliente) => `${endpoints.clientes}/${idCliente}`;
 const getDeleteReviewUrl = (idCliente) =>
   `${endpoints.clientes}/${idCliente}/eliminacion-segura`;
+
+const toNumber = (value, fallback = 0) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+};
+
+const normalizeDirectorySummary = (summary = {}, totalRecords = 0) => ({
+  total: toNumber(summary.total, totalRecords),
+  activos: toNumber(summary.activos),
+  inactivos: toNumber(summary.inactivos),
+  archivados: toNumber(summary.archivados),
+  conFiscales: toNumber(summary.conFiscales),
+  conDireccion: toNumber(summary.conDireccion),
+});
+
+const normalizeDirectoryPage = (data = {}) => {
+  const items = getListPayload(data);
+  const totalRecords = toNumber(data.totalRecords ?? data.totalElements, items.length);
+
+  return {
+    items,
+    totalRecords,
+    page: toNumber(data.page ?? data.number),
+    size: toNumber(data.size, items.length),
+    summary: normalizeDirectorySummary(data.summary, totalRecords),
+  };
+};
 
 const actionMessages = {
   desactivar: {
@@ -47,14 +86,14 @@ const actionMessages = {
   },
   archivar: {
     title: "Archivar cliente",
-    success: "Cliente archivado.",
+    success: "Cliente archivado como baja historica definitiva.",
     confirmLabel: "Archivar",
     placeholder: "Ej. Cliente historico, conservar solo para consulta.",
-    detail: "El cliente queda fuera de operacion normal y se conserva como referencia historica.",
+    detail: "El cliente queda como baja historica definitiva: no se reactiva ni acepta nuevas compras.",
     consequences: [
       "Se retira del uso diario.",
       "El historial permanece disponible para consulta.",
-      "Puede reactivarse si vuelve a comprar.",
+      "No se puede reactivar desde operacion normal.",
     ],
   },
   reactivar: {
@@ -83,14 +122,38 @@ const actionMessages = {
   },
 };
 
-const dependencyLabels = {
-  ventasHistoricas: "Ventas historicas",
-  datosFiscales: "Datos fiscales",
-  auditoriaRelevante: "Auditoria relevante",
+const clienteEstado = (cliente) =>
+  String(cliente?.estadoCliente || "ACTIVO").toUpperCase();
+
+const defaultRemovalResolution = (cliente) => {
+  const estado = clienteEstado(cliente);
+  if (estado === "ACTIVO") return "desactivar";
+  if (estado === "INACTIVO") return "archivar";
+  return null;
 };
 
-const isDeleteBlocked = (action) =>
-  action?.action === "eliminar" && action?.deletePolicy?.puedeEliminar === false;
+const removalSummaryText = (action) => {
+  if (!action) return "";
+  if (action.loadingPolicy) return "Revisando si existen compras, datos fiscales o auditoria...";
+  if (action.deletePolicy?.puedeEliminar) {
+    return "No tiene movimientos ni relaciones. Puedes borrarlo por completo.";
+  }
+  if (clienteEstado(action.cliente) === "ACTIVO") {
+    return "Elige si solo dejara de comprar por ahora o si ya no se usara nunca mas.";
+  }
+  if (clienteEstado(action.cliente) === "INACTIVO") {
+    return "Esta pausado. Puedes quitarlo definitivamente del uso diario.";
+  }
+  return "Este cliente ya esta archivado y solo queda disponible para historial.";
+};
+
+const resolveConfirmTargetAction = (action) => {
+  if (!action) return null;
+  if (action.action !== "salida") return action.action;
+  if (action.loadingPolicy) return null;
+  if (action.deletePolicy?.puedeEliminar) return "eliminar";
+  return action.selectedResolution || null;
+};
 
 const mergeClienteResult = (current, result) =>
   normalizeCliente({
@@ -101,11 +164,43 @@ const mergeClienteResult = (current, result) =>
     comprasRegistradas: current?.comprasRegistradas ?? result?.comprasRegistradas,
   });
 
+const estimateRowsForShell = (shell) => {
+  if (!shell) return null;
+
+  const shellRect = shell.getBoundingClientRect();
+  const viewportHeight =
+    typeof window !== "undefined" ? window.innerHeight || 0 : 0;
+  const viewportAvailableHeight =
+    viewportHeight && shellRect.top ? viewportHeight - shellRect.top - 16 : 0;
+  const shellHeight = Math.max(shellRect.height || 0, viewportAvailableHeight);
+  const headHeight =
+    shell.querySelector(".cli-table-head")?.getBoundingClientRect().height || 48;
+  const tableHeaderHeight =
+    shell.querySelector(".p-datatable-thead")?.getBoundingClientRect().height || 42;
+  const paginatorHeight =
+    shell.querySelector(".p-paginator")?.getBoundingClientRect().height || 64;
+  const rowHeight =
+    shell.querySelector(".p-datatable-tbody > tr")?.getBoundingClientRect().height || 56;
+  const usableHeight = shellHeight - headHeight - tableHeaderHeight - paginatorHeight - 6;
+  const estimatedRows = Math.floor(usableHeight / rowHeight);
+
+  if (!Number.isFinite(estimatedRows) || estimatedRows < 1) return null;
+  return Math.max(3, Math.min(estimatedRows, 20));
+};
+
 export default function Clientes() {
   const toast = useRef(null);
+  const tableShellRef = useRef(null);
+  const listRequestRef = useRef(0);
+  const userSelectedRowsRef = useRef(false);
   const [clientes, setClientes] = useState([]);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filters, setFilters] = useState(emptyFilters);
+  const [stats, setStats] = useState(INITIAL_STATS);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [tableBaseRows, setTableBaseRows] = useState(INITIAL_DYNAMIC_ROWS);
+  const [tableState, setTableState] = useState(INITIAL_TABLE_STATE);
   const [loading, setLoading] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -114,11 +209,11 @@ export default function Clientes() {
   const [editorLoading, setEditorLoading] = useState(false);
   const [editorMode, setEditorMode] = useState("create");
   const [editorCliente, setEditorCliente] = useState(null);
-  const [detailVisible, setDetailVisible] = useState(false);
   const [selectedCliente, setSelectedCliente] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null);
   const [actionPreparing, setActionPreparing] = useState(false);
-  const [advancedSection, setAdvancedSection] = useState(null);
+  const [workspaceVisible, setWorkspaceVisible] = useState(false);
+  const [workspaceInitialSection, setWorkspaceInitialSection] = useState(null);
 
   const showToast = useCallback((severity, summary, detail) => {
     toast.current?.show({ severity, summary, detail, life: 3200 });
@@ -150,82 +245,138 @@ export default function Clientes() {
   }, []);
 
   const fetchClientes = useCallback(async () => {
+    const requestId = listRequestRef.current + 1;
+    listRequestRef.current = requestId;
     setLoading(true);
     setLoadError("");
 
     try {
-      const response = await api.fetchApi({}, "GET", undefined, endpoints.clientes);
-      const payloadData = await readApiPayload(response, "clientes");
-      const baseRows = getListPayload(payloadData).map((cliente) =>
-        normalizeCliente(cliente)
-      );
+      const params = new URLSearchParams({
+        page: String(tableState.page),
+        size: String(tableState.rows),
+        sort: tableState.sortField || "nombre",
+        direction: tableState.sortOrder === -1 ? "desc" : "asc",
+      });
 
-      setClientes(baseRows);
-
-      if (baseRows.length && baseRows.length <= DETAIL_ENRICH_LIMIT) {
-        setDetailLoading(true);
-        const enriched = await Promise.all(baseRows.map(fetchClienteDetail));
-        setClientes(enriched);
+      if (debouncedSearch) {
+        params.set("search", debouncedSearch);
       }
+
+      Object.entries(filters).forEach(([key, value]) => {
+        const normalizedValue = String(value || "").trim();
+        if (normalizedValue && normalizedValue !== "TODOS") {
+          params.set(key, normalizedValue);
+        }
+      });
+
+      const response = await api.fetchApi(
+        {},
+        "GET",
+        undefined,
+        `${endpoints.clientes}/page?${params.toString()}`
+      );
+      const payloadData = await readApiPayload(response, "clientes");
+      const pageData = normalizeDirectoryPage(payloadData);
+      const rows = pageData.items.map((cliente) => normalizeCliente(cliente));
+
+      if (requestId !== listRequestRef.current) return;
+
+      if (!rows.length && pageData.totalRecords > 0 && tableState.page > 0) {
+        setTableState((prev) => ({ ...prev, page: 0, first: 0 }));
+        return;
+      }
+
+      setClientes(rows);
+      setTotalRecords(pageData.totalRecords);
+      setStats(pageData.summary);
     } catch (error) {
+      if (requestId !== listRequestRef.current) return;
       console.error("Error al obtener clientes:", error);
       setClientes([]);
+      setTotalRecords(0);
+      setStats(INITIAL_STATS);
       setLoadError(error?.message || "No se pudo cargar clientes.");
       showToast("error", "Clientes", "No se pudo cargar la lista.");
     } finally {
-      setLoading(false);
-      setDetailLoading(false);
+      if (requestId === listRequestRef.current) {
+        setLoading(false);
+      }
     }
-  }, [fetchClienteDetail, showToast]);
+  }, [
+    debouncedSearch,
+    filters,
+    showToast,
+    tableState.page,
+    tableState.rows,
+    tableState.sortField,
+    tableState.sortOrder,
+  ]);
 
   useEffect(() => {
     fetchClientes();
   }, [fetchClientes]);
 
-  const stats = useMemo(
-    () => ({
-      total: clientes.length,
-      activos: clientes.filter((cliente) => cliente.estadoCliente === "ACTIVO").length,
-      inactivos: clientes.filter((cliente) => cliente.estadoCliente === "INACTIVO").length,
-      archivados: clientes.filter((cliente) => cliente.estadoCliente === "ARCHIVADO").length,
-      conFiscales: clientes.filter(hasFiscalData).length,
-      conDireccion: clientes.filter(hasAddressData).length,
-    }),
-    [clientes]
-  );
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(search.trim()), 260);
+    return () => window.clearTimeout(timer);
+  }, [search]);
 
-  const filteredClientes = useMemo(() => {
-    const query = search.trim().toLowerCase();
+  useEffect(() => {
+    let active = true;
+    let animationFrame = null;
+    const timers = [];
 
-    return clientes.filter((cliente) => {
-      const matchesSearch = !query || searchableText(cliente).includes(query);
-      const matchesEstado =
-        filters.estado === "TODOS" || cliente.estadoCliente === filters.estado;
-      const matchesTipo = filters.tipo === "TODOS" || cliente.tipoCliente === filters.tipo;
-      const matchesFiscal =
-        filters.fiscales === "TODOS" ||
-        (filters.fiscales === "CON_FISCALES" && hasFiscalData(cliente)) ||
-        (filters.fiscales === "SIN_FISCALES" && !hasFiscalData(cliente));
-      const matchesDireccion =
-        filters.direccion === "TODOS" ||
-        (filters.direccion === "CON_DIRECCION" && hasAddressData(cliente)) ||
-        (filters.direccion === "SIN_DIRECCION" && !hasAddressData(cliente));
-      const comprasCount = Number(cliente.comprasRegistradas || 0);
-      const matchesCompras =
-        filters.compras === "TODOS" ||
-        (filters.compras === "CON_COMPRAS" && comprasCount > 0) ||
-        (filters.compras === "SIN_COMPRAS" && comprasCount === 0);
+    const updateRowsFromShell = () => {
+      if (!active) return;
+      const nextRows = estimateRowsForShell(tableShellRef.current);
+      if (!nextRows) return;
 
-      return (
-        matchesSearch &&
-        matchesEstado &&
-        matchesTipo &&
-        matchesFiscal &&
-        matchesDireccion &&
-        matchesCompras
+      setTableBaseRows(nextRows);
+
+      if (userSelectedRowsRef.current) return;
+
+      setTableState((prev) =>
+        prev.rows === nextRows
+          ? prev
+          : { ...prev, rows: nextRows, page: 0, first: 0 }
       );
+    };
+
+    const scheduleRowsMeasure = () => {
+      if (!active) return;
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(updateRowsFromShell);
+    };
+
+    [0, 90, 220, 420, 720].forEach((delay) => {
+      timers.push(window.setTimeout(scheduleRowsMeasure, delay));
     });
-  }, [clientes, filters, search]);
+
+    document.fonts?.ready?.then?.(scheduleRowsMeasure);
+
+    const observer =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(scheduleRowsMeasure)
+        : null;
+
+    if (tableShellRef.current && observer) {
+      observer.observe(tableShellRef.current);
+    }
+
+    window.addEventListener("resize", scheduleRowsMeasure);
+    window.addEventListener("focus", scheduleRowsMeasure);
+    document.addEventListener("visibilitychange", scheduleRowsMeasure);
+
+    return () => {
+      active = false;
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      timers.forEach((timer) => window.clearTimeout(timer));
+      observer?.disconnect();
+      window.removeEventListener("resize", scheduleRowsMeasure);
+      window.removeEventListener("focus", scheduleRowsMeasure);
+      document.removeEventListener("visibilitychange", scheduleRowsMeasure);
+    };
+  }, []);
 
   const openCreate = () => {
     setEditorMode("create");
@@ -236,8 +387,12 @@ export default function Clientes() {
 
   const openEdit = async (cliente) => {
     if (!cliente) return;
+    if (clienteEstado(cliente) === "ARCHIVADO") {
+      showToast("info", "Cliente archivado", "Este cliente ya no se puede editar.");
+      return;
+    }
 
-    setDetailVisible(false);
+    setWorkspaceVisible(false);
     setEditorMode("edit");
     setEditorCliente(cliente);
     setEditorVisible(true);
@@ -253,7 +408,8 @@ export default function Clientes() {
 
   const openDetail = async (cliente) => {
     setSelectedCliente(cliente);
-    setDetailVisible(true);
+    setWorkspaceInitialSection(null);
+    setWorkspaceVisible(true);
 
     if (!cliente.detailLoaded) {
       setDetailLoading(true);
@@ -264,26 +420,30 @@ export default function Clientes() {
     }
   };
 
-  const openAdvancedSectionForCliente = async (cliente, section) => {
-    if (!cliente?.idCliente) return;
-
-    setSelectedCliente(cliente);
-    let target = cliente;
-    if (!cliente.detailLoaded) {
-      setDetailLoading(true);
-      target = await fetchClienteDetail(cliente);
-      setSelectedCliente(target);
-      updateClienteInList(target);
-      setDetailLoading(false);
-    }
-    setDetailVisible(false);
-    setAdvancedSection(section);
-  };
-
-  const saveCliente = async (payload) => {
+  const saveCliente = async ({ payload, activateOnly = false, motivo } = {}) => {
     setSaving(true);
     try {
       const editing = editorMode === "edit" && editorCliente?.idCliente;
+      if (activateOnly) {
+        if (!editing) {
+          throw new Error("No se encontro el cliente para reactivar.");
+        }
+
+        const response = await api.fetchApi(
+          {},
+          "PUT",
+          { motivo: motivo || "Reactivado desde edicion de cliente" },
+          `${endpoints.clientes}/${editorCliente.idCliente}/reactivar`
+        );
+        await readApiPayload(response, "reactivar cliente");
+
+        showToast("success", "Cliente reactivado", "Ahora puedes editar sus datos.");
+        setEditorVisible(false);
+        setEditorCliente(null);
+        await fetchClientes();
+        return;
+      }
+
       const url = editing
         ? `${endpoints.clientes}/${editorCliente.idCliente}`
         : endpoints.clientes;
@@ -317,29 +477,38 @@ export default function Clientes() {
     return readApiPayload(response, "revisar eliminacion");
   };
 
-  const openClienteAction = async (action, cliente) => {
-    if (!cliente || !actionMessages[action]) return;
+  const openRemovalAction = async (cliente) => {
+    if (!cliente?.idCliente) return;
 
     const baseAction = {
-      action,
+      action: "salida",
       cliente,
       motivo: "",
+      selectedResolution: defaultRemovalResolution(cliente),
+      archiveConfirmed: false,
       deletePolicy: null,
-      ...actionMessages[action],
+      loadingPolicy: true,
+      title: "Resolver salida del cliente",
+      placeholder: "Ej. Ya no debe comprar temporalmente o se dara de baja.",
+      detail:
+        "Se revisa si el cliente puede eliminarse fisicamente. Si tiene compras, datos fiscales o auditoria, se conserva la informacion y se retira de operacion.",
     };
 
-    if (action !== "eliminar") {
-      setConfirmAction(baseAction);
-      return;
-    }
-
     setActionPreparing(true);
-    setConfirmAction({ ...baseAction, loadingPolicy: true });
+    setConfirmAction(baseAction);
     try {
       const deletePolicy = await fetchDeletePolicy(cliente);
       setConfirmAction((prev) =>
         prev?.cliente?.idCliente === cliente.idCliente
-          ? { ...prev, deletePolicy, loadingPolicy: false }
+          ? {
+              ...prev,
+              deletePolicy,
+              loadingPolicy: false,
+              selectedResolution: deletePolicy?.puedeEliminar
+                ? "eliminar"
+                : defaultRemovalResolution(cliente),
+              archiveConfirmed: false,
+            }
           : prev
       );
     } catch (error) {
@@ -354,6 +523,8 @@ export default function Clientes() {
                 mensaje: "No se puede confirmar eliminacion sin validacion del backend.",
               },
               loadingPolicy: false,
+              selectedResolution: defaultRemovalResolution(cliente),
+              archiveConfirmed: false,
             }
           : prev
       );
@@ -361,6 +532,17 @@ export default function Clientes() {
     } finally {
       setActionPreparing(false);
     }
+  };
+
+  const openClienteStateAction = (action, cliente) => {
+    if (!cliente || !actionMessages[action]) return;
+    setConfirmAction({
+      action,
+      cliente,
+      motivo: "",
+      deletePolicy: null,
+      ...actionMessages[action],
+    });
   };
 
   const updateSelectedFromAction = useCallback((cliente, result) => {
@@ -385,28 +567,33 @@ export default function Clientes() {
 
   const confirmClienteAction = async () => {
     if (!confirmAction) return;
+    const targetAction = resolveConfirmTargetAction(confirmAction);
+    if (!targetAction) {
+      showToast("warn", "Accion no disponible", "No hay una salida segura disponible para este cliente.");
+      return;
+    }
     if (!confirmAction.motivo?.trim()) {
       showToast("warn", "Motivo requerido", "Captura el motivo para continuar.");
       return;
     }
-    if (isDeleteBlocked(confirmAction)) {
-      showToast("warn", "Eliminacion bloqueada", "Usa desactivar o archivar para conservar historial.");
+    if (targetAction === "archivar" && !confirmAction.archiveConfirmed) {
+      showToast("warn", "Confirmacion requerida", "Confirma que este cliente ya no se usara.");
       return;
     }
 
     setSaving(true);
     try {
       const result = await runClienteAction(
-        confirmAction.action,
+        targetAction,
         confirmAction.cliente,
         confirmAction.motivo
       );
-      if (confirmAction.action === "eliminar") {
+      if (targetAction === "eliminar") {
         setClientes((prev) =>
           prev.filter((item) => item.idCliente !== confirmAction.cliente.idCliente)
         );
         if (selectedCliente?.idCliente === confirmAction.cliente.idCliente) {
-          setDetailVisible(false);
+          setWorkspaceVisible(false);
           setSelectedCliente(null);
         }
       } else {
@@ -415,7 +602,12 @@ export default function Clientes() {
         updateSelectedFromAction(confirmAction.cliente, result);
       }
       setConfirmAction(null);
-      showToast("success", "Clientes", confirmAction.success);
+      await fetchClientes();
+      showToast(
+        "success",
+        "Clientes",
+        confirmAction.success || actionMessages[targetAction]?.success || "Accion completada."
+      );
     } catch (error) {
       console.error("Error en accion de cliente:", error);
       showToast("error", "Clientes", error?.message || "No se pudo completar la accion.");
@@ -424,29 +616,93 @@ export default function Clientes() {
     }
   };
 
+  const resetTableToFirstPage = useCallback(() => {
+    setTableState((prev) =>
+      prev.first === 0 && prev.page === 0 ? prev : { ...prev, first: 0, page: 0 }
+    );
+  }, []);
+
+  const handleSearchChange = (value) => {
+    setSearch(value);
+    resetTableToFirstPage();
+  };
+
   const updateFilter = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
+    resetTableToFirstPage();
   };
 
   const clearFilters = () => {
     setSearch("");
     setFilters(emptyFilters);
+    resetTableToFirstPage();
   };
 
-  const deleteBlocked = isDeleteBlocked(confirmAction);
+  const handleTablePage = (event) => {
+    if (event.rows !== tableState.rows) {
+      userSelectedRowsRef.current = event.rows !== tableBaseRows;
+    }
+
+    setTableState((prev) => ({
+      ...prev,
+      first: event.first,
+      page: event.page ?? Math.floor(event.first / event.rows),
+      rows: event.rows,
+    }));
+  };
+
+  const handleTableSort = (event) => {
+    setTableState((prev) => ({
+      ...prev,
+      sortField: event.sortField || INITIAL_TABLE_STATE.sortField,
+      sortOrder: event.sortOrder || INITIAL_TABLE_STATE.sortOrder,
+      first: 0,
+      page: 0,
+    }));
+  };
+
+  const isRemovalFlow = confirmAction?.action === "salida";
+  const targetAction = resolveConfirmTargetAction(confirmAction);
+  const removalPolicyReady = isRemovalFlow && !confirmAction?.loadingPolicy;
+  const removalCanDelete = removalPolicyReady && confirmAction?.deletePolicy?.puedeEliminar;
+  const removalNeedsPreserve = removalPolicyReady && !confirmAction?.deletePolicy?.puedeEliminar;
+  const removalAlreadyArchived =
+    removalNeedsPreserve && clienteEstado(confirmAction?.cliente) === "ARCHIVADO";
+  const confirmLabel = isRemovalFlow
+    ? removalAlreadyArchived
+      ? "Sin accion disponible"
+      : removalCanDelete
+      ? "Eliminar definitivamente"
+      : targetAction === "archivar"
+      ? "Archivar cliente"
+      : "Desactivar cliente"
+    : confirmAction?.confirmLabel || "Confirmar";
+  const confirmIcon =
+    targetAction === "eliminar"
+      ? "pi pi-trash"
+      : targetAction === "archivar"
+      ? "pi pi-folder"
+      : targetAction === "reactivar"
+      ? "pi pi-play"
+      : "pi pi-pause";
   const confirmDisabled =
     saving ||
     actionPreparing ||
     confirmAction?.loadingPolicy ||
+    (targetAction === "archivar" && !confirmAction?.archiveConfirmed) ||
     !confirmAction?.motivo?.trim() ||
-    deleteBlocked;
-  const deleteDependencies = confirmAction?.deletePolicy?.dependencias || {};
-  const deleteReasons = Array.isArray(confirmAction?.deletePolicy?.motivos)
-    ? confirmAction.deletePolicy.motivos
-    : [];
-  const deleteDependencyEntries = Object.entries(deleteDependencies).filter(
-    ([, value]) => Number(value) > 0
-  );
+    !targetAction ||
+    removalAlreadyArchived;
+  const hasActiveDirectoryQuery =
+    search.trim() ||
+    Object.entries(filters).some(([key, value]) => value !== emptyFilters[key]);
+  const rowOptions = Array.from(
+    new Set([tableBaseRows, ...FIXED_TABLE_ROW_OPTIONS])
+  ).sort((a, b) => a - b);
+  const pageStart = totalRecords && clientes.length ? tableState.first + 1 : 0;
+  const pageEnd = totalRecords && clientes.length
+    ? Math.min(tableState.first + clientes.length, totalRecords)
+    : 0;
 
   return (
     <Shell>
@@ -474,22 +730,22 @@ export default function Clientes() {
         <ClientesFilters
           search={search}
           filters={filters}
-          loading={loading || detailLoading}
-          onSearchChange={setSearch}
+          loading={loading}
+          onSearchChange={handleSearchChange}
           onFilterChange={updateFilter}
           onClear={clearFilters}
           onRefresh={fetchClientes}
         />
 
-        <section className="cli-table-shell">
+        <section className="cli-table-shell" ref={tableShellRef}>
           <div className="cli-table-head">
             <div>
               <strong>Directorio de compradores</strong>
               <span>
-                {filteredClientes.length} de {clientes.length} clientes
+                {pageStart}-{pageEnd} de {totalRecords} clientes
               </span>
             </div>
-            {detailLoading ? <small>Actualizando ultimas compras...</small> : null}
+            {loading && clientes.length ? <small>Actualizando listado...</small> : null}
           </div>
 
           {loadError ? (
@@ -506,13 +762,20 @@ export default function Clientes() {
             </div>
           ) : (
             <ClientesTable
-              rows={filteredClientes}
-              loading={loading || detailLoading || saving || actionPreparing}
-              hasClientes={clientes.length > 0}
+              rows={clientes}
+              loading={loading || saving || actionPreparing}
+              hasClientes={totalRecords > 0 || Boolean(hasActiveDirectoryQuery)}
+              first={tableState.first}
+              rowsPerPage={tableState.rows}
+              rowsPerPageOptions={rowOptions}
+              totalRecords={totalRecords}
+              sortField={tableState.sortField}
+              sortOrder={tableState.sortOrder}
+              onPage={handleTablePage}
+              onSort={handleTableSort}
               onView={openDetail}
               onEdit={openEdit}
-              onManage={openAdvancedSectionForCliente}
-              onAction={openClienteAction}
+              onRemove={openRemovalAction}
             />
           )}
         </section>
@@ -528,105 +791,189 @@ export default function Clientes() {
         onSave={saveCliente}
       />
 
-      <ClienteDetailPanel
+      <ClienteWorkspaceDrawer
         cliente={selectedCliente}
-        visible={detailVisible}
+        visible={workspaceVisible}
         loading={detailLoading}
-        onHide={() => setDetailVisible(false)}
+        initialSection={workspaceInitialSection}
+        onHide={() => setWorkspaceVisible(false)}
+        onStateAction={openClienteStateAction}
       />
 
-      <ClienteAdvancedModals
-        section={advancedSection}
-        cliente={selectedCliente}
-        loading={detailLoading}
-        onHide={() => setAdvancedSection(null)}
-      />
-
-      <Dialog
-        header={confirmAction?.title || ""}
+      <ModalSurface
+        title={confirmAction?.title || ""}
         visible={Boolean(confirmAction)}
         onHide={() => setConfirmAction(null)}
-        modal
-        draggable={false}
-        dismissableMask
+        size="small"
         className="cli-confirm-dialog"
-        style={{ width: "34rem" }}
         footer={
           <div className="cli-dialog-footer">
             <Button
-              label={deleteBlocked ? "Cerrar" : "Cancelar"}
+              label="Cancelar"
               className="p-button-text cli-text-btn"
               onClick={() => setConfirmAction(null)}
               disabled={saving || actionPreparing}
             />
-            {!deleteBlocked ? (
-              <Button
-                label={confirmAction?.confirmLabel || "Confirmar"}
-                icon={confirmAction?.action === "eliminar" ? "pi pi-trash" : "pi pi-check"}
-                className={
-                  confirmAction?.action === "eliminar"
-                    ? "cli-danger-btn"
-                    : "cli-primary-btn"
-                }
-                onClick={confirmClienteAction}
-                loading={saving}
-                disabled={confirmDisabled}
-              />
-            ) : null}
+            <Button
+              label={confirmLabel}
+              icon={confirmIcon}
+              className={
+                targetAction === "eliminar" || targetAction === "archivar"
+                  ? "cli-danger-btn"
+                  : "cli-primary-btn"
+              }
+              onClick={confirmClienteAction}
+              loading={saving}
+              disabled={confirmDisabled}
+            />
           </div>
         }
       >
         <div className="cli-safe-action-body">
-          <p className="cli-confirm-text">{confirmAction?.detail}</p>
-
-          {confirmAction?.consequences?.length ? (
-            <div className="cli-safe-box">
-              <strong>Consecuencias</strong>
-              <ul>
-                {confirmAction.consequences.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
+          {!isRemovalFlow && confirmAction?.detail ? (
+            <p className="cli-confirm-text">{confirmAction.detail}</p>
           ) : null}
 
-          {confirmAction?.action === "eliminar" ? (
-            <div className={deleteBlocked ? "cli-delete-policy is-blocked" : "cli-delete-policy"}>
-              {confirmAction.loadingPolicy ? (
-                <span>Revisando ventas, datos fiscales y auditoria del cliente...</span>
-              ) : (
-                <>
+          {(isRemovalFlow || confirmAction?.action === "eliminar") ? (
+            <>
+              <div
+                className={
+                  targetAction === "archivar"
+                    ? "cli-delete-policy is-danger"
+                    : removalNeedsPreserve
+                    ? "cli-delete-policy is-blocked"
+                    : "cli-delete-policy"
+                }
+              >
+                <i
+                  className={
+                    confirmAction?.loadingPolicy
+                      ? "pi pi-spin pi-spinner"
+                      : removalCanDelete
+                      ? "pi pi-trash"
+                      : "pi pi-shield"
+                  }
+                />
+                <div>
                   <strong>
-                    {confirmAction.deletePolicy?.puedeEliminar
-                      ? "Eliminacion permitida"
-                      : "Eliminacion bloqueada"}
+                    {confirmAction?.loadingPolicy
+                      ? "Revisando cliente"
+                      : removalCanDelete
+                      ? "Eliminar definitivamente"
+                      : targetAction === "archivar"
+                      ? "Archivar cliente"
+                      : "Elegir salida"}
                   </strong>
-                  <p>
-                    {confirmAction.deletePolicy?.mensaje ||
-                      "El backend debe validar que no exista uso antes de eliminar."}
-                  </p>
-                  {deleteReasons.length ? (
-                    <ul>
-                      {deleteReasons.map((reason) => (
-                        <li key={reason}>{reason}</li>
-                      ))}
-                    </ul>
-                  ) : null}
-                  {deleteDependencyEntries.length ? (
-                    <div className="cli-delete-counts">
-                      {deleteDependencyEntries.map(([key, value]) => (
-                        <span key={key}>
-                          {dependencyLabels[key] || key}: {value}
+                  <p>{removalSummaryText(confirmAction)}</p>
+                </div>
+              </div>
+
+              {removalNeedsPreserve ? (
+                <>
+                  <div
+                    className={`cli-removal-options ${
+                      clienteEstado(confirmAction?.cliente) !== "ACTIVO" ? "is-single" : ""
+                    }`}
+                    aria-label="Opciones de salida del cliente"
+                  >
+                    {clienteEstado(confirmAction?.cliente) === "ACTIVO" ? (
+                      <button
+                        type="button"
+                        className={
+                          confirmAction.selectedResolution === "desactivar"
+                            ? "is-selected"
+                            : ""
+                        }
+                        onClick={() =>
+                          setConfirmAction((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  selectedResolution: "desactivar",
+                                  archiveConfirmed: false,
+                                }
+                              : prev
+                          )
+                        }
+                        disabled={saving || actionPreparing}
+                      >
+                        <i className="pi pi-pause" />
+                        <span>
+                          <strong>Desactivar</strong>
+                          <small>Pausa compras temporalmente</small>
                         </span>
-                      ))}
-                    </div>
+                      </button>
+                    ) : null}
+                    {clienteEstado(confirmAction?.cliente) !== "ARCHIVADO" ? (
+                      <button
+                        type="button"
+                        className={
+                          confirmAction.selectedResolution === "archivar"
+                            ? "is-danger is-selected"
+                            : "is-danger"
+                        }
+                        onClick={() =>
+                          setConfirmAction((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  selectedResolution: "archivar",
+                                  archiveConfirmed: false,
+                                }
+                              : prev
+                          )
+                        }
+                        disabled={saving || actionPreparing}
+                      >
+                        <i className="pi pi-folder" />
+                        <span>
+                          <strong>Archivar</strong>
+                          <small>Baja historica definitiva</small>
+                        </span>
+                      </button>
+                    ) : null}
+                    {clienteEstado(confirmAction?.cliente) === "ARCHIVADO" ? (
+                      <div className="cli-removal-locked">
+                        <i className="pi pi-lock" />
+                        <span>No hay accion disponible</span>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {targetAction === "archivar" ? (
+                    <label className="cli-archive-confirm">
+                      <span>
+                        <i className="pi pi-exclamation-triangle" />
+                      </span>
+                      <div>
+                        <strong>No se podra usar este cliente.</strong>
+                        <small>
+                          No podra comprar ni editarse; solo quedara disponible para historial.
+                        </small>
+                        <em>
+                          <input
+                            type="checkbox"
+                            checked={Boolean(confirmAction?.archiveConfirmed)}
+                            onChange={(event) =>
+                              setConfirmAction((prev) =>
+                                prev
+                                  ? { ...prev, archiveConfirmed: event.target.checked }
+                                  : prev
+                              )
+                            }
+                            disabled={saving || actionPreparing}
+                          />
+                          Confirmo que ya no se usara este cliente.
+                        </em>
+                      </div>
+                    </label>
                   ) : null}
                 </>
-              )}
-            </div>
+              ) : null}
+            </>
           ) : null}
 
-          {!deleteBlocked ? (
+          {!removalAlreadyArchived ? (
             <label className="cli-field cli-safe-reason">
               <span>Motivo</span>
               <InputTextarea
@@ -646,7 +993,7 @@ export default function Clientes() {
             </label>
           ) : null}
         </div>
-      </Dialog>
+      </ModalSurface>
     </Shell>
   );
 }

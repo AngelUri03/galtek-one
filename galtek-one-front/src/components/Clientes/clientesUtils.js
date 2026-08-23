@@ -33,12 +33,19 @@ export const COMPRAS_OPTIONS = [
   { label: "Sin compras", value: "SIN_COMPRAS" },
 ];
 
+export const ULTIMA_COMPRA_OPTIONS = [
+  { label: "Todas", value: "TODOS" },
+  { label: "Con ultima", value: "CON_COMPRAS" },
+  { label: "Sin ultima", value: "SIN_COMPRAS" },
+];
+
 export const emptyFilters = {
-  estado: "TODOS",
+  estado: "ACTIVO",
   tipo: "TODOS",
   fiscales: "TODOS",
   direccion: "TODOS",
   compras: "TODOS",
+  ultimaCompra: "TODOS",
 };
 
 const trim = (value) => (value == null ? "" : String(value).trim());
@@ -96,6 +103,9 @@ export const hasAddressData = (cliente = {}) =>
     cliente.direccionReferencia,
   ].some(hasValue);
 
+export const hasContactData = (cliente = {}) =>
+  [cliente.telefono, cliente.whatsapp, cliente.email].some(hasValue);
+
 const getLastPurchase = (pedidos = []) => {
   const sorted = [...pedidos].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
   return sorted[0] || null;
@@ -108,6 +118,7 @@ export const normalizeCliente = (cliente = {}, detail = null) => {
   const estadoCliente = normalizeEstado(data);
   const comprasRegistradas =
     data.comprasRegistradas ?? data.comprasCount ?? data.ventasCount ?? pedidos.length;
+  const ultimaCompra = data.ultimaCompra || getLastPurchase(pedidos);
 
   return {
     idCliente: data.idCliente ?? data.id ?? null,
@@ -139,7 +150,7 @@ export const normalizeCliente = (cliente = {}, detail = null) => {
     avatar: data.avatar ?? "",
     pedidos,
     comprasRegistradas,
-    ultimaCompra: getLastPurchase(pedidos),
+    ultimaCompra,
     fechaCreacion: data.fechaCreacion ?? "",
     fechaModificacion: data.fechaModificacion ?? "",
     usuarioCreacion: data.usuarioCreacion ?? "",
@@ -148,8 +159,9 @@ export const normalizeCliente = (cliente = {}, detail = null) => {
     motivoCambioEstado: data.motivoCambioEstado ?? "",
     usuarioCambioEstado: data.usuarioCambioEstado ?? "",
     fechaCambioEstado: data.fechaCambioEstado ?? "",
-    tieneDatosFiscales: hasFiscalData(data),
-    tieneDireccion: hasAddressData(data),
+    tieneDatosFiscales: data.tieneDatosFiscales ?? hasFiscalData(data),
+    tieneDireccion: data.tieneDireccion ?? hasAddressData(data),
+    tieneContacto: data.tieneContacto ?? hasContactData(data),
     detailLoaded: Boolean(detail || data.pedidos),
     raw: data,
   };
@@ -162,9 +174,12 @@ export const createClienteForm = (cliente = null) => ({
   tipoCliente: cliente?.tipoCliente || "PERSONA",
   estadoCliente: cliente?.estadoCliente || "ACTIVO",
   notasInternas: cliente?.notasInternas ?? "",
+  tieneContacto: cliente ? hasContactData(cliente) : false,
   email: cliente?.email ?? "",
   telefono: cliente?.telefono ?? "",
   whatsapp: cliente?.whatsapp ?? "",
+  tieneDireccion: cliente ? hasAddressData(cliente) : false,
+  tieneDatosFiscales: cliente ? hasFiscalData(cliente) : false,
   direccion: cliente?.direccion ?? "",
   direccionCalle: cliente?.direccionCalle ?? "",
   direccionNumeroExterior: cliente?.direccionNumeroExterior ?? "",
@@ -206,24 +221,28 @@ export const buildClientePayload = (form = {}) => ({
   tipoCliente: form.tipoCliente || "PERSONA",
   estadoCliente: form.estadoCliente || "ACTIVO",
   notasInternas: trim(form.notasInternas),
-  email: trim(form.email),
-  telefono: sanitizePhoneInput(form.telefono),
-  whatsapp: sanitizePhoneInput(form.whatsapp),
-  direccion: buildAddressText(form) || trim(form.direccion),
-  direccionCalle: trim(form.direccionCalle),
-  direccionNumeroExterior: trim(form.direccionNumeroExterior),
-  direccionNumeroInterior: trim(form.direccionNumeroInterior),
-  direccionColonia: trim(form.direccionColonia),
-  direccionMunicipio: trim(form.direccionMunicipio),
-  direccionEstado: trim(form.direccionEstado),
-  direccionCodigoPostal: onlyDigits(form.direccionCodigoPostal).slice(0, 5),
-  direccionReferencia: trim(form.direccionReferencia),
-  rfc: trim(form.rfc).toUpperCase(),
-  razonSocial: trim(form.razonSocial),
-  codigoPostalFiscal: onlyDigits(form.codigoPostalFiscal).slice(0, 5),
-  correoFiscal: trim(form.correoFiscal),
-  regimenFiscal: trim(form.regimenFiscal),
-  usoCfdi: trim(form.usoCfdi).toUpperCase(),
+  email: form.tieneContacto ? trim(form.email) : "",
+  telefono: form.tieneContacto ? sanitizePhoneInput(form.telefono) : "",
+  whatsapp: form.tieneContacto ? sanitizePhoneInput(form.whatsapp) : "",
+  direccion: form.tieneDireccion ? buildAddressText(form) || trim(form.direccion) : "",
+  direccionCalle: form.tieneDireccion ? trim(form.direccionCalle) : "",
+  direccionNumeroExterior: form.tieneDireccion ? trim(form.direccionNumeroExterior) : "",
+  direccionNumeroInterior: form.tieneDireccion ? trim(form.direccionNumeroInterior) : "",
+  direccionColonia: form.tieneDireccion ? trim(form.direccionColonia) : "",
+  direccionMunicipio: form.tieneDireccion ? trim(form.direccionMunicipio) : "",
+  direccionEstado: form.tieneDireccion ? trim(form.direccionEstado) : "",
+  direccionCodigoPostal: form.tieneDireccion
+    ? onlyDigits(form.direccionCodigoPostal).slice(0, 5)
+    : "",
+  direccionReferencia: form.tieneDireccion ? trim(form.direccionReferencia) : "",
+  rfc: form.tieneDatosFiscales ? trim(form.rfc).toUpperCase() : "",
+  razonSocial: form.tieneDatosFiscales ? trim(form.razonSocial) : "",
+  codigoPostalFiscal: form.tieneDatosFiscales
+    ? onlyDigits(form.codigoPostalFiscal).slice(0, 5)
+    : "",
+  correoFiscal: form.tieneDatosFiscales ? trim(form.correoFiscal) : "",
+  regimenFiscal: form.tieneDatosFiscales ? trim(form.regimenFiscal) : "",
+  usoCfdi: form.tieneDatosFiscales ? trim(form.usoCfdi).toUpperCase() : "",
   avatar: trim(form.avatar),
   estatus: form.estadoCliente === "ACTIVO",
 });

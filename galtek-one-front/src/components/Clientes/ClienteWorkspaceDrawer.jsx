@@ -1,13 +1,38 @@
-import React, { useMemo } from "react";
-import { Dialog } from "primereact/dialog";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Skeleton } from "primereact/skeleton";
+import { WorkspaceDrawer } from "../common/OverlaySurfaces";
 import ClienteAuditSection from "./ClienteAuditSection";
+import { ClienteDetailContent } from "./ClienteDetailPanel";
 import { formatDate, moneyOrDash } from "./clientesUtils";
 
-const titles = {
+const SECTION_TITLES = {
   compras: "Ultimas compras",
-  auditoria: "Auditoria del cliente",
+  auditoria: "Auditoria",
 };
+
+function initialStack(initialSection) {
+  const stack = [{ view: "detail" }];
+  if (initialSection && SECTION_TITLES[initialSection]) {
+    stack.push({ view: initialSection });
+  }
+  return stack;
+}
+
+function resolveTitle(view, cliente) {
+  if (!view || view.view === "detail") return cliente?.nombre || "Cliente";
+  return SECTION_TITLES[view.view] || "Cliente";
+}
+
+function resolveSubtitle(view, cliente) {
+  if (!view || view.view === "detail") return "Perfil, contacto y datos fiscales";
+  if (view.view === "compras") return "Historial de ventas y detalle de productos";
+  if (view.view === "auditoria") return "Trazabilidad completa del cliente";
+  return cliente?.nombre || "Cliente";
+}
+
+function viewKey(view) {
+  return view?.view || "detail";
+}
 
 function EmptyState({ text }) {
   return (
@@ -106,7 +131,7 @@ function PurchaseRow({ pedido }) {
   );
 }
 
-function PurchasesSection({ cliente, loading }) {
+function ClientePurchasesSection({ cliente, loading }) {
   const pedidos = useMemo(
     () =>
       [...(cliente?.pedidos || [])].sort(
@@ -171,28 +196,108 @@ function PurchasesSection({ cliente, loading }) {
   );
 }
 
-export default function ClienteAdvancedModals({ section, cliente, loading, onHide }) {
-  if (!cliente) return null;
+export default function ClienteWorkspaceDrawer({
+  visible,
+  cliente,
+  loading,
+  initialSection,
+  onHide,
+  onStateAction,
+}) {
+  const bodyRef = useRef(null);
+  const [stack, setStack] = useState(() => initialStack(initialSection));
+  const [direction, setDirection] = useState("forward");
+  const [scrollPositions, setScrollPositions] = useState({});
+
+  const current = useMemo(() => stack[stack.length - 1] || { view: "detail" }, [stack]);
+  const previous = stack.length > 1 ? stack[stack.length - 2] : null;
+  const currentKey = viewKey(current);
+
+  useEffect(() => {
+    if (!visible) return;
+    setStack(initialStack(initialSection));
+    setDirection("forward");
+    setScrollPositions({});
+  }, [cliente?.idCliente, initialSection, visible]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (bodyRef.current) {
+        bodyRef.current.scrollTop = scrollPositions[currentKey] || 0;
+      }
+    }, 30);
+    return () => window.clearTimeout(timer);
+  }, [currentKey, scrollPositions]);
+
+  const rememberScroll = () => {
+    const scrollTop = bodyRef.current?.scrollTop || 0;
+    setScrollPositions((prev) => ({ ...prev, [currentKey]: scrollTop }));
+  };
+
+  const pushView = (view) => {
+    rememberScroll();
+    setDirection("forward");
+    setStack((prev) => [...prev, view]);
+  };
+
+  const popView = () => {
+    rememberScroll();
+    if (stack.length <= 1) {
+      onHide?.();
+      return;
+    }
+    setDirection("back");
+    setStack((prev) => prev.slice(0, -1));
+  };
+
+  const closeDrawer = () => {
+    onHide?.();
+  };
+
+  const title = resolveTitle(current, cliente);
+  const subtitle = resolveSubtitle(current, cliente);
+  const backLabel = previous ? resolveTitle(previous, cliente) : null;
+
+  const content = (() => {
+    if (current.view === "detail") {
+      return (
+        <ClienteDetailContent
+          cliente={cliente}
+          loading={loading}
+          onNavigateSection={(section) => pushView({ view: section })}
+          onStateAction={onStateAction}
+        />
+      );
+    }
+
+    if (current.view === "compras") {
+      return <ClientePurchasesSection cliente={cliente} loading={loading} />;
+    }
+
+    if (current.view === "auditoria") {
+      return <ClienteAuditSection cliente={cliente} detailed />;
+    }
+
+    return null;
+  })();
 
   return (
-    <Dialog
-      header={titles[section] || "Cliente"}
-      visible={Boolean(section)}
-      onHide={onHide}
-      modal
-      draggable={false}
-      dismissableMask
-      focusOnShow={false}
-      closeButtonProps={{ tabIndex: -1 }}
-      className="cli-advanced-dialog"
-      style={{ width: "min(980px, calc(100vw - 72px))" }}
+    <WorkspaceDrawer
+      visible={visible}
+      eyebrow="Cliente"
+      title={title}
+      subtitle={subtitle}
+      backLabel={backLabel}
+      onBack={previous ? popView : null}
+      onClose={closeDrawer}
+      onDismiss={popView}
+      size={current.view === "detail" ? "detail" : "workspace"}
+      direction={direction}
+      focusTitle={false}
+      bodyRef={bodyRef}
+      className="cli-workspace-drawer"
     >
-      <div className={section === "auditoria" ? "cli-advanced-dialog-body is-audit" : "cli-advanced-dialog-body"}>
-        {section === "compras" ? (
-          <PurchasesSection cliente={cliente} loading={loading} />
-        ) : null}
-        {section === "auditoria" ? <ClienteAuditSection cliente={cliente} /> : null}
-      </div>
-    </Dialog>
+      {content}
+    </WorkspaceDrawer>
   );
 }

@@ -731,7 +731,7 @@ export default function ProveedorActivosSection({
                             disabled={isUpdating}
                             aria-label="Cambiar estado"
                             tooltip="Cambiar estado"
-                            tooltipOptions={{ position: "top" }}
+                            tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
                           />
                           <Button
                             icon="pi pi-exclamation-triangle"
@@ -740,7 +740,7 @@ export default function ProveedorActivosSection({
                             disabled={isUpdating}
                             aria-label="Registrar incidente"
                             tooltip="Registrar incidente"
-                            tooltipOptions={{ position: "top" }}
+                            tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
                           />
                         </>
                       ) : null}
@@ -751,7 +751,7 @@ export default function ProveedorActivosSection({
                         disabled={isUpdating}
                         aria-label="Ver historial"
                         tooltip="Ver historial"
-                        tooltipOptions={{ position: "top" }}
+                        tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
                       />
                     </>
                   }

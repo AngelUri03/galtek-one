@@ -207,7 +207,7 @@ export function ProveedorActivoHistoryContent({ activo, documentos = [] }) {
                                 onClick={() => downloadEvidence(evidence)}
                                 aria-label="Descargar evidencia"
                                 tooltip="Descargar evidencia"
-                                tooltipOptions={{ position: "top" }}
+                                tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
                               />
                             </article>
                           );

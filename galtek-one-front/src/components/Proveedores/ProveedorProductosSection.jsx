@@ -42,16 +42,6 @@ function valueOrDash(value) {
   return value;
 }
 
-const productActionTooltip = {
-  position: "top",
-  className: "prov-product-action-tooltip",
-};
-
-const productEdgeTooltip = {
-  position: "left",
-  className: "prov-product-action-tooltip",
-};
-
 export default function ProveedorProductosSection({
   proveedor,
   items = [],
@@ -248,7 +238,7 @@ export default function ProveedorProductosSection({
                     disabled={isUpdating}
                     aria-label="Abrir en inventario"
                     tooltip="Abrir en inventario"
-                    tooltipOptions={productActionTooltip}
+                    tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
                   />
                   <Button
                     icon="pi pi-shopping-cart"
@@ -257,7 +247,7 @@ export default function ProveedorProductosSection({
                     disabled={isUpdating}
                     aria-label="Ver en compras"
                     tooltip="Ver en compras"
-                    tooltipOptions={productActionTooltip}
+                    tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
                   />
                   <Button
                     icon="pi pi-chart-line"
@@ -266,30 +256,30 @@ export default function ProveedorProductosSection({
                     disabled={isUpdating || !onOpenCostHistory}
                     aria-label="Historial de costos"
                     tooltip="Historial de costos"
-                    tooltipOptions={productActionTooltip}
+                    tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
                   />
                   {isActive && !readOnly ? (
                     <Button
-                      icon="pi pi-ban"
+                      icon="pi pi-pause"
                       className="prov-row-action"
                       onClick={() => setConfirm({ action: "desactivar", item })}
                       disabled={isUpdating}
                       loading={isUpdating && updatingRelation?.action === "desactivar"}
                       aria-label="Desactivar relacion"
                       tooltip="Pausar en compras"
-                      tooltipOptions={productEdgeTooltip}
+                      tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
                     />
                   ) : null}
                   {isInactive && !readOnly ? (
                     <Button
-                      icon="pi pi-refresh"
+                      icon="pi pi-play"
                       className="prov-row-action"
                       onClick={() => setConfirm({ action: "reactivar", item })}
                       disabled={isUpdating}
                       loading={isUpdating && updatingRelation?.action === "reactivar"}
                       aria-label="Reactivar relacion"
                       tooltip="Usar en compras"
-                      tooltipOptions={productEdgeTooltip}
+                      tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
                     />
                   ) : null}
                 </div>

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,12 +12,18 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.galtekone.config.EmpresaContextHolder;
 import com.galtekone.dto.cliente.ClienteConPedidosDTO;
+import com.galtekone.dto.cliente.ClienteDirectoryPageDTO;
+import com.galtekone.dto.cliente.ClienteDirectoryRowDTO;
+import com.galtekone.dto.cliente.ClienteDirectorySummaryDTO;
 import com.galtekone.dto.cliente.DetallePedidoClienteDTO;
 import com.galtekone.dto.cliente.PedidoClienteDTO;
 import com.galtekone.entity.ClientesEntity;
@@ -29,12 +36,28 @@ import com.galtekone.repository.VentasRepository;
 import com.galtekone.services.ClientesService;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 
 @Service
 public class ClientesServiceImpl implements ClientesService {
 
     private static final Set<String> TIPOS_CLIENTE = Set.of("PERSONA", "NEGOCIO");
     private static final Set<String> ESTADOS_CLIENTE = Set.of("ACTIVO", "INACTIVO", "ARCHIVADO");
+    private static final Set<String> DIRECTORY_SORT_FIELDS = Set.of(
+            "nombre",
+            "alias",
+            "tipoCliente",
+            "estadoCliente",
+            "telefono",
+            "email",
+            "rfc",
+            "razonSocial",
+            "fechaCreacion",
+            "fechaModificacion"
+    );
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[0-9]{10,13}$");
     private static final Pattern RFC_PATTERN = Pattern.compile("^[A-Z&\\u00D1]{3,4}[0-9]{6}[A-Z0-9]{3}$");
@@ -49,6 +72,9 @@ public class ClientesServiceImpl implements ClientesService {
     public ClientesEntity create(ClientesEntity obj, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
         validateCliente(obj);
+        if (!isBlank(obj.getEstadoCliente()) && "ARCHIVADO".equals(validateEstado(obj.getEstadoCliente()))) {
+            throw new IllegalArgumentException("No se puede crear un cliente archivado. Crealo activo y usa la salida segura si debe conservarse como historial.");
+        }
 
         EmpresasEntity empresa = new EmpresasEntity();
         empresa.setIdEmpresa(empresaId);
@@ -74,10 +100,336 @@ public class ClientesServiceImpl implements ClientesService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Page<ClientesEntity> readPage(
+            Specification<ClientesEntity> specs,
+            int page,
+            int size,
+            String sort,
+            String direction
+    ) {
+        Integer empresaId = EmpresaContextHolder.getEmpresaId();
+
+        Specification<ClientesEntity> filtroEmpresa = (root, query, cb) ->
+                cb.equal(root.get("empresa").get("idEmpresa"), empresaId);
+
+        Specification<ClientesEntity> finalSpec = Specification.where(specs).and(filtroEmpresa);
+        Sort.Direction sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        String sortField = isBlank(sort) ? "nombre" : sort.trim();
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+
+        return clientesRepository.findAll(finalSpec, PageRequest.of(safePage, safeSize, Sort.by(sortDirection, sortField)));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ClienteDirectoryPageDTO readDirectoryPage(
+            Map<String, String> filters,
+            int page,
+            int size,
+            String sort,
+            String direction
+    ) {
+        Integer empresaId = EmpresaContextHolder.getEmpresaId();
+        Specification<ClientesEntity> specs = buildDirectorySpec(filters, empresaId);
+        Sort.Direction sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        String sortField = DIRECTORY_SORT_FIELDS.contains(trimToEmpty(sort)) ? sort.trim() : "nombre";
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+
+        Page<ClientesEntity> pageData = clientesRepository.findAll(
+                specs,
+                PageRequest.of(safePage, safeSize, Sort.by(sortDirection, sortField))
+        );
+
+        List<Integer> idsCliente = pageData.getContent().stream()
+                .map(ClientesEntity::getIdCliente)
+                .toList();
+        Map<Integer, Long> comprasPorCliente = countComprasByCliente(idsCliente, empresaId);
+        Map<Integer, PedidoClienteDTO> ultimaCompraPorCliente = latestPurchaseByCliente(idsCliente, empresaId);
+
+        ClienteDirectoryPageDTO dto = new ClienteDirectoryPageDTO();
+        dto.setItems(pageData.getContent().stream()
+                .map(cliente -> toDirectoryRow(cliente, comprasPorCliente, ultimaCompraPorCliente))
+                .toList());
+        dto.setPage(pageData.getNumber());
+        dto.setSize(pageData.getSize());
+        dto.setTotalRecords(pageData.getTotalElements());
+        dto.setTotalPages(pageData.getTotalPages());
+        dto.setFirst(pageData.isFirst());
+        dto.setLast(pageData.isLast());
+        dto.setSummary(buildDirectorySummary(specs));
+        return dto;
+    }
+
+    private Specification<ClientesEntity> buildDirectorySpec(Map<String, String> filters, Integer empresaId) {
+        Map<String, String> safeFilters = filters == null ? Map.of() : filters;
+        Specification<ClientesEntity> specs = empresaSpec(empresaId);
+
+        specs = andSpec(specs, searchSpec(safeFilters.get("search")));
+        specs = andSpec(specs, estadoFilterSpec(safeFilters.get("estado")));
+        specs = andSpec(specs, fieldFilterSpec("tipoCliente", safeFilters.get("tipo")));
+        specs = andSpec(specs, fiscalFilterSpec(safeFilters.get("fiscales")));
+        specs = andSpec(specs, addressFilterSpec(safeFilters.get("direccion")));
+        specs = andSpec(specs, comprasFilterSpec(safeFilters.get("compras"), empresaId));
+        specs = andSpec(specs, comprasFilterSpec(safeFilters.get("ultimaCompra"), empresaId));
+
+        return specs;
+    }
+
+    private Specification<ClientesEntity> andSpec(
+            Specification<ClientesEntity> base,
+            Specification<ClientesEntity> next
+    ) {
+        return next == null ? base : base.and(next);
+    }
+
+    private Specification<ClientesEntity> empresaSpec(Integer empresaId) {
+        return (root, query, cb) -> cb.equal(root.get("empresa").get("idEmpresa"), empresaId);
+    }
+
+    private Specification<ClientesEntity> fieldFilterSpec(String field, String rawValue) {
+        String value = filterValue(rawValue);
+        if (value == null) return null;
+        return (root, query, cb) -> cb.equal(root.get(field), value);
+    }
+
+    private Specification<ClientesEntity> estadoFilterSpec(String rawValue) {
+        String value = filterValue(rawValue);
+        if (value == null) return null;
+
+        if ("ACTIVO".equals(value)) {
+            return (root, query, cb) -> cb.or(
+                    cb.equal(root.get("estadoCliente"), "ACTIVO"),
+                    cb.and(
+                            cb.or(
+                                    cb.isNull(root.get("estadoCliente")),
+                                    cb.equal(root.get("estadoCliente"), "")
+                            ),
+                            cb.isTrue(root.get("estatus"))
+                    )
+            );
+        }
+
+        if ("INACTIVO".equals(value)) {
+            return (root, query, cb) -> cb.or(
+                    cb.equal(root.get("estadoCliente"), "INACTIVO"),
+                    cb.and(
+                            cb.or(
+                                    cb.isNull(root.get("estadoCliente")),
+                                    cb.equal(root.get("estadoCliente"), "")
+                            ),
+                            cb.isFalse(root.get("estatus"))
+                    )
+            );
+        }
+
+        final String estado = value;
+        return (root, query, cb) -> cb.equal(root.get("estadoCliente"), estado);
+    }
+
+    private Specification<ClientesEntity> searchSpec(String rawValue) {
+        String value = trimToNull(rawValue);
+        if (value == null) return null;
+
+        String like = "%" + value.toLowerCase() + "%";
+        return (root, query, cb) -> cb.or(
+                like(root, cb, "nombre", like),
+                like(root, cb, "alias", like),
+                like(root, cb, "telefono", like),
+                like(root, cb, "whatsapp", like),
+                like(root, cb, "email", like),
+                like(root, cb, "rfc", like),
+                like(root, cb, "razonSocial", like),
+                like(root, cb, "direccion", like),
+                like(root, cb, "direccionCalle", like),
+                like(root, cb, "direccionColonia", like),
+                like(root, cb, "direccionMunicipio", like),
+                like(root, cb, "direccionEstado", like),
+                like(root, cb, "direccionCodigoPostal", like),
+                like(root, cb, "notasInternas", like)
+        );
+    }
+
+    private Predicate like(Root<?> root, CriteriaBuilder cb, String field, String like) {
+        return cb.like(cb.lower(root.get(field).as(String.class)), like);
+    }
+
+    private Specification<ClientesEntity> fiscalFilterSpec(String rawValue) {
+        String value = filterValue(rawValue);
+        if (value == null) return null;
+
+        if ("CON_FISCALES".equals(value)) return fiscalPresenceSpec(true);
+        if ("SIN_FISCALES".equals(value)) return fiscalPresenceSpec(false);
+        return null;
+    }
+
+    private Specification<ClientesEntity> addressFilterSpec(String rawValue) {
+        String value = filterValue(rawValue);
+        if (value == null) return null;
+
+        if ("CON_DIRECCION".equals(value)) return addressPresenceSpec(true);
+        if ("SIN_DIRECCION".equals(value)) return addressPresenceSpec(false);
+        return null;
+    }
+
+    private Specification<ClientesEntity> comprasFilterSpec(String rawValue, Integer empresaId) {
+        String value = filterValue(rawValue);
+        if (value == null) return null;
+
+        if ("CON_COMPRAS".equals(value)) return comprasPresenceSpec(empresaId, true);
+        if ("SIN_COMPRAS".equals(value)) return comprasPresenceSpec(empresaId, false);
+        return null;
+    }
+
+    private Specification<ClientesEntity> fiscalPresenceSpec(boolean present) {
+        return (root, query, cb) -> {
+            Predicate predicate = cb.or(
+                    hasText(root, cb, "rfc"),
+                    hasText(root, cb, "razonSocial"),
+                    hasText(root, cb, "codigoPostalFiscal"),
+                    hasText(root, cb, "correoFiscal"),
+                    hasText(root, cb, "regimenFiscal"),
+                    hasText(root, cb, "usoCfdi")
+            );
+            return present ? predicate : cb.not(predicate);
+        };
+    }
+
+    private Specification<ClientesEntity> addressPresenceSpec(boolean present) {
+        return (root, query, cb) -> {
+            Predicate predicate = cb.or(
+                    hasText(root, cb, "direccion"),
+                    hasText(root, cb, "direccionCalle"),
+                    hasText(root, cb, "direccionNumeroExterior"),
+                    hasText(root, cb, "direccionNumeroInterior"),
+                    hasText(root, cb, "direccionColonia"),
+                    hasText(root, cb, "direccionMunicipio"),
+                    hasText(root, cb, "direccionEstado"),
+                    hasText(root, cb, "direccionCodigoPostal"),
+                    hasText(root, cb, "direccionReferencia")
+            );
+            return present ? predicate : cb.not(predicate);
+        };
+    }
+
+    private Predicate hasText(Root<ClientesEntity> root, CriteriaBuilder cb, String field) {
+        return cb.and(cb.isNotNull(root.get(field)), cb.notEqual(root.get(field), ""));
+    }
+
+    private Specification<ClientesEntity> comprasPresenceSpec(Integer empresaId, boolean present) {
+        return (root, query, cb) -> {
+            Subquery<Integer> subquery = query.subquery(Integer.class);
+            Root<VentasEntity> venta = subquery.from(VentasEntity.class);
+            subquery.select(cb.literal(1));
+            subquery.where(
+                    cb.equal(venta.get("cliente").get("idCliente"), root.get("idCliente")),
+                    cb.equal(venta.get("empresa").get("idEmpresa"), empresaId)
+            );
+
+            return present ? cb.exists(subquery) : cb.not(cb.exists(subquery));
+        };
+    }
+
+    private ClienteDirectorySummaryDTO buildDirectorySummary(Specification<ClientesEntity> specs) {
+        ClienteDirectorySummaryDTO summary = new ClienteDirectorySummaryDTO();
+        summary.setTotal(clientesRepository.count(specs));
+        summary.setActivos(clientesRepository.count(specs.and(estadoFilterSpec("ACTIVO"))));
+        summary.setInactivos(clientesRepository.count(specs.and(estadoFilterSpec("INACTIVO"))));
+        summary.setArchivados(clientesRepository.count(specs.and(equalSpec("estadoCliente", "ARCHIVADO"))));
+        summary.setConFiscales(clientesRepository.count(specs.and(fiscalPresenceSpec(true))));
+        summary.setConDireccion(clientesRepository.count(specs.and(addressPresenceSpec(true))));
+        return summary;
+    }
+
+    private Specification<ClientesEntity> equalSpec(String field, String value) {
+        return (root, query, cb) -> cb.equal(root.get(field), value);
+    }
+
+    private ClienteDirectoryRowDTO toDirectoryRow(
+            ClientesEntity cliente,
+            Map<Integer, Long> comprasPorCliente,
+            Map<Integer, PedidoClienteDTO> ultimaCompraPorCliente
+    ) {
+        ClienteDirectoryRowDTO row = new ClienteDirectoryRowDTO();
+        row.setIdCliente(cliente.getIdCliente());
+        row.setNombre(cliente.getNombre());
+        row.setAlias(cliente.getAlias());
+        row.setTipoCliente(isBlank(cliente.getTipoCliente()) ? "PERSONA" : cliente.getTipoCliente());
+        row.setEstadoCliente(normalizedEstadoCliente(cliente));
+        row.setEmail(cliente.getEmail());
+        row.setTelefono(cliente.getTelefono());
+        row.setWhatsapp(cliente.getWhatsapp());
+        row.setDireccion(cliente.getDireccion());
+        row.setDireccionCalle(cliente.getDireccionCalle());
+        row.setDireccionNumeroExterior(cliente.getDireccionNumeroExterior());
+        row.setDireccionNumeroInterior(cliente.getDireccionNumeroInterior());
+        row.setDireccionColonia(cliente.getDireccionColonia());
+        row.setDireccionMunicipio(cliente.getDireccionMunicipio());
+        row.setDireccionEstado(cliente.getDireccionEstado());
+        row.setDireccionCodigoPostal(cliente.getDireccionCodigoPostal());
+        row.setDireccionReferencia(cliente.getDireccionReferencia());
+        row.setNotasInternas(cliente.getNotasInternas());
+        row.setRfc(cliente.getRfc());
+        row.setRazonSocial(cliente.getRazonSocial());
+        row.setCodigoPostalFiscal(cliente.getCodigoPostalFiscal());
+        row.setCorreoFiscal(cliente.getCorreoFiscal());
+        row.setRegimenFiscal(cliente.getRegimenFiscal());
+        row.setUsoCfdi(cliente.getUsoCfdi());
+        row.setAvatar(cliente.getAvatar());
+        row.setEstatus("ACTIVO".equals(normalizedEstadoCliente(cliente)));
+        row.setTieneDatosFiscales(hasFiscalData(cliente));
+        row.setTieneDireccion(hasAddressData(cliente));
+        row.setComprasRegistradas(comprasPorCliente.getOrDefault(cliente.getIdCliente(), 0L));
+        row.setUltimaCompra(ultimaCompraPorCliente.get(cliente.getIdCliente()));
+        row.setFechaCreacion(cliente.getFechaCreacion());
+        row.setFechaModificacion(cliente.getFechaModificacion());
+        return row;
+    }
+
+    private Map<Integer, Long> countComprasByCliente(List<Integer> idsCliente, Integer empresaId) {
+        if (idsCliente == null || idsCliente.isEmpty()) return Map.of();
+        return toCountMap(ventasRepository.countByClienteIdsAndEmpresa(idsCliente, empresaId));
+    }
+
+    private Map<Integer, PedidoClienteDTO> latestPurchaseByCliente(List<Integer> idsCliente, Integer empresaId) {
+        if (idsCliente == null || idsCliente.isEmpty()) return Map.of();
+        Map<Integer, PedidoClienteDTO> result = new HashMap<>();
+        for (VentasEntity venta : ventasRepository.findLatestByClienteIdsAndEmpresa(idsCliente, empresaId)) {
+            if (venta.getCliente() == null || venta.getCliente().getIdCliente() == null) continue;
+            result.putIfAbsent(venta.getCliente().getIdCliente(), toPedidoResumenDto(venta));
+        }
+        return result;
+    }
+
+    private Map<Integer, Long> toCountMap(List<Object[]> rows) {
+        Map<Integer, Long> result = new HashMap<>();
+        if (rows == null) return result;
+
+        for (Object[] row : rows) {
+            if (row == null || row.length < 2 || !(row[0] instanceof Number) || !(row[1] instanceof Number)) {
+                continue;
+            }
+            result.put(((Number) row[0]).intValue(), ((Number) row[1]).longValue());
+        }
+        return result;
+    }
+
+    @Override
     public ClientesEntity update(ClientesEntity obj, String user) {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
 
         ClientesEntity entityToUpdate = findCliente(obj.getIdCliente(), empresaId);
+        ensureClienteNoArchivado(entityToUpdate);
+        String estadoActual = normalizedEstadoCliente(entityToUpdate);
+        String estadoSolicitado = requestedEstadoCliente(obj, estadoActual);
+        if (!estadoActual.equals(estadoSolicitado)) {
+            throw new IllegalArgumentException("El estado del cliente se cambia desde el flujo de salida segura.");
+        }
+        if ("INACTIVO".equals(estadoActual)) {
+            throw new IllegalStateException("El cliente inactivo solo puede reactivarse antes de modificarlo.");
+        }
         validateCliente(obj);
         applyUpdate(entityToUpdate, obj);
         entityToUpdate.setUsuarioModificacion(user);
@@ -91,11 +443,12 @@ public class ClientesServiceImpl implements ClientesService {
         Integer empresaId = EmpresaContextHolder.getEmpresaId();
         ClientesEntity entity = findCliente(idCliente, empresaId);
         String estadoNuevo = validateEstado(estadoCliente);
-        String estadoAnterior = validateEstado(entity.getEstadoCliente());
+        String estadoAnterior = normalizedEstadoCliente(entity);
 
         if (estadoAnterior.equals(estadoNuevo)) {
             throw new IllegalArgumentException("El cliente ya se encuentra en estado " + estadoNuevo);
         }
+        validateEstadoTransition(estadoAnterior, estadoNuevo);
 
         entity.setEstadoClienteAnterior(estadoAnterior);
         entity.setEstadoCliente(estadoNuevo);
@@ -175,6 +528,22 @@ public class ClientesServiceImpl implements ClientesService {
                 metodoPago,
                 venta.getEstado(),
                 productos
+        );
+    }
+
+    private PedidoClienteDTO toPedidoResumenDto(VentasEntity venta) {
+        BigDecimal importeTotal = BigDecimal.valueOf(venta.getTotal() == null ? 0 : venta.getTotal())
+                .setScale(2, RoundingMode.HALF_UP);
+        String metodoPago = venta.getMetodoPago() == null ? "" : venta.getMetodoPago().getNombreMetodoPago();
+
+        return new PedidoClienteDTO(
+                "Venta #" + venta.getIdVenta(),
+                venta.getFechaCreacion() == null ? null : venta.getFechaCreacion().toLocalDate(),
+                0,
+                importeTotal,
+                metodoPago,
+                venta.getEstado(),
+                List.of()
         );
     }
 
@@ -284,9 +653,6 @@ public class ClientesServiceImpl implements ClientesService {
         target.setNombre(source.getNombre().trim());
         target.setAlias(trimToNull(source.getAlias()));
         target.setTipoCliente(isBlank(source.getTipoCliente()) ? "PERSONA" : validateValue("tipoCliente", source.getTipoCliente(), TIPOS_CLIENTE));
-        target.setEstadoCliente(!isBlank(source.getEstadoCliente())
-                ? validateEstado(source.getEstadoCliente())
-                : source.getEstatus() != null && !source.getEstatus() ? "INACTIVO" : "ACTIVO");
         target.setEmail(trimToEmpty(source.getEmail()));
         target.setTelefono(sanitizePhone(source.getTelefono()));
         target.setWhatsapp(sanitizePhone(source.getWhatsapp()));
@@ -357,7 +723,7 @@ public class ClientesServiceImpl implements ClientesService {
         policy.put("puedeEliminar", puedeEliminar);
         policy.put("dependencias", dependencies);
         policy.put("motivos", motivos);
-        policy.put("accionRecomendada", puedeEliminar ? "ELIMINAR_FISICAMENTE" : "DESACTIVAR_O_ARCHIVAR");
+        policy.put("accionRecomendada", recommendedExitAction(entity, puedeEliminar));
         policy.put(
                 "mensaje",
                 puedeEliminar
@@ -374,6 +740,18 @@ public class ClientesServiceImpl implements ClientesService {
                 || !isBlank(entity.getCorreoFiscal())
                 || !isBlank(entity.getRegimenFiscal())
                 || !isBlank(entity.getUsoCfdi());
+    }
+
+    private boolean hasAddressData(ClientesEntity entity) {
+        return !isBlank(entity.getDireccion())
+                || !isBlank(entity.getDireccionCalle())
+                || !isBlank(entity.getDireccionNumeroExterior())
+                || !isBlank(entity.getDireccionNumeroInterior())
+                || !isBlank(entity.getDireccionColonia())
+                || !isBlank(entity.getDireccionMunicipio())
+                || !isBlank(entity.getDireccionEstado())
+                || !isBlank(entity.getDireccionCodigoPostal())
+                || !isBlank(entity.getDireccionReferencia());
     }
 
     private boolean hasRelevantAudit(ClientesEntity entity) {
@@ -402,6 +780,24 @@ public class ClientesServiceImpl implements ClientesService {
         obj.setEstatus("ACTIVO".equals(validateEstado(obj.getEstadoCliente())));
     }
 
+    private void validateEstadoTransition(String estadoAnterior, String estadoNuevo) {
+        if ("ARCHIVADO".equals(estadoAnterior)) {
+            throw new IllegalStateException("El cliente archivado es una baja historica definitiva y no puede reactivarse ni cambiar de estado.");
+        }
+        if ("ACTIVO".equals(estadoNuevo) && !"INACTIVO".equals(estadoAnterior)) {
+            throw new IllegalArgumentException("Solo un cliente inactivo puede reactivarse.");
+        }
+        if ("INACTIVO".equals(estadoNuevo) && !"ACTIVO".equals(estadoAnterior)) {
+            throw new IllegalArgumentException("Solo un cliente activo puede desactivarse.");
+        }
+    }
+
+    private void ensureClienteNoArchivado(ClientesEntity entity) {
+        if (entity != null && "ARCHIVADO".equals(normalizedEstadoCliente(entity))) {
+            throw new IllegalStateException("El cliente archivado es solo historico y no acepta cambios.");
+        }
+    }
+
     private String actionForEstado(String estado) {
         return switch (estado) {
             case "ACTIVO" -> "REACTIVAR";
@@ -409,6 +805,32 @@ public class ClientesServiceImpl implements ClientesService {
             case "ARCHIVADO" -> "ARCHIVAR";
             default -> "CAMBIAR_ESTADO";
         };
+    }
+
+    private String recommendedExitAction(ClientesEntity entity, boolean puedeEliminar) {
+        if (puedeEliminar) return "ELIMINAR_FISICAMENTE";
+        String estado = normalizedEstadoCliente(entity);
+        if ("ACTIVO".equals(estado)) return "DESACTIVAR_O_ARCHIVAR";
+        if ("INACTIVO".equals(estado)) return "REACTIVAR_O_ARCHIVAR";
+        return "SOLO_CONSULTA";
+    }
+
+    private String normalizedEstadoCliente(ClientesEntity entity) {
+        if (entity == null || isBlank(entity.getEstadoCliente())) {
+            return entity != null && Boolean.FALSE.equals(entity.getEstatus()) ? "INACTIVO" : "ACTIVO";
+        }
+        return validateEstado(entity.getEstadoCliente());
+    }
+
+    private String requestedEstadoCliente(ClientesEntity request, String fallback) {
+        if (request == null) return fallback;
+        if (!isBlank(request.getEstadoCliente())) {
+            return validateEstado(request.getEstadoCliente());
+        }
+        if (request.getEstatus() != null) {
+            return Boolean.TRUE.equals(request.getEstatus()) ? "ACTIVO" : "INACTIVO";
+        }
+        return fallback;
     }
 
     private String requireMotivo(String motivo) {
@@ -434,6 +856,14 @@ public class ClientesServiceImpl implements ClientesService {
 
     private String validateEstado(String estado) {
         return validateValue("estadoCliente", isBlank(estado) ? "ACTIVO" : estado, ESTADOS_CLIENTE);
+    }
+
+    private String filterValue(String rawValue) {
+        String value = trimToNull(rawValue);
+        if (value == null || "TODOS".equalsIgnoreCase(value) || "ALL".equalsIgnoreCase(value)) {
+            return null;
+        }
+        return normalizeValue(value);
     }
 
     private String validateValue(String field, String rawValue, Set<String> allowedValues) {

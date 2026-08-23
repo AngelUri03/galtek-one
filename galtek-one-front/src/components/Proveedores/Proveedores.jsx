@@ -474,8 +474,9 @@ export default function Proveedores() {
       }
 
       Object.entries(filters).forEach(([key, value]) => {
-        if (value && value !== emptyFilters[key]) {
-          params.set(key, value);
+        const normalizedValue = String(value || "").trim();
+        if (normalizedValue && normalizedValue !== "TODOS") {
+          params.set(key, normalizedValue);
         }
       });
 
@@ -632,10 +633,38 @@ export default function Proveedores() {
     }
   };
 
-  const saveProveedor = async ({ proveedor, contactos, contactRefs, deletedContactIds }) => {
+  const saveProveedor = async ({
+    proveedor,
+    contactos,
+    contactRefs,
+    deletedContactIds,
+    activateOnly = false,
+    motivo,
+  }) => {
     setSaving(true);
     try {
       const editing = editorMode === "edit" && editorProveedor?.idProveedor;
+      if (activateOnly) {
+        if (!editing) {
+          throw new Error("No se encontro el proveedor para reactivar.");
+        }
+
+        const response = await api.fetchApi(
+          {},
+          "PUT",
+          { motivo: motivo || "Reactivado desde edicion de proveedor" },
+          `${endpoints.proveedores}/${editorProveedor.idProveedor}/reactivar`
+        );
+        await readApiPayload(response, "reactivar proveedor");
+
+        showToast("success", "Proveedor reactivado", "Ahora puedes editar sus datos.");
+        setEditorVisible(false);
+        setEditorProveedor(null);
+        restoreFocus();
+        await fetchProveedores();
+        return;
+      }
+
       const url = editing
         ? `${endpoints.proveedores}/${editorProveedor.idProveedor}`
         : endpoints.proveedores;
@@ -881,8 +910,10 @@ export default function Proveedores() {
     targetAction === "eliminar"
       ? "pi pi-trash"
       : targetAction === "archivar"
-      ? "pi pi-exclamation-triangle"
-      : "pi pi-check";
+      ? "pi pi-folder"
+      : targetAction === "reactivar"
+      ? "pi pi-play"
+      : "pi pi-pause";
   const confirmDisabled =
     saving ||
     actionPreparing ||
@@ -1092,7 +1123,7 @@ export default function Proveedores() {
                         }
                         disabled={saving || actionPreparing}
                       >
-                        <i className="pi pi-pause-circle" />
+                        <i className="pi pi-pause" />
                         <span>
                           <strong>Desactivar</strong>
                           <small>Pausa temporal, puede volver</small>

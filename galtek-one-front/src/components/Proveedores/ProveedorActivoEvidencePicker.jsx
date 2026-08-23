@@ -135,7 +135,7 @@ export default function ProveedorActivoEvidencePicker({
                 disabled={disabled}
                 aria-label="Quitar evidencia"
                 tooltip="Quitar evidencia"
-                tooltipOptions={{ position: "top" }}
+                tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
               />
             </article>
           ))}

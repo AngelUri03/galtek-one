@@ -6,8 +6,8 @@ import { Tag } from "primereact/tag";
 import { APIfetchApi } from "../../API/APIfetch";
 import { endpoints } from "../../API/api";
 import { readApiPayload } from "./proveedoresUtils";
+import { ModalSurface } from "../common/OverlaySurfaces";
 import {
-  DOCUMENTO_ESTADO_OPTIONS,
   DOCUMENTO_MIME_OPTIONS,
   DOCUMENTO_TIPO_OPTIONS,
   MAX_DOCUMENT_BYTES,
@@ -21,7 +21,7 @@ import {
   AdvancedEmpty,
   AdvancedFormActions,
   AdvancedSection,
-  ConfirmActionDialog,
+  FieldLabel,
   TextAreaField,
   TextField,
 } from "./ProveedorAdvancedShared";
@@ -46,6 +46,31 @@ const MIME_BY_EXTENSION = {
 
 const ACCEPTED_EXTENSIONS = Object.keys(MIME_BY_EXTENSION).map((extension) => `.${extension}`);
 const ACCEPTED_FILES = [...DOCUMENTO_MIME_OPTIONS.map((option) => option.value), ...ACCEPTED_EXTENSIONS].join(",");
+
+const DOCUMENTO_FIELD_LIMITS = {
+  nombre: 120,
+  descripcion: 520,
+  motivo: 420,
+};
+
+function limitDocumentoValue(field, value) {
+  const limit = DOCUMENTO_FIELD_LIMITS[field];
+  if (!limit || typeof value !== "string") return value;
+  return value.slice(0, limit);
+}
+
+function focusFirstDocumentFormError(root, errors) {
+  const firstField = Object.keys(errors).find((field) => errors[field]);
+  if (!firstField || !root) return;
+
+  window.requestAnimationFrame(() => {
+    const field = root.querySelector(`[data-field-key="${firstField}"]`);
+    if (!field) return;
+    field.scrollIntoView({ behavior: "smooth", block: "center" });
+    const control = field.querySelector("input, textarea, button, .p-dropdown");
+    control?.focus?.({ preventScroll: true });
+  });
+}
 
 function getDocumentoUrl(idProveedor, idDocumento) {
   return idDocumento
@@ -177,6 +202,53 @@ function fileKind(documento) {
   return { label: "Archivo", icon: "pi pi-file", tone: "file" };
 }
 
+function documentoEstado(item) {
+  return String(item?.estadoDocumento || "ACTIVO").trim().toUpperCase();
+}
+
+function documentoEstadoSeverity(item) {
+  const state = documentoEstado(item);
+  if (state === "ACTIVO") return "success";
+  if (state === "INACTIVO") return "warning";
+  return "secondary";
+}
+
+function documentoFlowDefaultAction(item) {
+  const state = documentoEstado(item);
+  if (state === "ACTIVO") return "desactivar";
+  if (state === "INACTIVO") return "reactivar";
+  return null;
+}
+
+function documentoFlowSummary(item, action) {
+  const state = documentoEstado(item);
+  if (state === "ARCHIVADO") {
+    return "Este documento ya esta archivado y solo permite consultar historial.";
+  }
+  if (action === "archivar") {
+    return "Archivar conserva el historial, pero bloquea el documento de forma definitiva.";
+  }
+  if (action === "reactivar") {
+    return "Reactivar devuelve el documento al flujo normal de operacion.";
+  }
+  if (state === "ACTIVO") {
+    return "El documento activo puede pausarse temporalmente o archivarse como historico definitivo.";
+  }
+  return "El documento inactivo puede volver al flujo normal o archivarse definitivamente.";
+}
+
+function documentoFlowConfirmLabel(action) {
+  if (action === "reactivar") return "Activar documento";
+  if (action === "archivar") return "Archivar documento";
+  return "Desactivar documento";
+}
+
+function documentoFlowConfirmIcon(action) {
+  if (action === "reactivar") return "pi pi-play";
+  if (action === "archivar") return "pi pi-folder";
+  return "pi pi-pause";
+}
+
 function historyDocument(event, prefix) {
   return {
     nombre: prefix === "anterior" ? event.archivoAnteriorNombre : event.archivoNuevoNombre,
@@ -306,16 +378,6 @@ export function DocumentoPreviewDialog({ documento, onHide }) {
     >
       {documento ? (
         <div className="prov-document-preview-shell">
-          <div className="prov-document-preview-toolbar">
-            <FileMetaStrip documento={documento} locked />
-            <Button
-              label="Descargar"
-              icon="pi pi-download"
-              className="prov-soft-btn prov-document-download-btn"
-              onClick={() => downloadDocumento(documento)}
-              disabled={!canDownload(documento)}
-            />
-          </div>
           <div className="prov-document-preview-body">
             {isImage ? <img src={dataUrl} alt={documento.nombre || "Documento"} /> : null}
             {isPdf ? <iframe title={documento.nombre || "Documento PDF"} src={dataUrl} /> : null}
@@ -350,7 +412,7 @@ export function DocumentoHistoryContent({ documento, onPreview }) {
                 return (
                   <article key={event.idProveedorDocumentoHistorial || `${event.tipoEvento}-${event.fechaEvento}`} className="prov-document-history-event">
                     <span className="prov-document-history-icon">
-                      <i className={event.tipoEvento === "NUEVA_VERSION" ? "pi pi-refresh" : event.tipoEvento === "ARCHIVADO" ? "pi pi-ban" : "pi pi-history"} />
+                      <i className={event.tipoEvento === "NUEVA_VERSION" ? "pi pi-refresh" : event.tipoEvento === "ARCHIVADO" ? "pi pi-folder" : "pi pi-history"} />
                     </span>
                     <div>
                       <div className="prov-document-history-title">
@@ -517,7 +579,7 @@ function DocumentoVersionDialog({
           </div>
           <div className={`prov-document-uploader ${errors.archivo ? "has-error" : ""}`}>
             <div>
-              <span>Nuevo archivo</span>
+              <FieldLabel required>Nuevo archivo</FieldLabel>
               <strong>{form.archivoNombre || "Selecciona la version firmada o corregida"}</strong>
               <small>PDF, imagen, Excel, Word, PowerPoint, CSV o texto - maximo 25 MB.</small>
             </div>
@@ -541,9 +603,12 @@ function DocumentoVersionDialog({
             label="Motivo de la nueva version"
             value={form.motivo}
             onChange={(value) => onChange("motivo", value)}
+            error={errors.motivo}
+            required
+            fieldKey="motivo"
+            maxLength={DOCUMENTO_FIELD_LIMITS.motivo}
             placeholder="Ej. Se recibio contrato firmado por el proveedor; conservar version anterior como evidencia."
           />
-          {errors.motivo ? <small className="prov-field-error">{errors.motivo}</small> : null}
         </div>
       ) : null}
     </Dialog>
@@ -559,6 +624,7 @@ export function ProveedorDocumentoFormView({
   onDirtyChange,
 }) {
   const fileInputRef = useRef(null);
+  const formRef = useRef(null);
   const [form, setForm] = useState(() => createDocumentoForm(item));
   const [initialSnapshot, setInitialSnapshot] = useState(() =>
     JSON.stringify(createDocumentoForm(item))
@@ -583,7 +649,7 @@ export function ProveedorDocumentoFormView({
   }, [dirty, onDirtyChange]);
 
   const update = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((prev) => ({ ...prev, [field]: limitDocumentoValue(field, value) }));
     setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
@@ -626,6 +692,7 @@ export function ProveedorDocumentoFormView({
   const validate = () => {
     const nextErrors = {};
     if (!String(form.nombre || "").trim()) nextErrors.nombre = "El nombre es obligatorio.";
+    if (!String(form.tipo || "").trim()) nextErrors.tipo = "Selecciona un tipo.";
     if (!editing && !form.archivoBase64) {
       nextErrors.archivo = "Selecciona el archivo del documento.";
     }
@@ -640,6 +707,10 @@ export function ProveedorDocumentoFormView({
       nextErrors.archivo = "Formato no permitido.";
     }
     setErrors(nextErrors);
+    if (Object.keys(nextErrors).length) {
+      focusFirstDocumentFormError(formRef.current, nextErrors);
+      return false;
+    }
     return Object.keys(nextErrors).length === 0;
   };
 
@@ -670,7 +741,7 @@ export function ProveedorDocumentoFormView({
   };
 
   return (
-    <div className="prov-adv-form prov-workspace-form">
+    <div className="prov-workspace-form prov-document-workspace-form" ref={formRef}>
       <input
         ref={fileInputRef}
         type="file"
@@ -678,22 +749,29 @@ export function ProveedorDocumentoFormView({
         className="prov-hidden-file"
         onChange={handleFile}
       />
-      <div className="prov-form-grid">
+      <div className="prov-form-grid prov-workspace-form-body">
         <TextField
           label="Nombre del documento"
           value={form.nombre}
           onChange={(value) => update("nombre", value)}
           error={errors.nombre}
+          required
+          fieldKey="nombre"
+          maxLength={DOCUMENTO_FIELD_LIMITS.nombre}
           placeholder="Ej. Comodato enfriador Coca-Cola"
           autoFocus
         />
-        <label className="prov-field">
-          <span>Tipo</span>
+        <label className={`prov-field ${errors.tipo ? "has-error" : ""}`} data-field-key="tipo">
+          <FieldLabel required>Tipo</FieldLabel>
           <Dropdown
             value={form.tipo}
             options={DOCUMENTO_TIPO_OPTIONS}
             onChange={(event) => update("tipo", event.value)}
+            placeholder="Selecciona tipo"
+            aria-invalid={errors.tipo ? "true" : undefined}
+            aria-required
           />
+          {errors.tipo ? <small className="prov-field-error">{errors.tipo}</small> : null}
         </label>
 
         {editing ? (
@@ -707,9 +785,12 @@ export function ProveedorDocumentoFormView({
           </div>
         ) : (
           <>
-            <div className={`prov-document-uploader prov-field-wide ${errors.archivo ? "has-error" : ""}`}>
+            <div
+              className={`prov-document-uploader prov-field-wide ${errors.archivo ? "has-error" : ""}`}
+              data-field-key="archivo"
+            >
               <div>
-                <span>Archivo obligatorio</span>
+                <FieldLabel required>Archivo obligatorio</FieldLabel>
                 <strong>{form.archivoNombre || "Sin archivo seleccionado"}</strong>
                 <small>PDF, imagen, Excel, Word, PowerPoint, CSV o texto - maximo 25 MB.</small>
               </div>
@@ -735,19 +816,13 @@ export function ProveedorDocumentoFormView({
           </span>
         </div>
 
-        <label className="prov-field">
-          <span>Estado</span>
-          <Dropdown
-            value={form.estadoDocumento}
-            options={DOCUMENTO_ESTADO_OPTIONS}
-            onChange={(event) => update("estadoDocumento", event.value)}
-          />
-        </label>
         <TextAreaField
           label="Descripcion"
           value={form.descripcion}
           onChange={(value) => update("descripcion", value)}
           className="prov-field-wide"
+          fieldKey="descripcion"
+          maxLength={DOCUMENTO_FIELD_LIMITS.descripcion}
           placeholder="Ej. Contrato firmado, lista vigente o evidencia relacionada al proveedor."
         />
       </div>
@@ -756,6 +831,9 @@ export function ProveedorDocumentoFormView({
         saving={saving}
         onCancel={onCancel}
         onSave={save}
+        saveLabel={editing ? "Guardar documento" : "Agregar documento"}
+        className="prov-workspace-editor-footer"
+        editorStyle
       />
     </div>
   );
@@ -773,9 +851,10 @@ export default function ProveedorDocumentosSection({
 }) {
   const fileInputRef = useRef(null);
   const versionFileInputRef = useRef(null);
+  const inlineFormRef = useRef(null);
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [confirm, setConfirm] = useState(null);
+  const [documentFlow, setDocumentFlow] = useState(null);
   const [preview, setPreview] = useState(null);
   const [history, setHistory] = useState(null);
   const [versionItem, setVersionItem] = useState(null);
@@ -793,13 +872,14 @@ export default function ProveedorDocumentosSection({
   const editing = Boolean(form?.idProveedorDocumento);
 
   const update = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((prev) => ({ ...prev, [field]: limitDocumentoValue(field, value) }));
     setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
   const validate = () => {
     const nextErrors = {};
     if (!String(form.nombre || "").trim()) nextErrors.nombre = "El nombre es obligatorio.";
+    if (!String(form.tipo || "").trim()) nextErrors.tipo = "Selecciona un tipo.";
     if (!editing && !form.archivoBase64) nextErrors.archivo = "Selecciona el archivo del documento.";
     if (!editing && form.tamanoBytes != null && Number(form.tamanoBytes) > MAX_DOCUMENT_BYTES) {
       nextErrors.archivo = "Maximo 25 MB.";
@@ -808,6 +888,10 @@ export default function ProveedorDocumentosSection({
       nextErrors.archivo = "Formato no permitido.";
     }
     setErrors(nextErrors);
+    if (Object.keys(nextErrors).length) {
+      focusFirstDocumentFormError(inlineFormRef.current, nextErrors);
+      return false;
+    }
     return Object.keys(nextErrors).length === 0;
   };
 
@@ -931,8 +1015,8 @@ export default function ProveedorDocumentosSection({
     }
   };
 
-  const archive = async () => {
-    if (!confirm) return;
+  const archiveDocumento = async (item) => {
+    if (!item) return false;
 
     setSaving(true);
     try {
@@ -940,43 +1024,79 @@ export default function ProveedorDocumentosSection({
         {},
         "DELETE",
         undefined,
-        getDocumentoUrl(proveedor.idProveedor, confirm.idProveedorDocumento)
+        getDocumentoUrl(proveedor.idProveedor, item.idProveedorDocumento)
       );
       await readApiPayload(response, "archivar documento");
-      showToast("success", "Documentos", "Documento archivado.");
-      setConfirm(null);
+      showToast("success", "Documentos", "Documento archivado como historico.");
       await onRefresh();
+      return true;
     } catch (error) {
       showToast("error", "Documentos", error?.message || "No se pudo completar.");
+      return false;
     } finally {
       setSaving(false);
     }
   };
 
-  const restore = async (item) => {
-    if (!item) return;
+  const changeDocumentoEstado = async (item, estadoDocumento, successMessage) => {
+    if (!item) return false;
 
     setSaving(true);
     try {
       const response = await api.fetchApi(
         {},
         "PUT",
-        buildDocumentoPayload({ ...createDocumentoForm(item), estadoDocumento: "ACTIVO" }),
+        buildDocumentoPayload({ ...createDocumentoForm(item), estadoDocumento }),
         getDocumentoUrl(proveedor.idProveedor, item.idProveedorDocumento)
       );
-      await readApiPayload(response, "desarchivar documento");
-      showToast("success", "Documentos", "Documento restaurado.");
+      await readApiPayload(response, "cambiar estado de documento");
+      showToast("success", "Documentos", successMessage);
       await onRefresh();
+      return true;
     } catch (error) {
-      showToast("error", "Documentos", error?.message || "No se pudo restaurar.");
+      showToast("error", "Documentos", error?.message || "No se pudo cambiar el estado.");
+      return false;
     } finally {
       setSaving(false);
     }
   };
 
+  const openDocumentFlow = (item) => {
+    if (readOnly) {
+      showToast?.("info", "Proveedor archivado", "Los documentos quedan solo como historial.");
+      return;
+    }
+    const selectedAction = documentoFlowDefaultAction(item);
+    if (!selectedAction) return;
+    setDocumentFlow({ item, selectedAction, archiveConfirmed: false });
+  };
+
+  const confirmDocumentFlow = async () => {
+    if (!documentFlow?.item || !documentFlow.selectedAction) return;
+    if (documentFlow.selectedAction === "archivar" && !documentFlow.archiveConfirmed) {
+      showToast?.("warn", "Confirmacion requerida", "Confirma que el documento quedara como historial definitivo.");
+      return;
+    }
+
+    let completed = false;
+    if (documentFlow.selectedAction === "archivar") {
+      completed = await archiveDocumento(documentFlow.item);
+    } else if (documentFlow.selectedAction === "reactivar") {
+      completed = await changeDocumentoEstado(documentFlow.item, "ACTIVO", "Documento reactivado.");
+    } else {
+      completed = await changeDocumentoEstado(documentFlow.item, "INACTIVO", "Documento inactivado.");
+    }
+
+    if (completed) setDocumentFlow(null);
+  };
+
   const openVersion = (item) => {
     if (readOnly) {
       showToast?.("info", "Proveedor archivado", "Los documentos quedan solo como historial.");
+      return;
+    }
+    if (documentoEstado(item) !== "ACTIVO") {
+      showToast?.("info", "Documento sin operacion", "Reactiva el documento antes de registrar una nueva version.");
       return;
     }
     setVersionItem(item);
@@ -989,6 +1109,10 @@ export default function ProveedorDocumentosSection({
       showToast?.("info", "Proveedor archivado", "Los documentos quedan solo como historial.");
       return;
     }
+    if (item && documentoEstado(item) !== "ACTIVO") {
+      showToast?.("info", "Documento sin operacion", "Solo los documentos activos pueden editarse.");
+      return;
+    }
     if (onOpenForm) {
       onOpenForm(item);
       return;
@@ -996,6 +1120,16 @@ export default function ProveedorDocumentosSection({
     setForm(createDocumentoForm(item));
     setErrors({});
   };
+
+  const documentFlowState = documentoEstado(documentFlow?.item);
+  const documentFlowAction = documentFlow?.selectedAction || null;
+  const documentFlowArchive = documentFlowAction === "archivar";
+  const documentFlowConfirmDisabled =
+    saving ||
+    versionSaving ||
+    !documentFlowAction ||
+    documentFlowState === "ARCHIVADO" ||
+    (documentFlowArchive && !documentFlow?.archiveConfirmed);
 
   return (
     <AdvancedSection
@@ -1018,7 +1152,7 @@ export default function ProveedorDocumentosSection({
       ) : null}
 
       {form ? (
-        <div className="prov-adv-form">
+        <div className="prov-adv-form" ref={inlineFormRef}>
           <input
             ref={fileInputRef}
             type="file"
@@ -1032,15 +1166,22 @@ export default function ProveedorDocumentosSection({
               value={form.nombre}
               onChange={(value) => update("nombre", value)}
               error={errors.nombre}
+              required
+              fieldKey="nombre"
+              maxLength={DOCUMENTO_FIELD_LIMITS.nombre}
               placeholder="Ej. Comodato enfriador Coca-Cola"
             />
-            <label className="prov-field">
-              <span>Tipo</span>
+            <label className={`prov-field ${errors.tipo ? "has-error" : ""}`} data-field-key="tipo">
+              <FieldLabel required>Tipo</FieldLabel>
               <Dropdown
                 value={form.tipo}
                 options={DOCUMENTO_TIPO_OPTIONS}
                 onChange={(event) => update("tipo", event.value)}
+                placeholder="Selecciona tipo"
+                aria-invalid={errors.tipo ? "true" : undefined}
+                aria-required
               />
+              {errors.tipo ? <small className="prov-field-error">{errors.tipo}</small> : null}
             </label>
 
             {editing ? (
@@ -1053,9 +1194,12 @@ export default function ProveedorDocumentosSection({
               </div>
             ) : (
               <>
-                <div className={`prov-document-uploader prov-field-wide ${errors.archivo ? "has-error" : ""}`}>
+                <div
+                  className={`prov-document-uploader prov-field-wide ${errors.archivo ? "has-error" : ""}`}
+                  data-field-key="archivo"
+                >
                   <div>
-                    <span>Archivo obligatorio</span>
+                    <FieldLabel required>Archivo obligatorio</FieldLabel>
                     <strong>{form.archivoNombre || "Sin archivo seleccionado"}</strong>
                     <small>PDF, imagen, Excel, Word, PowerPoint, CSV o texto - maximo 25 MB.</small>
                   </div>
@@ -1077,19 +1221,13 @@ export default function ProveedorDocumentosSection({
               <span>Almacenamiento <strong>{form.archivoBase64 ? "Base de datos" : "Sin contenido cargado"}</strong></span>
             </div>
 
-            <label className="prov-field">
-              <span>Estado</span>
-              <Dropdown
-                value={form.estadoDocumento}
-                options={DOCUMENTO_ESTADO_OPTIONS}
-                onChange={(event) => update("estadoDocumento", event.value)}
-              />
-            </label>
             <TextAreaField
               label="Descripcion"
               value={form.descripcion}
               onChange={(value) => update("descripcion", value)}
               className="prov-field-wide"
+              fieldKey="descripcion"
+              maxLength={DOCUMENTO_FIELD_LIMITS.descripcion}
               placeholder="Ej. Contrato firmado, lista vigente o evidencia relacionada al proveedor."
             />
           </div>
@@ -1098,6 +1236,7 @@ export default function ProveedorDocumentosSection({
             saving={saving}
             onCancel={() => setForm(null)}
             onSave={save}
+            saveLabel={editing ? "Guardar documento" : "Agregar documento"}
           />
         </div>
       ) : null}
@@ -1106,7 +1245,10 @@ export default function ProveedorDocumentosSection({
         <div className="prov-adv-card-grid">
           {items.map((item) => {
             const storedInDb = Boolean(item.archivoBase64);
-            const isArchived = String(item.estadoDocumento || "").toUpperCase() === "ARCHIVADO";
+            const estado = documentoEstado(item);
+            const isActive = estado === "ACTIVO";
+            const isInactive = estado === "INACTIVO";
+            const isArchived = estado === "ARCHIVADO";
             const isHighlighted =
               highlightedDocumentoId &&
               Number(highlightedDocumentoId) === Number(item.idProveedorDocumento);
@@ -1126,7 +1268,7 @@ export default function ProveedorDocumentosSection({
                   </div>
                   <Tag
                     value={enumText(item.estadoDocumento)}
-                    severity={item.estadoDocumento === "ACTIVO" ? "success" : "secondary"}
+                    severity={documentoEstadoSeverity(item)}
                     className="prov-state-tag"
                   />
                 </div>
@@ -1140,39 +1282,50 @@ export default function ProveedorDocumentosSection({
                   <span>Descripcion <strong>{item.descripcion || "--"}</strong></span>
                 </div>
                 <AdvancedCardActions
-                  onEdit={readOnly ? null : () => openForm(item)}
-                  onArchive={readOnly || isArchived ? null : () => setConfirm(item)}
-                  archiveLabel="Archivar documento"
+                  onEdit={readOnly || !isActive ? null : () => openForm(item)}
                   disabled={saving || versionSaving}
                   extra={
                     <>
-                      <Button
-                        icon="pi pi-eye"
-                        className="prov-row-action"
-                        onClick={() => setPreview(item)}
-                        disabled={!storedInDb || saving || versionSaving}
-                        aria-label="Vista previa"
-                        tooltip="Vista previa"
-                        tooltipOptions={{ position: "top" }}
-                      />
-                      <Button
-                        icon="pi pi-download"
-                        className="prov-row-action"
-                        onClick={() => downloadDocumento(item)}
-                        disabled={!canDownload(item) || saving || versionSaving}
-                        aria-label="Descargar"
-                        tooltip="Descargar"
-                        tooltipOptions={{ position: "top" }}
-                      />
-                      {!readOnly ? (
+                      {isActive && !readOnly ? (
+                        <>
+                          <Button
+                            icon="pi pi-eye"
+                            className="prov-row-action"
+                            onClick={() => setPreview(item)}
+                            disabled={!storedInDb || saving || versionSaving}
+                            aria-label="Vista previa"
+                            tooltip="Vista previa"
+                            tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
+                          />
+                          <Button
+                            icon="pi pi-download"
+                            className="prov-row-action"
+                            onClick={() => downloadDocumento(item)}
+                            disabled={!canDownload(item) || saving || versionSaving}
+                            aria-label="Descargar"
+                            tooltip="Descargar"
+                            tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
+                          />
+                          <Button
+                            icon="pi pi-refresh"
+                            className="prov-row-action"
+                            onClick={() => openVersion(item)}
+                            disabled={!storedInDb || saving || versionSaving}
+                            aria-label="Nueva version"
+                            tooltip="Nueva version"
+                            tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
+                          />
+                        </>
+                      ) : null}
+                      {!readOnly && !isArchived ? (
                         <Button
-                          icon="pi pi-refresh"
-                          className="prov-row-action"
-                          onClick={() => openVersion(item)}
-                          disabled={!storedInDb || saving || versionSaving}
-                          aria-label="Nueva version"
-                          tooltip="Nueva version"
-                          tooltipOptions={{ position: "top" }}
+                          icon="pi pi-trash"
+                          className="prov-row-action is-danger"
+                          onClick={() => openDocumentFlow(item)}
+                          disabled={saving || versionSaving}
+                          aria-label="Opciones de estado del documento"
+                          tooltip={isInactive ? "Activar o archivar" : "Desactivar o archivar"}
+                          tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
                         />
                       ) : null}
                       <Button
@@ -1182,19 +1335,8 @@ export default function ProveedorDocumentosSection({
                         disabled={saving || versionSaving}
                         aria-label="Historial"
                         tooltip="Historial"
-                        tooltipOptions={{ position: "top" }}
+                        tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
                       />
-                      {isArchived && !readOnly ? (
-                        <Button
-                          icon="pi pi-undo"
-                          className="prov-row-action"
-                          onClick={() => restore(item)}
-                          disabled={saving || versionSaving}
-                          aria-label="Restaurar documento"
-                          tooltip="Restaurar documento"
-                          tooltipOptions={{ position: "top" }}
-                        />
-                      ) : null}
                     </>
                   }
                 />
@@ -1223,7 +1365,7 @@ export default function ProveedorDocumentosSection({
         onPickFile={() => versionFileInputRef.current?.click()}
         onFileChange={handleVersionFile}
         onChange={(field, value) => {
-          setVersionForm((prev) => ({ ...prev, [field]: value }));
+          setVersionForm((prev) => ({ ...prev, [field]: limitDocumentoValue(field, value) }));
           setVersionErrors((prev) => ({ ...prev, [field]: "" }));
         }}
         onCancel={() => {
@@ -1234,14 +1376,113 @@ export default function ProveedorDocumentosSection({
         onSave={saveVersion}
       />
 
-      <ConfirmActionDialog
-        visible={Boolean(confirm)}
-        title="Archivar documento"
-        detail="El documento quedara archivado y se conservara como historial del proveedor."
-        loading={saving}
-        onCancel={() => setConfirm(null)}
-        onConfirm={archive}
-      />
+      <ModalSurface
+        visible={Boolean(documentFlow)}
+        title="Opciones del documento"
+        onHide={() => {
+          if (!saving && !versionSaving) setDocumentFlow(null);
+        }}
+        size="small"
+        className="prov-confirm-dialog"
+        footer={
+          <>
+            <Button
+              label="Cancelar"
+              className="p-button-text prov-text-btn"
+              onClick={() => setDocumentFlow(null)}
+              disabled={saving || versionSaving}
+            />
+            <Button
+              label={documentoFlowConfirmLabel(documentFlowAction)}
+              icon={documentoFlowConfirmIcon(documentFlowAction)}
+              className={documentFlowArchive ? "prov-danger-btn" : "prov-primary-btn"}
+              onClick={confirmDocumentFlow}
+              loading={saving}
+              disabled={documentFlowConfirmDisabled}
+            />
+          </>
+        }
+      >
+        <div className="prov-safe-action-body">
+          <div className={`prov-delete-policy ${documentFlowArchive ? "is-danger" : ""}`}>
+            <i className={documentoFlowConfirmIcon(documentFlowAction)} />
+            <div>
+              <strong>
+                {documentFlowArchive
+                  ? "Archivar documento"
+                  : documentFlowAction === "reactivar"
+                    ? "Activar documento"
+                    : "Desactivar documento"}
+              </strong>
+              <p>{documentoFlowSummary(documentFlow?.item, documentFlowAction)}</p>
+            </div>
+          </div>
+
+          <div className="prov-removal-options">
+            {documentFlowState === "ACTIVO" ? (
+              <button
+                type="button"
+                className={documentFlowAction === "desactivar" ? "is-selected" : ""}
+                onClick={() => setDocumentFlow((prev) => ({ ...prev, selectedAction: "desactivar", archiveConfirmed: false }))}
+              >
+                <i className="pi pi-pause" />
+                <span>
+                  <strong>Desactivar</strong>
+                  <small>Pausa temporal</small>
+                </span>
+              </button>
+            ) : null}
+            {documentFlowState === "INACTIVO" ? (
+              <button
+                type="button"
+                className={documentFlowAction === "reactivar" ? "is-selected" : ""}
+                onClick={() => setDocumentFlow((prev) => ({ ...prev, selectedAction: "reactivar", archiveConfirmed: false }))}
+              >
+                <i className="pi pi-play" />
+                <span>
+                  <strong>Activar</strong>
+                  <small>Vuelve al flujo</small>
+                </span>
+              </button>
+            ) : null}
+            {documentFlowState !== "ARCHIVADO" ? (
+              <button
+                type="button"
+                className={`is-danger ${documentFlowArchive ? "is-selected" : ""}`}
+                onClick={() => setDocumentFlow((prev) => ({ ...prev, selectedAction: "archivar", archiveConfirmed: false }))}
+              >
+                <i className="pi pi-folder" />
+                <span>
+                  <strong>Archivar</strong>
+                  <small>Historial definitivo</small>
+                </span>
+              </button>
+            ) : null}
+          </div>
+
+          {documentFlowArchive ? (
+            <label className="prov-archive-confirm">
+              <span>
+                <i className="pi pi-exclamation-triangle" />
+              </span>
+              <div>
+                <strong>No se podra usar este documento.</strong>
+                <small>No podras editarlo, descargarlo, versionarlo ni reactivarlo.</small>
+                <em>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(documentFlow?.archiveConfirmed)}
+                    onChange={(event) =>
+                      setDocumentFlow((prev) => ({ ...prev, archiveConfirmed: event.target.checked }))
+                    }
+                  />
+                  Confirmo que este documento quedara como historial definitivo.
+                </em>
+              </div>
+            </label>
+          ) : null}
+        </div>
+      </ModalSurface>
     </AdvancedSection>
   );
 }

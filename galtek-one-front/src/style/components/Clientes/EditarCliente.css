@@ -11,20 +11,64 @@
 .crear-wrapper,
 .crear-card,
 .edit-wrapper,
-.edit-card,
-.p-button,
-.p-inputtext,
-.p-dialog,
-.p-datatable,
-.p-column-header-content {
+.edit-card {
   font-family: 'Kodchasan', sans-serif !important;
 }
 
-h1, h2, h3 {
+.edit-wrapper .p-button,
+.edit-wrapper .p-inputtext,
+.edit-wrapper .p-dialog,
+.edit-wrapper .p-datatable,
+.edit-wrapper .p-column-header-content,
+.edit-card .p-button,
+.edit-card .p-inputtext,
+.edit-card .p-dialog,
+.edit-card .p-datatable,
+.edit-card .p-column-header-content,
+.pedido-dialog .p-button,
+.pedido-dialog .p-inputtext,
+.pedido-dialog .p-dialog,
+.pedido-dialog .p-datatable,
+.pedido-dialog .p-column-header-content {
+  font-family: 'Kodchasan', sans-serif !important;
+}
+
+.edit-wrapper h1,
+.edit-wrapper h2,
+.edit-wrapper h3,
+.edit-card h1,
+.edit-card h2,
+.edit-card h3,
+.pedido-dialog h1,
+.pedido-dialog h2,
+.pedido-dialog h3 {
   font-weight: 700;
 }
 
-p, span, td, th, label, button, input, select {
+.edit-wrapper p,
+.edit-wrapper span,
+.edit-wrapper td,
+.edit-wrapper th,
+.edit-wrapper label,
+.edit-wrapper button,
+.edit-wrapper input,
+.edit-wrapper select,
+.edit-card p,
+.edit-card span,
+.edit-card td,
+.edit-card th,
+.edit-card label,
+.edit-card button,
+.edit-card input,
+.edit-card select,
+.pedido-dialog p,
+.pedido-dialog span,
+.pedido-dialog td,
+.pedido-dialog th,
+.pedido-dialog label,
+.pedido-dialog button,
+.pedido-dialog input,
+.pedido-dialog select {
   font-weight: 400;
 }
 

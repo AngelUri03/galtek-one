@@ -34,6 +34,7 @@ import com.galtekone.repository.ProveedorContactoRepository;
 import com.galtekone.repository.ProveedorDocumentoRepository;
 import com.galtekone.repository.ProveedorProductoRespository;
 import com.galtekone.repository.ProveedoresRepository;
+import com.galtekone.services.ProveedorDocumentoService;
 import com.galtekone.services.ProveedoresService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -83,6 +84,9 @@ public class ProveedoresServiceImpl implements ProveedoresService {
 
     @Autowired
     private ProveedorDocumentoRepository proveedorDocumentoRepository;
+
+    @Autowired
+    private ProveedorDocumentoService proveedorDocumentoService;
 
     @Autowired
     private ProveedorAcuerdoRepository proveedorAcuerdoRepository;
@@ -411,7 +415,7 @@ public class ProveedoresServiceImpl implements ProveedoresService {
         detail.put("contactos", proveedorContactoRepository.findByProveedor_IdProveedorAndEmpresa_IdEmpresa(idProveedor, empresaId));
         detail.put("productos", proveedorProductoRepository.findRowsByProveedorAndEmpresa(idProveedor, empresaId));
         detail.put("activos", proveedorActivoRepository.findRowsByProveedorAndEmpresa(idProveedor, empresaId));
-        detail.put("documentos", proveedorDocumentoRepository.findByProveedor_IdProveedorAndEmpresa_IdEmpresa(idProveedor, empresaId));
+        detail.put("documentos", proveedorDocumentoService.readByProveedor(idProveedor));
         detail.put("acuerdos", proveedorAcuerdoRepository.findByProveedor_IdProveedorAndEmpresa_IdEmpresa(idProveedor, empresaId));
 
         return detail;
@@ -435,6 +439,14 @@ public class ProveedoresServiceImpl implements ProveedoresService {
 
         ProveedoresEntity entityToUpdate = findProveedor(obj.getIdProveedor(), empresaId);
         ensureProveedorNoArchivado(entityToUpdate);
+        String estadoActual = normalizedEstadoProveedor(entityToUpdate);
+        String estadoSolicitado = requestedEstadoProveedor(obj, estadoActual);
+        if (!estadoActual.equals(estadoSolicitado)) {
+            throw new IllegalArgumentException("El estado del proveedor se cambia desde el flujo de salida segura.");
+        }
+        if ("INACTIVO".equals(estadoActual)) {
+            throw new IllegalStateException("El proveedor inactivo solo puede reactivarse antes de modificarlo.");
+        }
         validateProveedor(obj, false);
         if (!isBlank(obj.getEstadoProveedor()) && "ARCHIVADO".equals(validateEstado(obj.getEstadoProveedor()))) {
             throw new IllegalArgumentException("Archivar es una baja definitiva historica. Usa la accion Archivar desde el flujo de salida segura.");
@@ -738,6 +750,17 @@ public class ProveedoresServiceImpl implements ProveedoresService {
     private String normalizedEstadoProveedor(ProveedoresEntity entity) {
         if (entity == null || isBlank(entity.getEstadoProveedor())) return "ACTIVO";
         return validateEstado(entity.getEstadoProveedor());
+    }
+
+    private String requestedEstadoProveedor(ProveedoresEntity request, String fallback) {
+        if (request == null) return fallback;
+        if (!isBlank(request.getEstadoProveedor())) {
+            return validateEstado(request.getEstadoProveedor());
+        }
+        if (request.getEstatus() != null) {
+            return Boolean.TRUE.equals(request.getEstatus()) ? "ACTIVO" : "INACTIVO";
+        }
+        return fallback;
     }
 
     private String requireMotivo(String motivo) {

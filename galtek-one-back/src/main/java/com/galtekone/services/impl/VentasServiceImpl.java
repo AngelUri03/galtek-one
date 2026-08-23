@@ -111,6 +111,7 @@ public class VentasServiceImpl implements VentasService {
                     empresaId,
                     "Cliente",
                     clientesRepository::findByIdClienteAndEmpresa_IdEmpresa);
+            ensureClienteActivoParaVenta(cliente);
             entityToUpdate.setCliente(cliente);
         }
         if (obj.getMetodoPago() != null) {
@@ -173,6 +174,7 @@ public class VentasServiceImpl implements VentasService {
                     empresaId,
                     "Cliente",
                     clientesRepository::findByIdClienteAndEmpresa_IdEmpresa);
+            ensureClienteActivoParaVenta(cliente);
         }
 
         MetodoPagoEntity metodoPago = empresaValidator.validarEntidadPorEmpresa(
@@ -548,6 +550,19 @@ public class VentasServiceImpl implements VentasService {
         return metodoPago == null || metodoPago.getNombreMetodoPago() == null
                 ? ""
                 : metodoPago.getNombreMetodoPago().trim().toLowerCase(Locale.ROOT);
+    }
+
+    private void ensureClienteActivoParaVenta(ClientesEntity cliente) {
+        if (cliente == null) return;
+        String estado = cliente.getEstadoCliente() == null
+                ? ""
+                : cliente.getEstadoCliente().trim().toUpperCase(Locale.ROOT);
+        if (estado.isBlank()) {
+            estado = Boolean.FALSE.equals(cliente.getEstatus()) ? "INACTIVO" : "ACTIVO";
+        }
+        if (!"ACTIVO".equals(estado)) {
+            throw new IllegalStateException("El cliente no esta activo y no puede asociarse a una venta.");
+        }
     }
 
     private BigDecimal scaleMoney(BigDecimal value) {

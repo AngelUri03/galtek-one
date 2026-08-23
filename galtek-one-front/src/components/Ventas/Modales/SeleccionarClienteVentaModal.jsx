@@ -25,6 +25,9 @@ const normalize = (value) =>
 
 const getClienteId = (cliente) => cliente?.idCliente ?? cliente?.id ?? null;
 
+const isActiveCliente = (cliente) =>
+  String(cliente?.estadoCliente || "ACTIVO").toUpperCase() === "ACTIVO";
+
 const formatCantidad = (value) => {
   const number = Number(value || 0);
   if (!Number.isFinite(number)) return "0";
@@ -92,7 +95,8 @@ export default function SeleccionarClienteVentaModal({
 
     setStep(selectedCliente ? "client" : "choice");
     setSearch("");
-    setClienteSeleccionado(selectedCliente || null);
+    const normalizado = selectedCliente ? normalizeCliente(selectedCliente) : null;
+    setClienteSeleccionado(normalizado && isActiveCliente(normalizado) ? normalizado : null);
     setEditorVisible(false);
   }, [selectedCliente, visible]);
 
@@ -108,7 +112,9 @@ export default function SeleccionarClienteVentaModal({
 
   const clientesNormalizados = useMemo(
     () =>
-      clientes.map((cliente) => normalizeCliente(cliente)),
+      clientes
+        .map((cliente) => normalizeCliente(cliente))
+        .filter(isActiveCliente),
     [clientes]
   );
 
@@ -146,7 +152,7 @@ export default function SeleccionarClienteVentaModal({
   };
 
   const continuarConCliente = () => {
-    if (!clienteSeleccionado || saving) return;
+    if (!clienteSeleccionado || saving || !isActiveCliente(clienteSeleccionado)) return;
     onContinue?.(clienteSeleccionado);
   };
 

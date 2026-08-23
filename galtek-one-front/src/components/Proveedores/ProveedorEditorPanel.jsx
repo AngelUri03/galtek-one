@@ -72,6 +72,10 @@ const commercialFlags = [
 const rfcPattern = /^[A-Z&\u00D1]{3,4}[0-9]{6}[A-Z0-9]{3}$/;
 
 const FORMAL_PROVIDER_TYPE = "DISTRIBUIDOR_FORMAL";
+const ACTIVATION_ONLY_ESTADO_OPTIONS = [
+  { label: "Inactivo", value: "INACTIVO", disabled: true },
+  { label: "Activo", value: "ACTIVO" },
+];
 
 const ERROR_FIELD_ORDER = [
   "tipoProveedor",
@@ -125,6 +129,9 @@ const resolveCategoryValue = (value, options = []) => {
   if (!category) return "";
   return options.some((option) => option.value === category) ? category : CATEGORY_OTHER_VALUE;
 };
+
+const normalizeEstadoProveedorValue = (value) =>
+  String(value || "ACTIVO").trim().toUpperCase();
 
 function normalizeSnapshot(form, deletedContactIds) {
   return JSON.stringify({ form, deletedContactIds });
@@ -317,6 +324,8 @@ export default function ProveedorEditorPanel({
   );
 
   const isEditing = mode === "edit";
+  const isActivationOnly =
+    isEditing && normalizeEstadoProveedorValue(proveedor?.estadoProveedor) === "INACTIVO";
   const currentSnapshot = useMemo(
     () => normalizeSnapshot(form, deletedContactIds),
     [deletedContactIds, form]
@@ -781,6 +790,23 @@ export default function ProveedorEditorPanel({
   };
 
   const submit = async () => {
+    if (isActivationOnly) {
+      if (form.estadoProveedor !== "ACTIVO") {
+        const nextErrors = {
+          estadoProveedor: "Selecciona Activo para reactivar el proveedor.",
+        };
+        setErrors(nextErrors);
+        scrollToFirstError(nextErrors);
+        return;
+      }
+
+      await onSave({
+        activateOnly: true,
+        motivo: "Reactivado desde edicion de proveedor",
+      });
+      return;
+    }
+
     if (!validate()) return;
 
     const contactRefs = form.contactos.filter(hasContactData);
@@ -815,8 +841,12 @@ export default function ProveedorEditorPanel({
 
   const header = (
     <div className="prov-editor-header">
-      <span>{isEditing ? "Edicion comercial" : "Nuevo proveedor"}</span>
-      <strong>{isEditing ? "Editar proveedor" : "Agregar proveedor"}</strong>
+      <span>
+        {isActivationOnly ? "Reactivacion" : isEditing ? "Edicion comercial" : "Nuevo proveedor"}
+      </span>
+      <strong>
+        {isActivationOnly ? "Activar proveedor" : isEditing ? "Editar proveedor" : "Agregar proveedor"}
+      </strong>
     </div>
   );
   const usesCredit = form.formaPagoPrincipal === "CREDITO" || form.formaPagoPrincipal === "MIXTO";
@@ -838,6 +868,38 @@ export default function ProveedorEditorPanel({
             <LoadingEditor />
           ) : (
             <div className="prov-editor-body" ref={editorBodyRef}>
+              {isActivationOnly ? (
+                <>
+                  <div className="prov-state-explain is-inactive prov-editor-state-explain">
+                    <i className="pi pi-pause-circle" />
+                    <div>
+                      <strong>Proveedor inactivo</strong>
+                      <span>Reactivalo antes de cambiar sus datos comerciales.</span>
+                    </div>
+                  </div>
+
+                  <Section eyebrow="01" title="Estado del proveedor">
+                    <div className="prov-form-grid">
+                      <label
+                        className={`prov-field ${errors.estadoProveedor ? "has-error" : ""}`}
+                        data-field-key="estadoProveedor"
+                      >
+                        <FieldLabel required>Estado</FieldLabel>
+                        <Dropdown
+                          value={form.estadoProveedor}
+                          options={ACTIVATION_ONLY_ESTADO_OPTIONS}
+                          optionDisabled="disabled"
+                          onChange={(event) => updateField("estadoProveedor", event.value)}
+                          placeholder="Selecciona estado"
+                          aria-required
+                        />
+                        <FieldError value={errors.estadoProveedor} />
+                      </label>
+                    </div>
+                  </Section>
+                </>
+              ) : (
+                <>
               <Section eyebrow="01" title="Datos generales">
                 <div className="prov-form-grid">
                   <label
@@ -1496,6 +1558,8 @@ export default function ProveedorEditorPanel({
                   />
                 </label>
               </Section>
+                </>
+              )}
             </div>
           )}
 
@@ -1509,12 +1573,18 @@ export default function ProveedorEditorPanel({
                 disabled={saving}
               />
               <Button
-                label={isEditing ? "Guardar cambios" : "Crear proveedor"}
-                icon="pi pi-check"
+                label={
+                  isActivationOnly
+                    ? "Activar proveedor"
+                    : isEditing
+                    ? "Guardar cambios"
+                    : "Crear proveedor"
+                }
+                icon={isActivationOnly ? "pi pi-play" : "pi pi-check"}
                 className="prov-primary-btn"
                 onClick={submit}
                 loading={saving}
-                disabled={loading}
+                disabled={loading || (isActivationOnly && form.estadoProveedor !== "ACTIVO")}
               />
             </div>
           </div>

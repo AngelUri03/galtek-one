@@ -120,7 +120,7 @@ export default function ProveedoresFilters({
             loading={loading}
             aria-label="Actualizar proveedores"
             tooltip="Actualizar"
-            tooltipOptions={{ position: "top" }}
+            tooltipOptions={{ position: "top", className: "prov-action-tooltip" }}
           />
           <Button
             label="Limpiar"
